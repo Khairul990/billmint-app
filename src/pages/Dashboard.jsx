@@ -128,17 +128,17 @@ const PremiumChartTooltip = ({ active, payload, label, currencySymbol }) => {
   const rate = invoiced > 0 ? Math.round((currentBillCollected / invoiced) * 100) : (collected > 0 ? 100 : 0);
 
   return (
-    <div className="bg-white dark:bg-theme-card p-3.5 rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xl space-y-2 text-xs min-w-[200px]">
-      <div className="font-bold text-[#1c1917] dark:text-theme-primary pb-1.5 border-b border-[#f5f2ed] dark:border-theme-border-soft/60 flex items-center justify-between">
+    <div className="bg-theme-surface/95 dark:bg-theme-card/95 backdrop-blur-md p-3.5 rounded-2xl border border-theme-border-soft shadow-xl space-y-2 text-xs min-w-[200px]">
+      <div className="font-bold text-theme-primary pb-1.5 border-b border-theme-border-soft/60 flex items-center justify-between">
         <span>{label}</span>
         <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">{rate}% Realized</span>
       </div>
       <div className="space-y-1.5 text-2xs">
         <div className="flex items-center justify-between">
-          <span className="flex items-center gap-1 text-[#c2410c] dark:text-theme-accent font-semibold">
-            <span className="w-2 h-2 rounded-full bg-[#c2410c]" /> Invoiced:
+          <span className="flex items-center gap-1 text-theme-accent font-semibold">
+            <span className="w-2 h-2 rounded-full bg-theme-accent" /> Invoiced:
           </span>
-          <span className="font-black text-[#1c1917] dark:text-theme-primary font-numbers">
+          <span className="font-black text-theme-primary font-numbers">
             {formatCurrency(invoiced, currencySymbol)}
           </span>
         </div>
@@ -160,9 +160,9 @@ const PremiumChartTooltip = ({ active, payload, label, currencySymbol }) => {
           <span>↳ Current Bills:</span>
           <span className="font-bold font-numbers">{formatCurrency(currentBillCollected, currencySymbol)}</span>
         </div>
-        <div className="flex items-center justify-between pt-1 border-t border-[#f5f2ed] dark:border-theme-border-soft/40">
-          <span className="text-[#ea580c] dark:text-amber-500 font-semibold">Period Outstanding:</span>
-          <span className="font-black text-[#ea580c] dark:text-amber-500 font-numbers">
+        <div className="flex items-center justify-between pt-1 border-t border-theme-border-soft/40">
+          <span className="text-amber-600 dark:text-amber-500 font-semibold">Period Outstanding:</span>
+          <span className="font-black text-amber-600 dark:text-amber-500 font-numbers">
             {formatCurrency(outstanding, currencySymbol)}
           </span>
         </div>
@@ -952,23 +952,23 @@ const Dashboard = ({
               {/* ========================================================================= */}
               {/* 1. EXECUTIVE HEADER & REAL-TIME BUSINESS HEALTH COCKPIT */}
               {/* ========================================================================= */}
-              <div className="p-4 sm:p-5 lg:p-6 rounded-3xl bg-white dark:bg-theme-card border border-[#f0ece6] dark:border-theme-border-soft shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="p-4 sm:p-5 lg:p-6 rounded-3xl bg-theme-surface dark:bg-theme-card border border-theme-border-soft shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#faf5ef] dark:bg-theme-surface text-[#c2410c] dark:text-theme-accent border border-[#f0ece6] dark:border-theme-border-soft flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#c2410c] dark:bg-theme-accent" />
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-theme-tint-surface text-theme-accent border border-theme-border-soft flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-theme-accent" />
                       {workspaceName}
                     </span>
-                    <span className="text-2xs text-[#a8a29e] dark:text-theme-muted font-bold">
+                    <span className="text-2xs text-theme-muted font-bold">
                       Executive Business Command Center
                     </span>
                   </div>
-                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-[#1c1917] dark:text-theme-primary tracking-tight flex items-center gap-2 mt-1.5 truncate">
+                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-theme-primary tracking-tight flex items-center gap-2 mt-1.5 truncate">
                     <span>{greeting.text},</span>
-                    <span className="text-[#c2410c] dark:text-theme-accent truncate">{ownerName}</span>
+                    <span className="text-theme-accent truncate">{ownerName}</span>
                     <span>👋</span>
                   </h1>
-                  <p className="text-xs sm:text-sm text-[#78716c] dark:text-theme-muted font-medium mt-0.5">
+                  <p className="text-xs sm:text-sm text-theme-muted font-medium mt-0.5">
                     Real-time revenue intelligence, collection flow, and financial command.
                   </p>
                 </div>
@@ -992,7 +992,7 @@ const Dashboard = ({
                   {/* Refresh Button */}
                   <button
                     onClick={handleRefresh}
-                    className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-[#faf8f5] dark:bg-theme-surface hover:bg-[#f5f0ea] dark:hover:bg-theme-surface/80 border border-[#f0ece6] dark:border-theme-border-soft text-[#78716c] hover:text-[#c2410c] text-xs font-bold transition-all shadow-2xs cursor-pointer active:scale-95 group"
+                    className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-theme-surface hover:bg-theme-tint-hover border border-theme-border-soft text-theme-muted hover:text-theme-accent text-xs font-bold transition-all shadow-2xs cursor-pointer active:scale-95 group"
                     title="Sync Latest Data"
                   >
                     <RefreshCw className="w-3.5 h-3.5 transition-transform group-hover:rotate-180 duration-500" />
@@ -1004,14 +1004,14 @@ const Dashboard = ({
               {/* ========================================================================= */}
               {/* 2. HERO SECTION: REVENUE & COLLECTION TREND (VISUAL FOCUS) */}
               {/* ========================================================================= */}
-              <div className="bg-white dark:bg-theme-card p-5 sm:p-6 rounded-3xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs space-y-5">
+              <div className="bg-theme-surface dark:bg-theme-card p-5 sm:p-6 rounded-3xl border border-theme-border-soft shadow-xs space-y-5">
                 {/* Header & Timeframe Switcher */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#f5f2ed] dark:border-theme-border-soft/60">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-theme-border-soft/60">
                   <div>
-                    <h2 className="text-sm sm:text-base font-black text-[#1c1917] dark:text-theme-primary tracking-tight">
+                    <h2 className="text-sm sm:text-base font-black text-theme-primary tracking-tight">
                       Revenue & Collection Trend
                     </h2>
-                    <p className="text-xs text-[#78716c] dark:text-theme-muted font-medium mt-0.5">
+                    <p className="text-xs text-theme-muted font-medium mt-0.5">
                       Track invoiced revenue and actual collections over time.
                     </p>
                   </div>
@@ -1024,8 +1024,8 @@ const Dashboard = ({
                         onClick={() => setChartTimeframe(k)}
                         className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                           chartTimeframe === k
-                            ? 'bg-[#c2410c] text-white shadow-xs'
-                            : 'bg-[#faf8f5] dark:bg-theme-surface text-[#78716c] dark:text-theme-muted hover:text-[#1c1917] border border-[#f0ece6] dark:border-theme-border-soft'
+                            ? 'bg-theme-accent text-theme-button-text shadow-xs'
+                            : 'bg-theme-tint-bg text-theme-muted hover:text-theme-primary border border-theme-border-soft'
                         }`}
                       >
                         {lbl}
@@ -1037,18 +1037,18 @@ const Dashboard = ({
                 {/* Hero 4 KPI Summary Cards for Selected Timeframe */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                   {/* KPI 1: TOTAL INVOICED */}
-                  <div className="p-3.5 rounded-2xl bg-[#faf8f5] dark:bg-theme-surface/60 border border-[#f5f2ed] dark:border-theme-border-soft/60 flex flex-col justify-between">
+                  <div className="p-3.5 rounded-2xl bg-theme-tint-bg border border-theme-border-soft/60 flex flex-col justify-between">
                     <div>
-                      <span className="text-[9px] font-black text-[#a8a29e] dark:text-theme-muted uppercase tracking-wider block">
+                      <span className="text-[9px] font-black text-theme-muted uppercase tracking-wider block">
                         TOTAL INVOICED
                       </span>
-                      <p className="text-lg sm:text-xl font-black text-[#c2410c] dark:text-theme-accent font-numbers mt-1">
+                      <p className="text-lg sm:text-xl font-black text-theme-accent font-numbers mt-1">
                         <AnimatedNumber value={formatCurrency(heroKPIs.invoiced, currencySymbol)} />
                       </p>
                     </div>
-                    <div className="mt-2 pt-1.5 border-t border-[#f0ece6] dark:border-theme-border-soft/40 flex items-center justify-between text-2xs text-theme-muted font-medium">
+                    <div className="mt-2 pt-1.5 border-t border-theme-border-soft/40 flex items-center justify-between text-2xs text-theme-muted font-medium">
                       <span>Billed Volume</span>
-                      <span className="font-bold text-[#c2410c]">{timeframeLabels[chartTimeframe]}</span>
+                      <span className="font-bold text-theme-accent">{timeframeLabels[chartTimeframe]}</span>
                     </div>
                   </div>
 
@@ -1069,18 +1069,18 @@ const Dashboard = ({
                   </div>
 
                   {/* KPI 3: OUTSTANDING */}
-                  <div className="p-3.5 rounded-2xl bg-[#faf8f5] dark:bg-theme-surface/60 border border-[#f5f2ed] dark:border-theme-border-soft/60 flex flex-col justify-between">
+                  <div className="p-3.5 rounded-2xl bg-theme-tint-bg border border-theme-border-soft/60 flex flex-col justify-between">
                     <div>
-                      <span className="text-[9px] font-black text-[#a8a29e] dark:text-theme-muted uppercase tracking-wider block">
+                      <span className="text-[9px] font-black text-theme-muted uppercase tracking-wider block">
                         AMOUNT STILL DUE
                       </span>
-                      <p className="text-lg sm:text-xl font-black text-[#ea580c] dark:text-amber-500 font-numbers mt-1">
+                      <p className="text-lg sm:text-xl font-black text-amber-600 dark:text-amber-500 font-numbers mt-1">
                         <AnimatedNumber value={formatCurrency(heroKPIs.outstanding, currencySymbol)} />
                       </p>
                     </div>
-                    <div className="mt-2 pt-1.5 border-t border-[#f0ece6] dark:border-theme-border-soft/40 flex items-center justify-between text-[10px] text-theme-muted font-medium truncate">
+                    <div className="mt-2 pt-1.5 border-t border-theme-border-soft/40 flex items-center justify-between text-[10px] text-theme-muted font-medium truncate">
                       <span>{metrics.previousDueTotal > 0 ? `${formatCurrency(metrics.previousDueTotal, currencySymbol)} Earlier • ` : ''}{formatCurrency(metrics.currentDueTotal, currencySymbol)} This Bill</span>
-                      <span className="font-bold text-[#ea580c] shrink-0">Due</span>
+                      <span className="font-bold text-amber-600 dark:text-amber-500 shrink-0">Due</span>
                     </div>
                   </div>
 
@@ -1104,8 +1104,8 @@ const Dashboard = ({
                 {/* Main Hero AreaChart */}
                 <div className="h-64 sm:h-72 w-full pt-2">
                   <div className="flex items-center gap-4 mb-2 text-2xs font-bold">
-                    <span className="flex items-center gap-1.5 text-[#c2410c] dark:text-theme-accent">
-                      <span className="w-2.5 h-2.5 rounded-full bg-[#c2410c]" /> INVOICED (Created Invoices)
+                    <span className="flex items-center gap-1.5 text-theme-accent">
+                      <span className="w-2.5 h-2.5 rounded-full bg-theme-accent" /> INVOICED (Created Invoices)
                     </span>
                     <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
                       <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> COLLECTED (Confirmed Payments)
@@ -1116,19 +1116,19 @@ const Dashboard = ({
                     <AreaChart data={chartSeries} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                       <defs>
                         <linearGradient id="heroInvoicedGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#c2410c" stopOpacity={0.28} />
-                          <stop offset="95%" stopColor="#c2410c" stopOpacity={0.0} />
+                          <stop offset="5%" stopColor="var(--accent, #c2410c)" stopOpacity={0.28} />
+                          <stop offset="95%" stopColor="var(--accent, #c2410c)" stopOpacity={0.0} />
                         </linearGradient>
                         <linearGradient id="heroCollectedGrad" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#10b981" stopOpacity={0.28} />
                           <stop offset="95%" stopColor="#10b981" stopOpacity={0.0} />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0ece6" opacity={0.6} />
-                      <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#a8a29e' }} dy={4} />
-                      <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#a8a29e' }} />
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-soft, #f0ece6)" opacity={0.6} />
+                      <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: 'var(--text-muted, #a8a29e)' }} dy={4} />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: 'var(--text-muted, #a8a29e)' }} />
                       <Tooltip content={<PremiumChartTooltip currencySymbol={currencySymbol} />} />
-                      <Area type="monotone" dataKey="invoiced" name="invoiced" stroke="#c2410c" strokeWidth={2.4} fill="url(#heroInvoicedGrad)" />
+                      <Area type="monotone" dataKey="invoiced" name="invoiced" stroke="var(--accent, #c2410c)" strokeWidth={2.4} fill="url(#heroInvoicedGrad)" />
                       <Area type="monotone" dataKey="collected" name="collected" stroke="#10b981" strokeWidth={2.2} fill="url(#heroCollectedGrad)" />
                     </AreaChart>
                   </ResponsiveContainer>
@@ -1142,7 +1142,7 @@ const Dashboard = ({
                 {/* 1. Create Invoice */}
                 <button
                   onClick={onQuickBillOpen}
-                  className="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-[#c2410c] hover:bg-[#b43e0b] active:scale-[0.98] text-white text-xs font-black shadow-xs transition-all cursor-pointer"
+                  className="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-theme-accent hover:opacity-90 active:scale-[0.98] text-theme-button-text text-xs font-black shadow-xs transition-all cursor-pointer"
                 >
                   <Plus className="w-4 h-4 stroke-[3]" />
                   <span>Create Invoice</span>
@@ -1152,9 +1152,9 @@ const Dashboard = ({
                 {hasCustomers && (
                   <button
                     onClick={() => setShowAddCustomerSheet(true)}
-                    className="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-white dark:bg-theme-card hover:bg-[#faf5ef] dark:hover:bg-theme-surface-elevated border border-[#f0ece6] dark:border-theme-border-soft text-[#1c1917] dark:text-theme-primary text-xs font-bold shadow-xs transition-all cursor-pointer"
+                    className="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-theme-surface dark:bg-theme-card hover:bg-theme-tint-hover border border-theme-border-soft text-theme-primary text-xs font-bold shadow-xs transition-all cursor-pointer"
                   >
-                    <UserPlus className="w-4 h-4 text-[#c2410c]" />
+                    <UserPlus className="w-4 h-4 text-theme-accent" />
                     <span>Add Customer</span>
                   </button>
                 )}
@@ -1162,7 +1162,7 @@ const Dashboard = ({
                 {/* 3. Record Payment */}
                 <button
                   onClick={() => (onRecordPayment ? onRecordPayment() : setCurrentTab('collection-center'))}
-                  className="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-white dark:bg-theme-card hover:bg-[#faf5ef] dark:hover:bg-theme-surface-elevated border border-[#f0ece6] dark:border-theme-border-soft text-[#1c1917] dark:text-theme-primary text-xs font-bold shadow-xs transition-all cursor-pointer"
+                  className="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-theme-surface dark:bg-theme-card hover:bg-theme-tint-hover border border-theme-border-soft text-theme-primary text-xs font-bold shadow-xs transition-all cursor-pointer"
                 >
                   <CreditCard className="w-4 h-4 text-emerald-600" />
                   <span>Record Payment</span>
@@ -1171,9 +1171,9 @@ const Dashboard = ({
                 {/* 4. Due Ledger */}
                 <button
                   onClick={() => setCurrentTab('due-ledger')}
-                  className="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-white dark:bg-theme-card hover:bg-[#faf5ef] dark:hover:bg-theme-surface-elevated border border-[#f0ece6] dark:border-theme-border-soft text-[#1c1917] dark:text-theme-primary text-xs font-bold shadow-xs transition-all cursor-pointer"
+                  className="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-theme-surface dark:bg-theme-card hover:bg-theme-tint-hover border border-theme-border-soft text-theme-primary text-xs font-bold shadow-xs transition-all cursor-pointer"
                 >
-                  <Receipt className="w-4 h-4 text-[#ea580c]" />
+                  <Receipt className="w-4 h-4 text-amber-600 dark:text-amber-500" />
                   <span>Due Ledger</span>
                 </button>
 
@@ -1181,7 +1181,7 @@ const Dashboard = ({
                 {hasExpenses && (
                   <button
                     onClick={() => setCurrentTab('expenses')}
-                    className="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-white dark:bg-theme-card hover:bg-[#faf5ef] dark:hover:bg-theme-surface-elevated border border-[#f0ece6] dark:border-theme-border-soft text-[#1c1917] dark:text-theme-primary text-xs font-bold shadow-xs transition-all cursor-pointer"
+                    className="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-theme-surface dark:bg-theme-card hover:bg-theme-tint-hover border border-theme-border-soft text-theme-primary text-xs font-bold shadow-xs transition-all cursor-pointer"
                   >
                     <TrendingDown className="w-4 h-4 text-rose-500" />
                     <span>Add Expense</span>
@@ -1195,51 +1195,51 @@ const Dashboard = ({
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Wallet className="w-4 h-4 text-[#c2410c]" />
-                    <h2 className="text-xs font-black text-[#1c1917] dark:text-theme-primary uppercase tracking-wider">
+                    <Wallet className="w-4 h-4 text-theme-accent" />
+                    <h2 className="text-xs font-black text-theme-primary uppercase tracking-wider">
                       Universal Money & Collection Center
                     </h2>
                   </div>
-                  <span className="text-2xs text-[#a8a29e] font-bold">
+                  <span className="text-2xs text-theme-muted font-bold">
                     Clean Business & Personal Separation
                   </span>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                   {/* CARD 1: BUSINESS MONEY */}
-                  <div className="bg-white dark:bg-theme-card p-5 rounded-3xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs space-y-4">
-                    <div className="flex items-center justify-between pb-3 border-b border-[#f5f2ed] dark:border-theme-border-soft/60">
+                  <div className="bg-theme-surface dark:bg-theme-card p-5 rounded-3xl border border-theme-border-soft shadow-xs space-y-4">
+                    <div className="flex items-center justify-between pb-3 border-b border-theme-border-soft/60">
                       <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-xl bg-[#c2410c]/10 text-[#c2410c] flex items-center justify-center">
+                        <div className="w-7 h-7 rounded-xl bg-theme-accent/10 text-theme-accent flex items-center justify-center">
                           <Building2 className="w-4 h-4" />
                         </div>
-                        <span className="text-xs font-black text-[#1c1917] dark:text-theme-primary">
+                        <span className="text-xs font-black text-theme-primary">
                           BUSINESS MONEY
                         </span>
                       </div>
-                      <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-[#faf5ef] text-[#c2410c] border border-[#f0ece6]">
+                      <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-theme-tint-surface text-theme-accent border border-theme-border-soft">
                         Enterprise
                       </span>
                     </div>
 
                     <div>
-                      <span className="text-[9px] font-bold text-[#a8a29e] uppercase tracking-wider block">
+                      <span className="text-[9px] font-bold text-theme-muted uppercase tracking-wider block">
                         TOTAL AVAILABLE BUSINESS MONEY
                       </span>
-                      <p className="text-2xl font-black text-[#c2410c] font-numbers mt-0.5">
+                      <p className="text-2xl font-black text-theme-accent font-numbers mt-0.5">
                         <AnimatedNumber value={formatCurrency(bucketFinancials.businessAvailableTotal, currencySymbol)} />
                       </p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-2 pt-1 text-xs">
-                      <div className="p-2.5 rounded-xl bg-[#faf8f5] dark:bg-theme-surface/60 border border-[#f5f2ed]">
-                        <span className="text-[8px] font-bold text-[#a8a29e] uppercase block">Total Collected</span>
+                      <div className="p-2.5 rounded-xl bg-theme-tint-bg border border-theme-border-soft/60">
+                        <span className="text-[8px] font-bold text-theme-muted uppercase block">Total Collected</span>
                         <span className="font-black text-emerald-600 font-numbers text-xs">
                           {formatCurrency(bucketFinancials.totalCollected, currencySymbol)}
                         </span>
                       </div>
-                      <div className="p-2.5 rounded-xl bg-[#faf8f5] dark:bg-theme-surface/60 border border-[#f5f2ed]">
-                        <span className="text-[8px] font-bold text-[#a8a29e] uppercase block">Business Expenses</span>
+                      <div className="p-2.5 rounded-xl bg-theme-tint-bg border border-theme-border-soft/60">
+                        <span className="text-[8px] font-bold text-theme-muted uppercase block">Business Expenses</span>
                         <span className="font-black text-rose-500 font-numbers text-xs">
                           {formatCurrency(bucketFinancials.totalBusinessExpenses, currencySymbol)}
                         </span>
@@ -1248,13 +1248,13 @@ const Dashboard = ({
                   </div>
 
                   {/* CARD 2: CURRENT MONEY LOCATIONS & PERSONAL MONEY */}
-                  <div className="bg-white dark:bg-theme-card p-5 rounded-3xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs space-y-4">
-                    <div className="flex items-center justify-between pb-3 border-b border-[#f5f2ed] dark:border-theme-border-soft/60">
+                  <div className="bg-theme-surface dark:bg-theme-card p-5 rounded-3xl border border-theme-border-soft shadow-xs space-y-4">
+                    <div className="flex items-center justify-between pb-3 border-b border-theme-border-soft/60">
                       <div className="flex items-center gap-2">
                         <div className="w-7 h-7 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center">
                           <Smartphone className="w-4 h-4" />
                         </div>
-                        <span className="text-xs font-black text-[#1c1917] dark:text-theme-primary">
+                        <span className="text-xs font-black text-theme-primary">
                           MONEY LOCATIONS & SALARY
                         </span>
                       </div>
@@ -1285,15 +1285,15 @@ const Dashboard = ({
                       </div>
                     </div>
 
-                    <div className="p-2.5 rounded-xl bg-[#faf8f5] dark:bg-theme-surface/60 border border-[#f5f2ed] flex items-center justify-between text-xs">
+                    <div className="p-2.5 rounded-xl bg-theme-tint-bg border border-theme-border-soft/60 flex items-center justify-between text-xs">
                       <div>
-                        <span className="text-[8px] font-bold text-[#a8a29e] uppercase block">My Salary Drawn</span>
-                        <span className="font-black text-[#1c1917] dark:text-theme-primary font-numbers">
+                        <span className="text-[8px] font-bold text-theme-muted uppercase block">My Salary Drawn</span>
+                        <span className="font-black text-theme-primary font-numbers">
                           {formatCurrency(bucketFinancials.totalMySalary, currencySymbol)}
                         </span>
                       </div>
                       <div className="text-right">
-                        <span className="text-[8px] font-bold text-[#a8a29e] uppercase block">Personal Total</span>
+                        <span className="text-[8px] font-bold text-theme-muted uppercase block">Personal Total</span>
                         <span className="font-black text-emerald-600 font-numbers">
                           {formatCurrency(bucketFinancials.personalAvailableTotal, currencySymbol)}
                         </span>
@@ -1302,13 +1302,13 @@ const Dashboard = ({
                   </div>
 
                   {/* CARD 3: MY DREAM SAVINGS */}
-                  <div className="bg-white dark:bg-theme-card p-5 rounded-3xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs space-y-4">
-                    <div className="flex items-center justify-between pb-3 border-b border-[#f5f2ed] dark:border-theme-border-soft/60">
+                  <div className="bg-theme-surface dark:bg-theme-card p-5 rounded-3xl border border-theme-border-soft shadow-xs space-y-4">
+                    <div className="flex items-center justify-between pb-3 border-b border-theme-border-soft/60">
                       <div className="flex items-center gap-2">
                         <div className="w-7 h-7 rounded-xl bg-pink-500/10 text-pink-600 flex items-center justify-center">
                           <Moon className="w-4 h-4" />
                         </div>
-                        <span className="text-xs font-black text-[#1c1917] dark:text-theme-primary">
+                        <span className="text-xs font-black text-theme-primary">
                           MY DREAM SAVINGS
                         </span>
                       </div>
@@ -1329,12 +1329,12 @@ const Dashboard = ({
                     {activeDream ? (
                       <div className="space-y-2">
                         <div className="flex items-center justify-between text-xs font-bold">
-                          <span className="text-[#1c1917] dark:text-theme-primary truncate">{activeDream.dreamName || activeDream.name}</span>
+                          <span className="text-theme-primary truncate">{activeDream.dreamName || activeDream.name}</span>
                           <span className="text-pink-600 font-black font-numbers">{formatCurrency(activeDream.savedAmount || 0, currencySymbol)}</span>
                         </div>
 
                         {/* Progress Bar */}
-                        <div className="w-full bg-[#faf5ef] dark:bg-theme-surface h-2 rounded-full overflow-hidden">
+                        <div className="w-full bg-theme-tint-bg h-2 rounded-full overflow-hidden">
                           <div
                             className="h-full bg-gradient-to-r from-pink-500 to-rose-400 rounded-full transition-all"
                             style={{ width: `${Math.min(100, activeDream.progressPercentage || 0)}%` }}
@@ -1357,7 +1357,7 @@ const Dashboard = ({
                           <button
                             disabled={!activeDream.savedAmount}
                             onClick={() => setShowDreamWithdrawModal(true)}
-                            className="py-2 px-3 rounded-xl bg-[#faf8f5] dark:bg-theme-surface hover:bg-[#f0ece6] text-[#1c1917] dark:text-theme-primary text-2xs font-bold transition-all flex items-center justify-center gap-1 border border-[#f0ece6] disabled:opacity-50 cursor-pointer"
+                            className="py-2 px-3 rounded-xl bg-theme-surface hover:bg-theme-tint-hover text-theme-primary text-2xs font-bold transition-all flex items-center justify-center gap-1 border border-theme-border-soft disabled:opacity-50 cursor-pointer"
                           >
                             <ArrowUpRight className="w-3 h-3" />
                             <span>Move Money</span>
@@ -1386,14 +1386,14 @@ const Dashboard = ({
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <AlertTriangle className="w-4 h-4 text-[#ea580c]" />
-                    <h2 className="text-xs font-black text-[#1c1917] dark:text-theme-primary uppercase tracking-wider">
+                    <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-500" />
+                    <h2 className="text-xs font-black text-theme-primary uppercase tracking-wider">
                       Receivables & Due Intelligence
                     </h2>
                   </div>
                   <button
                     onClick={() => setCurrentTab('due-ledger')}
-                    className="text-xs font-bold text-[#c2410c] hover:underline flex items-center gap-1 cursor-pointer"
+                    className="text-xs font-bold text-theme-accent hover:underline flex items-center gap-1 cursor-pointer"
                   >
                     <span>View All Due</span>
                     <span>→</span>
@@ -1402,12 +1402,12 @@ const Dashboard = ({
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
                   {/* LEFT: PREVIOUS DUE & CURRENT DUE BREAKDOWN (5 COLS) */}
-                  <div className="lg:col-span-5 bg-white dark:bg-theme-card p-5 rounded-3xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs space-y-4">
+                  <div className="lg:col-span-5 bg-theme-surface dark:bg-theme-card p-5 rounded-3xl border border-theme-border-soft shadow-xs space-y-4">
                     <div>
-                      <span className="text-[9px] font-black text-[#a8a29e] uppercase tracking-wider block">
+                      <span className="text-[9px] font-black text-theme-muted uppercase tracking-wider block">
                         TOTAL OUTSTANDING RECEIVABLES
                       </span>
-                      <p className="text-2xl font-black text-[#ea580c] font-numbers mt-0.5">
+                      <p className="text-2xl font-black text-amber-600 dark:text-amber-500 font-numbers mt-0.5">
                         <AnimatedNumber value={formatCurrency(metrics.totalOutstanding, currencySymbol)} />
                       </p>
                     </div>
@@ -1427,9 +1427,9 @@ const Dashboard = ({
                         </p>
                       </div>
 
-                      <div className="p-3 rounded-2xl bg-[#faf8f5] dark:bg-theme-surface/60 border border-[#f5f2ed]">
+                      <div className="p-3 rounded-2xl bg-theme-tint-bg border border-theme-border-soft/60">
                         <span className="text-[10px] font-bold text-theme-muted uppercase block">Current Invoice Due</span>
-                        <p className="text-base font-black text-[#1c1917] dark:text-theme-primary font-numbers mt-1">
+                        <p className="text-base font-black text-theme-primary font-numbers mt-1">
                           {formatCurrency(metrics.currentDueTotal, currencySymbol)}
                         </p>
                         <p className="text-[9px] text-theme-muted mt-0.5">
@@ -1442,26 +1442,26 @@ const Dashboard = ({
                     <div>
                       <div className="flex items-center justify-between text-[10px] font-bold text-theme-muted mb-1.5">
                         <span>Aging Breakdown</span>
-                        <span className="text-rose-600">{metrics.overdueCount} Overdue ({formatCurrency(metrics.overdueAmount, currencySymbol)})</span>
+                        <span className="text-rose-600 dark:text-rose-400">{metrics.overdueCount} Overdue ({formatCurrency(metrics.overdueAmount, currencySymbol)})</span>
                       </div>
                       <div className="grid grid-cols-5 gap-1 text-center text-[8px] font-bold">
-                        <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-700 border border-emerald-500/20">
+                        <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
                           <div>Current</div>
                           <div className="font-numbers">{formatCurrency(metrics.aging.current, currencySymbol)}</div>
                         </div>
-                        <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-700 border border-amber-500/20">
+                        <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20">
                           <div>1-7d</div>
                           <div className="font-numbers">{formatCurrency(metrics.aging.days1to7, currencySymbol)}</div>
                         </div>
-                        <div className="p-1.5 rounded-lg bg-amber-500/15 text-amber-800 border border-amber-500/25">
+                        <div className="p-1.5 rounded-lg bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/25">
                           <div>8-30d</div>
                           <div className="font-numbers">{formatCurrency(metrics.aging.days8to30, currencySymbol)}</div>
                         </div>
-                        <div className="p-1.5 rounded-lg bg-rose-500/10 text-rose-700 border border-rose-500/20">
+                        <div className="p-1.5 rounded-lg bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/20">
                           <div>31-60d</div>
                           <div className="font-numbers">{formatCurrency(metrics.aging.days31to60, currencySymbol)}</div>
                         </div>
-                        <div className="p-1.5 rounded-lg bg-rose-500/20 text-rose-800 border border-rose-500/30">
+                        <div className="p-1.5 rounded-lg bg-rose-500/20 text-rose-800 dark:text-rose-300 border border-rose-500/30">
                           <div>60d+</div>
                           <div className="font-numbers">{formatCurrency(metrics.aging.days60plus, currencySymbol)}</div>
                         </div>
@@ -1470,9 +1470,9 @@ const Dashboard = ({
                   </div>
 
                   {/* RIGHT: TOP OUTSTANDING CUSTOMERS LIST (7 COLS) */}
-                  <div className="lg:col-span-7 bg-white dark:bg-theme-card p-5 rounded-3xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs space-y-3">
+                  <div className="lg:col-span-7 bg-theme-surface dark:bg-theme-card p-5 rounded-3xl border border-theme-border-soft shadow-xs space-y-3">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-xs font-black text-[#1c1917] dark:text-theme-primary tracking-tight">
+                      <h3 className="text-xs font-black text-theme-primary tracking-tight">
                         Top Customers with Outstanding Balance
                       </h3>
                       <span className="text-2xs font-bold text-theme-muted">
@@ -1481,16 +1481,16 @@ const Dashboard = ({
                     </div>
 
                     {customerAnalytics.topDebtors.length === 0 ? (
-                      <div className="py-12 text-center text-xs text-[#a8a29e]">
+                      <div className="py-12 text-center text-xs text-theme-muted">
                         <CheckCircle2 className="w-8 h-8 mx-auto text-emerald-500 mb-2 opacity-80" />
-                        <p className="font-bold text-[#1c1917] dark:text-theme-primary">No outstanding dues</p>
+                        <p className="font-bold text-theme-primary">No outstanding dues</p>
                         <p className="text-2xs text-theme-muted mt-0.5">All customer invoices have been fully settled.</p>
                       </div>
                     ) : (
                       <div className="overflow-x-auto">
                         <table className="w-full text-left text-xs">
                           <thead>
-                            <tr className="text-[9px] font-bold text-[#a8a29e] uppercase tracking-wider border-b border-[#f5f2ed] pb-2">
+                            <tr className="text-[9px] font-bold text-theme-muted uppercase tracking-wider border-b border-theme-border-soft/60 pb-2">
                               <th className="pb-2">CUSTOMER</th>
                               <th className="pb-2 text-right">TOTAL DUE</th>
                               <th className="pb-2 text-right">PREV DUE</th>
@@ -1498,17 +1498,17 @@ const Dashboard = ({
                               <th className="pb-2 text-center">ACTION</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-[#faf7f2] dark:divide-theme-border-soft/40">
+                          <tbody className="divide-y divide-theme-border-soft/40">
                             {customerAnalytics.topDebtors.slice(0, 5).map(c => (
-                              <tr key={c.id} className="hover:bg-[#faf8f5] dark:hover:bg-theme-surface/50 transition-colors">
-                                <td className="py-2.5 font-bold text-[#1c1917] dark:text-theme-primary">
+                              <tr key={c.id} className="hover:bg-theme-tint-hover transition-colors">
+                                <td className="py-2.5 font-bold text-theme-primary">
                                   <div>{c.name}</div>
-                                  {c.phone && <div className="text-[9px] text-[#a8a29e] font-numbers">{c.phone}</div>}
+                                  {c.phone && <div className="text-[9px] text-theme-muted font-numbers">{c.phone}</div>}
                                 </td>
                                 <td className="py-2.5 text-right font-black text-rose-600 dark:text-rose-400 font-numbers">
                                   {formatCurrency(c.totalDue, currencySymbol)}
                                 </td>
-                                <td className="py-2.5 text-right font-bold text-amber-600 font-numbers">
+                                <td className="py-2.5 text-right font-bold text-amber-600 dark:text-amber-500 font-numbers">
                                   {c.previousDue > 0 ? formatCurrency(c.previousDue, currencySymbol) : '—'}
                                 </td>
                                 <td className="py-2.5 text-right font-medium text-theme-muted font-numbers">
@@ -1517,7 +1517,7 @@ const Dashboard = ({
                                 <td className="py-2.5 text-center">
                                   <button
                                     onClick={() => setCurrentTab('due-ledger')}
-                                    className="px-2.5 py-1 rounded-xl bg-[#faf5ef] dark:bg-theme-surface text-[#c2410c] text-[10px] font-bold hover:bg-[#c2410c] hover:text-white transition-all border border-[#f0ece6]"
+                                    className="px-2.5 py-1 rounded-xl bg-theme-tint-surface text-theme-accent text-[10px] font-bold hover:bg-theme-accent hover:text-theme-button-text transition-all border border-theme-border-soft"
                                   >
                                     Collect
                                   </button>
@@ -1539,48 +1539,48 @@ const Dashboard = ({
                 {/* Executive Sales Grid */}
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
                   {/* Today's Sales */}
-                  <div className="bg-white dark:bg-theme-card p-4 rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs flex flex-col justify-between">
+                  <div className="bg-theme-surface dark:bg-theme-card p-4 rounded-2xl border border-theme-border-soft shadow-xs flex flex-col justify-between">
                     <div>
-                      <span className="text-[9px] font-black text-[#a8a29e] dark:text-theme-muted uppercase tracking-wider block">
+                      <span className="text-[9px] font-black text-theme-muted uppercase tracking-wider block">
                         TODAY'S SALES
                       </span>
-                      <p className="text-lg sm:text-xl font-black text-[#1c1917] dark:text-theme-primary font-numbers mt-1">
+                      <p className="text-lg sm:text-xl font-black text-theme-primary font-numbers mt-1">
                         <AnimatedNumber value={formatCurrency(metrics.todaysSales, currencySymbol)} />
                       </p>
                     </div>
-                    <div className="mt-3 pt-2 border-t border-[#f5f2ed] dark:border-theme-border-soft/60 flex items-center justify-between text-2xs text-[#78716c]">
+                    <div className="mt-3 pt-2 border-t border-theme-border-soft/60 flex items-center justify-between text-2xs text-theme-muted">
                       <span>Today's Invoiced Volume</span>
-                      <span className="font-bold text-[#c2410c]">{metrics.todaysInvoicesCount} inv</span>
+                      <span className="font-bold text-theme-accent">{metrics.todaysInvoicesCount} inv</span>
                     </div>
                   </div>
 
                   {/* Today's Collected */}
-                  <div className="bg-white dark:bg-theme-card p-4 rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs flex flex-col justify-between">
+                  <div className="bg-theme-surface dark:bg-theme-card p-4 rounded-2xl border border-theme-border-soft shadow-xs flex flex-col justify-between">
                     <div>
-                      <span className="text-[9px] font-black text-[#a8a29e] dark:text-theme-muted uppercase tracking-wider block">
+                      <span className="text-[9px] font-black text-theme-muted uppercase tracking-wider block">
                         TODAY'S COLLECTED
                       </span>
                       <p className="text-lg sm:text-xl font-black text-emerald-600 dark:text-emerald-400 font-numbers mt-1">
                         <AnimatedNumber value={formatCurrency(metrics.todaysCollected, currencySymbol)} />
                       </p>
                     </div>
-                    <div className="mt-3 pt-2 border-t border-[#f5f2ed] dark:border-theme-border-soft/60 flex items-center justify-between text-2xs text-[#78716c]">
+                    <div className="mt-3 pt-2 border-t border-theme-border-soft/60 flex items-center justify-between text-2xs text-theme-muted">
                       <span>{metrics.todaysPaymentCount} payments</span>
-                      <span className="font-bold text-emerald-600">Money In</span>
+                      <span className="font-bold text-emerald-600 dark:text-emerald-400">Money In</span>
                     </div>
                   </div>
 
                   {/* Month Revenue */}
-                  <div className="bg-white dark:bg-theme-card p-4 rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs flex flex-col justify-between">
+                  <div className="bg-theme-surface dark:bg-theme-card p-4 rounded-2xl border border-theme-border-soft shadow-xs flex flex-col justify-between">
                     <div>
-                      <span className="text-[9px] font-black text-[#a8a29e] dark:text-theme-muted uppercase tracking-wider block" data-title="Month Revenue">
+                      <span className="text-[9px] font-black text-theme-muted uppercase tracking-wider block" data-title="Month Revenue">
                         TOTAL REVENUE (THIS MONTH)
                       </span>
-                      <p className="text-lg sm:text-xl font-black text-[#c2410c] dark:text-theme-accent font-numbers mt-1">
+                      <p className="text-lg sm:text-xl font-black text-theme-accent font-numbers mt-1">
                         <AnimatedNumber value={formatCurrency(metrics.thisMonthRevenue, currencySymbol)} />
                       </p>
                     </div>
-                    <div className="mt-3 pt-2 border-t border-[#f5f2ed] dark:border-theme-border-soft/60 flex items-center justify-between text-2xs">
+                    <div className="mt-3 pt-2 border-t border-theme-border-soft/60 flex items-center justify-between text-2xs">
                       {metrics.revenueGrowthPercent !== null ? (
                         <span className={`font-bold ${metrics.revenueGrowthPercent >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
                           {metrics.revenueGrowthPercent >= 0 ? `+${metrics.revenueGrowthPercent}%` : `${metrics.revenueGrowthPercent}%`} vs last mo
@@ -1593,48 +1593,48 @@ const Dashboard = ({
                   </div>
 
                   {/* Month Collected */}
-                  <div className="bg-white dark:bg-theme-card p-4 rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs flex flex-col justify-between">
+                  <div className="bg-theme-surface dark:bg-theme-card p-4 rounded-2xl border border-theme-border-soft shadow-xs flex flex-col justify-between">
                     <div>
-                      <span className="text-[9px] font-black text-[#a8a29e] dark:text-theme-muted uppercase tracking-wider block">
+                      <span className="text-[9px] font-black text-theme-muted uppercase tracking-wider block">
                         MONTH COLLECTED
                       </span>
                       <p className="text-lg sm:text-xl font-black text-emerald-600 dark:text-emerald-400 font-numbers mt-1">
                         <AnimatedNumber value={formatCurrency(metrics.thisMonthCollected, currencySymbol)} />
                       </p>
                     </div>
-                    <div className="mt-3 pt-2 border-t border-[#f5f2ed] dark:border-theme-border-soft/60 flex items-center justify-between text-2xs">
+                    <div className="mt-3 pt-2 border-t border-theme-border-soft/60 flex items-center justify-between text-2xs">
                       <span className="text-emerald-600 font-bold">{metrics.collectionRate}% Rate</span>
                       <span className="text-theme-muted font-medium">Realized</span>
                     </div>
                   </div>
 
                   {/* Total Invoices Count */}
-                  <div className="bg-white dark:bg-theme-card p-4 rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs flex flex-col justify-between">
+                  <div className="bg-theme-surface dark:bg-theme-card p-4 rounded-2xl border border-theme-border-soft shadow-xs flex flex-col justify-between">
                     <div>
-                      <span className="text-[9px] font-black text-[#a8a29e] dark:text-theme-muted uppercase tracking-wider block">
+                      <span className="text-[9px] font-black text-theme-muted uppercase tracking-wider block">
                         TOTAL INVOICES
                       </span>
-                      <p className="text-lg sm:text-xl font-black text-[#1c1917] dark:text-theme-primary font-numbers mt-1">
+                      <p className="text-lg sm:text-xl font-black text-theme-primary font-numbers mt-1">
                         <AnimatedNumber value={scopedInvoices.length} />
                       </p>
                     </div>
-                    <div className="mt-3 pt-2 border-t border-[#f5f2ed] dark:border-theme-border-soft/60 flex items-center justify-between text-2xs text-[#78716c]">
+                    <div className="mt-3 pt-2 border-t border-theme-border-soft/60 flex items-center justify-between text-2xs text-theme-muted">
                       <span>{metrics.paidInvoicesCount} Paid</span>
-                      <span className="font-bold text-amber-600">{metrics.unpaidInvoicesCount} Due</span>
+                      <span className="font-bold text-amber-600 dark:text-amber-500">{metrics.unpaidInvoicesCount} Due</span>
                     </div>
                   </div>
 
                   {/* Average Ticket Size */}
-                  <div className="bg-white dark:bg-theme-card p-4 rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs flex flex-col justify-between">
+                  <div className="bg-theme-surface dark:bg-theme-card p-4 rounded-2xl border border-theme-border-soft shadow-xs flex flex-col justify-between">
                     <div>
-                      <span className="text-[9px] font-black text-[#a8a29e] dark:text-theme-muted uppercase tracking-wider block">
+                      <span className="text-[9px] font-black text-theme-muted uppercase tracking-wider block">
                         AVERAGE INVOICE
                       </span>
-                      <p className="text-lg sm:text-xl font-black text-[#1c1917] dark:text-theme-primary font-numbers mt-1">
+                      <p className="text-lg sm:text-xl font-black text-theme-primary font-numbers mt-1">
                         <AnimatedNumber value={formatCurrency(customerAnalytics.avgInvoiceValue, currencySymbol)} />
                       </p>
                     </div>
-                    <div className="mt-3 pt-2 border-t border-[#f5f2ed] dark:border-theme-border-soft/60 flex items-center justify-between text-2xs text-[#78716c]">
+                    <div className="mt-3 pt-2 border-t border-theme-border-soft/60 flex items-center justify-between text-2xs text-theme-muted">
                       <span>Ticket Size</span>
                       <span className="font-bold">Avg</span>
                     </div>
@@ -1642,19 +1642,19 @@ const Dashboard = ({
                 </div>
 
                 {/* Recent Invoices Table */}
-                <div className="bg-white dark:bg-theme-card p-5 rounded-3xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs space-y-4">
+                <div className="bg-theme-surface dark:bg-theme-card p-5 rounded-3xl border border-theme-border-soft shadow-xs space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-xs font-black text-[#1c1917] dark:text-theme-primary tracking-tight">
+                      <h3 className="text-xs font-black text-theme-primary tracking-tight">
                         Recent Invoices
                       </h3>
-                      <p className="text-2xs text-[#78716c] dark:text-theme-muted mt-0.5">
+                      <p className="text-2xs text-theme-muted mt-0.5">
                         {metrics.paidInvoicesCount} Paid • {metrics.partialInvoicesCount} Partial • {metrics.unpaidInvoicesCount} Unpaid
                       </p>
                     </div>
                     <button
                       onClick={() => setCurrentTab('invoices')}
-                      className="text-xs font-bold text-[#c2410c] hover:underline flex items-center gap-1 cursor-pointer"
+                      className="text-xs font-bold text-theme-accent hover:underline flex items-center gap-1 cursor-pointer"
                     >
                       <span>View All Invoices</span>
                       <span>→</span>
@@ -1662,12 +1662,12 @@ const Dashboard = ({
                   </div>
 
                   {recentInvoicesList.length === 0 ? (
-                    <div className="py-12 text-center text-xs text-[#a8a29e]">
-                      <FileText className="w-8 h-8 mx-auto text-[#d6d3d1] mb-2" />
+                    <div className="py-12 text-center text-xs text-theme-muted">
+                      <FileText className="w-8 h-8 mx-auto text-theme-muted/50 mb-2" />
                       <p>No invoices created yet.</p>
                       <button
                         onClick={onQuickBillOpen}
-                        className="mt-2 text-xs font-bold text-[#c2410c] hover:underline"
+                        className="mt-2 text-xs font-bold text-theme-accent hover:underline"
                       >
                         + Create First Invoice
                       </button>
@@ -1676,7 +1676,7 @@ const Dashboard = ({
                     <div className="overflow-x-auto">
                       <table className="w-full text-left text-xs">
                         <thead>
-                          <tr className="text-[9px] font-bold text-[#a8a29e] uppercase tracking-wider border-b border-[#f5f2ed] dark:border-theme-border-soft pb-2">
+                          <tr className="text-[9px] font-bold text-theme-muted uppercase tracking-wider border-b border-theme-border-soft/60 pb-2">
                             <th className="pb-2.5 font-bold">INVOICE</th>
                             <th className="pb-2.5 font-bold">CUSTOMER</th>
                             <th className="pb-2.5 font-bold">DATE</th>
@@ -1687,7 +1687,7 @@ const Dashboard = ({
                             <th className="pb-2.5 font-bold text-center">ACTIONS</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-[#faf7f2] dark:divide-theme-border-soft/40">
+                        <tbody className="divide-y divide-theme-border-soft/40">
                           {recentInvoicesList.map(inv => {
                             const total = roundTo2(parseFloat(inv.grandTotal || inv.total) || 0);
                             const paid = getInvoicePaidTotal(inv);
@@ -1700,32 +1700,32 @@ const Dashboard = ({
                             const formattedDate = invDateStr ? new Date(invDateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Today';
 
                             return (
-                              <tr key={inv.id} className="hover:bg-[#faf8f5] dark:hover:bg-theme-surface/50 transition-colors">
+                              <tr key={inv.id} className="hover:bg-theme-tint-hover transition-colors">
                                 <td className="py-3">
                                   <div className="flex items-center gap-2">
-                                    <div className="w-6 h-6 rounded-md bg-[#faf5ef] dark:bg-theme-surface flex items-center justify-center text-[#c2410c] shrink-0">
+                                    <div className="w-6 h-6 rounded-md bg-theme-tint-surface flex items-center justify-center text-theme-accent shrink-0">
                                       <FileText className="w-3 h-3" />
                                     </div>
                                     <div>
-                                      <span className="font-bold text-[#1c1917] dark:text-theme-primary block font-mono">
+                                      <span className="font-bold text-theme-primary block font-mono">
                                         {inv.invoiceNumber || `INV-${inv.id?.slice(0, 4)}`}
                                       </span>
-                                      <span className="text-[8px] text-[#a8a29e] font-mono">
+                                      <span className="text-[8px] text-theme-muted font-mono">
                                         #{inv.id?.slice(0, 5)}
                                       </span>
                                     </div>
                                   </div>
                                 </td>
 
-                                <td className="py-3 text-[#44403c] dark:text-theme-secondary font-medium truncate max-w-[120px]">
+                                <td className="py-3 text-theme-secondary font-medium truncate max-w-[120px]">
                                   {inv.customerName || inv.customer?.name || 'Walk-in'}
                                 </td>
 
-                                <td className="py-3 text-[#78716c] dark:text-theme-muted font-medium whitespace-nowrap">
+                                <td className="py-3 text-theme-muted font-medium whitespace-nowrap">
                                   {formattedDate}
                                 </td>
 
-                                <td className="py-3 text-right font-black text-[#1c1917] dark:text-theme-primary font-numbers">
+                                <td className="py-3 text-right font-black text-theme-primary font-numbers">
                                   {formatCurrency(total, currencySymbol)}
                                 </td>
 
@@ -1733,7 +1733,7 @@ const Dashboard = ({
                                   {formatCurrency(paid, currencySymbol)}
                                 </td>
 
-                                <td className="py-3 text-right font-bold text-[#ea580c] dark:text-amber-500 font-numbers">
+                                <td className="py-3 text-right font-bold text-amber-600 dark:text-amber-500 font-numbers">
                                   {formatCurrency(due, currencySymbol)}
                                 </td>
 
@@ -1750,7 +1750,7 @@ const Dashboard = ({
                                 </td>
 
                                 <td className="py-3 text-center">
-                                  <div className="flex items-center justify-center gap-1 text-[#a8a29e]">
+                                  <div className="flex items-center justify-center gap-1 text-theme-muted">
                                     {due > 0 && (
                                       <button
                                         onClick={() => setQuickPayInvoice(inv)}
@@ -1762,14 +1762,14 @@ const Dashboard = ({
                                     )}
                                     <button
                                       onClick={() => onViewInvoice?.(inv)}
-                                      className="p-1 hover:text-[#c2410c] hover:bg-[#faf5ef] rounded-md transition-colors cursor-pointer"
+                                      className="p-1 hover:text-theme-accent hover:bg-theme-tint-surface rounded-md transition-colors cursor-pointer"
                                       title="View Invoice"
                                     >
                                       <Eye className="w-3.5 h-3.5" />
                                     </button>
                                     <button
                                       onClick={() => onDownloadPDF?.(inv)}
-                                      className="p-1 hover:text-[#c2410c] hover:bg-[#faf5ef] rounded-md transition-colors cursor-pointer"
+                                      className="p-1 hover:text-theme-accent hover:bg-theme-tint-surface rounded-md transition-colors cursor-pointer"
                                       title="Download PDF"
                                     >
                                       <Download className="w-3.5 h-3.5" />
@@ -1791,11 +1791,11 @@ const Dashboard = ({
               {/* ========================================================================= */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
                 {/* LEFT: CASH FLOW BAR & PAYMENT METHODS (6 COLS) */}
-                <div className="lg:col-span-6 bg-white dark:bg-theme-card p-5 rounded-3xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs space-y-4">
-                  <div className="flex items-center justify-between pb-3 border-b border-[#f5f2ed]">
+                <div className="lg:col-span-6 bg-theme-surface dark:bg-theme-card p-5 rounded-3xl border border-theme-border-soft shadow-xs space-y-4">
+                  <div className="flex items-center justify-between pb-3 border-b border-theme-border-soft/60">
                     <div className="flex items-center gap-2">
                       <Activity className="w-4 h-4 text-emerald-600" />
-                      <h3 className="text-xs font-black text-[#1c1917] dark:text-theme-primary tracking-tight">
+                      <h3 className="text-xs font-black text-theme-primary tracking-tight">
                         Cash Flow: Money In vs Money Out
                       </h3>
                     </div>
@@ -1806,12 +1806,12 @@ const Dashboard = ({
 
                   <div className="space-y-3">
                     {/* Flow Bar */}
-                    <div className="p-4 rounded-2xl bg-[#faf8f5] dark:bg-theme-surface/60 border border-[#f5f2ed] space-y-2">
+                    <div className="p-4 rounded-2xl bg-theme-tint-bg border border-theme-border-soft/60 space-y-2">
                       <div className="flex items-center justify-between text-xs font-bold">
                         <span className="text-emerald-600">Money In: {formatCurrency(metrics.totalCollected, currencySymbol)}</span>
                         <span className="text-rose-500">Money Out: {formatCurrency(metrics.totalExpenses, currencySymbol)}</span>
                       </div>
-                      <div className="w-full bg-[#f0ece6] h-2.5 rounded-full overflow-hidden flex">
+                      <div className="w-full bg-theme-tint-surface h-2.5 rounded-full overflow-hidden flex">
                         <div
                           className="bg-emerald-500 h-full transition-all"
                           style={{
@@ -1829,25 +1829,25 @@ const Dashboard = ({
 
                     {/* Payment methods split */}
                     <div>
-                      <h4 className="text-[10px] font-bold text-[#a8a29e] uppercase tracking-wider mb-2">
+                      <h4 className="text-[10px] font-bold text-theme-muted uppercase tracking-wider mb-2">
                         Collections by Payment Method
                       </h4>
                       <div className="grid grid-cols-3 gap-2 text-center text-xs">
                         <div className="p-2.5 rounded-xl bg-amber-500/5 border border-amber-500/20">
                           <span className="text-[9px] font-bold text-amber-700 block">Cash</span>
-                          <span className="font-black text-[#1c1917] dark:text-theme-primary font-numbers">
+                          <span className="font-black text-theme-primary font-numbers">
                             {formatCurrency(metrics.cashPaymentsTotal, currencySymbol)}
                           </span>
                         </div>
                         <div className="p-2.5 rounded-xl bg-indigo-500/5 border border-indigo-500/20">
                           <span className="text-[9px] font-bold text-indigo-700 block">Digital / UPI</span>
-                          <span className="font-black text-[#1c1917] dark:text-theme-primary font-numbers">
+                          <span className="font-black text-theme-primary font-numbers">
                             {formatCurrency(metrics.digitalPaymentsTotal, currencySymbol)}
                           </span>
                         </div>
                         <div className="p-2.5 rounded-xl bg-slate-500/5 border border-slate-500/20">
                           <span className="text-[9px] font-bold text-slate-700 block">Other</span>
-                          <span className="font-black text-[#1c1917] dark:text-theme-primary font-numbers">
+                          <span className="font-black text-theme-primary font-numbers">
                             {formatCurrency(metrics.otherPaymentsTotal, currencySymbol)}
                           </span>
                         </div>
@@ -1857,17 +1857,17 @@ const Dashboard = ({
                 </div>
 
                 {/* RIGHT: EXPENSE INTELLIGENCE & CATEGORIES (6 COLS) */}
-                <div className="lg:col-span-6 bg-white dark:bg-theme-card p-5 rounded-3xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs space-y-4">
-                  <div className="flex items-center justify-between pb-3 border-b border-[#f5f2ed]">
+                <div className="lg:col-span-6 bg-theme-surface dark:bg-theme-card p-5 rounded-3xl border border-theme-border-soft shadow-xs space-y-4">
+                  <div className="flex items-center justify-between pb-3 border-b border-theme-border-soft/60">
                     <div className="flex items-center gap-2">
                       <TrendingDown className="w-4 h-4 text-rose-500" />
-                      <h3 className="text-xs font-black text-[#1c1917] dark:text-theme-primary tracking-tight">
+                      <h3 className="text-xs font-black text-theme-primary tracking-tight">
                         Expense Center & Categories
                       </h3>
                     </div>
                     <button
                       onClick={() => setCurrentTab('expenses')}
-                      className="text-xs font-bold text-[#c2410c] hover:underline cursor-pointer"
+                      className="text-xs font-bold text-theme-accent hover:underline cursor-pointer"
                     >
                       All Expenses →
                     </button>
@@ -1880,9 +1880,9 @@ const Dashboard = ({
                         {formatCurrency(metrics.thisMonthExpenses, currencySymbol)}
                       </span>
                     </div>
-                    <div className="p-3 rounded-2xl bg-[#faf8f5] dark:bg-theme-surface/60 border border-[#f5f2ed]">
+                    <div className="p-3 rounded-2xl bg-theme-tint-bg border border-theme-border-soft/60">
                       <span className="text-[8px] font-bold text-theme-muted uppercase block">All-Time Expenses</span>
-                      <span className="text-lg font-black text-[#1c1917] dark:text-theme-primary font-numbers mt-0.5 block">
+                      <span className="text-lg font-black text-theme-primary font-numbers mt-0.5 block">
                         {formatCurrency(metrics.totalExpenses, currencySymbol)}
                       </span>
                     </div>
@@ -1890,13 +1890,13 @@ const Dashboard = ({
 
                   {metrics.expenseCategories.length > 0 ? (
                     <div className="space-y-1.5">
-                      <span className="text-[9px] font-bold text-[#a8a29e] uppercase tracking-wider block">
+                      <span className="text-[9px] font-bold text-theme-muted uppercase tracking-wider block">
                         Category Breakdown
                       </span>
                       <div className="grid grid-cols-2 gap-2">
                         {metrics.expenseCategories.slice(0, 4).map(c => (
-                          <div key={c.name} className="flex items-center justify-between p-2 rounded-xl bg-[#faf8f5] dark:bg-theme-surface/40 border border-[#f5f2ed] text-xs">
-                            <span className="font-bold text-[#44403c] dark:text-theme-secondary truncate">{c.name}</span>
+                          <div key={c.name} className="flex items-center justify-between p-2 rounded-xl bg-theme-tint-bg border border-theme-border-soft/60 text-xs">
+                            <span className="font-bold text-theme-secondary truncate">{c.name}</span>
                             <span className="font-black text-rose-600 font-numbers">{formatCurrency(c.amount, currencySymbol)}</span>
                           </div>
                         ))}
@@ -1913,11 +1913,11 @@ const Dashboard = ({
               {/* ========================================================================= */}
               {/* 8. CUSTOMER INTELLIGENCE */}
               {/* ========================================================================= */}
-              <div className="bg-white dark:bg-theme-card p-5 rounded-3xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-[#f5f2ed]">
+              <div className="bg-theme-surface dark:bg-theme-card p-5 rounded-3xl border border-theme-border-soft shadow-xs space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-theme-border-soft/60">
                   <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-[#c2410c]" />
-                    <h3 className="text-xs font-black text-[#1c1917] dark:text-theme-primary tracking-tight">
+                    <Users className="w-4 h-4 text-theme-accent" />
+                    <h3 className="text-xs font-black text-theme-primary tracking-tight">
                       Customer Intelligence
                     </h3>
                   </div>
@@ -1927,40 +1927,40 @@ const Dashboard = ({
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="p-3.5 rounded-2xl bg-[#faf8f5] dark:bg-theme-surface/60 border border-[#f5f2ed]">
-                    <span className="text-[8px] font-bold text-[#a8a29e] uppercase block">Fully Settled</span>
+                  <div className="p-3.5 rounded-2xl bg-theme-tint-bg border border-theme-border-soft/60">
+                    <span className="text-[8px] font-bold text-theme-muted uppercase block">Fully Settled</span>
                     <span className="text-lg font-black text-emerald-600 font-numbers mt-0.5 block">
                       {customerAnalytics.fullyPaidCount} Customers
                     </span>
                   </div>
-                  <div className="p-3.5 rounded-2xl bg-[#faf8f5] dark:bg-theme-surface/60 border border-[#f5f2ed]">
-                    <span className="text-[8px] font-bold text-[#a8a29e] uppercase block">With Due Balance</span>
+                  <div className="p-3.5 rounded-2xl bg-theme-tint-bg border border-theme-border-soft/60">
+                    <span className="text-[8px] font-bold text-theme-muted uppercase block">With Due Balance</span>
                     <span className="text-lg font-black text-amber-600 font-numbers mt-0.5 block">
                       {customerAnalytics.withDueCount} Customers
                     </span>
                   </div>
-                  <div className="p-3.5 rounded-2xl bg-[#faf8f5] dark:bg-theme-surface/60 border border-[#f5f2ed]">
-                    <span className="text-[8px] font-bold text-[#a8a29e] uppercase block">Average Payment Value</span>
-                    <span className="text-lg font-black text-[#1c1917] dark:text-theme-primary font-numbers mt-0.5 block">
+                  <div className="p-3.5 rounded-2xl bg-theme-tint-bg border border-theme-border-soft/60">
+                    <span className="text-[8px] font-bold text-theme-muted uppercase block">Average Payment Value</span>
+                    <span className="text-lg font-black text-theme-primary font-numbers mt-0.5 block">
                       {formatCurrency(customerAnalytics.avgPaymentValue, currencySymbol)}
                     </span>
                   </div>
                 </div>
 
                 <div>
-                  <h4 className="text-[10px] font-bold text-[#a8a29e] uppercase tracking-wider mb-2">
+                  <h4 className="text-[10px] font-bold text-theme-muted uppercase tracking-wider mb-2">
                     Top Customers by Revenue
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
                     {customerAnalytics.topRevenue.map((c, i) => (
-                      <div key={c.id} className="flex items-center justify-between text-xs p-2.5 rounded-2xl bg-[#faf8f5] dark:bg-theme-surface/40 border border-[#f5f2ed]">
+                      <div key={c.id} className="flex items-center justify-between text-xs p-2.5 rounded-2xl bg-theme-tint-bg border border-theme-border-soft/60">
                         <div className="flex items-center gap-2 truncate">
-                          <span className="w-4 h-4 rounded-full bg-[#c2410c]/10 text-[#c2410c] text-[9px] font-black flex items-center justify-center shrink-0">
+                          <span className="w-4 h-4 rounded-full bg-theme-accent/10 text-theme-accent text-[9px] font-black flex items-center justify-center shrink-0">
                             {i + 1}
                           </span>
-                          <span className="font-bold text-[#1c1917] dark:text-theme-primary truncate">{c.name}</span>
+                          <span className="font-bold text-theme-primary truncate">{c.name}</span>
                         </div>
-                        <span className="font-black text-[#1c1917] dark:text-theme-primary font-numbers">
+                        <span className="font-black text-theme-primary font-numbers">
                           {formatCurrency(c.totalBilled, currencySymbol)}
                         </span>
                       </div>
@@ -1979,13 +1979,13 @@ const Dashboard = ({
                       <AlertCircle className="w-5 h-5" />
                     </div>
                     <div>
-                      <h4 className="text-xs font-black text-[#1c1917] dark:text-theme-primary uppercase tracking-wider flex items-center gap-2">
+                      <h4 className="text-xs font-black text-theme-primary uppercase tracking-wider flex items-center gap-2">
                         <span>Needs Your Attention</span>
                         <span className="px-2 py-0.5 rounded-full bg-rose-500 text-white text-[9px] font-black">
                           Immediate
                         </span>
                       </h4>
-                      <p className="text-xs text-[#78716c] dark:text-theme-muted font-medium flex items-center gap-3 flex-wrap mt-1">
+                      <p className="text-xs text-theme-muted font-medium flex items-center gap-3 flex-wrap mt-1">
                         {metrics.overdueCount > 0 && (
                           <span className="font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1">
                             🔴 {metrics.overdueCount} Overdue ({formatCurrency(metrics.overdueAmount, currencySymbol)})
@@ -2016,7 +2016,7 @@ const Dashboard = ({
                     )}
                     <button
                       onClick={() => setCurrentTab('due-ledger')}
-                      className="px-3.5 py-2 bg-white dark:bg-theme-surface text-xs font-bold text-[#c2410c] dark:text-theme-accent border border-[#f0ece6] dark:border-theme-border-soft hover:bg-[#faf5ef] rounded-xl transition-all cursor-pointer shadow-2xs"
+                      className="px-3.5 py-2 bg-theme-surface dark:bg-theme-card text-xs font-bold text-theme-accent border border-theme-border-soft hover:bg-theme-tint-hover rounded-xl transition-all cursor-pointer shadow-2xs"
                     >
                       Follow Up Dues →
                     </button>
@@ -2039,17 +2039,17 @@ const Dashboard = ({
               {/* ========================================================================= */}
               {/* 10. RECENT CONFIRMED FINANCIAL ACTIVITY */}
               {/* ========================================================================= */}
-              <div className="bg-white dark:bg-theme-card p-5 rounded-3xl border border-[#f0ece6] dark:border-theme-border-soft shadow-xs space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-[#f5f2ed]">
+              <div className="bg-theme-surface dark:bg-theme-card p-5 rounded-3xl border border-theme-border-soft shadow-xs space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-theme-border-soft/60">
                   <div className="flex items-center gap-2">
-                    <Activity className="w-4 h-4 text-[#c2410c]" />
-                    <h3 className="text-xs font-black text-[#1c1917] dark:text-theme-primary tracking-tight">
+                    <Activity className="w-4 h-4 text-theme-accent" />
+                    <h3 className="text-xs font-black text-theme-primary tracking-tight">
                       Confirmed Financial Activity Feed
                     </h3>
                   </div>
                   <button
                     onClick={() => setCurrentTab('collection-center')}
-                    className="text-xs font-bold text-[#c2410c] hover:underline cursor-pointer"
+                    className="text-xs font-bold text-theme-accent hover:underline cursor-pointer"
                   >
                     View Money Center →
                   </button>
@@ -2060,9 +2060,9 @@ const Dashboard = ({
                     No recent confirmed transactions recorded yet.
                   </div>
                 ) : (
-                  <div className="divide-y divide-[#faf7f2] dark:divide-theme-border-soft/40">
+                  <div className="divide-y divide-theme-border-soft/40">
                     {unifiedActivity.map((act, i) => (
-                      <div key={act.id || i} className="py-3 flex items-center justify-between text-xs hover:bg-[#faf8f5] dark:hover:bg-theme-surface/40 px-2 rounded-xl transition-colors">
+                      <div key={act.id || i} className="py-3 flex items-center justify-between text-xs hover:bg-theme-tint-hover px-2 rounded-xl transition-colors">
                         <div className="flex items-center gap-3">
                           <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
                             act.type === 'collection' || act.type === 'income'
@@ -2076,7 +2076,7 @@ const Dashboard = ({
                             {act.type === 'collection' ? <CreditCard className="w-4 h-4" /> : <Activity className="w-4 h-4" />}
                           </div>
                           <div>
-                            <p className="font-bold text-[#1c1917] dark:text-theme-primary">
+                            <p className="font-bold text-theme-primary">
                               {act.title || act.customerName || act.category || 'Transaction'}
                             </p>
                             <p className="text-[10px] text-theme-muted">
