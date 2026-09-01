@@ -285,11 +285,20 @@ const Dashboard = ({
 
   // Unified Live Activity Transactions
   const unifiedActivity = useMemo(() => {
-    return paymentEngine.getUnifiedHistory({
-      invoices: scopedInvoices,
-      bankLedger: liveBankLedger,
-      workspaceId: activeWsId
-    }).slice(0, 8);
+    try {
+      const getHistoryFn = paymentEngine.getUnifiedTransactionHistory || paymentEngine.getUnifiedHistory;
+      if (typeof getHistoryFn === 'function') {
+        const list = getHistoryFn.call(paymentEngine, {
+          invoices: scopedInvoices,
+          bankLedger: liveBankLedger,
+          workspaceId: activeWsId
+        });
+        return Array.isArray(list) ? list.slice(0, 8) : [];
+      }
+    } catch (e) {
+      console.warn('Unified activity load error:', e);
+    }
+    return [];
   }, [scopedInvoices, liveBankLedger, activeWsId]);
 
   const handleExecuteDreamTransfer = async () => {

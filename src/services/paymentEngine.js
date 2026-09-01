@@ -1529,6 +1529,10 @@ class PaymentEngine {
     logAudit('payment_request_rejected', 'payment_proof', payment.id, {}, { reason });
   }
 
+  getUnifiedHistory(params) {
+    return this.getUnifiedTransactionHistory(params);
+  }
+
   async getUserPaymentProofs(userId) { return await dbGetUserPaymentProofs(userId); }
   async getUserRevenueState(userId, invoices, subscription) { return await dbGetUserRevenueState(userId, invoices, subscription); }
 }
