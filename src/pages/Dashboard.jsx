@@ -1071,8 +1071,8 @@ const Dashboard = ({
                       </p>
                     </div>
                     <div className="mt-2 pt-1.5 border-t border-emerald-500/20 flex items-center justify-between text-[10px] text-emerald-700 dark:text-emerald-300 font-medium truncate">
-                      <span>{heroKPIs.prevDueCollected > 0 ? `${formatCurrency(heroKPIs.prevDueCollected, currencySymbol)} Old • ` : ''}{formatCurrency(heroKPIs.currentBillCollected, currencySymbol)} Curr</span>
-                      <span className="font-bold text-emerald-600 shrink-0">Money In</span>
+                      <span>{heroKPIs.prevDueCollected > 0 ? `${formatCurrency(heroKPIs.prevDueCollected, currencySymbol)} Earlier • ` : ''}{formatCurrency(heroKPIs.currentBillCollected, currencySymbol)} This Bill</span>
+                      <span className="font-bold text-emerald-600 shrink-0">Collected</span>
                     </div>
                   </div>
 
@@ -1080,14 +1080,14 @@ const Dashboard = ({
                   <div className="p-3.5 rounded-2xl bg-[#faf8f5] dark:bg-theme-surface/60 border border-[#f5f2ed] dark:border-theme-border-soft/60 flex flex-col justify-between">
                     <div>
                       <span className="text-[9px] font-black text-[#a8a29e] dark:text-theme-muted uppercase tracking-wider block">
-                        OUTSTANDING
+                        AMOUNT STILL DUE
                       </span>
                       <p className="text-lg sm:text-xl font-black text-[#ea580c] dark:text-amber-500 font-numbers mt-1">
                         <AnimatedNumber value={formatCurrency(heroKPIs.outstanding, currencySymbol)} />
                       </p>
                     </div>
                     <div className="mt-2 pt-1.5 border-t border-[#f0ece6] dark:border-theme-border-soft/40 flex items-center justify-between text-[10px] text-theme-muted font-medium truncate">
-                      <span>{metrics.previousDueTotal > 0 ? `${formatCurrency(metrics.previousDueTotal, currencySymbol)} Old • ` : ''}{formatCurrency(metrics.currentDueTotal, currencySymbol)} Curr</span>
+                      <span>{metrics.previousDueTotal > 0 ? `${formatCurrency(metrics.previousDueTotal, currencySymbol)} Earlier • ` : ''}{formatCurrency(metrics.currentDueTotal, currencySymbol)} This Bill</span>
                       <span className="font-bold text-[#ea580c] shrink-0">Due</span>
                     </div>
                   </div>
