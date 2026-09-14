@@ -1,3 +1,5 @@
+import { calculateInvoiceTotals } from './invoiceMath.js';
+
 /**
  * Calculates subtotals, taxes, and final invoice values
  * @param {Array} items - List of items { price, quantity }
@@ -6,27 +8,7 @@
  * @returns {Object} subtotal, taxAmount, grandTotal
  */
 export const calculateTotals = (items = [], taxPercentage = 0, discountAmount = 0) => {
-  const subtotal = items.reduce((acc, item) => {
-    const q = parseFloat(item.qty) || 0;
-    const r = parseFloat(item.rate || item.price || item.unitPrice) || 0;
-    const d = parseFloat(item.discount) || 0;
-    const itemAmount = Math.max(0, (q * r) - d); // Row level calculation
-    return acc + itemAmount;
-  }, 0);
-
-  const globalDiscount = parseFloat(discountAmount) || 0;
-  const taxableAmount = Math.max(0, subtotal - globalDiscount);
-  
-  const taxRate = parseFloat(taxPercentage) || 0;
-  const taxAmount = (taxableAmount * taxRate) / 100;
-  
-  const grandTotal = taxableAmount + taxAmount;
-
-  return {
-    subtotal: Math.round(subtotal * 100) / 100,
-    taxAmount: Math.round(taxAmount * 100) / 100,
-    grandTotal: Math.round(grandTotal * 100) / 100,
-  };
+  return calculateInvoiceTotals(items, taxPercentage, discountAmount);
 };
 
 /**

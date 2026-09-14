@@ -742,7 +742,7 @@ const PublicInvoice = ({ initialInvoice }) => {
                     </thead>
                     <tbody className="divide-y divide-theme-border-soft/50">
                       {(invoice.items || []).map((item, idx) => (
-                        <tr key={idx} className="hover:bg-theme-app/50">
+                        <tr key={idx} className="hover:bg-theme-surface-elevated/50">
                           {getInvoiceColumns(invoice, business).map(col => {
                             if (col.id === 'sn') return <td key={col.id} className={`py-2 md:py-2.5 px-2 md:px-3 text-${col.align} text-theme-muted font-bold`}>{idx + 1}</td>;
                             
@@ -816,19 +816,19 @@ const PublicInvoice = ({ initialInvoice }) => {
                   )}
                   {canonical.previousDue > 0 && (
                     <div className="flex justify-between py-1 text-[10px] md:text-xs border-b border-theme-border-soft text-amber-600 font-bold">
-                      <span>Earlier Balance</span>
+                      <span>Old Due</span>
                       <span className="tabular-nums">+{formatVal(canonical.previousDue)}</span>
                     </div>
                   )}
                   {canonical.previousDue > 0 && (
                     <div className="flex justify-between py-1 text-[10px] md:text-xs border-b border-dashed border-theme-border-soft font-bold">
-                      <span className="text-theme-primary">Total Amount Due</span>
+                      <span className="text-theme-primary">Total Payable</span>
                       <span className="text-theme-primary tabular-nums">{formatVal(canonical.totalReceivable)}</span>
                     </div>
                   )}
                   {canonical.amountPaid > 0 && (
                     <div className="flex justify-between py-1 text-[10px] md:text-xs border-b border-theme-border-soft text-emerald-600 font-bold">
-                      <span>Amount Paid</span>
+                      <span>Paid</span>
                       <span className="tabular-nums">-{formatVal(canonical.amountPaid)}</span>
                     </div>
                   )}
@@ -1141,7 +1141,7 @@ const PublicInvoice = ({ initialInvoice }) => {
                       <div className="flex items-center gap-3">
                         <div className="relative flex-1">
                           <input type="file" accept="image/*" required={liveLinkPrefs.requirePaymentScreenshot} onChange={handleScreenshotChange} className="hidden" id="payment-proof-upload" />
-                          <label htmlFor="payment-proof-upload" className="w-full flex items-center justify-center gap-2 py-3 md:py-3.5 bg-theme-surface border-2 border-dashed border-theme-border-soft rounded-xl cursor-pointer hover:bg-theme-app/80 hover:border-theme-accent/40 transition-all text-theme-muted text-[10px] md:text-xs font-bold premium-focus">
+                          <label htmlFor="payment-proof-upload" className="w-full flex items-center justify-center gap-2 py-3 md:py-3.5 bg-theme-surface border-2 border-dashed border-theme-border-soft rounded-xl cursor-pointer hover:bg-theme-surface-elevated/80 hover:border-theme-accent/40 transition-all text-theme-muted text-[10px] md:text-xs font-bold premium-focus">
                             <Upload className="w-4 h-4" />
                             <span>{screenshot ? 'Change Screenshot' : 'Upload Screenshot'}</span>
                           </label>

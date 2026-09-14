@@ -81,7 +81,7 @@ const BottomNav = ({ currentTab, setCurrentTab, pendingPaymentsCount = 0, busine
               <div className={`relative p-1.5 rounded-xl transition-all duration-200 ${
                 isActive 
                   ? 'bg-[image:var(--accent-gradient)] text-white shadow-md scale-110' 
-                  : 'text-theme-muted hover:text-theme-muted hover:bg-theme-app'
+                  : 'text-theme-muted hover:text-theme-muted hover:bg-theme-surface-elevated'
               }`}>
                 <div className="relative">
                   <Icon className="w-5 h-5" />

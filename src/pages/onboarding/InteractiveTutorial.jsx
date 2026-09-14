@@ -106,7 +106,7 @@ const InteractiveTutorial = ({ businessSettings, onSaveSettings, setCurrentTab }
                 <div 
                   key={task.id} 
                   onClick={() => handleTaskClick(task.id)}
-                  className="flex items-center gap-4 p-4 rounded-2xl border border-theme-border-soft bg-theme-surface hover:bg-theme-app dark:hover:bg-theme-surface cursor-pointer transition-colors"
+                  className="flex items-center gap-4 p-4 rounded-2xl border border-theme-border-soft bg-theme-surface hover:bg-theme-surface-elevated dark:hover:bg-theme-surface cursor-pointer transition-colors"
                 >
                   {task.completed ? (
                     <CheckCircle2 className="w-6 h-6 text-green-500" />

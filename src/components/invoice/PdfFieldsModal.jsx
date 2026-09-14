@@ -43,7 +43,7 @@ const PdfFieldsModal = ({
                   return fields.map((field) => {
                     const isChecked = pdfVisibleFields.length === 0 || pdfVisibleFields.includes(field.key);
                     return (
-                      <label key={field.key} className="flex items-center gap-3 p-3 rounded-xl hover:bg-theme-app dark:bg-theme-surface cursor-pointer border border-theme-border-soft dark:border-theme-border-soft transition-colors">
+                      <label key={field.key} className="flex items-center gap-3 p-3 rounded-xl hover:bg-theme-surface-elevated dark:bg-theme-surface cursor-pointer border border-theme-border-soft dark:border-theme-border-soft transition-colors">
                         <input
                           type="checkbox"
                           checked={isChecked}
@@ -73,7 +73,7 @@ const PdfFieldsModal = ({
               <div className="flex gap-3 pt-2 border-t border-theme-border-soft dark:border-theme-border-soft">
                 <button
                   onClick={() => setPdfVisibleFields((ALL_FIELDS_BY_TEMPLATE[billType] || ALL_FIELDS_BY_TEMPLATE['custom']).map(f => f.key))}
-                  className="flex-1 py-2.5 text-xs font-bold text-theme-muted hover:bg-theme-app dark:bg-theme-surface rounded-xl border border-theme-border-soft transition-colors"
+                  className="flex-1 py-2.5 text-xs font-bold text-theme-muted hover:bg-theme-surface-elevated dark:bg-theme-surface rounded-xl border border-theme-border-soft transition-colors"
                 >
                   Show All
                 </button>

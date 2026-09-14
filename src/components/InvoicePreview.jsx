@@ -1,4 +1,5 @@
 import React from 'react';
+import { toast } from 'react-hot-toast';
 import DynamicQRCode from './DynamicQRCode';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { roundTo2 } from '../utils/invoiceMath';
@@ -274,7 +275,7 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false, templat
           </thead>
           <tbody className="divide-y divide-slate-50 dark:divide-slate-800/40">
             {invoice.items && invoice.items.map((item, idx) => (
-              <tr key={idx} className="text-theme-primary dark:text-theme-muted hover:bg-theme-app dark:bg-theme-surface/50 dark:hover:bg-theme-card/20">
+              <tr key={idx} className="text-theme-primary dark:text-theme-muted hover:bg-theme-surface-elevated dark:bg-theme-surface/50 dark:hover:bg-theme-card/20">
                 {getInvoiceColumns(invoice, businessSettings).map(col => {
                   if (col.id === 'sn') return <td key={col.id} className={`py-2 px-2 text-${col.align} text-theme-muted font-bold`}>{idx + 1}</td>;
                   
@@ -387,21 +388,21 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false, templat
 
           {((businessSettings?.invoiceBuilderSettings?.showOldDue) || financials.previousDue > 0) && (
             <div className="flex justify-between text-amber-600 dark:text-amber-400 font-bold">
-              <span>Earlier Balance</span>
+              <span>Old Due</span>
               <span className="tabular-nums">+{formatCurrency(financials.previousDue, currencySymbol, regionalPrefs.numberFormat)}</span>
             </div>
           )}
 
           {((businessSettings?.invoiceBuilderSettings?.showOldDue) || financials.previousDue > 0) && (
             <div className="flex justify-between items-center text-theme-primary dark:text-theme-primary font-bold text-xs pt-1 border-t border-dashed border-theme-border-soft">
-              <span>Total Amount Due</span>
+              <span>Total Payable</span>
               <span className="font-black tabular-nums">{formatCurrency(financials.totalReceivable, currencySymbol, regionalPrefs.numberFormat)}</span>
             </div>
           )}
 
           {financials.amountPaid > 0 && (
             <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-bold">
-              <span>Amount Paid</span>
+              <span>Paid</span>
               <span className="tabular-nums">-{formatCurrency(financials.amountPaid, currencySymbol, regionalPrefs.numberFormat)}</span>
             </div>
           )}
@@ -592,7 +593,12 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false, templat
           <div className="absolute top-0 right-0 w-28 h-28 bg-theme-accent/10 rounded-full blur-2xl -mr-12 -mt-12 pointer-events-none"></div>
           <h3 className="text-base font-black mb-1.5 text-theme-accent dark:text-theme-accent relative z-10">Secure Payment Gateway</h3>
           <p className="text-xs mb-4 text-theme-muted relative z-10">Please complete your payment below to settle this invoice.</p>
-          <button className="px-6 py-2.5 rounded-xl text-xs font-bold text-white shadow-lg transition-transform hover:scale-105 bg-theme-accent hover:bg-theme-accent-dark relative z-10">
+          <button 
+            type="button"
+            className="px-6 py-2.5 rounded-xl text-xs font-bold text-white shadow-lg transition-transform hover:scale-105 bg-theme-accent hover:bg-theme-accent-dark relative z-10 cursor-pointer"
+            onClick={() => toast('Payment gateway active on published customer link', { icon: '💳' })}
+            title="Customer Payment Gateway"
+          >
             Pay {formatCurrency((invoice.balanceDue !== undefined && invoice.balanceDue !== null && invoice.balanceDue !== 0) ? invoice.balanceDue : invoice.grandTotal, currencySymbol, regionalPrefs.numberFormat)} Now
           </button>
         </div>

@@ -5,17 +5,89 @@
  */
 
 :root {
-  --bq-luxury-radius-sm: 10px;
-  --bq-luxury-radius-md: 14px;
-  --bq-luxury-radius-lg: 18px;
-  --bq-luxury-radius-xl: 24px;
+  /* BillQyro Official Brand Family */
+  --bq-emerald: #0B8F78;
+  --bq-emerald-deep: #075E50;
+  --bq-emerald-bright: #18B99B;
+  --bq-champagne: #C8A96B;
+
+  /* Level 1 - 5 Surface Hierarchy (Adaptive to active theme) */
+  --bq-surface-app: var(--app-bg, #FAF7F2);
+  --bq-surface-primary: var(--surface, #FFFFFF);
+  --bq-surface-secondary: var(--card-bg, #FFFFFF);
+  --bq-surface-elevated: var(--surface-elevated, #F8FAFC);
+  --bq-surface-financial: color-mix(in srgb, var(--accent, #0B8F78) 6%, var(--surface, #FFFFFF));
+
+  /* Semantic Surfaces */
+  --bq-surface-action: color-mix(in srgb, var(--accent, #0B8F78) 4%, var(--surface, #FFFFFF));
+  --bq-surface-insight: color-mix(in srgb, #3B82F6 4%, var(--surface, #FFFFFF));
+  --bq-surface-activity: color-mix(in srgb, var(--text-muted, #64748b) 4%, var(--surface, #FFFFFF));
+  --bq-surface-warning: color-mix(in srgb, #F59E0B 5%, var(--surface, #FFFFFF));
+  --bq-surface-success: color-mix(in srgb, #10B981 5%, var(--surface, #FFFFFF));
+  --bq-surface-danger: color-mix(in srgb, #EF4444 5%, var(--surface, #FFFFFF));
+  --bq-surface-neutral: var(--surface, #FFFFFF);
+
+  /* Semantic Colors */
+  --bq-accent: var(--accent, #0B8F78);
+  --bq-accent-strong: var(--accent-dark, #075E50);
+  --bq-accent-muted: color-mix(in srgb, var(--accent, #0B8F78) 12%, transparent);
+  --bq-text-primary: var(--text-primary, #0F172A);
+  --bq-text-secondary: var(--text-secondary, #334155);
+  --bq-text-muted: var(--text-muted, #64748B);
+  --bq-border-soft: var(--border-soft, rgba(15, 23, 42, 0.08));
+  --bq-border-strong: var(--border-strong, rgba(15, 23, 42, 0.16));
+  --bq-success: var(--status-success, #10B981);
+  --bq-warning: var(--status-warning, #F59E0B);
+  --bq-danger: var(--status-danger, #EF4444);
+
+  /* Radii */
+  --bq-radius-xs: 6px;
+  --bq-radius-sm: 10px;
+  --bq-radius-md: 14px;
+  --bq-radius-lg: 18px;
+  --bq-radius-xl: 24px;
+  --bq-radius-full: 9999px;
+
+  /* Motion & Easings */
+  --bq-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --bq-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
   --bq-luxury-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --bq-duration-fast: 120ms;
+  --bq-duration-normal: 200ms;
+  --bq-duration-slow: 320ms;
   --bq-luxury-duration: 180ms;
   --bq-luxury-duration-slow: 280ms;
+
+  /* Shadows */
+  --bq-shadow-sm: 0 2px 8px -2px rgba(15, 23, 42, 0.04), 0 1px 3px -1px rgba(15, 23, 42, 0.02);
+  --bq-shadow-md: 0 8px 24px -4px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.03);
+  --bq-shadow-lg: 0 16px 36px -6px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.04);
+  --bq-shadow-financial: 0 10px 30px -4px color-mix(in srgb, var(--accent, #0B8F78) 16%, transparent);
   --bq-luxury-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 6px 18px rgba(15, 23, 42, 0.035);
   --bq-luxury-shadow-md: 0 10px 30px rgba(15, 23, 42, 0.07), 0 2px 8px rgba(15, 23, 42, 0.04);
-  --bq-luxury-shadow-accent: 0 10px 30px var(--accent-glow, rgba(16, 185, 129, 0.16));
-  --bq-luxury-ring: 0 0 0 3px var(--accent-light, rgba(16, 185, 129, 0.12));
+  --bq-luxury-shadow-accent: 0 10px 30px var(--accent-glow, rgba(11, 143, 120, 0.16));
+  --bq-luxury-ring: 0 0 0 3px var(--accent-light, rgba(11, 143, 120, 0.12));
+}
+
+.dark {
+  --bq-surface-app: var(--app-bg, #0B1118);
+  --bq-surface-primary: var(--surface, #111827);
+  --bq-surface-secondary: var(--card-bg, #1A2230);
+  --bq-surface-elevated: var(--surface-elevated, #1F293D);
+  --bq-surface-financial: color-mix(in srgb, var(--accent, #0B8F78) 12%, var(--surface, #111827));
+
+  --bq-surface-action: color-mix(in srgb, var(--accent, #0B8F78) 8%, var(--surface, #111827));
+  --bq-surface-insight: color-mix(in srgb, #3B82F6 8%, var(--surface, #111827));
+  --bq-surface-activity: color-mix(in srgb, var(--text-muted, #94A3B8) 6%, var(--surface, #111827));
+  --bq-surface-warning: color-mix(in srgb, #F59E0B 9%, var(--surface, #111827));
+  --bq-surface-success: color-mix(in srgb, #10B981 9%, var(--surface, #111827));
+  --bq-surface-danger: color-mix(in srgb, #EF4444 9%, var(--surface, #111827));
+  --bq-surface-neutral: var(--surface, #111827);
+
+  --bq-shadow-sm: 0 2px 8px -2px rgba(0, 0, 0, 0.25);
+  --bq-shadow-md: 0 8px 24px -4px rgba(0, 0, 0, 0.35);
+  --bq-shadow-lg: 0 16px 36px -6px rgba(0, 0, 0, 0.45);
+  --bq-shadow-financial: 0 10px 30px -4px color-mix(in srgb, var(--accent, #0B8F78) 22%, transparent);
 }
 
 .billqyro-luxury-surface { background: var(--surface, #fff); border: 1px solid var(--border-soft, rgba(15,23,42,.08)); border-radius: var(--bq-luxury-radius-lg); box-shadow: var(--bq-luxury-shadow-sm); }
@@ -35,6 +107,107 @@
 .billqyro-luxury-scroll::-webkit-scrollbar-track { background:transparent; }
 .billqyro-luxury-scroll::-webkit-scrollbar-thumb { background:var(--border-strong,rgba(100,116,139,.28));border-radius:999px; }
 ::selection { background:var(--accent-light,rgba(16,185,129,.18)); color:var(--text-primary,#0f172a); }
+
+/* ==========================================================================
+   BillQyro Signature Surface System (Levels 1 - 5 + Semantic Variants)
+   ========================================================================== */
+.bq-surface-primary {
+  background: var(--bq-surface-primary);
+  border: 1px solid var(--bq-border-soft);
+  border-radius: var(--bq-radius-lg);
+  box-shadow: var(--bq-shadow-sm);
+  color: var(--bq-text-primary);
+}
+
+.bq-surface-elevated {
+  background: var(--bq-surface-elevated);
+  border: 1px solid var(--bq-border-soft);
+  border-radius: var(--bq-radius-lg);
+  box-shadow: var(--bq-shadow-md);
+  color: var(--bq-text-primary);
+}
+
+.bq-surface-financial {
+  background: var(--bq-surface-financial);
+  border: 1px solid color-mix(in srgb, var(--bq-accent) 22%, var(--bq-border-soft));
+  border-radius: var(--bq-radius-lg);
+  box-shadow: var(--bq-shadow-financial);
+  color: var(--bq-text-primary);
+}
+
+.bq-surface-action {
+  background: var(--bq-surface-action);
+  border: 1px solid color-mix(in srgb, var(--bq-accent) 18%, var(--bq-border-soft));
+  border-radius: var(--bq-radius-lg);
+  box-shadow: var(--bq-shadow-sm);
+}
+
+.bq-surface-insight {
+  background: var(--bq-surface-insight);
+  border: 1px solid color-mix(in srgb, #3B82F6 18%, var(--bq-border-soft));
+  border-radius: var(--bq-radius-lg);
+  box-shadow: var(--bq-shadow-sm);
+}
+
+.bq-surface-activity {
+  background: var(--bq-surface-activity);
+  border: 1px solid var(--bq-border-soft);
+  border-radius: var(--bq-radius-lg);
+  box-shadow: var(--bq-shadow-sm);
+}
+
+.bq-surface-warning {
+  background: var(--bq-surface-warning);
+  border: 1px solid color-mix(in srgb, #F59E0B 24%, var(--bq-border-soft));
+  border-radius: var(--bq-radius-lg);
+  box-shadow: var(--bq-shadow-sm);
+}
+
+.bq-surface-success {
+  background: var(--bq-surface-success);
+  border: 1px solid color-mix(in srgb, #10B981 24%, var(--bq-border-soft));
+  border-radius: var(--bq-radius-lg);
+  box-shadow: var(--bq-shadow-sm);
+}
+
+.bq-surface-danger {
+  background: var(--bq-surface-danger);
+  border: 1px solid color-mix(in srgb, #EF4444 24%, var(--bq-border-soft));
+  border-radius: var(--bq-radius-lg);
+  box-shadow: var(--bq-shadow-sm);
+}
+
+.bq-surface-neutral {
+  background: var(--bq-surface-neutral);
+  border: 1px solid var(--bq-border-soft);
+  border-radius: var(--bq-radius-lg);
+  box-shadow: var(--bq-shadow-sm);
+}
+
+/* BillQyro Typography Utilities */
+.bq-font-display {
+  font-family: 'Sora', sans-serif;
+  letter-spacing: -0.035em;
+}
+
+.bq-font-body {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+.bq-financial-number {
+  font-family: 'Sora', 'Plus Jakarta Sans', monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.025em;
+  font-feature-settings: 'tnum' on, 'zero' on;
+}
+
+/* Nav Item Signature State */
+.bq-nav-item-active {
+  background: color-mix(in srgb, var(--bq-accent) 12%, transparent);
+  color: var(--bq-accent);
+  border-left: 3px solid var(--bq-accent);
+  font-weight: 700;
+}
 
 /* Landing canvas */
 .billqyro-landing-premium { --bq-content-max:1240px; --bq-section-gap:clamp(84px,10vw,150px); --bq-radius-xl:30px; --bq-radius-lg:24px; isolation:isolate; background:radial-gradient(900px 520px at 8% 0%,color-mix(in srgb,var(--accent,#0f9f83) 10%,transparent),transparent 68%),radial-gradient(800px 520px at 92% 18%,color-mix(in srgb,var(--accent,#0f9f83) 7%,transparent),transparent 70%),var(--app-bg,#f8fafc); }

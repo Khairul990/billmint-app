@@ -220,7 +220,7 @@ const SmartCustomerSelect = ({ customers = [] }) => {
           </div>
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-theme-muted mb-1 uppercase tracking-wider ml-1">Previous Due</label>
+          <label className="block text-[10px] font-bold text-theme-muted mb-1 uppercase tracking-wider ml-1">Old Due</label>
           <div className="relative group">
             <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-rose-500 transition-colors group-focus-within:text-rose-400" />
             <input

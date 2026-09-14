@@ -88,27 +88,27 @@ export const PdfTotalsSummary = ({
 
       {showOldDue && (
         <View style={[s.row, s.justifyBetween, s.mb4]}>
-          <Text style={{ fontSize: 8.5, color: '#d97706', fontFamily: 'Helvetica-Bold' }}>Earlier Balance</Text>
+          <Text style={{ fontSize: 8.5, color: '#d97706', fontFamily: 'Helvetica-Bold' }}>Old Due</Text>
           <Text style={{ fontSize: 8.5, color: '#d97706', fontFamily: 'Helvetica-Bold', textAlign: 'right' }}>+{formatCurrency(fin.previousDue)}</Text>
         </View>
       )}
 
       {showOldDue && (
         <View style={[s.row, s.justifyBetween, s.mb4, { borderTopWidth: 1, borderTopColor: isDark ? '#374151' : '#e5e7eb', paddingTop: 4 }]}>
-          <Text style={{ fontSize: 9, color: labelColor, fontFamily: 'Helvetica-Bold' }}>Total Amount Due</Text>
+          <Text style={{ fontSize: 9, color: labelColor, fontFamily: 'Helvetica-Bold' }}>Total Payable</Text>
           <Text style={{ fontSize: 9, color: valColor, fontFamily: 'Helvetica-Bold', textAlign: 'right' }}>{formatCurrency(fin.totalReceivable)}</Text>
         </View>
       )}
 
       {fin.amountPaid > 0 && (
         <View style={[s.row, s.justifyBetween, s.mb4]}>
-          <Text style={{ fontSize: 8.5, color: '#16a34a', fontFamily: 'Helvetica-Bold' }}>Amount Paid</Text>
+          <Text style={{ fontSize: 8.5, color: '#16a34a', fontFamily: 'Helvetica-Bold' }}>Paid</Text>
           <Text style={{ fontSize: 8.5, color: '#16a34a', fontFamily: 'Helvetica-Bold', textAlign: 'right' }}>-{formatCurrency(fin.amountPaid)}</Text>
         </View>
       )}
 
       <View style={[s.row, s.justifyBetween, s.bold, badgeStyle ? badgeStyle : { fontSize: 12, borderTopWidth: 2, borderTopColor: accentColor, paddingTop: 6, marginTop: 4 }]}>
-        <Text style={{ color: badgeStyle?.color || accentColor }}>{(fin.amountPaid > 0 || fin.previousDue > 0) ? 'AMOUNT STILL DUE' : 'TOTAL DUE'}</Text>
+        <Text style={{ color: badgeStyle?.color || accentColor }}>{(fin.amountPaid > 0 || fin.previousDue > 0) ? 'BALANCE DUE' : 'TOTAL DUE'}</Text>
         <Text style={{ color: badgeStyle?.color || accentColor, textAlign: 'right' }}>{formatCurrency(fin.customerTotalDue ?? (fin.previousDue > 0 ? (fin.remainingOldDue + fin.currentBillDue) : fin.balanceDue))}</Text>
       </View>
     </View>

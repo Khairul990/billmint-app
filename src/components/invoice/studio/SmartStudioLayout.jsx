@@ -333,7 +333,7 @@ const SmartStudioLayout = ({ customers, products, invoices = [], onSaveInvoice, 
                 <div className="flex gap-4 mt-4 w-full">
                   <button
                     onClick={() => setCurrentStep(1)}
-                    className="py-4 px-6 bg-theme-surface border border-theme-border-soft hover:bg-theme-app text-theme-primary rounded-2xl font-black shadow-sm transition-all active:scale-[0.98]"
+                    className="py-4 px-6 bg-theme-surface border border-theme-border-soft hover:bg-theme-surface-elevated text-theme-primary rounded-2xl font-black shadow-sm transition-all active:scale-[0.98]"
                   >
                     <ArrowLeft className="w-5 h-5" />
                   </button>
@@ -359,7 +359,7 @@ const SmartStudioLayout = ({ customers, products, invoices = [], onSaveInvoice, 
                 <div className="flex gap-4 mt-4 w-full">
                   <button
                     onClick={() => setCurrentStep(2)}
-                    className="py-4 px-6 bg-theme-surface border border-theme-border-soft hover:bg-theme-app text-theme-primary rounded-2xl font-black shadow-sm transition-all active:scale-[0.98]"
+                    className="py-4 px-6 bg-theme-surface border border-theme-border-soft hover:bg-theme-surface-elevated text-theme-primary rounded-2xl font-black shadow-sm transition-all active:scale-[0.98]"
                   >
                     <ArrowLeft className="w-5 h-5" />
                   </button>
@@ -410,14 +410,14 @@ const SmartStudioLayout = ({ customers, products, invoices = [], onSaveInvoice, 
                 <button
                   onClick={() => setCurrentStep(3)}
                   disabled={isPaidLocked}
-                  className="flex-1 py-4 bg-theme-surface border border-theme-border-soft hover:bg-theme-app text-theme-primary rounded-2xl font-black shadow-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="flex-1 py-4 bg-theme-surface border border-theme-border-soft hover:bg-theme-surface-elevated text-theme-primary rounded-2xl font-black shadow-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   <ArrowLeft className="w-5 h-5" /> Back
                 </button>
                 <button
                   onClick={handleDownloadPDF}
                   disabled={isSaving}
-                  className="flex-1 py-4 bg-theme-surface border border-theme-border-soft hover:bg-theme-app text-theme-primary rounded-2xl font-black shadow-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="flex-1 py-4 bg-theme-surface border border-theme-border-soft hover:bg-theme-surface-elevated text-theme-primary rounded-2xl font-black shadow-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   <Download className="w-5 h-5" /> PDF
                 </button>
@@ -468,7 +468,7 @@ const SmartStudioLayout = ({ customers, products, invoices = [], onSaveInvoice, 
                 onClick={() => {
                   if (savedInvoiceResult && onDownloadPDF) onDownloadPDF(savedInvoiceResult);
                 }}
-                className="w-full py-3.5 bg-theme-surface border border-theme-border-soft hover:bg-theme-app text-theme-primary rounded-2xl font-bold text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                className="w-full py-3.5 bg-theme-surface border border-theme-border-soft hover:bg-theme-surface-elevated text-theme-primary rounded-2xl font-bold text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2"
               >
                 <Download className="w-4 h-4" /> Download PDF
               </button>

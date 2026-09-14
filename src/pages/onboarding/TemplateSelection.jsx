@@ -48,7 +48,7 @@ const TemplateSelection = () => {
                   className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center justify-center text-center gap-3 ${
                     isSelected 
                       ? `${tpl.bg} shadow-md scale-105` 
-                      : 'border-theme-border-soft bg-theme-surface hover:bg-theme-app dark:hover:bg-theme-surface'
+                      : 'border-theme-border-soft bg-theme-surface hover:bg-theme-surface-elevated dark:hover:bg-theme-surface'
                   }`}
                 >
                   <div className={`p-3 rounded-xl bg-theme-card shadow-sm ${isSelected ? tpl.color : 'text-theme-muted'}`}>
@@ -91,7 +91,7 @@ const TemplateSelection = () => {
           </AnimatePresence>
 
           <div className="flex justify-between pt-6 border-t border-theme-border-soft mt-6">
-            <button type="button" onClick={prevStep} className="px-6 py-3 rounded-xl font-bold text-theme-muted bg-theme-surface hover:bg-theme-app dark:hover:bg-theme-surface transition-colors flex items-center gap-2 text-sm">
+            <button type="button" onClick={prevStep} className="px-6 py-3 rounded-xl font-bold text-theme-muted bg-theme-surface hover:bg-theme-surface-elevated dark:hover:bg-theme-surface transition-colors flex items-center gap-2 text-sm">
               <ChevronLeft className="w-4 h-4" /> Back
             </button>
             <button type="submit" className="px-8 py-3 rounded-xl font-black text-white bg-[image:var(--accent-gradient)] shadow-glow hover:opacity-90 transition-opacity flex items-center gap-2 text-sm uppercase tracking-wider">

@@ -380,21 +380,21 @@ const Estimates = ({
 
                 <button
                   onClick={handlePrint}
-                  className="p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-app dark:bg-theme-surface rounded-xl transition-all"
+                  className="p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-surface-elevated dark:bg-theme-surface rounded-xl transition-all"
                   title="Print Estimate"
                 >
                   <Printer className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => onDownloadPDF(viewingEstimate)}
-                  className="p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-app dark:bg-theme-surface rounded-xl transition-all"
+                  className="p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-surface-elevated dark:bg-theme-surface rounded-xl transition-all"
                   title="Download PDF"
                 >
                   <Download className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => onDownloadImage && onDownloadImage(viewingEstimate)}
-                  className="p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-app dark:bg-theme-surface rounded-xl transition-all"
+                  className="p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-surface-elevated dark:bg-theme-surface rounded-xl transition-all"
                   title="Download Image (PNG)"
                 >
                   <ImageDown className="w-4 h-4" />
@@ -406,7 +406,7 @@ const Estimates = ({
                     setViewingEstimate(null);
                     setCurrentTab('create-invoice');
                   }}
-                  className="p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-app dark:bg-theme-surface rounded-xl transition-all"
+                  className="p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-surface-elevated dark:bg-theme-surface rounded-xl transition-all"
                   title="Edit Estimate"
                 >
                   <Edit className="w-4 h-4" />

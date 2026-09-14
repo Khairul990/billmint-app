@@ -528,6 +528,27 @@ const SettingsStudioV2 = ({
           enableBarcodeSku
         }
       };
+
+      // Phase 3: Business Profile Persistence
+      // Ensure the active workspace entry is updated so edits aren't lost on switch
+      if (payload.activeWorkspaceId && Array.isArray(payload.businessWorkspaces)) {
+        payload.businessWorkspaces = payload.businessWorkspaces.map(ws => {
+          if (ws.id === payload.activeWorkspaceId) {
+            return {
+              ...ws,
+              name: businessName,
+              type: businessType,
+              phone: phone,
+              address: address,
+              email: email,
+              currency: currency,
+              logoUrl: logoUrl
+            };
+          }
+          return ws;
+        });
+      }
+
       onSaveSettings(payload);
       setIsDirty(false);
       setSaveState('saved');

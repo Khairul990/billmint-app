@@ -255,7 +255,7 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {}, setSettings, initi
       {setCurrentTab && (
         <button
           onClick={() => setCurrentTab('settings')}
-          className="btn-premium flex items-center gap-2 px-4 py-2 bg-theme-surface border border-theme-border-soft hover:bg-theme-app text-theme-primary rounded-xl font-bold text-xs mb-4 shadow-sm w-fit transition-all active:scale-95"
+          className="btn-premium flex items-center gap-2 px-4 py-2 bg-theme-surface border border-theme-border-soft hover:bg-theme-surface-elevated text-theme-primary rounded-xl font-bold text-xs mb-4 shadow-sm w-fit transition-all active:scale-95"
         >
           <ArrowLeft className="w-4 h-4 text-theme-muted" /> Back to Settings Studio
         </button>

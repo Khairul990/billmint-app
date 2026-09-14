@@ -498,7 +498,10 @@ const CollectionCenter = ({
           setIsSubmitting(false);
           return;
         }
-        const maxPayable = invoiceFinancials.previousDue > 0 ? invoiceFinancials.customerTotalDue : invoiceFinancials.balanceDue;
+        const maxPayable = Math.max(
+          customerLedger?.totalDue || 0, 
+          (invoiceFinancials?.previousDue > 0 ? invoiceFinancials.customerTotalDue : invoiceFinancials?.balanceDue) || 0
+        );
         if (amt > maxPayable && maxPayable > 0) {
           toast.error(`Amount cannot exceed total outstanding due of ${formatCurrency(maxPayable, currencySymbol)}`);
           setIsSubmitting(false);
@@ -1746,7 +1749,7 @@ const CollectionCenter = ({
                       <div className="p-3 rounded-xl bg-theme-surface/70 border border-theme-border-soft space-y-1.5 text-2xs">
                         <div className="font-bold text-theme-muted uppercase text-[10px]">Payment Waterfall Breakdown:</div>
                         <div className="flex justify-between">
-                          <span className="text-theme-muted">To Earlier Balance:</span>
+                          <span className="text-theme-muted">To Old Due:</span>
                           <span className="font-mono font-bold text-amber-600">
                             {formatCurrency(liveAllocation.allocatedToOldDue, currencySymbol)}
                           </span>

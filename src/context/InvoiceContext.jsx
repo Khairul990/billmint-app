@@ -9,7 +9,7 @@ const InvoiceContext = createContext();
 const initialState = {
   id: '', publicToken: '', invoiceNumber: '', date: '', dueDate: '', billType: 'retail', selectedTemplate: 'retail', templateFields: [], pdfVisibleFields: [],
   customer: { id: '', name: '', phone: '', email: '', address: '' }, items: [],
-  totals: { subtotal: 0, taxPercentage: 18, taxAmount: 0, discountAmount: 0, grandTotal: 0, oldDue: 0, totalDue: 0, amountPaid: 0, balanceDue: 0 },
+  totals: { subtotal: 0, taxPercentage: 0, taxAmount: 0, discountAmount: 0, grandTotal: 0, oldDue: 0, totalDue: 0, amountPaid: 0, balanceDue: 0 },
   settings: { notes: '', terms: '', paymentStatus: 'Unpaid', orderStatus: 'Pending', paymentMethod: 'Cash', paymentNote: '' }, paymentProofs: [], isInitialized: false
 };
 
@@ -54,9 +54,9 @@ const invoiceReducer = (state, action) => {
   }
 };
 
-// Previous due is the customer's outstanding balance BEFORE this invoice.
+// Old due is the customer's outstanding balance BEFORE this invoice.
 // It is calculated from prior invoices only, using each invoice's current-bill balance so
-// an already-carried previous due is never counted twice.
+// an already-carried old due is never counted twice.
 const getCustomerPreviousDue = (customerId, customerName, invoices = [], excludeInvoiceId = null) => {
   if (!Array.isArray(invoices) || (!customerId && !customerName)) return 0;
   return roundTo2(invoices.reduce((sum, inv) => {
@@ -93,7 +93,7 @@ export const InvoiceProvider = ({ children, editingInvoice, invoices, businessSe
     }
   }, [editingInvoice, invoices, businessSettings]);
 
-  // Keep previous due live while selecting/changing a customer on a new invoice.
+  // Keep old due live while selecting/changing a customer on a new invoice.
   useEffect(() => {
     if (!state.isInitialized || editingInvoice || !state.customer?.id && !state.customer?.name) return;
     const oldDue = getCustomerPreviousDue(state.customer.id, state.customer.name, invoices, state.id);

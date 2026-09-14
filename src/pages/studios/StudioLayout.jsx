@@ -7,12 +7,13 @@ import {
   LayoutTemplate, Zap, Blocks, Shield, Save, Database, Undo, Redo, RotateCcw,
   Crown, Lock, HardDrive, Globe2, Bell, ArrowLeft, PanelLeftClose, PanelLeftOpen,
   CheckCircle2, Menu, X, ChevronDown, ChevronRight, Search, Sparkles, ArrowRight,
-  SlidersHorizontal, RefreshCw, AlertTriangle
+  SlidersHorizontal, RefreshCw, AlertTriangle, Store, ShieldCheck, User, Phone
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useSettingsHistory } from '../../hooks/useSettingsHistory';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { SignatureSurface, Badge } from '../../components/ui';
 import { getStudioHeaderTarget } from '../../utils/portalTargets';
 
 // Lazy-loaded studio modules
@@ -148,7 +149,7 @@ const StudioLayout = ({
             {!isSidebarCollapsed && (
               <div>
                 <h2 className="text-sm font-black text-theme-primary">Settings Studio</h2>
-                <p className="text-[10px] font-bold text-theme-muted uppercase tracking-wider">Configuration Hub</p>
+                <p className="text-[10px] font-bold text-theme-muted uppercase tracking-wider font-mono">Control Center</p>
               </div>
             )}
             <button 
@@ -251,7 +252,7 @@ const StudioLayout = ({
             </div>
             <div className="min-w-0">
               <span className="text-xs font-bold text-theme-primary block truncate">{activeRouteObj.label}</span>
-              <span className="text-[9px] text-theme-muted block truncate">Tap to switch settings section</span>
+              <span className="text-[9px] text-theme-muted block truncate">Tap to switch section</span>
             </div>
           </div>
           <ChevronDown className="w-3.5 h-3.5 text-theme-muted shrink-0 ml-1.5" />
@@ -292,7 +293,7 @@ const StudioLayout = ({
               <div className="flex items-center justify-between pb-3 border-b border-theme-border-soft">
                 <div>
                   <h3 className="text-sm font-black text-theme-primary">Settings Menu</h3>
-                  <p className="text-[10px] text-theme-muted">Select a section to customize</p>
+                  <p className="text-[10px] text-theme-muted">Select a studio section to configure</p>
                 </div>
                 <button
                   onClick={() => setMobileDrawerOpen(false)}
@@ -435,61 +436,91 @@ const StudioLayout = ({
               exit="exit"
               className="space-y-6 max-w-6xl mx-auto pb-16"
             >
-              {/* Overview Hero Card */}
-              <div className="p-6 rounded-2xl bg-theme-surface/70 border border-theme-border-soft backdrop-blur-xl relative overflow-hidden shadow-xs">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="space-y-1">
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-theme-accent/10 text-theme-accent border border-theme-accent/20">
-                      <Sparkles className="w-3 h-3" />
-                      Command Center
+              {/* 1. Signature Business Identity Hero Card */}
+              <div className="p-6 sm:p-7 rounded-3xl bg-theme-surface-elevated border border-theme-border-soft backdrop-blur-xl relative overflow-hidden shadow-premium">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                  <div className="space-y-2 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-theme-accent/10 text-theme-accent border border-theme-accent/20">
+                        <Sparkles className="w-3 h-3" />
+                        Active Workspace
+                      </span>
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-theme-surface border border-theme-border-soft text-theme-muted uppercase">
+                        {draftSettings?.businessType || settings?.businessType || 'Retail'}
+                      </span>
                     </div>
-                    <h1 className="text-xl font-black text-theme-primary tracking-tight">Workspace Settings & Studio</h1>
-                    <p className="text-xs text-theme-muted font-medium">
-                      Manage your BillQyro workspace identity, financial defaults, theme system, security, and preferences.
-                    </p>
+
+                    <h1 className="text-xl sm:text-2xl font-black text-theme-primary tracking-tight truncate">
+                      {draftSettings?.businessName || settings?.businessName || 'BillQyro Workspace'}
+                    </h1>
+
+                    <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs text-theme-muted font-medium">
+                      <span className="flex items-center gap-1">
+                        <User className="w-3 h-3 text-theme-accent" />
+                        {draftSettings?.ownerName || settings?.ownerName || 'Administrator'}
+                      </span>
+                      <span>•</span>
+                      <span className="flex items-center gap-1">
+                        <Phone className="w-3 h-3 text-theme-accent" />
+                        {draftSettings?.phone || settings?.phone || 'No phone registered'}
+                      </span>
+                      <span>•</span>
+                      <span className="font-mono text-theme-primary font-bold">
+                        Currency: {draftSettings?.currency || settings?.currency || '₹'}
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
-                    <div className="p-3 rounded-xl bg-theme-card border border-theme-border-soft flex items-center gap-2.5">
-                      <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                  {/* Badges and Quick Links */}
+                  <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 shrink-0">
+                    <div className="p-3 rounded-2xl bg-theme-surface border border-theme-border-soft flex items-center gap-2.5 shadow-2xs">
+                      <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
                       <div className="text-left">
-                        <p className="text-[10px] font-bold uppercase text-theme-muted tracking-wider">Cloud State</p>
+                        <p className="text-[9px] font-black uppercase text-theme-muted tracking-wider">Cloud State</p>
                         <p className="text-xs font-black text-theme-primary">Synchronized</p>
                       </div>
                     </div>
 
-                    <div className="p-3 rounded-xl bg-theme-card border border-theme-border-soft flex items-center gap-2.5">
-                      <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                    <div className="p-3 rounded-2xl bg-theme-surface border border-theme-border-soft flex items-center gap-2.5 shadow-2xs">
+                      <div className="w-2.5 h-2.5 rounded-full bg-blue-500"></div>
                       <div className="text-left">
-                        <p className="text-[10px] font-bold uppercase text-theme-muted tracking-wider">Isolation</p>
+                        <p className="text-[9px] font-black uppercase text-theme-muted tracking-wider">Storage Guard</p>
                         <p className="text-xs font-black text-theme-primary">Encrypted</p>
                       </div>
                     </div>
+
+                    <button
+                      onClick={() => setCurrentTab('workspace-manager')}
+                      className="px-3.5 py-3 rounded-2xl bg-theme-surface hover:bg-theme-card border border-theme-border-soft hover:border-theme-accent/30 text-xs font-bold text-theme-primary transition-all flex items-center gap-2 cursor-pointer shadow-2xs"
+                    >
+                      <Store className="w-4 h-4 text-theme-accent" />
+                      <span className="whitespace-nowrap">Switch Workspace</span>
+                    </button>
                   </div>
                 </div>
               </div>
 
-              {/* Category Cards Grid */}
+              {/* 2. Core Workspace Configuration Group */}
               <div>
                 <div className="flex items-center justify-between mb-3 px-1">
-                  <h2 className="text-xs font-black uppercase tracking-widest text-theme-muted">
-                    Configuration Modules ({STUDIO_ROUTES.filter(r => r.id && r.id !== 'overview').length})
+                  <h2 className="text-xs font-black uppercase tracking-widest text-theme-muted font-mono">
+                    Core Business Configuration
                   </h2>
-                  <span className="text-[10px] text-theme-muted font-bold">1-Click Quick Configuration</span>
+                  <span className="text-[10px] text-theme-muted font-bold">Immediate Studio Essentials</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-                  {STUDIO_ROUTES.filter(r => r.id && r.id !== 'overview').map(route => {
+                  {STUDIO_ROUTES.filter(r => r.tier === 'simple' && r.id && r.id !== 'overview' && r.icon).map(route => {
                     const Icon = route.icon;
                     return (
                       <button
                         key={route.id}
                         onClick={() => setActiveStudio(route.id)}
-                        className="p-4 rounded-2xl bg-theme-card hover:bg-theme-surface border border-theme-border-soft hover:border-theme-border-strong text-left transition-all duration-200 group shadow-2xs hover:shadow-sm cursor-pointer flex flex-col justify-between gap-4"
+                        className="p-4 rounded-2xl bg-theme-card hover:bg-theme-surface border border-theme-border-soft hover:border-theme-border-strong text-left transition-all duration-200 group shadow-2xs hover:shadow-premium-sm cursor-pointer flex flex-col justify-between gap-4"
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="w-10 h-10 rounded-xl bg-theme-surface group-hover:bg-theme-accent/10 border border-theme-border-soft group-hover:border-theme-accent/30 text-theme-muted group-hover:text-theme-accent flex items-center justify-center transition-colors shrink-0">
-                            <Icon className="w-5 h-5" />
+                            {Icon && <Icon className="w-5 h-5 transition-transform group-hover:scale-105" />}
                           </div>
                           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-theme-surface border border-theme-border-soft text-theme-muted group-hover:text-theme-primary transition-colors">
                             {route.count}
@@ -510,6 +541,49 @@ const StudioLayout = ({
                   })}
                 </div>
               </div>
+
+              {/* 3. Advanced Operations Configuration Group */}
+              <div>
+                <div className="flex items-center justify-between mb-3 px-1 mt-6">
+                  <h2 className="text-xs font-black uppercase tracking-widest text-theme-muted font-mono">
+                    Advanced Operations & Security
+                  </h2>
+                  <span className="text-[10px] text-theme-muted font-bold">Deep Controls & Automation</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                  {STUDIO_ROUTES.filter(r => r.tier === 'advanced' && r.id && r.icon).map(route => {
+                    const Icon = route.icon;
+                    return (
+                      <button
+                        key={route.id}
+                        onClick={() => setActiveStudio(route.id)}
+                        className="p-4 rounded-2xl bg-theme-card hover:bg-theme-surface border border-theme-border-soft hover:border-theme-border-strong text-left transition-all duration-200 group shadow-2xs hover:shadow-premium-sm cursor-pointer flex flex-col justify-between gap-4"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-theme-surface group-hover:bg-theme-accent/10 border border-theme-border-soft group-hover:border-theme-accent/30 text-theme-muted group-hover:text-theme-accent flex items-center justify-center transition-colors shrink-0">
+                            <Icon className="w-5 h-5 transition-transform group-hover:scale-105" />
+                          </div>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-theme-surface border border-theme-border-soft text-theme-muted group-hover:text-theme-primary transition-colors">
+                            {route.count}
+                          </span>
+                        </div>
+
+                        <div>
+                          <h3 className="text-xs font-bold text-theme-primary group-hover:text-theme-accent transition-colors flex items-center gap-1.5">
+                            <span>{route.label}</span>
+                            <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all text-theme-accent" />
+                          </h3>
+                          <p className="text-[11px] text-theme-muted font-medium mt-1 leading-snug line-clamp-2">
+                            {route.desc}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
             </motion.div>
           )}
 

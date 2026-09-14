@@ -293,7 +293,7 @@ const AdminConsoleTab = (props) => {
                               toast.error("Failed to save global settings.");
                             }
                           }}
-                          className="mt-4 px-5 py-2 bg-theme-surface border border-theme-border-strong text-theme-primary hover:bg-theme-app dark:bg-theme-card dark:hover:bg-theme-card text-[10px] font-black uppercase rounded-lg transition-colors cursor-pointer"
+                          className="mt-4 px-5 py-2 bg-theme-surface border border-theme-border-strong text-theme-primary hover:bg-theme-surface-elevated dark:bg-theme-card dark:hover:bg-theme-card text-[10px] font-black uppercase rounded-lg transition-colors cursor-pointer"
                         >
                           Save Global Config
                         </button>
@@ -425,7 +425,7 @@ const AdminConsoleTab = (props) => {
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50 font-medium">
                           {adminUsers.map((user) => (
-                            <tr key={user.userId} className="hover:bg-theme-app dark:bg-theme-surface/50 dark:hover:bg-theme-surface/20 transition-all">
+                            <tr key={user.userId} className="hover:bg-theme-surface-elevated dark:bg-theme-surface/50 dark:hover:bg-theme-surface/20 transition-all">
                               <td className="p-3.5 font-bold text-theme-primary dark:text-theme-primary dark:text-theme-secondary">{user.email}</td>
                               <td className="p-3.5 text-theme-muted dark:text-theme-muted">{user.businessName || '—'}</td>
                               <td className="p-3.5 text-theme-muted dark:text-theme-muted">{user.country || 'India'}</td>
@@ -646,7 +646,7 @@ const AdminConsoleTab = (props) => {
                         key={provider}
                         type="button"
                         onClick={() => handleSetDbProvider(provider)}
-                        className={`flex-1 py-1.5 px-2 text-[10px] font-black uppercase rounded-lg border transition-all ${dbProvider === provider ? 'bg-theme-accent text-white border-theme-accent shadow-md cursor-default' : 'bg-transparent text-theme-muted border-theme-border-soft hover:bg-theme-app dark:hover:bg-theme-card cursor-pointer'}`}
+                        className={`flex-1 py-1.5 px-2 text-[10px] font-black uppercase rounded-lg border transition-all ${dbProvider === provider ? 'bg-theme-accent text-white border-theme-accent shadow-md cursor-default' : 'bg-transparent text-theme-muted border-theme-border-soft hover:bg-theme-surface-elevated dark:hover:bg-theme-card cursor-pointer'}`}
                       >
                         {provider === 'dual' ? 'Dual Sync' : provider}
                       </button>
@@ -733,7 +733,7 @@ const AdminConsoleTab = (props) => {
               <button
                 type="button"
                 onClick={() => setShowRejectionModalFor(null)}
-                className="px-4 py-2 border border-theme-border-soft dark:border-theme-border-soft text-theme-primary dark:text-theme-muted hover:bg-theme-app dark:bg-theme-surface dark:hover:bg-theme-surface text-xs font-bold rounded-xl cursor-pointer"
+                className="px-4 py-2 border border-theme-border-soft dark:border-theme-border-soft text-theme-primary dark:text-theme-muted hover:bg-theme-surface-elevated dark:bg-theme-surface dark:hover:bg-theme-surface text-xs font-bold rounded-xl cursor-pointer"
               >
                 Cancel
               </button>

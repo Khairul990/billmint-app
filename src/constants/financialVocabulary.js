@@ -8,12 +8,12 @@
 
 export const FINANCIAL_VOCABULARY = {
   // Opening debt & Current bill terms
-  EARLIER_BALANCE: 'Earlier Balance',
-  THIS_BILL: 'This Bill',
-  THIS_BILL_REMAINING: 'This Bill Remaining',
-  TOTAL_AMOUNT_DUE: 'Total Amount Due',
-  AMOUNT_STILL_DUE: 'Amount Still Due',
-  AMOUNT_PAID: 'Amount Paid',
+  EARLIER_BALANCE: 'Old Due',
+  THIS_BILL: 'Current Bill',
+  THIS_BILL_REMAINING: 'Current Bill Remaining',
+  TOTAL_AMOUNT_DUE: 'Total Payable',
+  AMOUNT_STILL_DUE: 'Balance Due',
+  AMOUNT_PAID: 'Paid',
   
   // Collections & Rates
   PAYMENT_COLLECTION: 'Payment Collection',

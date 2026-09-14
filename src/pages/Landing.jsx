@@ -117,8 +117,8 @@ const Landing = ({ onLoginSuccess }) => {
       a: 'Yes. Each invoice comes with a secure, unique Live Link. Customers can open the link in any mobile or desktop browser to view invoice line items, scan payment QR codes, and upload transaction proof directly.'
     },
     {
-      q: 'How are previous dues and balances calculated?',
-      a: 'BillQyro enforces canonical mathematical invariants across all screens: Balance Due = max(0, Previous Due + Current Invoice - Paid Now). Lifetime customer dues and dashboard totals stay 100% consistent.'
+      q: 'How are old dues and balances calculated?',
+      a: 'BillQyro enforces canonical mathematical invariants across all screens: Balance Due = max(0, Old Due + Current Invoice - Paid Now). Lifetime customer dues and dashboard totals stay 100% consistent.'
     },
     {
       q: 'Can I export reports and financial statements?',
@@ -453,7 +453,7 @@ const Landing = ({ onLoginSuccess }) => {
                   <p className="font-black text-sm text-theme-primary">Financial Computation</p>
                   <div className="flex justify-between text-theme-muted"><span>Subtotal</span><span className="font-numbers font-bold text-theme-primary">₹17,000.00</span></div>
                   <div className="flex justify-between text-theme-muted"><span>GST (18%)</span><span className="font-numbers font-bold text-theme-primary">₹3,060.00</span></div>
-                  <div className="flex justify-between text-theme-muted"><span>Previous Due</span><span className="font-numbers font-bold text-amber-500">₹1,500.00</span></div>
+                  <div className="flex justify-between text-theme-muted"><span>Old Due</span><span className="font-numbers font-bold text-amber-500">₹1,500.00</span></div>
                   <div className="flex justify-between text-theme-muted"><span>Paid Now</span><span className="font-numbers font-bold text-emerald-500">-₹10,000.00</span></div>
                   <div className="flex justify-between pt-2 border-t border-theme-border-soft font-black text-sm text-theme-primary">
                     <span>Balance Due</span>

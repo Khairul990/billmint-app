@@ -15,7 +15,7 @@ const FAQAccordion = ({ language }) => {
         <div key={index} className="bg-theme-card dark:bg-theme-card border border-theme-border-soft rounded-xl overflow-hidden shadow-sm hover:border-theme-border-strong transition-colors">
           <button
             onClick={() => setOpenIndex(openIndex === index ? null : index)}
-            className="w-full px-5 md:px-6 py-4 text-left flex items-center justify-between hover:bg-theme-app dark:hover:bg-theme-surface transition-colors"
+            className="w-full px-5 md:px-6 py-4 text-left flex items-center justify-between hover:bg-theme-surface-elevated dark:hover:bg-theme-surface transition-colors"
           >
             <span className="font-semibold text-theme-primary dark:text-theme-primary text-sm md:text-base">
               {language === 'bn' ? faq.question : faq.questionEn}

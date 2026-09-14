@@ -50,7 +50,7 @@ it('1.1: Admin navigation groups contain all 6 specified categories', () => {
 it('2.1: KPI metrics present "Data unavailable" on offline / unqueryable state rather than fake numbers', () => {
   const formatValue = (val, prefix = '') => {
     if (val === null || val === undefined) return 'Data unavailable';
-    if (typeof val === 'number') return `${prefix}${val.toLocaleString()}`;
+    if (typeof val === 'number') return `${prefix}${val.toLocaleString('en-US')}`;
     return `${prefix}${val}`;
   };
 

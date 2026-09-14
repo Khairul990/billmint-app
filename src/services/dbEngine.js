@@ -23,6 +23,7 @@ export const getStaffs = async (includeDeleted = false) => {
   } catch (e) { console.warn('Ignored error in dbEngine.js:', e); }
   return [];
 };
+export const getStaff = (...args) => getStaffs(...args);
 
 export const saveStaff = async (staff) => {
   if (localStorage.getItem('billqyro_demo_session_active') === 'true') {
@@ -1195,7 +1196,7 @@ const SEED_INVOICES = [
       { sn: 1, designNo: 'SO-5', workType: 'Embroidery', description: 'Logo Embroidery Work', size: '3x3"', qty: 10, rate: 120, amount: 1200 },
       { sn: 2, designNo: 'SO-6', workType: 'Punching', description: 'Jacket Punching Service', size: 'N/A', qty: 1, rate: 500, amount: 500 },
     ],
-    taxPercentage: 18,
+    taxPercentage: 0,
     discountAmount: 200,
     notes: 'Thank you for your business. Payment received via bank transfer.',
     paymentStatus: 'Paid',
@@ -1222,7 +1223,7 @@ const SEED_INVOICES = [
     items: [
       { sn: 1, designNo: 'SO-7', workType: 'Embroidery', description: 'Jacket Digitized Embroidery', size: '10x12"', qty: 50, rate: 300, amount: 15000 },
     ],
-    taxPercentage: 18,
+    taxPercentage: 0,
     discountAmount: 1000,
     notes: 'Please complete payment on or before the due date.',
     paymentStatus: 'Pending',
@@ -1249,7 +1250,7 @@ const SEED_INVOICES = [
     items: [
       { sn: 1, designNo: 'SO-8', workType: 'Repair', description: 'Garment Repair & Hemming', size: 'Standard', qty: 100, rate: 80, amount: 8000 },
     ],
-    taxPercentage: 12,
+    taxPercentage: 0,
     discountAmount: 0,
     notes: 'Payment net 14 days.',
     paymentStatus: 'Unpaid',
@@ -3826,7 +3827,7 @@ export const syncFromFirestore = async (force = false) => {
     const activeCustomers = await getCustomers();
     const activeProducts = await getProducts();
     const activeExpenses = await getExpenses();
-    const activeStaff = await getStaff();
+    const activeStaff = await getStaffs();
     const activeStudents = await getStudents();
 
     return {

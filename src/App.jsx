@@ -506,7 +506,25 @@ function App() {
   const updateWorkspaceState = (newWorkspaces, newActiveId) => {
     setBusinessWorkspaces(newWorkspaces);
     setActiveWorkspaceId(newActiveId);
-    const updated = { ...(settings || {}), businessWorkspaces: newWorkspaces, activeWorkspaceId: newActiveId };
+    
+    // Phase 3: Swap root profile based on active workspace
+    const currentSettings = settings || {};
+    const targetWs = newWorkspaces.find(w => w.id === newActiveId);
+    
+    let updated = { ...currentSettings, businessWorkspaces: newWorkspaces, activeWorkspaceId: newActiveId };
+    if (targetWs) {
+      updated = {
+        ...updated,
+        businessName: targetWs.name || updated.businessName,
+        businessType: targetWs.type || updated.businessType,
+        phone: targetWs.phone || updated.phone,
+        address: targetWs.address || updated.address,
+        email: targetWs.email || updated.email,
+        currency: targetWs.currency || updated.currency,
+        logoUrl: targetWs.logoUrl !== undefined ? targetWs.logoUrl : updated.logoUrl,
+      };
+    }
+    
     setSettings(updated);
     settingsEngine.saveSettings(updated);
     window.dispatchEvent(new CustomEvent('billqyro_sync'));
@@ -898,7 +916,7 @@ function App() {
     }
     if (payload.totals && typeof payload.totals === 'object') {
       payload.subtotal = payload.totals.subtotal || payload.subtotal || 0;
-      payload.taxPercentage = payload.totals.taxPercentage ?? payload.taxPercentage ?? 18;
+      payload.taxPercentage = payload.totals.taxPercentage ?? payload.taxPercentage ?? 0;
       payload.taxAmount = payload.totals.taxAmount || payload.taxAmount || 0;
       payload.discountAmount = payload.totals.discountAmount || payload.discountAmount || 0;
       payload.grandTotal = payload.totals.grandTotal || payload.grandTotal || 0;
@@ -1668,6 +1686,7 @@ function App() {
             onSaveCustomer={handleSaveCustomer}
             onPaymentRecorded={handlePaymentRecorded}
             onRecordPayment={handleOpenCollectionCenter}
+            onOpenCollection={handleOpenCollectionCenter}
             permissions={userPermissions}
             workspaceVerified={workspaceVerified}
           />
@@ -1756,6 +1775,7 @@ function App() {
             expenses={activeExpenses}
             staffs={activeStaffs} 
             businessSettings={activeSettings}
+            setCurrentTab={setCurrentTab}
           />
         );
       case 'invoices':
@@ -1857,9 +1877,14 @@ function App() {
             setCurrentTab={setCurrentTab}
             onPaymentRecorded={handlePaymentRecorded}
             onOpenCollection={handleOpenCollectionCenter}
-            onRecordPayment={handleOpenCollectionCenter}
             onCreateBill={(cust) => {
-              setEditingInvoice({ customerName: cust.name });
+              setEditingInvoice({ 
+                customerName: cust?.name || '',
+                customerId: cust?.id || null,
+                customer: cust || null,
+                customerPhone: cust?.phone || '',
+                oldDue: parseFloat(cust?.previousDue ?? cust?.openingDue ?? cust?.openingBalance) || 0
+              });
               setCurrentTab('create-invoice');
             }}
           />

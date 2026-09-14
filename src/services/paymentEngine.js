@@ -78,98 +78,145 @@ class PaymentEngine {
     const paymentAmount = roundTo2(rawAmt);
 
     const invoices = await invoiceEngine.getInvoices(true);
-    const invoice = invoices.find(inv => inv.id === invoiceId);
-    if (!invoice) {
+    const targetInvoice = invoices.find(inv => inv.id === invoiceId);
+    if (!targetInvoice) {
       throw new Error('Invoice not found for payment collection.');
     }
 
     // Workspace Isolation Check
-    if (workspaceId && invoice.workspaceId && invoice.workspaceId !== workspaceId) {
+    if (workspaceId && targetInvoice.workspaceId && targetInvoice.workspaceId !== workspaceId) {
       throw new Error('Access denied: Invoice does not belong to the active workspace.');
     }
 
-    if (!Array.isArray(invoice.paymentHistory)) invoice.paymentHistory = [];
-    if (!Array.isArray(invoice.paymentProofs)) invoice.paymentProofs = [];
+    const custId = customerId || targetInvoice.customer?.id || targetInvoice.customerId;
+    const custName = targetInvoice.customer?.name || targetInvoice.customerName || '';
 
-    // Canonical Financial Calculations
-    const fin = calculateCanonicalInvoiceFinancials(invoice);
-    const maxPayable = fin.previousDue > 0 ? fin.customerTotalDue : fin.balanceDue;
+    // Find all active invoices for this customer
+    const customerInvoices = invoices.filter(inv => {
+      if (inv.isDeleted || inv.status === 'Cancelled' || inv.status === 'Void') return false;
+      if (workspaceId && inv.workspaceId && inv.workspaceId !== workspaceId) return false;
+      const invCustId = inv.customerId || inv.customer?.id;
+      const invCustName = inv.customerName || inv.customer?.name;
+      if (custId && invCustId) return custId === invCustId;
+      if (custName && invCustName) return custName === invCustName;
+      if (inv.id === invoiceId) return true;
+      return false;
+    }).sort((a, b) => new Date(a.date || a.createdAt).getTime() - new Date(b.date || b.createdAt).getTime());
 
-    // Overpayment Protection
-    if (paymentAmount > maxPayable && maxPayable > 0) {
-      throw new Error(`Payment amount (${paymentAmount}) cannot exceed outstanding liability (${maxPayable}).`);
-    }
-
-    // Previous Due Priority Allocation
-    const allocation = allocatePayment(paymentAmount, fin.previousDue, fin.currentInvoiceTotal);
-
-    const paymentId = proofId ? `pmt_${proofId}` : `pmt_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-
-    // Idempotent duplicate check
-    const existingIndex = invoice.paymentHistory.findIndex(p => 
-      p.id === paymentId || (proofId && p.proofId === proofId) || (p.transactionId && reference && p.transactionId === reference && p.amount === paymentAmount)
-    );
-
-    if (existingIndex >= 0) {
-      return {
-        success: true,
-        alreadyProcessed: true,
-        invoice,
-        payment: invoice.paymentHistory[existingIndex],
-        allocation
-      };
-    }
+    let remainingPayment = paymentAmount;
+    const modifiedInvoices = [];
+    let primaryPaymentEntry = null;
+    let primaryAllocation = null;
 
     const effectiveDate = paymentDate 
       ? (paymentDate.includes('T') ? paymentDate : `${paymentDate}T12:00:00.000Z`)
       : new Date().toISOString();
 
-    const paymentEntry = {
-      id: paymentId,
-      proofId: proofId || null,
-      amount: paymentAmount,
-      method: paymentMethod,
-      transactionId: reference || '',
-      reference: reference || '',
-      date: effectiveDate,
-      note: note || (source === 'live_link_approved' ? 'Payment proof approved' : 'Recorded in Money & Payment Center'),
-      source,
-      allocatedToOldDue: allocation.allocatedToOldDue,
-      allocatedToCurrentInvoice: allocation.allocatedToCurrentInvoice,
-      earlierBalancePaid: allocation.allocatedToOldDue,
-      thisBillPaid: allocation.allocatedToCurrentInvoice,
-      customerId: customerId || invoice.customer?.id || invoice.customerId || null,
-      customerName: invoice.customer?.name || invoice.customerName || 'Walk-in Customer',
-      invoiceId: invoice.id,
-      invoiceNumber: invoice.invoiceNumber || `INV-${invoice.id.slice(0, 4)}`,
-      createdBy,
-      workspaceId: workspaceId || invoice.workspaceId || null,
-      verified: true,
-      createdAt: new Date().toISOString()
-    };
+    let cumulativeOldDueSettled = 0;
 
-    invoice.paymentHistory.push(paymentEntry);
+    // Waterfall Cascade
+    for (const inv of customerInvoices) {
+      // If previous invoices were settled in this cascade, reduce this invoice's previousDue accordingly
+      if (cumulativeOldDueSettled > 0 && inv.previousDue > 0) {
+        const reduction = Math.min(inv.previousDue, cumulativeOldDueSettled);
+        inv.previousDue = roundTo2(inv.previousDue - reduction);
+        if (inv.totals) inv.totals.oldDue = inv.previousDue;
+        inv.oldDue = inv.previousDue;
+        cumulativeOldDueSettled = roundTo2(cumulativeOldDueSettled - reduction);
+      }
 
-    // Save normalized invoice
-    const saved = await invoiceEngine.saveInvoice({
-      ...invoice,
-      paymentMethod: paymentMethod || invoice.paymentMethod || 'Cash'
-    });
+      if (remainingPayment <= 0 && inv.id !== invoiceId) {
+        if (inv.previousDue !== undefined) {
+          modifiedInvoices.push(inv); // Save the reduced previousDue even if no payment
+        }
+        continue;
+      }
+      
+      const fin = calculateCanonicalInvoiceFinancials(inv);
+      // Because we reduced previousDue, fin.balanceDue now correctly reflects what THIS invoice needs (including any remaining oldDue it has)
+      const invoiceNeeds = fin.balanceDue;
+      
+      let amountToApply = 0;
+      if (inv.id === invoiceId) {
+        // Target invoice absorbs remaining
+        amountToApply = remainingPayment;
+        remainingPayment = 0;
+      } else if (invoiceNeeds > 0) {
+        amountToApply = Math.min(remainingPayment, invoiceNeeds);
+        remainingPayment = roundTo2(remainingPayment - amountToApply);
+      }
+
+      if (amountToApply > 0 || inv.id === invoiceId) {
+        if (!Array.isArray(inv.paymentHistory)) inv.paymentHistory = [];
+        if (!Array.isArray(inv.paymentProofs)) inv.paymentProofs = [];
+
+        const allocation = allocatePayment(amountToApply, fin.previousDue, fin.currentInvoiceTotal);
+        
+        // Accumulate settled old due for subsequent invoices
+        // If we pay the current invoice bill of an OLDER invoice, that counts as settling the "oldDue" of NEWER invoices!
+        // Actually, ANY payment applied to an older invoice reduces the oldDue of newer invoices!
+        if (inv.id !== invoiceId) {
+           cumulativeOldDueSettled = roundTo2(cumulativeOldDueSettled + amountToApply);
+        }
+
+        const paymentId = (inv.id === invoiceId && proofId) ? `pmt_${proofId}` : `pmt_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
+        const paymentEntry = {
+          id: paymentId,
+          proofId: (inv.id === invoiceId) ? (proofId || null) : null,
+          amount: amountToApply,
+          method: paymentMethod,
+          transactionId: reference || '',
+          reference: reference || '',
+          date: effectiveDate,
+          note: note || (source === 'live_link_approved' ? 'Payment proof approved' : (inv.id === invoiceId ? 'Recorded in Money & Payment Center' : 'Auto-settled via Payment Waterfall')),
+          source: inv.id === invoiceId ? source : 'waterfall_cascade',
+          allocatedToOldDue: allocation.allocatedToOldDue,
+          allocatedToCurrentInvoice: allocation.allocatedToCurrentInvoice,
+          earlierBalancePaid: allocation.allocatedToOldDue,
+          thisBillPaid: allocation.allocatedToCurrentInvoice,
+          customerId: custId,
+          customerName: custName,
+          invoiceId: inv.id,
+          invoiceNumber: inv.invoiceNumber || `INV-${inv.id.slice(0, 4)}`,
+          createdBy,
+          workspaceId: workspaceId || inv.workspaceId || null,
+          verified: true,
+          createdAt: new Date().toISOString()
+        };
+
+        inv.paymentHistory.push(paymentEntry);
+        
+        if (inv.id === invoiceId) {
+          primaryPaymentEntry = paymentEntry;
+          primaryAllocation = allocation;
+        }
+      }
+
+      modifiedInvoices.push({
+        ...inv,
+        paymentMethod: paymentMethod || inv.paymentMethod || 'Cash'
+      });
+    }
+
+    // Save all modified invoices
+    const uniqueInvoices = Array.from(new Map(modifiedInvoices.map(i => [i.id, i])).values());
+    const savedInvoices = await Promise.all(uniqueInvoices.map(inv => invoiceEngine.saveInvoice(inv)));
+    const savedTargetInvoice = savedInvoices.find(inv => inv.id === invoiceId) || savedInvoices[0];
 
     // Structured Audit Log
     try {
       logAudit(
         'payment_recorded', 
         'invoice', 
-        invoice.id, 
-        { oldAmountPaid: fin.amountPaid }, 
+        targetInvoice.id, 
+        null, 
         { 
-          paymentId: paymentEntry.id,
+          paymentId: primaryPaymentEntry?.id,
           amount: paymentAmount, 
-          source, 
-          allocatedToOldDue: allocation.allocatedToOldDue,
-          allocatedToCurrentInvoice: allocation.allocatedToCurrentInvoice,
-          workspaceId: invoice.workspaceId 
+          source,
+          waterfallInvoices: savedInvoices.map(i => i.id),
+          workspaceId: targetInvoice.workspaceId 
         }
       );
     } catch (e) {
@@ -178,35 +225,39 @@ class PaymentEngine {
 
     // Mirror payment into Internal Bank ledger (idempotent, failure-isolated)
     try {
-      const { bankEngine } = await import('./bankEngine.js');
-      await bankEngine.autoPostPayment({
-        id: paymentEntry.id,
-        amount: paymentEntry.amount,
-        method: paymentEntry.method,
-        date: paymentEntry.date,
-        invoiceId: saved.id,
-        invoiceNumber: saved.invoiceNumber,
-        customerId: paymentEntry.customerId,
-        customerName: paymentEntry.customerName,
-        note: paymentEntry.note
-      });
+      if (primaryPaymentEntry) {
+        const { bankEngine } = await import('./bankEngine.js');
+        await bankEngine.autoPostPayment({
+          id: primaryPaymentEntry.id,
+          amount: paymentAmount, // Post the total payment amount once to the bank
+          method: primaryPaymentEntry.method,
+          date: primaryPaymentEntry.date,
+          invoiceId: savedTargetInvoice.id,
+          invoiceNumber: savedTargetInvoice.invoiceNumber,
+          customerId: primaryPaymentEntry.customerId,
+          customerName: primaryPaymentEntry.customerName,
+          note: `Payment for ${savedTargetInvoice.invoiceNumber} (Waterfall Auto-settled)`
+        });
+      }
     } catch (e) {
       console.warn('[BANK] auto-post payment skipped (non-blocking):', e);
     }
 
     // Dispatch Reactive App-Wide Events
     if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('billqyro_invoice_updated', { detail: saved }));
+      savedInvoices.forEach(inv => {
+        window.dispatchEvent(new CustomEvent('billqyro_invoice_updated', { detail: inv }));
+        window.dispatchEvent(new CustomEvent('billqyro:data-updated', { detail: { collectionName: 'invoices', doc: inv } }));
+      });
       window.dispatchEvent(new Event('billqyro_bank_updated'));
       window.dispatchEvent(new Event('billqyro_sync'));
-      window.dispatchEvent(new CustomEvent('billqyro:data-updated', { detail: { collectionName: 'invoices', doc: saved } }));
     }
 
     return {
       success: true,
-      invoice: saved,
-      payment: paymentEntry,
-      allocation
+      invoice: savedTargetInvoice,
+      payment: primaryPaymentEntry,
+      allocation: primaryAllocation
     };
   }
 

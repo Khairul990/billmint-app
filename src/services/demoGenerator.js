@@ -61,7 +61,7 @@ export const generateDemoWorkspace = () => {
         { sn: 1, description: prod1.name, qty: qty1, rate: prod1.price, amount: prod1.price * qty1 },
         { sn: 2, description: prod2.name, qty: qty2, rate: prod2.price, amount: prod2.price * qty2 },
       ],
-      taxPercentage: 18,
+      taxPercentage: 0,
       subtotal,
       taxAmount,
       grandTotal,

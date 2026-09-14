@@ -140,7 +140,7 @@ export default function Support({ onBack }) {
       <div className="bg-theme-card border-b border-theme-border-soft sticky top-0 z-20 shadow-sm">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button onClick={onBack} className="p-2 -ml-2 rounded-xl hover:bg-theme-app transition-colors text-theme-muted">
+            <button onClick={onBack} className="p-2 -ml-2 rounded-xl hover:bg-theme-surface-elevated transition-colors text-theme-muted hover:text-theme-primary">
               <ArrowLeft className="w-5 h-5" />
             </button>
             <h1 className="text-lg font-black tracking-tight flex items-center gap-2">

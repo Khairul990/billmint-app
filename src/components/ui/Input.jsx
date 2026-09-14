@@ -10,23 +10,34 @@ export const Input = React.forwardRef(({
   isSearch = false,
   error = false,
   size = 'md',
+  variant = 'default', // 'default' | 'financial'
+  currencyPrefix = null,
   ...props 
 }, ref) => {
   if (isSearch) {
     LeftIcon = Search;
   }
 
-  const sizeStyles = size === 'sm' ? 'h-8 text-xs py-1.5' : size === 'lg' ? 'h-12 text-base py-3' : 'h-10 py-2.5';
+  const isFinancial = variant === 'financial';
+  const sizeStyles = size === 'sm' ? 'h-8 text-xs py-1.5' : size === 'lg' ? 'h-12 text-base py-3' : isFinancial ? 'h-11 text-base md:text-lg py-2' : 'h-10 py-2.5';
   const errorStyles = error ? 'border-theme-danger/60 focus:border-theme-danger focus:ring-theme-danger/25' : '';
+  const financialStyles = isFinancial ? 'font-numbers font-bold tracking-tight text-theme-primary bg-[var(--bq-surface-primary)] focus:border-emerald-500 focus:ring-emerald-500/25' : '';
+
+  const prefix = currencyPrefix ?? (isFinancial ? '₹' : null);
 
   return (
     <div className="relative group w-full">
-      {LeftIcon && (
+      {prefix && (
+        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-theme-muted font-bold font-numbers text-sm pointer-events-none select-none">
+          {prefix}
+        </span>
+      )}
+      {!prefix && LeftIcon && (
         <LeftIcon className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-theme-muted group-focus-within:text-theme-accent transition-colors pointer-events-none" />
       )}
       <input
         ref={ref}
-        className={`${baseStyles} ${sizeStyles} ${errorStyles} ${LeftIcon ? 'pl-9' : 'pl-3.5'} ${RightIcon ? 'pr-9' : 'pr-3.5'} ${className}`}
+        className={`${baseStyles} ${sizeStyles} ${errorStyles} ${financialStyles} ${prefix ? 'pl-8' : LeftIcon ? 'pl-9' : 'pl-3.5'} ${RightIcon ? 'pr-9' : 'pr-3.5'} ${className}`}
         {...props}
       />
       {RightIcon && (

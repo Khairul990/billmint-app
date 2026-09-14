@@ -37,6 +37,7 @@ const buildQrBase64 = async (invoice, businessSettings) => {
     ? roundTo2(canonical.remainingOldDue + canonical.currentBillDue)
     : (canonical.totalReceivable || canonical.balanceDue || 0));
 
+  const currencyCode = businessSettings?.currencyCode || 'INR';
   let qrText = '';
   if (paymentMethod === 'UPI') {
     qrText = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&am=${dueAmount}&cu=${currencyCode}&tn=${invoice.invoiceNumber || ''}`;

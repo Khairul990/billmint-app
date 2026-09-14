@@ -195,7 +195,7 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
       {setCurrentTab && (
         <button
           onClick={() => setCurrentTab('settings')}
-          className="btn-premium flex items-center gap-2 px-4 py-2 bg-theme-surface border border-theme-border-soft hover:bg-theme-app text-theme-primary rounded-xl font-bold text-xs mb-2 shadow-xs w-fit transition-all active:scale-95"
+          className="btn-premium flex items-center gap-2 px-4 py-2 bg-theme-surface border border-theme-border-soft hover:bg-theme-surface-elevated text-theme-primary rounded-xl font-bold text-xs mb-2 shadow-xs w-fit transition-all active:scale-95"
         >
           <ArrowLeft className="w-4 h-4 text-theme-muted" /> Back to Settings Studio
         </button>
@@ -568,7 +568,7 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
                       <button
                         onClick={() => setPreviewTemplate(tpl.id)}
                         title="Full Screen Preview"
-                        className="py-2 px-2.5 rounded-xl text-xs font-bold transition-all bg-theme-surface border border-theme-border-soft text-theme-muted hover:text-theme-primary hover:bg-theme-app flex items-center justify-center"
+                        className="py-2 px-2.5 rounded-xl text-xs font-bold transition-all bg-theme-surface border border-theme-border-soft text-theme-muted hover:text-theme-primary hover:bg-theme-surface-elevated flex items-center justify-center"
                       >
                         <Eye className="w-4 h-4" />
                       </button>
@@ -615,7 +615,7 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
                   <button
                     disabled={downloadingSample}
                     onClick={() => handleDownloadSamplePDF(tpl.id)}
-                    className="px-4 py-2 rounded-xl text-xs font-bold bg-theme-surface hover:bg-theme-app text-theme-primary border border-theme-border-soft flex items-center gap-1.5 transition-all shadow-xs disabled:opacity-50"
+                    className="px-4 py-2 rounded-xl text-xs font-bold bg-theme-surface hover:bg-theme-surface-elevated text-theme-primary border border-theme-border-soft flex items-center gap-1.5 transition-all shadow-xs disabled:opacity-50"
                   >
                     <Download className="w-3.5 h-3.5 text-theme-accent" />
                     <span>{downloadingSample ? 'Generating PDF...' : 'Download Sample PDF'}</span>
@@ -634,7 +634,7 @@ const PdfTemplateStudio = ({ businessSettings, setSettings, setCurrentTab, subsc
 
                   <button
                     onClick={() => setPreviewTemplate(null)}
-                    className="p-2 rounded-xl bg-theme-surface hover:bg-theme-app text-theme-muted hover:text-theme-primary transition-all border border-theme-border-soft ml-1"
+                    className="p-2 rounded-xl bg-theme-surface hover:bg-theme-surface-elevated text-theme-muted hover:text-theme-primary transition-all border border-theme-border-soft ml-1"
                   >
                     <X className="w-4 h-4" />
                   </button>

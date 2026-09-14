@@ -1,5 +1,5 @@
 import React from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Check } from 'lucide-react';
 
 export const Button = React.forwardRef(({
   children,
@@ -7,13 +7,14 @@ export const Button = React.forwardRef(({
   size = 'md',
   className = '',
   isLoading = false,
+  isSuccess = false,
   disabled = false,
   leftIcon: LeftIcon,
   rightIcon: RightIcon,
   type = 'button',
   ...props
 }, ref) => {
-  const baseStyles = 'inline-flex items-center justify-center font-bold tracking-wide transition-all duration-200 select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-theme-accent/40 focus-visible:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none active:scale-[0.98]';
+  const baseStyles = 'inline-flex items-center justify-center font-bold tracking-wide transition-all duration-200 select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-theme-accent/40 focus-visible:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none active:scale-[0.98] font-sans';
   
   const variants = {
     primary: 'bg-gradient-to-r from-theme-accent to-theme-accent-dark text-white shadow-premium hover:shadow-theme-glow hover:-translate-y-0.5 active:translate-y-0 border border-white/10',
@@ -21,13 +22,16 @@ export const Button = React.forwardRef(({
     outline: 'bg-transparent text-theme-primary border border-theme-border-strong hover:border-theme-accent hover:text-theme-accent hover:bg-theme-accent/5',
     ghost: 'bg-transparent text-theme-secondary hover:text-theme-primary hover:bg-theme-surface-elevated',
     danger: 'bg-theme-danger/10 text-theme-danger border border-theme-danger/25 hover:bg-theme-danger hover:text-white shadow-sm',
+    destructive: 'bg-theme-danger/10 text-theme-danger border border-theme-danger/25 hover:bg-theme-danger hover:text-white shadow-sm',
     success: 'bg-theme-success/10 text-theme-success border border-theme-success/25 hover:bg-theme-success hover:text-white shadow-sm',
+    // Financial Action: High-confidence money / collection action
+    financial: 'bg-gradient-to-r from-[#0B8F78] to-[#075E50] text-white shadow-premium hover:shadow-[0_8px_25px_rgba(11,143,120,0.3)] hover:-translate-y-0.5 active:translate-y-0 border border-emerald-300/30 font-display font-bold',
   };
 
   const sizes = {
     sm: 'text-xs h-8 px-3 rounded-lg gap-1.5',
     md: 'text-sm h-10 px-4 rounded-xl gap-2',
-    lg: 'text-sm h-12 px-6 rounded-xl gap-2.5 font-black',
+    lg: 'text-sm h-12 px-6 rounded-xl gap-2.5 font-bold',
     icon: 'h-9 w-9 p-0 rounded-xl',
     'icon-sm': 'h-7 w-7 p-0 rounded-lg',
   };
@@ -42,13 +46,15 @@ export const Button = React.forwardRef(({
     >
       {isLoading ? (
         <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+      ) : isSuccess ? (
+        <Check className="w-4 h-4 text-emerald-300 shrink-0" />
       ) : (
         LeftIcon && <LeftIcon className={`${size === 'sm' || size === 'icon-sm' ? 'w-3.5 h-3.5' : 'w-4 h-4'} shrink-0`} />
       )}
       
       {children}
       
-      {!isLoading && RightIcon && (
+      {!isLoading && !isSuccess && RightIcon && (
         <RightIcon className={`${size === 'sm' || size === 'icon-sm' ? 'w-3.5 h-3.5' : 'w-4 h-4'} shrink-0`} />
       )}
     </button>
@@ -56,3 +62,6 @@ export const Button = React.forwardRef(({
 });
 
 Button.displayName = 'Button';
+
+export const ActionButton = Button;
+

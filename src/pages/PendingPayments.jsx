@@ -176,7 +176,7 @@ const PendingPayments = ({ setCurrentTab, pendingPayments = [], businessSettings
                   {payment.screenshotUrl && (
                     <button
                       onClick={() => setSelectedProof(payment)}
-                      className="w-full flex items-center justify-center gap-2 py-2.5 mb-4 bg-theme-surface hover:bg-theme-app dark:hover:bg-theme-surface/80 rounded-xl text-theme-accent font-bold text-xs transition-colors border border-theme-border-soft"
+                      className="w-full flex items-center justify-center gap-2 py-2.5 mb-4 bg-theme-surface hover:bg-theme-surface-elevated dark:hover:bg-theme-surface/80 rounded-xl text-theme-accent font-bold text-xs transition-colors border border-theme-border-soft"
                     >
                       <ImageIcon className="w-4 h-4" />
                       View Proof Screenshot

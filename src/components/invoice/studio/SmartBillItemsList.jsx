@@ -194,7 +194,7 @@ const SmartBillItemsList = ({ products = [], invoices = [], wsType }) => {
             </thead>
             <tbody>
               {state.items.map((item, index) => (
-                <tr key={item.id || index} className="border-b border-theme-border-soft hover:bg-theme-app/30 transition-colors">
+                <tr key={item.id || index} className="border-b border-theme-border-soft hover:bg-theme-surface-elevated/30 transition-colors">
                   <td className="py-3 px-4 text-sm font-bold text-theme-muted text-center">
                     {index + 1}
                   </td>

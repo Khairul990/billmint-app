@@ -721,7 +721,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
               className={`flex items-center gap-1.5 px-4.5 py-2.5 rounded-xl text-xs font-extrabold border transition-all cursor-pointer ${
                 step === 1 
                   ? 'border-transparent text-theme-muted dark:text-theme-primary dark:text-theme-muted cursor-default' 
-                  : 'bg-theme-card dark:bg-theme-card hover:bg-theme-app dark:bg-theme-surface border-theme-border-soft dark:border-theme-border-soft dark:bg-theme-card text-theme-muted dark:text-theme-muted active:scale-95'
+                  : 'bg-theme-card dark:bg-theme-card hover:bg-theme-surface-elevated dark:bg-theme-surface border-theme-border-soft dark:border-theme-border-soft dark:bg-theme-card text-theme-muted dark:text-theme-muted active:scale-95'
               }`}
             >
               <ChevronLeft className="w-4 h-4" />

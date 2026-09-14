@@ -9,6 +9,7 @@ import { Button } from '../components/ui/Button';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { motion, AnimatePresence } from 'framer-motion';
 import QRCode from 'qrcode';
+import { FinancialEquation } from '../components/ui/FinancialEquation';
 import InvoiceCustomizationPanel from '../components/invoice-templates/InvoiceCustomizationPanel';
 import InvoicePreview from '../components/InvoicePreview';
 import { LivePreviewLayouts } from '../components/invoice-templates/layouts/LivePreviewLayouts';
@@ -147,7 +148,7 @@ const CreateInvoice = ({
     };
   }, [items, discountType, discountAmount, taxPercent, shipping, oldDue, amountPaid]);
 
-  // Auto-calculate canonical Previous Due when selectedCustomerId changes
+  // Auto-calculate canonical Old Due when selectedCustomerId changes
   useEffect(() => {
     if (selectedCustomerId) {
       const cust = customers.find(c => c.id === selectedCustomerId);
@@ -1045,7 +1046,7 @@ const CreateInvoice = ({
                       type="number" 
                       min="0" 
                       step="0.01"
-                      className="input-premium w-full text-base font-black tabular-nums bg-theme-surface text-theme-primary"
+                      className="input-premium w-full text-base font-black tabular-nums bg-theme-surface text-theme-primary bq-financial-number"
                       placeholder="0.00"
                       value={amountPaid}
                       onChange={(e) => setAmountPaid(e.target.value)}
@@ -1139,13 +1140,13 @@ const CreateInvoice = ({
                 <div className="pt-3 border-t border-theme-border-soft/60 space-y-2.5">
                   <div className="flex justify-between items-center text-sm font-semibold text-theme-muted">
                     <span className="text-amber-600 dark:text-amber-400 font-bold flex items-center gap-1">
-                      <span>Earlier Balance</span>
+                      <span>Old Due</span>
                     </span>
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-theme-muted font-mono font-bold">+</span>
                       <input 
                         type="number" min="0" 
-                        className="w-24 px-2.5 py-1 bg-theme-surface border border-amber-500/30 rounded-lg text-sm text-right font-black text-amber-600 dark:text-amber-400 focus:outline-none focus:border-theme-accent transition-colors tabular-nums"
+                        className="w-24 px-2.5 py-1 bg-theme-surface border border-amber-500/30 rounded-lg text-sm text-right font-black text-amber-600 dark:text-amber-400 focus:outline-none focus:border-theme-accent transition-colors tabular-nums bq-financial-number"
                         value={oldDue} 
                         onChange={(e) => setOldDue(e.target.value)} 
                         title="Customer prior unpaid balance"
@@ -1153,68 +1154,28 @@ const CreateInvoice = ({
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-center text-sm font-bold text-theme-primary">
-                    <span>This Bill</span>
-                    <span className="tabular-nums font-black text-theme-primary">
-                      <span className="text-xs text-theme-muted font-mono font-bold mr-1">+</span>
-                      {formatCurrency(totals.grandTotal)}
-                    </span>
+                  <div className="mt-4">
+                    <FinancialEquation 
+                      oldDue={totals.oldDue}
+                      currentBill={totals.grandTotal}
+                      paid={totals.paidVal}
+                      balanceDue={totals.balanceDue}
+                      currency={draftBusinessSettings?.currency || '₹'}
+                    />
                   </div>
-
-                  {totals.oldDue > 0 && (
-                    <div className="flex justify-between items-center text-xs font-bold text-theme-primary border-t border-dashed border-theme-border-soft pt-1.5">
-                      <span>Total Amount Due</span>
-                      <span className="tabular-nums font-black text-theme-primary">
-                        {formatCurrency(totals.totalDue)}
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="flex justify-between items-center text-sm font-bold text-emerald-600 dark:text-emerald-400">
-                    <span>Amount Paid</span>
-                    <span className="font-black tabular-nums">
-                      <span className="text-xs text-emerald-500 font-mono font-bold mr-1">-</span>
-                      {formatCurrency(totals.paidVal)}
-                    </span>
-                  </div>
-
+                  
                   {totals.oldDue > 0 && totals.paidVal > 0 && (
-                    <div className="p-2.5 rounded-xl bg-theme-surface/70 border border-theme-border-soft space-y-1 text-2xs font-semibold">
+                    <div className="mt-4 p-2.5 rounded-xl bg-theme-surface/70 border border-theme-border-soft space-y-1 text-2xs font-semibold">
                       <div className="flex justify-between text-amber-700 dark:text-amber-300">
-                        <span>Earlier Balance Paid:</span>
+                        <span>Old Due Paid:</span>
                         <span className="font-bold">{formatCurrency(totals.allocatedToOldDue)} {totals.remainingOldDue > 0 ? `(${formatCurrency(totals.remainingOldDue)} left)` : '(Cleared)'}</span>
                       </div>
                       <div className="flex justify-between text-theme-primary">
-                        <span>This Bill Paid:</span>
+                        <span>Current Bill Paid:</span>
                         <span className="font-bold">{formatCurrency(totals.allocatedToCurrentInvoice)} {totals.currentBillDue > 0 ? `(${formatCurrency(totals.currentBillDue)} left)` : '(Cleared)'}</span>
                       </div>
                     </div>
                   )}
-
-                  <div className="pt-3 mt-1 border-t-2 border-dashed border-theme-border-soft flex flex-col gap-2">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <span className="text-sm font-black text-theme-primary block tracking-tight">Amount Still Due</span>
-                        <span className="text-[10px] text-theme-muted font-bold font-mono">
-                          {formatCurrency(totals.oldDue)} + {formatCurrency(totals.grandTotal)} - {formatCurrency(totals.paidVal)} = {formatCurrency(totals.balanceDue)}
-                        </span>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-xl font-black text-theme-accent tabular-nums block">
-                          {formatCurrency(totals.balanceDue)}
-                        </span>
-                        <span className={`inline-block text-[9px] font-black uppercase px-2 py-0.5 rounded-md mt-0.5 ${
-                          totals.paymentStatus === 'Paid'
-                            ? 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-300/40'
-                            : totals.paymentStatus === 'Partial'
-                            ? 'bg-amber-100 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-300/40'
-                            : 'bg-rose-100 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border border-rose-300/40'
-                        }`}>
-                          {totals.paymentStatus}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
             </section>
