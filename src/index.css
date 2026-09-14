@@ -168,36 +168,79 @@ body {
     --theme-tint-surface: rgba(255, 255, 255, 0.05);
     --theme-tint-border: var(--border-soft);
     --theme-tint-hover: var(--sidebar-active);
-  }
-
-  /* 1. Brand Guidelines (formerly Obsidian Gold) */
+  }  /* 1. Brand Guidelines - Hyper Premium (Midnight Emerald & Champagne Gold) */
   :root, [data-theme="obsidian-gold"] {
-    --app-bg: #FAF7F2;
-    --app-bg-soft: #FDFBF7;
-    --surface: #FFFFFF;
-    --surface-elevated: #F8FAFC;
-    --card-bg: #FFFFFF;
-    --text-primary: #1F1B1D;
-    --text-secondary: #1F1B1D;
-    --text-muted: #5C4B51;
-    --button-text: #FFFFFF;
-    --border-soft: rgba(212,175,122,0.25);
-    --border-strong: rgba(212,175,122,0.5);
-    --accent: #D4AF7A;
-    --accent-light: rgba(212,175,122,0.12);
-    --accent-dark: #C81E5C;
-    --accent-gradient: linear-gradient(135deg, #D4AF7A, #C81E5C);
-    --accent-glow: rgba(212,175,122,0.25);
-    --luxury-accent: #D4AF7A;
-    --luxury-companion: #FAF7F2;
-    --theme-tint-bg: rgba(212,175,122,0.03);
-    --theme-tint-surface: rgba(212,175,122,0.06);
-    --theme-tint-border: rgba(212,175,122,0.18);
-    --theme-tint-hover: rgba(212,175,122,0.08);
-    --sidebar-bg: #FAF7F2;
-    --sidebar-active: rgba(200,30,92,0.08);
-    --sidebar-text: #1F1B1D;
-    --input-bg: #FFFFFF;
+    --app-bg: #030712; /* Deep midnight */
+    --app-bg-soft: #0B1121; /* Slightly lighter deep blue */
+    --surface: #111827; /* Rich dark surface */
+    --surface-elevated: #1F2937; /* Elevated card surface */
+    --card-bg: #111827;
+    --text-primary: #F9FAFB;
+    --text-secondary: #E5E7EB;
+    --text-muted: #9CA3AF;
+    --button-text: #000000;
+    --border-soft: rgba(200, 169, 107, 0.15);
+    --border-strong: rgba(200, 169, 107, 0.4);
+    
+    /* Primary Accent: Champagne Gold */
+    --accent: #C8A96B;
+    --accent-light: rgba(200, 169, 107, 0.12);
+    /* Secondary Accent: Electric Emerald */
+    --accent-dark: #10B981; 
+    
+    --accent-gradient: linear-gradient(135deg, #C8A96B, #10B981);
+    --accent-glow: rgba(16, 185, 129, 0.25);
+    --luxury-accent: #10B981;
+    --luxury-companion: #0B1121;
+    
+    --theme-tint-bg: rgba(16, 185, 129, 0.03);
+    --theme-tint-surface: rgba(16, 185, 129, 0.06);
+    --theme-tint-border: rgba(200, 169, 107, 0.2);
+    --theme-tint-hover: rgba(200, 169, 107, 0.08);
+    
+    --sidebar-bg: #0B1121;
+    --sidebar-active: rgba(200, 169, 107, 0.15);
+    --sidebar-text: #F3F4F6;
+    --input-bg: #111827;
+    
+    --status-success: #10B981;
+    --status-warning: #F59E0B;
+    --status-danger: #EF4444;
+  }
+  
+  .dark {
+    /* Identical since this unique premium theme is inherently a dark luxury theme */
+    --app-bg: #030712;
+    --app-bg-soft: #0B1121;
+    --surface: #111827;
+    --surface-elevated: #1F2937;
+    --card-bg: #111827;
+    --text-primary: #F9FAFB;
+    --text-secondary: #E5E7EB;
+    --text-muted: #9CA3AF;
+    --button-text: #000000;
+    --border-soft: rgba(200, 169, 107, 0.15);
+    --border-strong: rgba(200, 169, 107, 0.4);
+    
+    --accent: #C8A96B;
+    --accent-light: rgba(200, 169, 107, 0.12);
+    --accent-dark: #10B981; 
+    
+    --accent-gradient: linear-gradient(135deg, #C8A96B, #10B981);
+    --accent-glow: rgba(16, 185, 129, 0.25);
+    --luxury-accent: #10B981;
+    --luxury-companion: #0B1121;
+    
+    --theme-tint-bg: rgba(16, 185, 129, 0.03);
+    --theme-tint-surface: rgba(16, 185, 129, 0.06);
+    --theme-tint-border: rgba(200, 169, 107, 0.2);
+    --theme-tint-hover: rgba(200, 169, 107, 0.08);
+    
+    --sidebar-bg: #0B1121;
+    --sidebar-active: rgba(200, 169, 107, 0.15);
+    --sidebar-text: #F3F4F6;
+    --input-bg: #111827;
+  }
     --chart-primary: #D4AF7A;
     --status-success: #10B981;
     --status-warning: #F59E0B;
