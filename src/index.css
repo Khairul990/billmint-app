@@ -734,7 +734,6 @@ body {
     --input-bg: #111827;
     --chart-primary: #60A5FA;
   }
-}
 
 /* Base styles to fix Tailwind arbitrary property rendering */
 .bg-\[image\:var\(--accent-gradient\)\] {
