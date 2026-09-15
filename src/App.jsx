@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Trash2, AlertTriangle, Lock, ServerCrash } from 'lucide-react';
@@ -243,7 +243,7 @@ function App() {
            ownerName: isVideo ? 'Demo Owner' : 'Me',
            email: isVideo ? 'hello@democorp.com' : 'demo@example.com',
            phone: isVideo ? '+1 555-0199' : '9999999999',
-           themeColor: 'obsidian-gold'
+           themeColor: 'brand-premium'
         });
       }
     };

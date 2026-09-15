@@ -120,7 +120,7 @@ export const themeEngine = {
 
   getThemePreviewColors(preset, forceMode = null) {
     const isDark = forceMode === 'dark' ? true : forceMode === 'light' ? false : document.documentElement.classList.contains('dark');
-    const c = ALL_THEME_COLORS[preset] || ALL_THEME_COLORS['obsidian-gold'];
+    const c = ALL_THEME_COLORS[preset] || ALL_THEME_COLORS['brand-premium'];
     return {
       background: isDark ? c.D : c.L,
       sidebar: isDark ? c.SD : c.S,

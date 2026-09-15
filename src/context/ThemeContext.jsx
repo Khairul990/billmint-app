@@ -6,7 +6,7 @@ const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
   const [themeState, setThemeState] = useState({
-    themeId: 'obsidian-gold',
+    themeId: 'brand-premium',
     darkMode: false,
     brandColor: null,
     themeType: 'built-in'
@@ -18,7 +18,7 @@ export const ThemeProvider = ({ children }) => {
         const settings = await settingsEngine.getSettings();
         if (settings) {
           setThemeState({
-            themeId: settings.themeColor || settings.themePreset || 'obsidian-gold',
+            themeId: settings.themeColor || settings.themePreset || 'brand-premium',
             darkMode: settings.darkMode === true || settings.darkMode === 'true',
             brandColor: settings.brandColor || null,
             themeType: settings.themeType || 'built-in'
@@ -35,7 +35,7 @@ export const ThemeProvider = ({ children }) => {
       const settings = e.detail;
       if (settings) {
         setThemeState({
-          themeId: settings.themeColor || settings.themePreset || 'obsidian-gold',
+          themeId: settings.themeColor || settings.themePreset || 'brand-premium',
           darkMode: settings.darkMode === true || settings.darkMode === 'true',
           brandColor: settings.brandColor || null,
           themeType: settings.themeType || 'built-in'
@@ -63,7 +63,7 @@ export const useTheme = () => {
   const context = useContext(ThemeContext);
   if (!context) {
     return {
-      themeState: { themeId: 'obsidian-gold', darkMode: false },
+      themeState: { themeId: 'brand-premium', darkMode: false },
       setThemeState: () => {},
       isDarkMode: false,
       toggleTheme: () => {}
