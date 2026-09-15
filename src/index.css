@@ -1745,3 +1745,22 @@ button:active {
   border: 1px solid color-mix(in srgb, var(--border-soft, rgba(255,255,255,0.06)) 75%, var(--accent, #c2410c) 25%);
   box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
 }
+
+/* Dynamic Theme Variables Patch for Missing Luxury/Tint Colors */
+[data-theme] {
+  --luxury-accent: var(--accent);
+  --luxury-companion: var(--surface);
+  --theme-tint-bg: var(--accent-light);
+  --theme-tint-surface: var(--border-soft);
+  --theme-tint-border: var(--border-strong);
+  --theme-tint-hover: var(--sidebar-active);
+}
+.dark[data-theme], [data-theme].dark {
+  --luxury-accent: var(--accent);
+  --luxury-companion: var(--surface);
+  --theme-tint-bg: var(--accent-light);
+  --theme-tint-surface: var(--border-soft);
+  --theme-tint-border: var(--border-strong);
+  --theme-tint-hover: var(--sidebar-active);
+}
+
