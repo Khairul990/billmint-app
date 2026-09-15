@@ -173,7 +173,7 @@ const Logo = ({ type = 'horizontal', className = '', forceWhiteText = false, onC
               filter: 'drop-shadow(0px 1px 2px rgba(0,0,0,0.1))'
             }}>Qyro</span>
           </motion.span>
-          <span className="text-[7px] font-black uppercase text-theme-muted tracking-[0.1em] mt-2 flex flex-col items-center gap-0.5 leading-tight">
+          <span className="text-[8px] font-black uppercase text-theme-muted tracking-[0.1em] mt-2 flex flex-col items-center gap-0.5 leading-tight">
             <span>SMART BILLING.</span>
             <span className="opacity-70">PREMIUM INVOICING PLATFORM</span>
           </span>
@@ -240,13 +240,13 @@ const Logo = ({ type = 'horizontal', className = '', forceWhiteText = false, onC
         {/* Premium tagline */}
         <motion.div className="flex flex-col mt-1 opacity-80">
           <span
-            className="text-[7px] font-black uppercase tracking-[0.1em] leading-tight"
+            className="text-[8px] font-black uppercase tracking-[0.1em] leading-tight"
             style={{ color: 'var(--text-muted)' }}
           >
             SMART BILLING.
           </span>
           <span
-            className="text-[6.5px] font-bold uppercase tracking-[0.05em] leading-none opacity-80"
+            className="text-[8px] font-bold uppercase tracking-[0.05em] leading-none opacity-80"
             style={{ color: 'var(--text-muted)' }}
           >
             PREMIUM INVOICING PLATFORM

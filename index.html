@@ -75,7 +75,7 @@
           var adminTheme = localStorage.getItem('billqyro_admin_default_theme');
           var adminMode = localStorage.getItem('billqyro_admin_default_mode');
           
-          var activeTheme = userTheme || adminTheme || 'pink';
+          var activeTheme = userTheme || adminTheme || 'brand-premium';
           var isDark = userMode !== null ? userMode === 'true' : (adminMode === 'dark');
           
           document.documentElement.setAttribute('data-theme', activeTheme);
@@ -87,7 +87,18 @@
 
           var themeFolderMap = {
             classic: 'billqyro-classic',
-            pink: 'pink-premium',
+            'brand-premium': 'billqyro-classic',
+            'obsidian-gold': 'champagne-black',
+            'midnight-emerald': 'emerald-business',
+            'emerald-royal': 'emerald-business',
+            'sapphire-noir': 'midnight-blue',
+            'midnight-blue': 'midnight-blue',
+            'midnight-ruby': 'ruby-burgundy',
+            'rose-platinum': 'rose-gold-luxe',
+            'carbon-violet': 'royal-indigo',
+            'royal-purple': 'royal-indigo',
+            'arctic-teal': 'billqyro-classic',
+            'pink': 'pink-premium',
             emerald: 'emerald-business',
             indigo: 'royal-indigo',
             rose: 'rose-gold-luxe',

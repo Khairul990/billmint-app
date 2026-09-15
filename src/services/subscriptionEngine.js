@@ -1,7 +1,7 @@
 import * as dbEngine from './dbEngine.js';
 import { submitPremiumRequest as dbSubmitPremiumRequest } from './dbEngine.js';
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from './firebaseConfig.js';
+import { db, firebaseReady } from './firebaseConfig.js';
 
 const SUBSCRIPTION_PLANS = {
   FREE: {
@@ -58,29 +58,34 @@ class SubscriptionEngine {
     const planId = settings?.plan || 'free';
     
     let planDetails = SUBSCRIPTION_PLANS[planId.toUpperCase()] || SUBSCRIPTION_PLANS.FREE;
-    
-    try {
-      const planDoc = await getDoc(doc(db, 'subscriptionPlans', planId.toLowerCase()));
-      if (planDoc.exists()) {
-        const data = planDoc.data();
-        planDetails = {
-          id: data.id || data.slug || planId,
-          name: data.name,
-          limits: {
-            invoices: data.limits.maxInvoices === -1 ? Infinity : data.limits.maxInvoices,
-            maxInvoices: data.limits.maxInvoices,
-            customers: data.limits.maxCustomers === -1 ? Infinity : data.limits.maxCustomers,
-            products: data.limits.maxProducts === -1 ? Infinity : data.limits.maxProducts,
-            users: data.limits.maxTeamMembers === -1 ? Infinity : data.limits.maxTeamMembers
-          },
-          features: Object.keys(data.toggles).filter(k => data.toggles[k]),
-          ...data
-        };
+
+    // Guard: only fetch the dynamic plan document when Firebase is actually
+    // configured. Otherwise `doc(undefined, ...)` throws and floods the
+    // console with errors on local/offline builds.
+    if (firebaseReady) {
+      try {
+        const planDoc = await getDoc(doc(db, 'subscriptionPlans', planId.toLowerCase()));
+        if (planDoc.exists()) {
+          const data = planDoc.data();
+          planDetails = {
+            id: data.id || data.slug || planId,
+            name: data.name,
+            limits: {
+              invoices: data.limits.maxInvoices === -1 ? Infinity : data.limits.maxInvoices,
+              maxInvoices: data.limits.maxInvoices,
+              customers: data.limits.maxCustomers === -1 ? Infinity : data.limits.maxCustomers,
+              products: data.limits.maxProducts === -1 ? Infinity : data.limits.maxProducts,
+              users: data.limits.maxTeamMembers === -1 ? Infinity : data.limits.maxTeamMembers
+            },
+            features: Object.keys(data.toggles).filter(k => data.toggles[k]),
+            ...data
+          };
+        }
+      } catch (e) {
+        console.error('Failed to fetch dynamic plan', e);
       }
-    } catch(e) {
-      console.error("Failed to fetch dynamic plan", e);
     }
-    
+
     return {
       planId: planDetails.id,
       name: planDetails.name,

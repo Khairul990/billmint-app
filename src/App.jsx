@@ -870,7 +870,7 @@ function App() {
 
           // Enable real-time multi-device sync via new Sync Engine
           import('./services/syncEngine').then(({ startRealTimeSync }) => {
-            const userId = auth.currentUser?.uid;
+            const userId = auth?.currentUser?.uid;
             if (userId) {
               startRealTimeSync(userId, (newSettings) => {
                 setSettings(newSettings);
@@ -2196,7 +2196,10 @@ function App() {
     );
   }
 
-  if (!isAuthenticated && (!isDemoSessionActive || !isDemoJourneyActive)) {
+  // Admin routes (/km-admin) must stay reachable for unauthenticated owners —
+  // the AdminRouteGuard below handles the PIN gate itself.
+  const isAdminPathEarly = window.location.pathname === '/km-admin' || currentTab === 'admin-panel';
+  if (!isAdminPathEarly && !isAuthenticated && (!isDemoSessionActive || !isDemoJourneyActive)) {
     return (
       <React.Suspense fallback={
         <div className="flex h-screen items-center justify-center">
@@ -2323,12 +2326,6 @@ function App() {
             <ClassicLoader />
             <p className="text-theme-muted font-bold mt-4 animate-pulse">Loading workspace...</p>
           </motion.div>
-        ) : (!isAuthenticated && !isDemoSessionActive) ? (
-          <motion.div key="landing-unauth" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full">
-            <React.Suspense fallback={<div className="flex h-screen items-center justify-center"><ClassicLoader /></div>}>
-              <Landing onLoginSuccess={handleLoginSuccess} />
-            </React.Suspense>
-          </motion.div>
         ) : showAdminRoute ? (
           <motion.div key="admin-route" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full h-full">
             <React.Suspense fallback={<div className="flex h-screen items-center justify-center"><ClassicLoader /></div>}>
@@ -2348,6 +2345,12 @@ function App() {
                   }} 
                 />
               </AdminRouteGuard>
+            </React.Suspense>
+          </motion.div>
+        ) : (!isAuthenticated && !isDemoSessionActive) ? (
+          <motion.div key="landing-unauth" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full">
+            <React.Suspense fallback={<div className="flex h-screen items-center justify-center"><ClassicLoader /></div>}>
+              <Landing onLoginSuccess={handleLoginSuccess} />
             </React.Suspense>
           </motion.div>
         ) : (
@@ -2371,7 +2374,9 @@ function App() {
                     localStorage.removeItem('billqyro_demo_session_active');
                     localStorage.removeItem('billqyro_demo_journey_mode');
                     localStorage.removeItem('billqyro_demo_video_creator');
-                    window.location.href = '/km-admin';
+                    // Admins return to the Owner Test Lab; public demo visitors go home.
+                    const backToAdmin = (() => { try { return !!authEngine.getAuthSession() && adminEngine.isAdminUser(authEngine.getAuthSession()); } catch { return false; } })();
+                    window.location.href = backToAdmin ? '/km-admin' : '/';
                   }
                 }} className="bg-amber-950 hover:bg-amber-900 text-amber-500 px-3 py-1 rounded-md text-xs transition-colors">Exit Demo</button>
               </div>

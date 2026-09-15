@@ -20,6 +20,29 @@ const Landing = ({ onLoginSuccess }) => {
   const [portalMode, setPortalMode] = useState('business'); // 'business' | 'customer'
   const [activePreviewTab, setActivePreviewTab] = useState('dashboard');
 
+  // Launch the full interactive demo journey (sandbox data, no signup needed).
+  // Mirrors the flag sequence used by the admin Owner Test Lab so App.jsx
+  // routes the visitor through DemoLogin into the seeded demo workspace.
+  const launchLiveDemo = async () => {
+    try {
+      const demoKeys = [
+        'billqyro_demo_customers', 'billqyro_demo_invoices', 'billqyro_demo_products',
+        'billqyro_demo_expenses', 'billqyro_demo_payments', 'billqyro_demo_reports',
+        'billqyro_demo_settings', 'billqyro_demo_logged_in'
+      ];
+      demoKeys.forEach((k) => localStorage.removeItem(k));
+      localStorage.setItem('billqyro_demo_session_active', 'true');
+      localStorage.setItem('billqyro_demo_journey_mode', 'true');
+      const { generateDemoWorkspace } = await import('../services/demoGenerator.js');
+      generateDemoWorkspace();
+      window.location.href = '/';
+    } catch (e) {
+      console.warn('Demo launch failed', e);
+      localStorage.removeItem('billqyro_demo_session_active');
+      localStorage.removeItem('billqyro_demo_journey_mode');
+    }
+  };
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
@@ -142,17 +165,17 @@ const Landing = ({ onLoginSuccess }) => {
 
           {/* Desktop Nav Links */}
           <div className="hidden lg:flex items-center gap-7">
-            <button onClick={() => scrollTo('preview')} className="text-xs font-bold text-theme-muted hover:text-theme-primary transition-colors">Platform</button>
-            <button onClick={() => scrollTo('why-billqyro')} className="text-xs font-bold text-theme-muted hover:text-theme-primary transition-colors">Why BillQyro</button>
-            <button onClick={() => scrollTo('categories')} className="text-xs font-bold text-theme-muted hover:text-theme-primary transition-colors">Categories</button>
-            <button onClick={() => scrollTo('workflow')} className="text-xs font-bold text-theme-muted hover:text-theme-primary transition-colors">Workflow</button>
-            <button onClick={() => scrollTo('payments')} className="text-xs font-bold text-theme-muted hover:text-theme-primary transition-colors">Payments</button>
-            <button onClick={() => scrollTo('offline-security')} className="text-xs font-bold text-theme-muted hover:text-theme-primary transition-colors">Security</button>
-            <button onClick={() => scrollTo('faq')} className="text-xs font-bold text-theme-muted hover:text-theme-primary transition-colors">FAQ</button>
+            <button onClick={() => scrollTo('preview')} className="text-[13px] font-semibold text-theme-muted hover:text-theme-primary transition-colors">Platform</button>
+            <button onClick={() => scrollTo('why-billqyro')} className="text-[13px] font-semibold text-theme-muted hover:text-theme-primary transition-colors">Why BillQyro</button>
+            <button onClick={() => scrollTo('categories')} className="text-[13px] font-semibold text-theme-muted hover:text-theme-primary transition-colors">Categories</button>
+            <button onClick={() => scrollTo('workflow')} className="text-[13px] font-semibold text-theme-muted hover:text-theme-primary transition-colors">Workflow</button>
+            <button onClick={() => scrollTo('payments')} className="text-[13px] font-semibold text-theme-muted hover:text-theme-primary transition-colors">Payments</button>
+            <button onClick={() => scrollTo('offline-security')} className="text-[13px] font-semibold text-theme-muted hover:text-theme-primary transition-colors">Security</button>
+            <button onClick={() => scrollTo('faq')} className="text-[13px] font-semibold text-theme-muted hover:text-theme-primary transition-colors">FAQ</button>
           </div>
 
           <div className="flex items-center gap-3">
-            <button onClick={() => scrollTo('login')} className="text-xs font-bold text-theme-muted hover:text-theme-primary transition-colors hidden sm:block">
+            <button onClick={() => scrollTo('login')} className="text-[13px] font-semibold text-theme-muted hover:text-theme-primary transition-colors hidden sm:block">
               Sign In
             </button>
             <a
@@ -257,7 +280,25 @@ const Landing = ({ onLoginSuccess }) => {
               >
                 Explore Platform
               </button>
+              <button
+                onClick={launchLiveDemo}
+                className="px-6 py-3.5 text-base font-bold w-full sm:w-auto flex items-center justify-center gap-2 rounded-2xl border border-dashed border-theme-accent/40 text-theme-accent hover:bg-theme-accent-light transition-all"
+                title="Explore the full platform with sample data — no signup required"
+              >
+                <Zap className="w-4 h-4" />
+                Try Live Demo
+              </button>
             </motion.div>
+
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="text-[11px] font-semibold text-theme-muted flex items-center gap-1.5 justify-center lg:justify-start"
+            >
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+              Free forever plan · No credit card · Works offline
+            </motion.p>
 
             <motion.div
               initial={{ opacity: 0 }}
@@ -295,15 +336,15 @@ const Landing = ({ onLoginSuccess }) => {
               {/* Mini Dashboard Metrics */}
               <div className="grid grid-cols-3 gap-2.5 mb-4">
                 <div className="bg-theme-surface p-3 rounded-xl border border-theme-border-soft">
-                  <p className="text-[9px] font-bold text-theme-muted uppercase">Today's Revenue</p>
+                  <p className="text-[10px] font-bold text-theme-muted uppercase">Today's Revenue</p>
                   <p className="text-base font-black text-theme-primary font-numbers mt-0.5">₹48,250</p>
                 </div>
                 <div className="bg-theme-surface p-3 rounded-xl border border-theme-border-soft">
-                  <p className="text-[9px] font-bold text-theme-muted uppercase">Collections</p>
+                  <p className="text-[10px] font-bold text-theme-muted uppercase">Collections</p>
                   <p className="text-base font-black text-emerald-500 font-numbers mt-0.5">₹42,000</p>
                 </div>
                 <div className="bg-theme-surface p-3 rounded-xl border border-theme-border-soft">
-                  <p className="text-[9px] font-bold text-theme-muted uppercase">Due Amount</p>
+                  <p className="text-[10px] font-bold text-theme-muted uppercase">Due Amount</p>
                   <p className="text-base font-black text-amber-500 font-numbers mt-0.5">₹6,250</p>
                 </div>
               </div>
@@ -316,7 +357,7 @@ const Landing = ({ onLoginSuccess }) => {
                     <p className="text-sm font-black text-theme-primary mt-1">Apex Industrial Solutions</p>
                     <p className="text-[10px] text-theme-muted font-medium">3 Line Items · Standard B2B Invoice</p>
                   </div>
-                  <span className="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-500 border border-emerald-500/30">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-500 border border-emerald-500/30">
                     Paid Online
                   </span>
                 </div>
@@ -629,7 +670,7 @@ const Landing = ({ onLoginSuccess }) => {
                     <div className="w-10 h-10 rounded-xl bg-theme-accent/10 text-theme-accent flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
                       <Icon className="w-5 h-5" />
                     </div>
-                    <span className="text-[9px] font-bold text-theme-accent uppercase tracking-wider block mb-1">
+                    <span className="text-[10px] font-bold text-theme-accent uppercase tracking-wider block mb-1">
                       {cat.tag}
                     </span>
                     <h3 className="text-base font-black text-theme-primary mb-2">
@@ -806,9 +847,9 @@ const Landing = ({ onLoginSuccess }) => {
             <p className="text-xs text-theme-muted mt-2 font-medium leading-relaxed">Log into your existing business account or register a new workspace in seconds.</p>
             <div className="hidden lg:block mt-8">
               <div className="grid grid-cols-3 gap-3">
-                <div className="p-4 rounded-2xl bg-theme-card border border-theme-border-soft"><p className="text-[9px] font-black uppercase tracking-wider text-theme-accent">Setup</p><p className="text-xs font-bold text-theme-primary mt-1">Business workspace</p></div>
-                <div className="p-4 rounded-2xl bg-theme-card border border-theme-border-soft"><p className="text-[9px] font-black uppercase tracking-wider text-theme-accent">Operate</p><p className="text-xs font-bold text-theme-primary mt-1">Invoice & collect</p></div>
-                <div className="p-4 rounded-2xl bg-theme-card border border-theme-border-soft"><p className="text-[9px] font-black uppercase tracking-wider text-theme-accent">Grow</p><p className="text-xs font-bold text-theme-primary mt-1">Measure & improve</p></div>
+                <div className="p-4 rounded-2xl bg-theme-card border border-theme-border-soft"><p className="text-[10px] font-black uppercase tracking-wider text-theme-accent">Setup</p><p className="text-xs font-bold text-theme-primary mt-1">Business workspace</p></div>
+                <div className="p-4 rounded-2xl bg-theme-card border border-theme-border-soft"><p className="text-[10px] font-black uppercase tracking-wider text-theme-accent">Operate</p><p className="text-xs font-bold text-theme-primary mt-1">Invoice & collect</p></div>
+                <div className="p-4 rounded-2xl bg-theme-card border border-theme-border-soft"><p className="text-[10px] font-black uppercase tracking-wider text-theme-accent">Grow</p><p className="text-xs font-bold text-theme-primary mt-1">Measure & improve</p></div>
               </div>
             </div>
           </div>
@@ -848,23 +889,95 @@ const Landing = ({ onLoginSuccess }) => {
                   }}
                 />
               )}
+
+              {/* No-signup interactive demo access */}
+              <div className="mt-5 pt-5 border-t border-theme-border-soft">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 rounded-2xl bg-theme-surface border border-dashed border-theme-accent/30 px-4 py-3.5">
+                  <div className="flex items-center gap-3 text-center sm:text-left">
+                    <div className="w-9 h-9 rounded-xl bg-theme-accent/10 border border-theme-accent/20 flex items-center justify-center shrink-0">
+                      <Zap className="w-4 h-4 text-theme-accent" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-black text-theme-primary">Not ready to register?</p>
+                      <p className="text-[11px] font-semibold text-theme-muted mt-0.5">Tour the full platform with sample business data.</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={launchLiveDemo}
+                    className="shrink-0 px-4 py-2 rounded-xl bg-theme-accent text-white text-xs font-black hover:opacity-90 transition-opacity shadow-md shadow-theme-glow/40"
+                  >
+                    Launch Live Demo →
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* ===== FOOTER ===== */}
-      <footer className="border-t border-theme-border-soft bg-theme-app py-10 px-6 text-xs text-theme-muted">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Logo type="horizontal" forceWhiteText={false} />
-            <span className="text-[10px] font-bold text-theme-muted">© 2026 BillQyro Platform</span>
+      <footer className="border-t border-theme-border-soft bg-theme-app px-6 pt-14 pb-8 text-xs text-theme-muted relative overflow-hidden">
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-theme-accent/50 to-transparent" />
+        <div className="max-w-7xl mx-auto relative">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-10 pb-10 border-b border-theme-border-soft/60">
+            {/* Brand column */}
+            <div className="col-span-2 md:col-span-1 space-y-4">
+              <Logo type="horizontal" forceWhiteText={false} />
+              <p className="text-[11px] font-medium leading-relaxed max-w-[26ch]">
+                The premium billing command center for small shops, studios and service businesses. Built in India 🇮🇳, made for the world.
+              </p>
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-theme-surface border border-theme-border-soft text-[10px] font-bold text-theme-secondary">
+                  <ShieldCheck className="w-3 h-3 text-emerald-500" /> Secure Sync
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-theme-surface border border-theme-border-soft text-[10px] font-bold text-theme-secondary">
+                  <Zap className="w-3 h-3 text-amber-500" /> Offline First
+                </span>
+              </div>
+            </div>
+
+            {/* Product column */}
+            <div className="space-y-3">
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-theme-primary">Product</p>
+              <div className="space-y-2.5 font-semibold">
+                <button onClick={() => scrollTo('preview')} className="block hover:text-theme-primary transition-colors">Platform Tour</button>
+                <button onClick={() => scrollTo('categories')} className="block hover:text-theme-primary transition-colors">Business Categories</button>
+                <button onClick={() => scrollTo('workflow')} className="block hover:text-theme-primary transition-colors">How It Works</button>
+                <button onClick={launchLiveDemo} className="block text-theme-accent hover:opacity-80 transition-opacity">Live Demo</button>
+              </div>
+            </div>
+
+            {/* Resources column */}
+            <div className="space-y-3">
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-theme-primary">Resources</p>
+              <div className="space-y-2.5 font-semibold">
+                <button onClick={() => scrollTo('faq')} className="block hover:text-theme-primary transition-colors">FAQ</button>
+                <a href="/support" className="block hover:text-theme-primary transition-colors">Help Center</a>
+                <button onClick={() => scrollTo('offline-security')} className="block hover:text-theme-primary transition-colors">Security & Privacy</button>
+                <button onClick={() => scrollTo('payments')} className="block hover:text-theme-primary transition-colors">Payment Collection</button>
+              </div>
+            </div>
+
+            {/* Legal column */}
+            <div className="space-y-3">
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-theme-primary">Legal</p>
+              <div className="space-y-2.5 font-semibold">
+                <a href="/terms" className="block hover:text-theme-primary transition-colors">Terms of Service</a>
+                <a href="/privacy" className="block hover:text-theme-primary transition-colors">Privacy Policy</a>
+                <a href="/refund" className="block hover:text-theme-primary transition-colors">Refund Policy</a>
+                <a href="/data-deletion" className="block hover:text-theme-primary transition-colors">Data Deletion</a>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-6 font-bold">
-            <a href="/terms" className="hover:text-theme-primary transition-colors">Terms of Service</a>
-            <a href="/privacy" className="hover:text-theme-primary transition-colors">Privacy Policy</a>
-            <a href="/refund" className="hover:text-theme-primary transition-colors">Refund Policy</a>
-            <button onClick={() => scrollTo('login')} className="hover:text-theme-primary transition-colors">Sign In</button>
+
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-6">
+            <span className="text-[10px] font-bold">© 2026 BillQyro Platform · All rights reserved.</span>
+            <div className="flex items-center gap-5 font-bold">
+              <button onClick={() => scrollTo('login')} className="hover:text-theme-primary transition-colors">Sign In</button>
+              <a href="mailto:support@billqyro.com" className="hover:text-theme-primary transition-colors flex items-center gap-1.5">
+                <Mail className="w-3.5 h-3.5" /> support@billqyro.com
+              </a>
+            </div>
           </div>
         </div>
       </footer>

@@ -94,7 +94,7 @@ export const authEngine = {
   },
 
   async hasCompletedOnboarding() {
-    const user = auth.currentUser;
+    const user = auth?.currentUser;
     if (!user) return false;
     try {
       const settingsSnap = await getDoc(doc(db, 'settings', user.uid));

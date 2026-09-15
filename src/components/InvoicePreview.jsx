@@ -199,7 +199,7 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false, templat
               {templateId === 'retail' && (
                 <div className="px-2.5 py-0.5 bg-white border border-slate-200 rounded text-center text-slate-800">
                   <div className="font-mono text-[8px] tracking-[0.3em] font-bold opacity-80 leading-none mb-0.5">||| |||| || |||</div>
-                  <div className="text-[7px] uppercase tracking-widest font-black leading-none opacity-50">{invoice.invoiceNumber}</div>
+                  <div className="text-[8px] uppercase tracking-widest font-black leading-none opacity-50">{invoice.invoiceNumber}</div>
                 </div>
               )}
             </div>

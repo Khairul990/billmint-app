@@ -76,7 +76,7 @@ const AdminLayout = ({ setCurrentTab, children, activeAdminTab, setActiveAdminTa
           {!isCollapsed && (
             <div className="min-w-0">
               <h1 className="text-xs font-black text-theme-primary tracking-tight truncate leading-tight">BillQyro</h1>
-              <span className="text-[8px] font-black tracking-widest text-theme-accent uppercase block leading-none">OWNER ROOM</span>
+              <span className="text-[9.5px] font-black tracking-[0.14em] text-theme-accent uppercase block leading-none">OWNER ROOM</span>
             </div>
           )}
         </div>
@@ -96,7 +96,7 @@ const AdminLayout = ({ setCurrentTab, children, activeAdminTab, setActiveAdminTa
         {adminMenuGroups.map((grp) => (
           <div key={grp.group} className="space-y-0.5">
             {!isCollapsed && (
-              <span className="px-2.5 text-[9px] font-black uppercase tracking-wider text-theme-muted block mb-0.5">
+              <span className="px-2.5 text-[10px] font-black uppercase tracking-[0.12em] text-theme-muted block mb-0.5">
                 {grp.group}
               </span>
             )}

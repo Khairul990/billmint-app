@@ -153,21 +153,55 @@ const AdminDashboard = () => {
 
   return (
     <motion.div variants={pageVariants} initial="initial" animate="animate" className="space-y-8 pb-32">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-        <div>
-          <h2 className="text-3xl font-black tracking-tight text-theme-primary flex items-center gap-3">
-            Owner Command Center
-            <Crown className="w-6 h-6 text-theme-accent" />
-          </h2>
-          <p className="text-sm text-theme-secondary mt-1">
-            Authoritative platform governance, telemetry metrics, and multi-tenant financial health.
-          </p>
+      {/* Premium Command Banner */}
+      <div className="relative overflow-hidden rounded-3xl border border-theme-accent/20 bg-gradient-to-br from-theme-surface-elevated via-theme-surface to-theme-surface p-6 sm:p-8">
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-theme-accent/60 to-transparent" />
+        <div className="absolute -right-20 -top-20 w-64 h-64 rounded-full bg-theme-accent/10 blur-3xl pointer-events-none" />
+        <div className="relative flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-[10px] font-black uppercase tracking-[0.18em] text-theme-accent">Owner Command Center</span>
+              <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${stats.systemHealth === 'Healthy'
+                ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30'
+                : 'bg-amber-500/10 text-amber-500 border-amber-500/30'}`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${stats.systemHealth === 'Healthy' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500 animate-pulse'}`} />
+                {stats.systemHealth || 'Standby'}
+              </span>
+            </div>
+            <h2 className="text-3xl font-black tracking-tight text-theme-primary flex items-center gap-3">
+              Platform Governance
+              <Crown className="w-6 h-6 text-theme-accent" />
+            </h2>
+            <p className="text-sm text-theme-secondary mt-1 max-w-xl">
+              Authoritative platform governance, telemetry metrics, and multi-tenant financial health.
+            </p>
+          </div>
+          <div className="flex items-center gap-3 shrink-0">
+            <Button variant="outline" size="sm" onClick={fetchStats} leftIcon={RefreshCw}>
+              Refresh Telemetry
+            </Button>
+          </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <Button variant="outline" size="sm" onClick={fetchStats} leftIcon={RefreshCw}>
-            Refresh Telemetry
-          </Button>
+        {/* Banner highlight strip */}
+        <div className="relative grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t border-theme-border-soft/60">
+          {[
+            { label: 'Platform Revenue', value: stats.monthlyRevenue !== null ? `₹${stats.monthlyRevenue.toLocaleString()}` : '—', icon: IndianRupee, tone: 'text-emerald-500' },
+            { label: 'Total Users', value: stats.totalUsers !== null ? stats.totalUsers.toLocaleString() : '—', icon: Users, tone: 'text-theme-accent' },
+            { label: 'Pending Payouts', value: stats.pendingPayments !== null ? `₹${stats.pendingPayments.toLocaleString()}` : '—', icon: AlertTriangle, tone: 'text-amber-500' },
+            { label: 'Sync Queue', value: stats.failedSyncs !== null ? stats.failedSyncs : '—', icon: RefreshCw, tone: stats.failedSyncs > 0 ? 'text-amber-500' : 'text-emerald-500' }
+          ].map((s) => {
+            const SIcon = s.icon;
+            return (
+              <div key={s.label} className="flex items-center gap-3 rounded-2xl bg-theme-app/40 border border-theme-border-soft/60 px-4 py-3">
+                <SIcon className={`w-4 h-4 ${s.tone} shrink-0`} />
+                <div className="min-w-0">
+                  <p className="text-[10px] font-black uppercase tracking-wider text-theme-muted truncate">{s.label}</p>
+                  <p className="text-lg font-black text-theme-primary tracking-tight truncate">{s.value}</p>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -192,11 +226,11 @@ const AdminDashboard = () => {
               return (
                 <div
                   key={idx}
-                  className="p-4 rounded-xl bg-theme-surface/60 border border-theme-border-soft hover:border-theme-accent/20 transition-all flex flex-col justify-between"
+                  className="group p-4 rounded-xl bg-theme-surface/60 border border-theme-border-soft hover:border-theme-accent/30 hover:bg-theme-accent-light/40 hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between"
                 >
                   <div className="flex items-center justify-between mb-2.5">
                     <span className="text-[10px] font-black uppercase tracking-wider text-theme-muted">{kpi.label}</span>
-                    <div className="p-1.5 rounded-lg bg-theme-surface-elevated border border-theme-border-soft">
+                    <div className="p-1.5 rounded-lg bg-theme-surface-elevated border border-theme-border-soft group-hover:border-theme-accent/25 transition-colors">
                       <Icon className={`w-3.5 h-3.5 ${kpi.color}`} />
                     </div>
                   </div>
