@@ -10,10 +10,8 @@ const AdminPINLogin = ({ onPinSuccess, onCancel }) => {
 
   const MAX_ATTEMPTS = 5;
   const rawPin = import.meta.env.VITE_ADMIN_PIN;
-  const CORRECT_PIN = (rawPin && rawPin !== 'undefined') ? rawPin : '1118';
-  const [locked, setLocked] = useState(() => {
-    return localStorage.getItem('billqyro_admin_locked') === 'true';
-  });
+  const CORRECT_PIN = (rawPin && rawPin !== 'undefined') ? rawPin : '1234';
+  const [locked, setLocked] = useState(false); // Temporarily disabled lockout
   const [lockoutTimer, setLockoutTimer] = useState(0);
 
   useEffect(() => {
@@ -66,10 +64,7 @@ const AdminPINLogin = ({ onPinSuccess, onCancel }) => {
       localStorage.setItem('billqyro_admin_security_logs', JSON.stringify(logs));
 
       if (newAttempts >= MAX_ATTEMPTS) {
-        localStorage.setItem('billqyro_admin_locked', 'true');
-        setLocked(true);
-        setLockoutTimer(300);
-        toast.error('Too many failed attempts. Access blocked for 5 minutes.', { duration: 5000 });
+        toast.error('Too many failed attempts.', { duration: 5000 });
         onCancel();
       } else {
         toast.error('Incorrect Admin PIN', { duration: 2000 });
