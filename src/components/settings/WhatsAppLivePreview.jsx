@@ -13,8 +13,8 @@ const WhatsAppLivePreview = ({ template, businessSettings }) => {
     .replace(/\{\{amountPaid\}\}/g, '₹0.00')
     .replace(/\{\{balanceDue\}\}/g, '₹1,500.00')
     .replace(/\{\{dueDate\}\}/g, '31 Dec 2024')
-    .replace(/\{\{pdfUrl\}\}/g, 'https://billqyro.com/pdf/sample')
-    .replace(/\{\{liveLinkUrl\}\}/g, 'https://billqyro.com/pay/sample')
+    .replace(/\{\{pdfUrl\}\}/g, `${window.location.origin}/pdf/sample`)
+    .replace(/\{\{liveLinkUrl\}\}/g, `${window.location.origin}/pay/sample`)
     .replace(/\{\{businessName\}\}/g, businessSettings?.businessName || 'Your Business');
 
   // WhatsApp applies some markdown formatting: *bold*, _italic_, ~strikethrough~
