@@ -11,6 +11,8 @@ import Logo from '../components/Logo';
 import Login from './Login';
 import CustomerPortalLogin from '../components/portal/CustomerPortalLogin';
 import HeroBackground from '../components/HeroBackground';
+import ScrollReveal from '../components/ScrollReveal';
+import AnimatedNumber from '../components/AnimatedNumber';
 import { AnimatedThemeToggler } from '../components/AnimatedThemeToggler';
 
 const Landing = ({ onLoginSuccess }) => {
@@ -247,7 +249,7 @@ const Landing = ({ onLoginSuccess }) => {
               className="text-4xl sm:text-5xl lg:text-[4.7rem] font-black tracking-[-0.045em] text-theme-primary leading-[1.02] max-w-3xl"
             >
               Smart Billing. <br />
-              <span className="text-transparent bg-clip-text bg-[image:var(--accent-gradient)]">
+              <span className="text-transparent bg-clip-text bg-[image:var(--accent-gradient)] bq-shimmer-text">
                 Premium Invoicing Platform.
               </span>
             </motion.h1>
@@ -317,9 +319,32 @@ const Landing = ({ onLoginSuccess }) => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2, duration: 0.6 }}
-            className="flex-1 w-full max-w-xl"
+            className="flex-1 w-full max-w-xl relative"
           >
+            <div aria-hidden="true" className="absolute -inset-6 rounded-[2.5rem] bg-theme-accent/10 blur-3xl -z-10 bq-breathe pointer-events-none" />
             <div className="billqyro-hero-cockpit rounded-[2rem] border border-theme-accent/20 bg-theme-card/90 p-4 sm:p-5 shadow-2xl relative overflow-hidden backdrop-blur-2xl">
+              {/* Signature floating ornaments */}
+              <div aria-hidden="true" className="absolute -left-3 top-16 z-20 hidden md:flex items-center gap-2 rounded-2xl border border-emerald-500/30 bg-theme-card/95 px-3 py-2 shadow-xl shadow-emerald-500/10 bq-float">
+                <span className="w-6 h-6 rounded-xl bg-emerald-500/15 text-emerald-500 flex items-center justify-center"><CheckCircle2 className="w-3.5 h-3.5" /></span>
+                <div className="leading-tight">
+                  <p className="text-[10px] font-black text-theme-primary">Payment Received</p>
+                  <p className="text-[9px] font-bold text-emerald-500">UPI · just now</p>
+                </div>
+              </div>
+              <div aria-hidden="true" className="absolute -right-4 top-40 z-20 hidden md:flex items-center gap-2 rounded-2xl border border-theme-accent/30 bg-theme-card/95 px-3 py-2 shadow-xl bq-float-delay">
+                <span className="w-6 h-6 rounded-xl bg-theme-accent/15 text-theme-accent flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5" /></span>
+                <div className="leading-tight">
+                  <p className="text-[10px] font-black text-theme-primary">Revenue +18%</p>
+                  <p className="text-[9px] font-bold text-theme-accent">this week</p>
+                </div>
+              </div>
+              <div aria-hidden="true" className="absolute -bottom-5 left-10 z-20 hidden md:flex items-center gap-2 rounded-2xl border border-amber-500/30 bg-theme-card/95 px-3 py-2 shadow-xl bq-float-slow">
+                <span className="w-6 h-6 rounded-xl bg-amber-500/15 text-amber-500 flex items-center justify-center"><MessageCircle className="w-3.5 h-3.5" /></span>
+                <div className="leading-tight">
+                  <p className="text-[10px] font-black text-theme-primary">Invoice shared</p>
+                  <p className="text-[9px] font-bold text-amber-500">via WhatsApp</p>
+                </div>
+              </div>
               {/* Window Controls */}
               <div className="flex items-center justify-between mb-4 pb-3 border-b border-theme-border-soft/60">
                 <div className="flex items-center gap-1.5">
@@ -337,15 +362,15 @@ const Landing = ({ onLoginSuccess }) => {
               <div className="grid grid-cols-3 gap-2.5 mb-4">
                 <div className="bg-theme-surface p-3 rounded-xl border border-theme-border-soft">
                   <p className="text-[10px] font-bold text-theme-muted uppercase">Today's Revenue</p>
-                  <p className="text-base font-black text-theme-primary font-numbers mt-0.5">₹48,250</p>
+                  <p className="text-base font-black text-theme-primary font-numbers mt-0.5"><AnimatedNumber value={48250} prefix="₹" /></p>
                 </div>
                 <div className="bg-theme-surface p-3 rounded-xl border border-theme-border-soft">
                   <p className="text-[10px] font-bold text-theme-muted uppercase">Collections</p>
-                  <p className="text-base font-black text-emerald-500 font-numbers mt-0.5">₹42,000</p>
+                  <p className="text-base font-black text-emerald-500 font-numbers mt-0.5"><AnimatedNumber value={42000} prefix="₹" /></p>
                 </div>
                 <div className="bg-theme-surface p-3 rounded-xl border border-theme-border-soft">
                   <p className="text-[10px] font-bold text-theme-muted uppercase">Due Amount</p>
-                  <p className="text-base font-black text-amber-500 font-numbers mt-0.5">₹6,250</p>
+                  <p className="text-base font-black text-amber-500 font-numbers mt-0.5"><AnimatedNumber value={6250} prefix="₹" /></p>
                 </div>
               </div>
 
@@ -393,8 +418,29 @@ const Landing = ({ onLoginSuccess }) => {
         </div>
       </section>
 
+      {/* ===== SIGNATURE CATEGORY MARQUEE ===== */}
+      <section aria-label="Business categories" className="pb-14 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="bq-marquee rounded-full border border-theme-border-soft bg-theme-surface/40 py-3">
+            <div className="bq-marquee-track gap-3 pr-3">
+              {[0, 1].map((dup) => (
+                <div key={dup} className="flex items-center gap-3 pr-3" aria-hidden={dup === 1}>
+                  {['Tailoring & Boutiques', 'Retail & Supermarkets', 'Clinics & Healthcare', 'Repair & Electronics', 'Coaching & Education', 'Embroidery Studios', 'Cyber Cafes', 'Salons & Parlours', 'Wholesale Trading', 'Freelancers'].map((cat) => (
+                    <span key={cat + dup} className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-theme-border-soft bg-theme-card px-4 py-1.5 text-[11px] font-black text-theme-secondary tracking-wide">
+                      <Sparkles className="w-3 h-3 text-theme-accent" />
+                      {cat}
+                    </span>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ===== SECTION 2: PRODUCT PREVIEW ===== */}
       <section id="preview" className="py-20 px-6 border-t border-theme-border-soft bg-theme-surface/30 relative">
+        <ScrollReveal yOffset={28}>
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-2xl mx-auto mb-12">
             <span className="text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-3.5 py-1 rounded-full border border-theme-accent/20">
@@ -563,10 +609,12 @@ const Landing = ({ onLoginSuccess }) => {
             )}
           </div>
         </div>
+      </ScrollReveal>
       </section>
 
       {/* ===== SECTION 3A: WHY BILLQYRO ===== */}
       <section id="why-billqyro" className="relative py-24 px-6 border-t border-theme-border-soft bg-theme-surface/20 overflow-hidden">
+        <ScrollReveal yOffset={28}>
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-theme-accent/50 to-transparent" />
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-[0.9fr_1.1fr] gap-12 lg:gap-20 items-start">
@@ -611,6 +659,7 @@ const Landing = ({ onLoginSuccess }) => {
             </div>
           </div>
         </div>
+      </ScrollReveal>
       </section>
 
       {/* ===== SECTION 3B: PLATFORM PILLARS ===== */}
@@ -645,6 +694,7 @@ const Landing = ({ onLoginSuccess }) => {
 
       {/* ===== SECTION 3: BUSINESS CATEGORIES ===== */}
       <section id="categories" className="py-20 px-6 border-t border-theme-border-soft bg-theme-app">
+        <ScrollReveal yOffset={28}>
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-2xl mx-auto mb-12">
             <span className="text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-3.5 py-1 rounded-full border border-theme-accent/20">
@@ -690,10 +740,12 @@ const Landing = ({ onLoginSuccess }) => {
             })}
           </div>
         </div>
+      </ScrollReveal>
       </section>
 
       {/* ===== SECTION 4: INVOICE WORKFLOW ===== */}
       <section id="workflow" className="py-20 px-6 border-t border-theme-border-soft bg-theme-surface/30">
+        <ScrollReveal yOffset={28}>
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-2xl mx-auto mb-14">
             <span className="text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-3.5 py-1 rounded-full border border-theme-accent/20">
@@ -717,10 +769,12 @@ const Landing = ({ onLoginSuccess }) => {
             ))}
           </div>
         </div>
+      </ScrollReveal>
       </section>
 
       {/* ===== SECTION 5: PAYMENT COLLECTION ===== */}
       <section id="payments" className="py-20 px-6 border-t border-theme-border-soft bg-theme-app">
+        <ScrollReveal yOffset={28}>
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12">
           <div className="flex-1 space-y-5">
             <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500 bg-emerald-500/10 px-3.5 py-1 rounded-full border border-emerald-500/20">
@@ -771,10 +825,12 @@ const Landing = ({ onLoginSuccess }) => {
             </div>
           </div>
         </div>
+      </ScrollReveal>
       </section>
 
       {/* ===== SECTION 6: OFFLINE & SECURITY ===== */}
       <section id="offline-security" className="py-20 px-6 border-t border-theme-border-soft bg-theme-surface/30">
+        <ScrollReveal yOffset={28}>
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="bg-theme-card p-8 rounded-3xl border border-theme-border-soft space-y-4">
             <div className="w-12 h-12 rounded-2xl bg-theme-accent/10 text-theme-accent flex items-center justify-center">
@@ -802,10 +858,12 @@ const Landing = ({ onLoginSuccess }) => {
             </div>
           </div>
         </div>
+      </ScrollReveal>
       </section>
 
       {/* ===== SECTION 7: FAQ ===== */}
       <section id="faq" className="py-20 px-6 border-t border-theme-border-soft bg-theme-app">
+        <ScrollReveal yOffset={28}>
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <span className="text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-3.5 py-1 rounded-full border border-theme-accent/20">
@@ -835,10 +893,12 @@ const Landing = ({ onLoginSuccess }) => {
             ))}
           </div>
         </div>
+      </ScrollReveal>
       </section>
 
       {/* ===== SECTION 8: AUTH / LOGIN SECTION ===== */}
       <section id="login" className="relative border-t border-theme-border-soft bg-theme-surface/50 py-24 px-6 z-10 overflow-hidden">
+        <ScrollReveal yOffset={24}>
         <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-theme-accent/10 to-transparent pointer-events-none" />
         <div className="max-w-6xl mx-auto grid lg:grid-cols-[1fr_1.15fr] gap-10 lg:gap-14 items-start relative">
           <div className="text-center lg:text-left pt-4">
@@ -913,6 +973,7 @@ const Landing = ({ onLoginSuccess }) => {
             </div>
           </div>
         </div>
+      </ScrollReveal>
       </section>
 
       {/* ===== FOOTER ===== */}

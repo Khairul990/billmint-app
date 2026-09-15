@@ -1803,3 +1803,75 @@
     scroll-margin-top: 90px;
   }
 }
+
+/* ============================================================
+   BILLQYRO SIGNATURE MOTION PACK (v2) — Landing animations
+   ============================================================ */
+
+/* Gradient headline shimmer — light sweeps across the accent text */
+.bq-shimmer-text {
+  background-size: 200% auto;
+  animation: bq-shimmer 5s linear infinite;
+}
+@keyframes bq-shimmer {
+  to { background-position: 200% center; }
+}
+
+/* Infinite horizontal marquee with soft edge fade */
+.bq-marquee {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);
+  mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);
+}
+.bq-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: bq-marquee 30s linear infinite;
+}
+.bq-marquee:hover .bq-marquee-track { animation-play-state: paused; }
+@keyframes bq-marquee {
+  to { transform: translateX(-50%); }
+}
+
+/* Gentle floating loop for hero ornaments */
+.bq-float { animation: bq-float 6s ease-in-out infinite; }
+.bq-float-slow { animation: bq-float 9s ease-in-out infinite; }
+.bq-float-delay { animation: bq-float 7s ease-in-out 1.2s infinite; }
+@keyframes bq-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(-1.2deg); }
+}
+
+/* Soft radial breathing glow behind hero cockpit */
+.bq-breathe { animation: bq-breathe 8s ease-in-out infinite; }
+@keyframes bq-breathe {
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.06); }
+}
+
+/* Animated underline accent for section headings */
+.bq-underline-grow {
+  position: relative;
+}
+.bq-underline-grow::after {
+  content: '';
+  position: absolute;
+  left: 0; bottom: -6px;
+  height: 3px; width: 100%;
+  border-radius: 9999px;
+  background: var(--accent-gradient, linear-gradient(90deg, #10b981, #059669));
+  transform-origin: left center;
+  animation: bq-underline 1.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes bq-underline {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .bq-shimmer-text, .bq-marquee-track, .bq-float, .bq-float-slow, .bq-float-delay, .bq-breathe {
+    animation: none !important;
+  }
+  .bq-underline-grow::after { animation: none; transform: scaleX(1); }
+}

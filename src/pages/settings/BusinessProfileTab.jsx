@@ -252,7 +252,7 @@ const BusinessProfileTab = (props) => {
                               <div className="flex justify-between items-center w-full">
                                 <span className="text-xs font-extrabold text-theme-primary dark:text-theme-primary">{preset.name}</span>
                                 {isSelected && (
-                                  <span className="w-4 h-4 rounded-full bg-theme-accent text-white flex items-center justify-center text-[8px] font-bold shadow-sm shadow-theme-accent/30">✓</span>
+                                  <span className="w-4 h-4 rounded-full bg-theme-accent text-white flex items-center justify-center text-[9.5px] font-bold shadow-sm shadow-theme-accent/30">✓</span>
                                 )}
                               </div>
                               <p className="text-[10px] text-theme-muted dark:text-theme-muted font-semibold leading-relaxed">{preset.desc}</p>
@@ -357,9 +357,9 @@ const BusinessProfileTab = (props) => {
                       const colors = getThemePreviewColors(themeColor);
                       return (
                         <div className="border border-theme-border-soft/60 dark:border-theme-border-soft rounded-2xl p-4 space-y-3 relative overflow-hidden flex flex-col justify-between" style={{ backgroundColor: colors.background }}>
-                          <span className="absolute top-2 right-2 text-[7px] font-black uppercase tracking-wider text-theme-muted bg-theme-card/40 dark:bg-black/30 px-1.5 py-0.5 rounded border border-theme-border-soft/10">PC Workspace</span>
+                          <span className="absolute top-2 right-2 text-[9px] font-black uppercase tracking-wider text-theme-muted bg-theme-card/40 dark:bg-black/30 px-1.5 py-0.5 rounded border border-theme-border-soft/10">PC Workspace</span>
                           <div className="space-y-2">
-                            <span className="text-[8px] font-black uppercase text-theme-muted tracking-wider block">Desktop Dashboard</span>
+                            <span className="text-[9.5px] font-black uppercase text-theme-muted tracking-wider block">Desktop Dashboard</span>
                             <div className="flex gap-2">
                               {/* Sidebar miniature */}
                               <div className="w-14 rounded p-1.5 space-y-1" style={{ backgroundColor: colors.sidebar }}>
@@ -371,7 +371,7 @@ const BusinessProfileTab = (props) => {
                               {/* Main panel miniature */}
                               <div className="flex-1 space-y-2">
                                 {/* Hero Mock */}
-                                <div className="rounded p-2 text-white text-[6px] space-y-1 relative" style={{ background: `linear-gradient(135deg, ${colors.btnFrom}, ${colors.btnTo})` }}>
+                                <div className="rounded p-2 text-white text-[9px] space-y-1 relative" style={{ background: `linear-gradient(135deg, ${colors.btnFrom}, ${colors.btnTo})` }}>
                                   <span className="font-extrabold block">Welcome to BillQyro</span>
                                   <div className="w-12 h-1 bg-theme-card/30 rounded-sm"></div>
                                 </div>
@@ -379,18 +379,18 @@ const BusinessProfileTab = (props) => {
                                 <div className="grid grid-cols-2 gap-1">
                                   <div className="rounded p-1 border" style={{ backgroundColor: colors.card, borderColor: colors.border }}>
                                     <span className="text-[5px] text-theme-muted block leading-none">Collection</span>
-                                    <span className="text-[6px] font-extrabold" style={{ color: colors.text }}>$1,200</span>
+                                    <span className="text-[9px] font-extrabold" style={{ color: colors.text }}>$1,200</span>
                                   </div>
                                   <div className="rounded p-1 border" style={{ backgroundColor: colors.card, borderColor: colors.border }}>
                                     <span className="text-[5px] text-theme-muted block leading-none">Dues</span>
-                                    <span className="text-[6px] font-extrabold" style={{ color: colors.text }}>$450</span>
+                                    <span className="text-[9px] font-extrabold" style={{ color: colors.text }}>$450</span>
                                   </div>
                                 </div>
                               </div>
                             </div>
                           </div>
                           {/* Create button */}
-                          <div className="w-full h-5 rounded-lg flex items-center justify-center text-[7px] font-black uppercase tracking-wider text-white shadow-sm" style={{ background: `linear-gradient(90deg, ${colors.btnFrom}, ${colors.btnTo})` }}>
+                          <div className="w-full h-5 rounded-lg flex items-center justify-center text-[9px] font-black uppercase tracking-wider text-white shadow-sm" style={{ background: `linear-gradient(90deg, ${colors.btnFrom}, ${colors.btnTo})` }}>
                             Create Invoice
                           </div>
                         </div>
@@ -402,7 +402,7 @@ const BusinessProfileTab = (props) => {
                       const colors = getThemePreviewColors(themeColor);
                       return (
                         <div className="border border-theme-border-soft/60 dark:border-theme-border-soft rounded-2xl p-4 flex flex-col justify-between items-center relative overflow-hidden bg-theme-app min-h-[145px]">
-                          <span className="absolute top-2 right-2 text-[7px] font-black uppercase tracking-wider text-theme-muted bg-theme-card/10 px-1.5 py-0.5 rounded border border-white/5">Smartphone UI</span>
+                          <span className="absolute top-2 right-2 text-[9px] font-black uppercase tracking-wider text-theme-muted bg-theme-card/10 px-1.5 py-0.5 rounded border border-white/5">Smartphone UI</span>
                           {/* Mobile Screen Shell */}
                           <div className="w-3/4 flex-1 border border-white/10 bg-theme-card rounded-t-xl overflow-hidden flex flex-col justify-between" style={{ backgroundColor: colors.background }}>
                             {/* Mobile header */}
@@ -440,16 +440,16 @@ const BusinessProfileTab = (props) => {
                       const colors = getThemePreviewColors(themeColor);
                       return (
                         <div className="border border-theme-border-soft/60 dark:border-theme-border-soft rounded-2xl p-4 bg-theme-surface dark:bg-theme-card flex flex-col justify-between items-center relative overflow-hidden min-h-[145px]">
-                          <span className="absolute top-2 right-2 text-[7px] font-black uppercase tracking-wider text-theme-muted bg-theme-card/40 dark:bg-black/30 px-1.5 py-0.5 rounded border border-theme-border-soft/10">Printable PDF</span>
+                          <span className="absolute top-2 right-2 text-[9px] font-black uppercase tracking-wider text-theme-muted bg-theme-card/40 dark:bg-black/30 px-1.5 py-0.5 rounded border border-theme-border-soft/10">Printable PDF</span>
                           {/* Mini paper sheet */}
                           <div className="w-[85%] flex-1 bg-theme-card border border-theme-border-soft shadow-sm p-2 flex flex-col justify-between">
                             {/* Header accent */}
                             <div className="flex justify-between items-start pb-1.5 border-b border-theme-border-soft">
                               <div className="space-y-0.5">
-                                <span className="text-[6px] font-extrabold block" style={{ color: colors.headerColor }}>BillQyro Store</span>
+                                <span className="text-[9px] font-extrabold block" style={{ color: colors.headerColor }}>BillQyro Store</span>
                                 <div className="w-10 h-0.5 bg-theme-border-strong rounded-sm"></div>
                               </div>
-                              <span className="text-[6px] font-black tracking-wide" style={{ color: colors.headerColor }}>INVOICE</span>
+                              <span className="text-[9px] font-black tracking-wide" style={{ color: colors.headerColor }}>INVOICE</span>
                             </div>
                             {/* Table Mockup */}
                             <div className="my-1.5 space-y-0.5">
@@ -473,10 +473,10 @@ const BusinessProfileTab = (props) => {
                       const colors = getThemePreviewColors(themeColor);
                       return (
                         <div className="border border-theme-border-soft/60 dark:border-theme-border-soft rounded-2xl p-4 bg-theme-card dark:bg-theme-card flex flex-col justify-between items-center relative overflow-hidden min-h-[145px]">
-                          <span className="absolute top-2 right-2 text-[7px] font-black uppercase tracking-wider text-theme-muted bg-theme-surface dark:bg-theme-card/80 px-1.5 py-0.5 rounded border border-theme-border-soft/10">QR Pay Card</span>
+                          <span className="absolute top-2 right-2 text-[9px] font-black uppercase tracking-wider text-theme-muted bg-theme-surface dark:bg-theme-card/80 px-1.5 py-0.5 rounded border border-theme-border-soft/10">QR Pay Card</span>
                           {/* Miniature Scan Card frame */}
                           <div className="w-[85%] border border-theme-border-soft dark:border-theme-border-soft rounded-xl p-2.5 flex flex-col items-center justify-between text-center gap-1.5 shadow-sm bg-theme-app dark:bg-theme-app/20">
-                            <span className="text-[6px] font-bold text-theme-muted dark:text-theme-muted uppercase tracking-widest block leading-none">Scan to Pay</span>
+                            <span className="text-[9px] font-bold text-theme-muted dark:text-theme-muted uppercase tracking-widest block leading-none">Scan to Pay</span>
                             
                             {/* Mini QR border styled in theme accent */}
                             <div className="p-1 rounded border-2 border-dashed flex items-center justify-center" style={{ borderColor: colors.accent }}>
@@ -485,7 +485,7 @@ const BusinessProfileTab = (props) => {
 
                             <div className="space-y-0.5">
                               <span className="text-[5.5px] text-theme-muted dark:text-theme-muted block font-semibold leading-none">BillQyro Payment</span>
-                              <span className="text-[7px] font-black block leading-tight" style={{ color: colors.headerColor }}>$1,650.00 Due</span>
+                              <span className="text-[9px] font-black block leading-tight" style={{ color: colors.headerColor }}>$1,650.00 Due</span>
                             </div>
                           </div>
                         </div>

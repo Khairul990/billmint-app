@@ -498,27 +498,27 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
               </div>
               <div className="flex items-center gap-1.5 shrink-0">
                 {syncStatus === 'Synced' ? (
-                  <span className="flex items-center gap-1 text-[8px] font-bold text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded-full border border-emerald-500/20">
+                  <span className="flex items-center gap-1 text-[9.5px] font-bold text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded-full border border-emerald-500/20">
                     <span className="w-1 h-1 rounded-full bg-emerald-500"></span>
                     Synced
                   </span>
                 ) : syncStatus === 'Offline' ? (
-                  <span className="flex items-center gap-1 text-[8px] font-bold text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded-full border border-red-500/20">
+                  <span className="flex items-center gap-1 text-[9.5px] font-bold text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded-full border border-red-500/20">
                     <span className="w-1 h-1 rounded-full bg-red-500"></span>
                     Offline
                   </span>
                 ) : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? (
-                  <span className="flex items-center gap-1 text-[8px] font-bold text-blue-500 bg-blue-500/10 px-1.5 py-0.5 rounded-full border border-blue-500/20 animate-pulse">
+                  <span className="flex items-center gap-1 text-[9.5px] font-bold text-blue-500 bg-blue-500/10 px-1.5 py-0.5 rounded-full border border-blue-500/20 animate-pulse">
                     <span className="w-1 h-1 rounded-full bg-blue-500 animate-ping"></span>
                     Sync
                   </span>
                 ) : (
-                  <span className="flex items-center gap-1 text-[8px] font-bold text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded-full border border-amber-500/20">
+                  <span className="flex items-center gap-1 text-[9.5px] font-bold text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded-full border border-amber-500/20">
                     <span className="w-1 h-1 rounded-full bg-amber-500"></span>
                     Pending
                   </span>
                 )}
-                <span className="flex items-center gap-1 text-[8px] font-bold text-theme-accent bg-theme-accent-light px-1.5 py-0.5 rounded-full border border-theme-accent/15">
+                <span className="flex items-center gap-1 text-[9.5px] font-bold text-theme-accent bg-theme-accent-light px-1.5 py-0.5 rounded-full border border-theme-accent/15">
                   <ShieldCheck className="w-2 h-2" />
                   Secure
                 </span>
@@ -554,7 +554,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                   >
                     <Bell className="w-4 h-4" />
                     {pendingPaymentsCount > 0 && (
-                      <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-rose-500 text-white text-[7px] font-bold rounded-full flex items-center justify-center border border-theme-card">
+                      <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center border border-theme-card">
                         {pendingPaymentsCount}
                       </span>
                     )}

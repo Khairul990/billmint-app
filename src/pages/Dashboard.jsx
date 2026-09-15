@@ -1292,14 +1292,14 @@ const Dashboard = ({
                   </div>
 
                   {/* ========================================================================= */}
-                  {/* LEVEL 3: BUSINESS MONEY COMMAND CENTER */}
+                  {/* Business Money Overview */}
                   {/* ========================================================================= */}
                   <div className="luxury-glass-card p-5 sm:p-6 rounded-3xl border border-theme-border-soft space-y-4">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-theme-border-soft/60">
                       <div>
                         <h2 className="text-sm sm:text-base font-bold bq-font-display text-theme-primary flex items-center gap-2">
                           <Landmark className="w-4 h-4 text-theme-accent" />
-                          LEVEL 3: BUSINESS MONEY COMMAND CENTER
+                          Business Money Overview
                         </h2>
                         <p className="text-xs text-theme-muted">
                           Available Business Money: Clean Business & Personal Separation.
@@ -1364,7 +1364,7 @@ const Dashboard = ({
                           Revenue & Collection Trend
                         </h2>
                         <p className="text-xs text-theme-muted">
-                          LEVEL 4: REVENUE & COLLECTION INTELLIGENCE — Sales realization & velocity.
+                          Sales realization & collection velocity across your business.
                         </p>
                       </div>
 
@@ -1508,7 +1508,7 @@ const Dashboard = ({
                       <div className="flex items-center gap-2">
                         <AlertCircle className="w-4 h-4 text-amber-500" />
                         <h2 className="text-sm sm:text-base font-bold bq-font-display text-theme-primary">
-                          LEVEL 6: ACTION REQUIRED (Needs Your Attention)
+                          Needs Your Attention
                         </h2>
                       </div>
                       <span className="text-2xs font-bold text-theme-muted uppercase tracking-wider">
@@ -1610,14 +1610,14 @@ const Dashboard = ({
                   </div>
 
                   {/* ========================================================================= */}
-                  {/* LEVEL 7: SALES & INVOICE INTELLIGENCE */}
+                  {/* Sales & Invoice Intelligence */}
                   {/* ========================================================================= */}
                   <div className="luxury-glass-card p-5 sm:p-6 rounded-3xl border border-theme-border-soft space-y-4">
                     <div className="flex items-center justify-between pb-3 border-b border-theme-border-soft/60">
                       <div>
                         <h2 className="text-sm sm:text-base font-bold bq-font-display text-theme-primary flex items-center gap-2">
                           <Receipt className="w-4 h-4 text-theme-accent" />
-                          LEVEL 7: SALES & INVOICE INTELLIGENCE
+                          Sales & Invoice Intelligence
                         </h2>
                         <p className="text-xs text-theme-muted">Invoice status distribution and settlement breakdown.</p>
                       </div>
@@ -1674,14 +1674,14 @@ const Dashboard = ({
                   </div>
 
                   {/* ========================================================================= */}
-                  {/* LEVEL 8: EXPENSE & CASH FLOW INTELLIGENCE */}
+                  {/* Expense & Cash Flow */}
                   {/* ========================================================================= */}
                   <div className="luxury-glass-card p-5 sm:p-6 rounded-3xl border border-theme-border-soft space-y-4">
                     <div className="flex items-center justify-between pb-3 border-b border-theme-border-soft/60">
                       <div>
                         <h2 className="text-sm sm:text-base font-bold bq-font-display text-theme-primary flex items-center gap-2">
                           <ArrowDownRight className="w-4 h-4 text-rose-500" />
-                          LEVEL 8: EXPENSE & CASH FLOW INTELLIGENCE
+                          Expense & Cash Flow
                         </h2>
                         <p className="text-xs text-theme-muted">Business expenditure categories and monthly net margin.</p>
                       </div>
@@ -1709,14 +1709,14 @@ const Dashboard = ({
                   </div>
 
                   {/* ========================================================================= */}
-                  {/* LEVEL 9: CUSTOMER INTELLIGENCE */}
+                  {/* Customer Intelligence */}
                   {/* ========================================================================= */}
                   <div className="luxury-glass-card p-5 sm:p-6 rounded-3xl border border-theme-border-soft space-y-4">
                     <div className="flex items-center justify-between pb-3 border-b border-theme-border-soft/60">
                       <div>
                         <h2 className="text-sm sm:text-base font-bold bq-font-display text-theme-primary flex items-center gap-2">
                           <Users className="w-4 h-4 text-theme-accent" />
-                          LEVEL 9: CUSTOMER INTELLIGENCE
+                          Customer Intelligence
                         </h2>
                         <p className="text-xs text-theme-muted">Top debtors requiring follow-up and top revenue accounts.</p>
                       </div>
@@ -1769,7 +1769,7 @@ const Dashboard = ({
                       <div>
                         <h2 className="text-sm sm:text-base font-bold bq-font-display text-theme-primary flex items-center gap-2">
                           <Heart className="w-4 h-4 text-pink-500" />
-                          LEVEL 10: PERSONAL MONEY (MONEY LOCATIONS & SALARY)
+                          Personal Money & Salary
                         </h2>
                         <p className="text-xs text-theme-muted">
                           Personal accounts maintained strictly separate from official business money.
@@ -1832,14 +1832,14 @@ const Dashboard = ({
                   </div>
 
                   {/* ========================================================================= */}
-                  {/* LEVEL 11: RECENT CONFIRMED FINANCIAL ACTIVITY */}
+                  {/* Recent Financial Activity */}
                   {/* ========================================================================= */}
                   <div className="luxury-glass-card p-5 sm:p-6 rounded-3xl border border-theme-border-soft space-y-4">
                     <div className="flex items-center justify-between pb-3 border-b border-theme-border-soft/60">
                       <div>
                         <h2 className="text-sm sm:text-base font-bold bq-font-display text-theme-primary flex items-center gap-2">
                           <Activity className="w-4 h-4 text-theme-accent" />
-                          LEVEL 11: RECENT CONFIRMED FINANCIAL ACTIVITY
+                          Recent Financial Activity
                         </h2>
                         <p className="text-xs text-theme-muted">Latest verified invoices, payments, and settlements.</p>
                       </div>

@@ -550,7 +550,7 @@ const AdminConsoleTab = (props) => {
                               </div>
                             {req.status === 'Rejected' && req.rejectionReason && (
                               <div className="text-[10px] text-theme-danger dark:text-rose-450 font-bold bg-theme-danger/5/30 dark:bg-rose-950/10 p-2.5 rounded-xl border border-rose-100 dark:border-rose-900/20 max-w-md w-full">
-                                <span className="uppercase tracking-widest block text-[8px] text-theme-danger mb-1">Rejection Reason</span>
+                                <span className="uppercase tracking-widest block text-[9.5px] text-theme-danger mb-1">Rejection Reason</span>
                                 "{req.rejectionReason}"
                               </div>
                             {req.status === 'Pending' && (
@@ -595,17 +595,17 @@ const AdminConsoleTab = (props) => {
                   <div className="bg-theme-card dark:bg-theme-surface/5 border border-white/5 rounded-xl p-2.5">
                     <FileText className="w-4 h-4 text-theme-accent mx-auto mb-1" />
                     <p className="text-lg font-black text-white">{totalInvoices}</p>
-                    <span className="text-[8px] text-theme-muted uppercase font-black block">Invoices</span>
+                    <span className="text-[9.5px] text-theme-muted uppercase font-black block">Invoices</span>
                   </div>
                   <div className="bg-theme-card dark:bg-theme-surface/5 border border-white/5 rounded-xl p-2.5">
                     <Users className="w-4 h-4 text-theme-accent mx-auto mb-1" />
                     <p className="text-lg font-black text-white">{totalCustomers}</p>
-                    <span className="text-[8px] text-theme-muted uppercase font-black block">CRM Clients</span>
+                    <span className="text-[9.5px] text-theme-muted uppercase font-black block">CRM Clients</span>
                   </div>
                   <div className="bg-theme-card dark:bg-theme-surface/5 border border-white/5 rounded-xl p-2.5">
                     <Users className="w-4 h-4 text-theme-accent mx-auto mb-1" />
                     <p className="text-lg font-black text-white">{adminUsers.length}</p>
-                    <span className="text-[8px] text-theme-muted uppercase font-black block">Total Users</span>
+                    <span className="text-[9.5px] text-theme-muted uppercase font-black block">Total Users</span>
                   </div>
                   <div className="bg-theme-card dark:bg-theme-surface/5 border border-white/5 rounded-xl p-2.5 flex flex-col items-center justify-center">
                     <div className="flex items-center gap-1 text-[10px] font-bold mt-1">
@@ -613,10 +613,10 @@ const AdminConsoleTab = (props) => {
                       <span className="text-theme-muted">/</span>
                       <span className="text-theme-muted">{adminUsers.filter(u => u.planStatus !== 'premium').length}</span>
                     </div>
-                    <span className="text-[7px] text-theme-muted uppercase font-black block mt-0.5">Premium / Free</span>
+                    <span className="text-[9px] text-theme-muted uppercase font-black block mt-0.5">Premium / Free</span>
                   </div>
                   <div className="bg-theme-card dark:bg-theme-surface/5 border border-white/5 rounded-xl p-2.5 md:col-span-2">
-                    <span className="text-[8px] text-theme-muted uppercase font-black block">Outstanding Dues</span>
+                    <span className="text-[9.5px] text-theme-muted uppercase font-black block">Outstanding Dues</span>
                     <p className="text-base font-black text-amber-300 mt-0.5">{currency}{pendingPayments.toLocaleString('en-IN')}</p>
                   </div>
                 </div>

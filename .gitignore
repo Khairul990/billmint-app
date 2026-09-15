@@ -44,3 +44,24 @@ yarn-error.log*
 dev-dist/
 eslint_report.json
 _deleted_backup/
+
+# One-off maintenance artifacts (keep out of the repo)
+/patch_*.js
+/patch_*.cjs
+/testSchema*.js
+/testFeature.js
+/test-pdf.js
+/test.pdf
+/test_pdf_node.mjs
+/test_portal.mjs
+/test_studio_imports.mjs
+/test_lazy_studios.mjs
+/scratch/
+/landing_dump*.html
+/lint_report*.json
+/lint_results.json
+/lint_output*.txt
+/parsed_undefs.json
+/parse_lint.cjs
+/fix_css.cjs
+*.bak

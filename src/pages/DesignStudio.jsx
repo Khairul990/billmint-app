@@ -542,7 +542,7 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {}, setSettings, initi
                 <div key={c.hex} className="flex items-center gap-2 bg-theme-app rounded-xl px-3 py-2 border border-theme-border-soft">
                   <div className="w-6 h-6 rounded-lg shadow-sm border border-white/10" style={{ backgroundColor: c.hex }} />
                   <span className="text-[10px] font-bold text-theme-primary">{c.name}</span>
-                  <span className="text-[8px] font-mono text-theme-muted">{c.hex}</span>
+                  <span className="text-[9.5px] font-mono text-theme-muted">{c.hex}</span>
                 </div>
               ))}
             </div>
@@ -567,7 +567,7 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {}, setSettings, initi
               >
                 <div className="w-full h-16 rounded-xl shadow-md" style={{ background: theme.gradient }} />
                 <span className="text-[9px] font-bold text-theme-primary text-center leading-tight mt-1">{theme.name}</span>
-                <span className="text-[7px] font-bold text-theme-muted uppercase tracking-wider">{theme.category}</span>
+                <span className="text-[9px] font-bold text-theme-muted uppercase tracking-wider">{theme.category}</span>
                 {favoriteThemes.includes(theme.id) && (
                   <div className="absolute top-2 right-2 w-4 h-4 bg-amber-500 rounded-full flex items-center justify-center shadow-sm">
                     <Star className="w-2.5 h-2.5 text-white" />
@@ -1062,7 +1062,7 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {}, setSettings, initi
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-0.5">
             <span className="text-[10px] font-black text-theme-primary uppercase tracking-wider">Design Tip</span>
-            <span className="text-[8px] font-bold text-theme-muted bg-theme-card px-2 py-0.5 rounded-full border border-theme-border-soft">
+            <span className="text-[9.5px] font-bold text-theme-muted bg-theme-card px-2 py-0.5 rounded-full border border-theme-border-soft">
               {currentTipIndex + 1}/{DESIGN_TIPS.length}
             </span>
           </div>

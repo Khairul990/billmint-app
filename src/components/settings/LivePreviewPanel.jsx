@@ -43,7 +43,7 @@ const MiniInvoicePreview = ({ colors, businessSettings }) => (
       </div>
     </div>
     <div className="px-3 pb-3">
-      <div className="w-full py-1.5 rounded-lg text-center text-[8px] font-bold text-white" style={{ background: `linear-gradient(90deg, ${colors.btnFrom}, ${colors.btnTo})` }}>
+      <div className="w-full py-1.5 rounded-lg text-center text-[9.5px] font-bold text-white" style={{ background: `linear-gradient(90deg, ${colors.btnFrom}, ${colors.btnTo})` }}>
         Pay Now - {DEMO_INVOICE.currency}{DEMO_INVOICE.grandTotal}
       </div>
     </div>
@@ -70,17 +70,17 @@ const MiniDashboardPreview = ({ colors }) => (
           { label: 'Invoices', value: '342', color: colors.btnFrom }
         ].map((stat, i) => (
           <div key={i} className="rounded-lg p-2 border" style={{ backgroundColor: colors.card, borderColor: colors.border }}>
-            <p className="text-[8px] font-semibold" style={{ color: colors.muted }}>{stat.label}</p>
+            <p className="text-[9.5px] font-semibold" style={{ color: colors.muted }}>{stat.label}</p>
             <p className="text-xs font-black" style={{ color: stat.color }}>{stat.value}</p>
           </div>
         ))}
       </div>
       <div className="rounded-lg p-2 border" style={{ backgroundColor: colors.card, borderColor: colors.border }}>
-        <p className="text-[8px] font-semibold" style={{ color: colors.muted }}>Recent Invoice</p>
+        <p className="text-[9.5px] font-semibold" style={{ color: colors.muted }}>Recent Invoice</p>
         <p className="text-[9px] font-bold" style={{ color: colors.text }}>INV-10024 - \u20B91,593</p>
         <div className="flex items-center gap-1 mt-1">
           <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: colors.accent }} />
-          <span className="text-[8px]" style={{ color: colors.muted }}>Pending - Rahim Sheikh</span>
+          <span className="text-[9.5px]" style={{ color: colors.muted }}>Pending - Rahim Sheikh</span>
         </div>
       </div>
     </div>
@@ -91,7 +91,7 @@ const MiniBillingPortalPreview = ({ colors }) => (
   <div className="w-full h-full flex flex-col" style={{ backgroundColor: colors.background }}>
     <div className="p-3 border-b text-center" style={{ backgroundColor: colors.card, borderColor: colors.border }}>
       <p className="text-xs font-bold" style={{ color: colors.text }}>ABC Coaching Center</p>
-      <p className="text-[8px]" style={{ color: colors.muted }}>Billing Portal</p>
+      <p className="text-[9.5px]" style={{ color: colors.muted }}>Billing Portal</p>
     </div>
     <div className="flex-1 p-3 space-y-3">
       <div className="rounded-xl p-3 text-center" style={{ background: `linear-gradient(135deg, ${colors.btnFrom}, ${colors.btnTo})` }}>
@@ -103,7 +103,7 @@ const MiniBillingPortalPreview = ({ colors }) => (
           <div key={i} className="flex items-center justify-between py-1.5 border-b border-dashed" style={{ borderColor: colors.border }}>
             <div>
               <p className="text-[9px] font-semibold" style={{ color: colors.text }}>June 2026 Fee</p>
-              <p className="text-[8px]" style={{ color: colors.muted }}>Due: 15/07/2026</p>
+              <p className="text-[9.5px]" style={{ color: colors.muted }}>Due: 15/07/2026</p>
             </div>
             <span className="text-[9px] font-bold" style={{ color: colors.accent }}>{DEMO_INVOICE.currency}500</span>
           </div>
@@ -133,13 +133,13 @@ const MiniStudentPortalPreview = ({ colors }) => (
         <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-[10px] font-black" style={{ backgroundColor: colors.accent }}>R</div>
         <div>
           <p className="text-[10px] font-bold" style={{ color: colors.text }}>Rahim Sheikh</p>
-          <p className="text-[8px]" style={{ color: colors.muted }}>Student ID: STU-2024-0089</p>
+          <p className="text-[9.5px]" style={{ color: colors.muted }}>Student ID: STU-2024-0089</p>
         </div>
       </div>
     </div>
     <div className="flex-1 p-3 space-y-2">
       <div className="rounded-lg p-2" style={{ backgroundColor: colors.card, border: `1px solid ${colors.border}` }}>
-        <p className="text-[8px] font-semibold" style={{ color: colors.muted }}>Current Month</p>
+        <p className="text-[9.5px] font-semibold" style={{ color: colors.muted }}>Current Month</p>
         <div className="flex justify-between items-center mt-1">
           <span className="text-[9px]" style={{ color: colors.text }}>Tuition Fee</span>
           <span className="text-[9px] font-bold" style={{ color: colors.accent }}>{DEMO_INVOICE.currency}1,000</span>
@@ -154,8 +154,8 @@ const MiniStudentPortalPreview = ({ colors }) => (
         </div>
       </div>
       <div className="flex gap-1">
-        <span className="text-[8px] px-2 py-0.5 rounded-full font-semibold" style={{ backgroundColor: colors.accent + '20', color: colors.accent }}>Pending</span>
-        <span className="text-[8px] px-2 py-0.5 rounded-full font-semibold" style={{ backgroundColor: colors.card, color: colors.muted, border: `1px solid ${colors.border}` }}>Due: 15/07</span>
+        <span className="text-[9.5px] px-2 py-0.5 rounded-full font-semibold" style={{ backgroundColor: colors.accent + '20', color: colors.accent }}>Pending</span>
+        <span className="text-[9.5px] px-2 py-0.5 rounded-full font-semibold" style={{ backgroundColor: colors.card, color: colors.muted, border: `1px solid ${colors.border}` }}>Due: 15/07</span>
       </div>
     </div>
   </div>
@@ -171,17 +171,17 @@ const MiniCustomerPortalPreview = ({ colors }) => (
         <div className="flex justify-between items-start">
           <div>
             <p className="text-[9px] font-semibold" style={{ color: colors.muted }}>INV-10024</p>
-            <p className="text-[8px]" style={{ color: colors.muted }}>15 Jun 2026</p>
+            <p className="text-[9.5px]" style={{ color: colors.muted }}>15 Jun 2026</p>
           </div>
-          <span className="text-[8px] px-2 py-0.5 rounded-full font-bold" style={{ backgroundColor: colors.btnFrom + '20', color: colors.btnFrom }}>Pending</span>
+          <span className="text-[9.5px] px-2 py-0.5 rounded-full font-bold" style={{ backgroundColor: colors.btnFrom + '20', color: colors.btnFrom }}>Pending</span>
         </div>
         <div className="mt-2 flex justify-between items-center">
           <span className="text-[10px] font-bold" style={{ color: colors.text }}>{DEMO_INVOICE.currency}{DEMO_INVOICE.grandTotal}</span>
-          <button className="text-[8px] px-3 py-1 rounded-lg font-bold text-white" style={{ backgroundColor: colors.accent }}>Pay Now</button>
+          <button className="text-[9.5px] px-3 py-1 rounded-lg font-bold text-white" style={{ backgroundColor: colors.accent }}>Pay Now</button>
         </div>
       </div>
       <div className="rounded-lg p-3" style={{ backgroundColor: colors.card, border: `1px solid ${colors.border}` }}>
-        <p className="text-[8px] font-semibold" style={{ color: colors.muted }}>Contact</p>
+        <p className="text-[9.5px] font-semibold" style={{ color: colors.muted }}>Contact</p>
         <p className="text-[9px] font-bold" style={{ color: colors.text }}>khairul@abccoaching.com</p>
         <p className="text-[9px]" style={{ color: colors.text }}>+91 98765 43210</p>
       </div>
@@ -266,7 +266,7 @@ const LivePreviewPanel = ({ themeId, darkMode, brandColor, settings = {} }) => {
               }}
             >
               <TabIcon className="w-3.5 h-3.5" />
-              <span className="text-[7px] font-semibold whitespace-nowrap">{tab.label}</span>
+              <span className="text-[9px] font-semibold whitespace-nowrap">{tab.label}</span>
             </button>
           );
         })}
@@ -290,10 +290,10 @@ const LivePreviewPanel = ({ themeId, darkMode, brandColor, settings = {} }) => {
 
       {/* Status Bar */}
       <div className="px-3 py-1.5 border-t flex items-center justify-between" style={{ borderColor: colors.border, backgroundColor: colors.card }}>
-        <span className="text-[7px] font-semibold" style={{ color: colors.muted }}>Instant Preview</span>
+        <span className="text-[9px] font-semibold" style={{ color: colors.muted }}>Instant Preview</span>
         <div className="flex items-center gap-1">
           <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: colors.accent }} />
-          <span className="text-[7px]" style={{ color: colors.muted }}>Live</span>
+          <span className="text-[9px]" style={{ color: colors.muted }}>Live</span>
         </div>
       </div>
     </div>

@@ -236,7 +236,7 @@ function DashboardCard() {
           <div className="min-w-0 flex-1 p-3">
             <div className="mb-3 flex items-center justify-between gap-2">
               <div className="min-w-0">
-                <div className="inline-flex rounded-full border border-theme-border-soft bg-theme-accent-light px-2 py-1 text-[8px] font-black uppercase tracking-wide text-theme-accent">
+                <div className="inline-flex rounded-full border border-theme-border-soft bg-theme-accent-light px-2 py-1 text-[9.5px] font-black uppercase tracking-wide text-theme-accent">
                   Active Workspace
                 </div>
                 <p className="mt-2 truncate text-sm font-black text-theme-primary">Business Dashboard</p>
@@ -367,17 +367,17 @@ function MiniInvoiceDocument({ compact = false, pdf = false }) {
     <div className={cn("flex h-full flex-col overflow-hidden rounded-[1rem] bg-theme-card text-theme-primary", compact ? "p-3" : "p-2")}>
       <div className="shrink-0 border-b border-theme-border-soft pb-2">
         <p className={cn("font-black leading-tight", compact ? "text-[11px]" : "text-[10px]")}>KB.Embroidery Designer</p>
-        <p className="mt-0.5 truncate text-[7px] font-semibold text-theme-muted">Dhulagor Howrah · khairul2052007@gmail.com</p>
+        <p className="mt-0.5 truncate text-[9px] font-semibold text-theme-muted">Dhulagor Howrah · khairul2052007@gmail.com</p>
         <div className="mt-2 flex items-center justify-between">
           <p className="text-[10px] font-black tracking-wide">INVOICE</p>
-          <div className="text-right text-[7px] font-bold text-theme-muted">
+          <div className="text-right text-[9px] font-bold text-theme-muted">
             <p>INV-1002</p>
             <p>24-05-2026</p>
           </div>
         </div>
       </div>
 
-      <div className="grid shrink-0 grid-cols-2 gap-2 border-b border-theme-border-soft py-2 text-[7px]">
+      <div className="grid shrink-0 grid-cols-2 gap-2 border-b border-theme-border-soft py-2 text-[9px]">
         <div>
           <p className="font-black uppercase text-theme-muted">Invoiced To</p>
           <p className="mt-1 font-bold">Soheb Mollik</p>
@@ -391,7 +391,7 @@ function MiniInvoiceDocument({ compact = false, pdf = false }) {
       </div>
 
       <div className="min-h-0 flex-1 py-2">
-        <div className="grid grid-cols-[0.8fr_1fr_0.4fr_0.6fr] gap-1 rounded-md bg-theme-surface px-1.5 py-1 text-[6.5px] font-black text-theme-muted">
+        <div className="grid grid-cols-[0.8fr_1fr_0.4fr_0.6fr] gap-1 rounded-md bg-theme-surface px-1.5 py-1 text-[9px] font-black text-theme-muted">
           <span>Design</span>
           <span>Type</span>
           <span>Qty</span>
@@ -399,23 +399,23 @@ function MiniInvoiceDocument({ compact = false, pdf = false }) {
         </div>
         <div className="mt-1 space-y-1">
           {rows.map(([design, type, qty, amount]) => (
-            <div key={design} className="grid grid-cols-[0.8fr_1fr_0.4fr_0.6fr] gap-1 px-1.5 text-[6.5px] font-semibold text-theme-muted">
+            <div key={design} className="grid grid-cols-[0.8fr_1fr_0.4fr_0.6fr] gap-1 px-1.5 text-[9px] font-semibold text-theme-muted">
               <span>{design}</span>
               <span>{type}</span>
               <span>{qty}</span>
               <span>{amount}</span>
             </div>
           ))}
-          <div className="px-1.5 text-[6.5px] font-semibold text-theme-muted">+ 23 more embroidery items</div>
+          <div className="px-1.5 text-[9px] font-semibold text-theme-muted">+ 23 more embroidery items</div>
         </div>
       </div>
 
       <div className="grid shrink-0 grid-cols-[0.9fr_1fr] gap-2 border-t border-theme-border-soft pt-2">
         <div className="rounded-lg bg-theme-surface p-2 text-center">
           <QrCode className="mx-auto text-theme-primary" size={compact ? 18 : 15} />
-          <p className="mt-1 text-[6.5px] font-black text-theme-muted">UPI QR</p>
+          <p className="mt-1 text-[9px] font-black text-theme-muted">UPI QR</p>
         </div>
-        <div className="space-y-1 text-[7px] font-bold">
+        <div className="space-y-1 text-[9px] font-bold">
           <div className="flex justify-between gap-2">
             <span className="text-theme-muted">Subtotal</span>
             <span>₹2510.00</span>
@@ -430,7 +430,7 @@ function MiniInvoiceDocument({ compact = false, pdf = false }) {
           </div>
         </div>
       </div>
-      {pdf ? <p className="mt-1 shrink-0 text-center text-[6px] font-bold text-theme-muted">Powered by BillQyro Invoicing SaaS</p> : null}
+      {pdf ? <p className="mt-1 shrink-0 text-center text-[9px] font-bold text-theme-muted">Powered by BillQyro Invoicing SaaS</p> : null}
     </div>
   );
 }
@@ -565,7 +565,7 @@ function ShareCard() {
             transition={{ delay: 0.25 }}
             className="flex min-h-0 flex-col rounded-[1.25rem] border border-theme-border-soft bg-theme-card p-3 text-theme-primary shadow-xl"
           >
-            <div className="mb-2 flex shrink-0 items-center justify-between text-[8px] font-black">
+            <div className="mb-2 flex shrink-0 items-center justify-between text-[9.5px] font-black">
               <span>Customer View</span>
               <span className="text-theme-accent">OPEN</span>
             </div>
