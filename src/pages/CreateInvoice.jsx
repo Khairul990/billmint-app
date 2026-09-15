@@ -178,11 +178,11 @@ const CreateInvoice = ({
         const dueAmount = totals.grandTotal || 0;
 
         let qrText = '';
-        if (method === 'UPI') {
+        if (method === 'UPI' && upiId) {
           qrText = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&am=${dueAmount}&cu=${currencyCode}&tn=${invoiceNumber}`;
-        } else if (method === 'bKash') {
+        } else if (method === 'bKash' && bkashNumber) {
           qrText = `bKash Payment\nMerchant/Personal Number: ${bkashNumber}\nAmount: ${dueAmount}\nInvoice: ${invoiceNumber}`;
-        } else if (method === 'Nagad') {
+        } else if (method === 'Nagad' && nagadNumber) {
           qrText = `Nagad Payment\nNumber: ${nagadNumber}\nAmount: ${dueAmount}\nInvoice: ${invoiceNumber}`;
         } else {
           qrText = `${window.location.origin}/invoice/preview`;

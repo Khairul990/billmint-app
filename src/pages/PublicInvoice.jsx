@@ -482,9 +482,11 @@ const PublicInvoice = ({ initialInvoice }) => {
   const verifStr = invoice.verificationCode ? ` [Code: ${invoice.verificationCode}]` : '';
   const txnNote = `Invoice ${invoice.invoiceNumber}${verifStr}`;
   const upiLink = `upi://pay?pa=${paymentPrefs.upiId}&pn=${encodeURIComponent(paymentPrefs.payeeName || business.businessName)}&am=${dueAmount}&cu=INR&tn=${encodeURIComponent(txnNote)}`;
-  const qrText = paymentPrefs.paymentMethod === 'UPI' ? upiLink : (
-    paymentPrefs.paymentMethod === 'bKash' ? `bKash: ${paymentPrefs.bkashNumber}, Invoice: ${invoice.invoiceNumber}, Amount: ${dueAmount}${invoice.verificationCode ? `, Code: ${invoice.verificationCode}` : ''}` : (
-      paymentPrefs.paymentMethod === 'Nagad' ? `Nagad: ${paymentPrefs.nagadNumber}, Invoice: ${invoice.invoiceNumber}, Amount: ${dueAmount}${invoice.verificationCode ? `, Code: ${invoice.verificationCode}` : ''}` :
+  // Guard: an empty UPI id must never produce a broken upi:// link or QR -
+  // fall through to the custom link / manual QR instead.
+  const qrText = paymentPrefs.paymentMethod === 'UPI' && paymentPrefs.upiId ? upiLink : (
+    paymentPrefs.paymentMethod === 'bKash' && paymentPrefs.bkashNumber ? `bKash: ${paymentPrefs.bkashNumber}, Invoice: ${invoice.invoiceNumber}, Amount: ${dueAmount}${invoice.verificationCode ? `, Code: ${invoice.verificationCode}` : ''}` : (
+      paymentPrefs.paymentMethod === 'Nagad' && paymentPrefs.nagadNumber ? `Nagad: ${paymentPrefs.nagadNumber}, Invoice: ${invoice.invoiceNumber}, Amount: ${dueAmount}${invoice.verificationCode ? `, Code: ${invoice.verificationCode}` : ''}` :
       paymentPrefs.customPaymentLink || 'Manual QR'
     )
   );
@@ -947,7 +949,7 @@ const PublicInvoice = ({ initialInvoice }) => {
             </div>
 
             {/* Payment Hub / Proof Form */}
-            {!showPaymentModal ? (
+            {!showPaymentModal && dueAmount > 0 ? (
               <div className="card-premium overflow-hidden">
                 <div className="p-4 md:p-5 space-y-4 md:space-y-5">
                   <button onClick={() => setPaymentSectionOpen(prev => !prev)} className="w-full flex items-center gap-2.5 pb-3 border-b border-theme-border-soft cursor-pointer text-left group premium-focus rounded-lg">
@@ -991,7 +993,7 @@ const PublicInvoice = ({ initialInvoice }) => {
                   )}
 
                   <div className="space-y-3">
-                    {paymentPrefs.paymentMethod === 'UPI' && (
+                    {paymentPrefs.paymentMethod === 'UPI' && paymentPrefs.upiId && (
                       <div className="space-y-2">
                         <a href={upiLink} className="btn-premium w-full py-3 text-[11px] md:text-xs">
                           <Wallet className="w-4 h-4" />
