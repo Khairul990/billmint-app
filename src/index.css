@@ -276,6 +276,74 @@ body {
     --chart-primary: #D4AF7A;
   }
 
+  /* 1b. BillQyro Signature — brand-premium (Official Emerald Standard)
+     Previously this theme id had no CSS block, so it silently fell back to
+     the obsidian-gold champagne palette. This is the real default theme. */
+  [data-theme="brand-premium"] {
+    --app-bg: #F5F9F7;
+    --app-bg-soft: #ECF4F0;
+    --surface: #FFFFFF;
+    --surface-elevated: #FFFFFF;
+    --card-bg: #FFFFFF;
+    --text-primary: #0E1F1A;
+    --text-secondary: #1C2F29;
+    --text-muted: #5B7069;
+    --button-text: #FFFFFF;
+    --border-soft: rgba(11, 143, 120, 0.14);
+    --border-strong: rgba(11, 143, 120, 0.30);
+    --accent: #0B8F78;
+    --accent-light: rgba(11, 143, 120, 0.10);
+    --accent-dark: #075E50;
+    --accent-gradient: linear-gradient(135deg, #0B8F78 0%, #18B99B 52%, #0A7766 100%);
+    --accent-glow: rgba(11, 143, 120, 0.25);
+    --luxury-accent: #0B8F78;
+    --luxury-companion: #C8A96B;
+    --theme-tint-bg: rgba(11, 143, 120, 0.03);
+    --theme-tint-surface: rgba(11, 143, 120, 0.06);
+    --theme-tint-border: rgba(11, 143, 120, 0.16);
+    --theme-tint-hover: rgba(11, 143, 120, 0.09);
+    --sidebar-bg: #F5F9F7;
+    --sidebar-active: rgba(11, 143, 120, 0.10);
+    --sidebar-text: #0E1F1A;
+    --input-bg: #FFFFFF;
+    --chart-primary: #0B8F78;
+    --status-success: #10B981;
+    --status-warning: #F59E0B;
+    --status-danger: #EF4444;
+  }
+  .dark[data-theme="brand-premium"], [data-theme="brand-premium"].dark {
+    --app-bg: #071411;
+    --app-bg-soft: #0A1B16;
+    --surface: #0E1F1A;
+    --surface-elevated: #142B24;
+    --card-bg: #112420;
+    --text-primary: #ECF7F3;
+    --text-secondary: #D3E8E0;
+    --text-muted: #8FAAA1;
+    --button-text: #FFFFFF;
+    --border-soft: rgba(24, 185, 155, 0.16);
+    --border-strong: rgba(24, 185, 155, 0.34);
+    --accent: #18B99B;
+    --accent-light: rgba(24, 185, 155, 0.14);
+    --accent-dark: #0FAF92;
+    --accent-gradient: linear-gradient(135deg, #0FAF92 0%, #18B99B 50%, #0B8F78 100%);
+    --accent-glow: rgba(24, 185, 155, 0.30);
+    --luxury-accent: #18B99B;
+    --luxury-companion: #C8A96B;
+    --theme-tint-bg: rgba(24, 185, 155, 0.04);
+    --theme-tint-surface: rgba(24, 185, 155, 0.07);
+    --theme-tint-border: rgba(24, 185, 155, 0.18);
+    --theme-tint-hover: rgba(24, 185, 155, 0.11);
+    --sidebar-bg: #071411;
+    --sidebar-active: rgba(24, 185, 155, 0.12);
+    --sidebar-text: #ECF7F3;
+    --input-bg: #112420;
+    --chart-primary: #18B99B;
+    --status-success: #10B981;
+    --status-warning: #F59E0B;
+    --status-danger: #EF4444;
+  }
+
   /* 2. Arctic Teal */
   [data-theme="arctic-teal"] {
     --app-bg: #F8FAFC;
@@ -2279,32 +2347,18 @@ button:active {
    Applied to public landing + owner control surfaces.
    ========================================================= */
 .billqyro-signature-brand {
-  --billqyro-brand: #0B8F78;
-  --billqyro-brand-deep: #075E50;
-  --billqyro-brand-bright: #18B99B;
+  /* Brand tokens now FOLLOW the active theme (data-theme / custom brand color)
+     instead of locking every surface to Signature Emerald. */
+  --billqyro-brand: var(--accent, #0B8F78);
+  --billqyro-brand-deep: var(--accent-dark, #075E50);
+  --billqyro-brand-bright: var(--accent-dark, #18B99B);
   --billqyro-champagne: #C8A96B;
-  --accent: var(--billqyro-brand);
-  --accent-light: rgba(11, 143, 120, 0.10);
-  --accent-dark: var(--billqyro-brand-deep);
-  --accent-gradient: linear-gradient(135deg, #0B8F78 0%, #18B99B 52%, #0A7766 100%);
-  --accent-glow: rgba(11, 143, 120, 0.28);
-  --chart-primary: var(--billqyro-brand);
-  --sidebar-active: rgba(11, 143, 120, 0.10);
-  --button-text: #FFFFFF;
 }
-
-.billqyro-signature-brand .text-theme-accent,
-.billqyro-signature-brand .text-theme-accent-dark { color: var(--billqyro-brand) !important; }
-.billqyro-signature-brand .bg-theme-accent { background-color: var(--billqyro-brand) !important; }
-.billqyro-signature-brand .bg-theme-accent-light { background-color: rgba(11, 143, 120, 0.10) !important; }
-.billqyro-signature-brand .border-theme-accent { border-color: rgba(11, 143, 120, 0.30) !important; }
-.billqyro-signature-brand .shadow-theme-glow,
-.billqyro-signature-brand .shadow-glow { box-shadow: 0 12px 36px rgba(11, 143, 120, 0.20) !important; }
 
 .billqyro-hero-cockpit {
   box-shadow:
     0 35px 90px rgba(15, 23, 42, 0.14),
-    0 0 0 1px rgba(11,143,120,0.06),
+    0 0 0 1px color-mix(in srgb, var(--accent, #0B8F78) 6%, transparent),
     inset 0 1px 0 rgba(255,255,255,0.45);
   transform: perspective(1400px) rotateY(-2deg) rotateX(1deg);
 }
@@ -2313,7 +2367,7 @@ button:active {
   position: absolute;
   inset: -35%;
   background:
-    radial-gradient(circle at 30% 25%, rgba(24,185,155,0.16), transparent 22%),
+    radial-gradient(circle at 30% 25%, color-mix(in srgb, var(--accent, #18B99B) 16%, transparent), transparent 22%),
     radial-gradient(circle at 72% 70%, rgba(200,169,107,0.10), transparent 20%);
   pointer-events: none;
 }
@@ -2323,8 +2377,8 @@ button:active {
 }
 .billqyro-luxury-card:hover {
   transform: translateY(-6px);
-  border-color: rgba(11,143,120,0.32);
-  box-shadow: 0 24px 65px rgba(11,143,120,0.10), inset 0 1px 0 rgba(255,255,255,0.42);
+  border-color: color-mix(in srgb, var(--accent, #0B8F78) 32%, transparent);
+  box-shadow: 0 24px 65px color-mix(in srgb, var(--accent, #0B8F78) 10%, transparent), inset 0 1px 0 rgba(255,255,255,0.42);
 }
 .dark .billqyro-hero-cockpit {
   box-shadow: 0 35px 90px rgba(0,0,0,0.42), 0 0 0 1px rgba(24,185,155,0.08);
@@ -2334,24 +2388,24 @@ button:active {
 }
 .billqyro-landing-premium {
   background:
-    radial-gradient(circle at 12% 8%, rgba(11,143,120,0.10), transparent 30%),
+    radial-gradient(circle at 12% 8%, color-mix(in srgb, var(--accent, #0B8F78) 10%, transparent), transparent 30%),
     radial-gradient(circle at 88% 18%, rgba(200,169,107,0.08), transparent 24%),
     linear-gradient(180deg, var(--app-bg) 0%, var(--app-bg) 60%, var(--surface) 100%);
 }
 
 .billqyro-landing-premium .btn-premium {
   background-image: var(--accent-gradient);
-  border: 1px solid rgba(11,143,120,0.28);
-  box-shadow: 0 14px 34px rgba(11,143,120,0.18), inset 0 1px 0 rgba(255,255,255,0.22);
+  border: 1px solid color-mix(in srgb, var(--accent, #0B8F78) 28%, transparent);
+  box-shadow: 0 14px 34px color-mix(in srgb, var(--accent, #0B8F78) 18%, transparent), inset 0 1px 0 rgba(255,255,255,0.22);
 }
 .billqyro-landing-premium .btn-premium:hover {
   transform: translateY(-2px);
-  box-shadow: 0 18px 44px rgba(11,143,120,0.25), inset 0 1px 0 rgba(255,255,255,0.25);
+  box-shadow: 0 18px 44px color-mix(in srgb, var(--accent, #0B8F78) 25%, transparent), inset 0 1px 0 rgba(255,255,255,0.25);
 }
 .billqyro-landing-premium .btn-premium-outline {
   background: rgba(255,255,255,0.48);
   backdrop-filter: blur(16px);
-  border: 1px solid rgba(11,143,120,0.22);
+  border: 1px solid color-mix(in srgb, var(--accent, #0B8F78) 22%, transparent);
   box-shadow: 0 8px 24px rgba(15,23,42,0.05);
 }
 .dark .billqyro-landing-premium .btn-premium-outline {
@@ -2368,8 +2422,8 @@ button:active {
   min-height: 34px;
   padding: 0 12px;
   border-radius: 999px;
-  border: 1px solid rgba(11,143,120,0.16);
-  background: rgba(11,143,120,0.055);
+  border: 1px solid color-mix(in srgb, var(--accent, #0B8F78) 16%, transparent);
+  background: color-mix(in srgb, var(--accent, #0B8F78) 6%, transparent);
   color: var(--text-secondary);
   font-size: 10px;
   font-weight: 900;
@@ -2378,12 +2432,12 @@ button:active {
 }
 .billqyro-admin-premium {
   background:
-    radial-gradient(circle at 12% 0%, rgba(11,143,120,0.10), transparent 30%),
+    radial-gradient(circle at 12% 0%, color-mix(in srgb, var(--accent, #0B8F78) 10%, transparent), transparent 30%),
     radial-gradient(circle at 92% 12%, rgba(200,169,107,0.06), transparent 24%),
     var(--app-bg);
 }
 .billqyro-admin-premium .vip-text-glow {
-  text-shadow: 0 0 24px rgba(11,143,120,0.22);
+  text-shadow: 0 0 24px color-mix(in srgb, var(--accent, #0B8F78) 22%, transparent);
 }
 @media (prefers-reduced-motion: reduce) {
   .billqyro-landing-premium *,

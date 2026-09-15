@@ -27,6 +27,10 @@ export const applyFullTheme = (settings, persist = true) => {
   
   const { themeColor, brandColor, darkMode, cornerRadius, shadowIntensity, animationSpeed, fontDensity, themeType } = settings;
   const themeId = (themeType === 'custom' && brandColor) ? 'custom' : (themeColor || 'brand-premium');
+  // Legacy guard: old saves stored mode values (light/dark/auto/classic) as themeColor.
+  // Those are not real themes, so fall back to the official default theme.
+  const LEGACY_THEME_VALUES = ['light', 'dark', 'auto', 'classic'];
+  const effectiveThemeId = LEGACY_THEME_VALUES.includes(themeId) ? 'brand-premium' : themeId;
 
   if (darkMode) {
     root.classList.add('dark');
@@ -67,7 +71,7 @@ export const applyFullTheme = (settings, persist = true) => {
     root.style.removeProperty('--theme-tint-surface');
     root.style.removeProperty('--theme-tint-border');
     root.style.removeProperty('--theme-tint-hover');
-    root.setAttribute('data-theme', themeId);
+    root.setAttribute('data-theme', effectiveThemeId);
   }
 
   // Modifiers
@@ -75,10 +79,10 @@ export const applyFullTheme = (settings, persist = true) => {
   if (animationSpeed !== undefined) root.style.setProperty('--animation-multiplier', `${animationSpeed}s`);
   if (shadowIntensity !== undefined) root.style.setProperty('--shadow-opacity', `${shadowIntensity / 100}`);
 
-  updateFaviconForTheme(themeId);
+  updateFaviconForTheme(effectiveThemeId);
   
   if (persist) {
-    localStorage.setItem('billqyro_theme_color', themeId);
+    localStorage.setItem('billqyro_theme_color', effectiveThemeId);
     localStorage.setItem('billqyro_dark_mode', String(darkMode));
   }
 };

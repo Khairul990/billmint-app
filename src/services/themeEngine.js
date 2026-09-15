@@ -33,6 +33,9 @@ export const themeEngine = {
     
     const { themeColor, brandColor, darkMode, cornerRadius, shadowIntensity, animationSpeed } = settings;
     const themeId = themeColor || 'brand-premium';
+    // Legacy guard: old saves stored mode values (light/dark/auto) as themeColor - not real themes.
+    const LEGACY_THEME_VALUES = ['light', 'dark', 'auto', 'classic'];
+    const effectiveThemeId = LEGACY_THEME_VALUES.includes(themeId) ? 'brand-premium' : themeId;
 
     if (darkMode) {
       root.classList.add('dark');
@@ -72,14 +75,14 @@ export const themeEngine = {
       root.style.removeProperty('--theme-tint-surface');
       root.style.removeProperty('--theme-tint-border');
       root.style.removeProperty('--theme-tint-hover');
-      root.setAttribute('data-theme', themeId);
+      root.setAttribute('data-theme', effectiveThemeId);
     }
 
     if (cornerRadius !== undefined) root.style.setProperty('--radius-base', `${cornerRadius}px`);
     if (animationSpeed !== undefined) root.style.setProperty('--animation-multiplier', `${animationSpeed}s`);
     if (shadowIntensity !== undefined) root.style.setProperty('--shadow-opacity', `${shadowIntensity / 100}`);
 
-    updateFaviconForTheme(themeId);
+    updateFaviconForTheme(effectiveThemeId);
     
     // Engine handles storage. Instead of direct localStorage, we wrap it behind engine.
     if (persist) {
@@ -89,7 +92,7 @@ export const themeEngine = {
 
   saveLocalThemePreference(themeId, darkMode) {
     try {
-      localStorage.setItem('billqyro_theme_color', themeId);
+      localStorage.setItem('billqyro_theme_color', effectiveThemeId);
       localStorage.setItem('billqyro_dark_mode', String(darkMode));
     } catch (e) {
       console.warn('Failed to save theme preference', e);
@@ -108,7 +111,7 @@ export const themeEngine = {
   },
 
   getThemeInfo(id) {
-    return THEME_INFO[id] || THEME_INFO['obsidian-gold'];
+    return THEME_INFO[id] || THEME_INFO['brand-premium'];
   },
 
   getAllThemes() {

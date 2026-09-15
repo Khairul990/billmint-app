@@ -76,6 +76,8 @@
           var adminMode = localStorage.getItem('billqyro_admin_default_mode');
           
           var activeTheme = userTheme || adminTheme || 'brand-premium';
+          // legacy guard — mode values are not themes
+          if (activeTheme === 'light' || activeTheme === 'dark' || activeTheme === 'auto' || activeTheme === 'classic') activeTheme = 'brand-premium';
           var isDark = userMode !== null ? userMode === 'true' : (adminMode === 'dark');
           
           document.documentElement.setAttribute('data-theme', activeTheme);

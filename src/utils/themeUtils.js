@@ -1,5 +1,5 @@
 export const ALL_THEME_COLORS = {
-  'brand-premium': { L: '#FFFFFF', D: '#1A0F14', S: '#FFFFFF', SD: '#1A0F14', C: '#FFFFFF', CD: '#2A1A22', T: '#1F1B1D', TD: '#F9F4F6', M: '#6B5E62', MD: '#B0A3A8', A: '#C81E5C', AD: '#D4AF7A', B: 'rgba(200,30,92,0.15)', BD: 'rgba(212,175,122,0.15)', BF: '#C81E5C', BFD: '#D4AF7A', BT: '#A01548', BTD: '#B8925A', H: '#1F1B1D', HD: '#1A0F14', TH: '#FFFFFF', THD: '#1A0F14', TB: '#FAFAFA', TBD: '#1A0F14' },
+  'brand-premium': { L: '#F5F9F7', D: '#071411', S: '#FFFFFF', SD: '#0A1B16', C: '#FFFFFF', CD: '#112420', T: '#0E1F1A', TD: '#ECF7F3', M: '#5B7069', MD: '#8FAAA1', A: '#0B8F78', AD: '#18B99B', B: 'rgba(11,143,120,0.16)', BD: 'rgba(24,185,155,0.20)', BF: '#0B8F78', BFD: '#18B99B', BT: '#075E50', BTD: '#0FAF92', H: '#0E1F1A', HD: '#071411', TH: '#F5F9F7', THD: '#0E1F1A', TB: '#FFFFFF', TBD: '#112420' },
   'obsidian-gold': { L: '#FAF7F2', D: '#1F1B1D', S: '#FAF7F2', SD: '#1F1B1D', C: '#FFFFFF', CD: '#2A2528', T: '#1F1B1D', TD: '#FAF7F2', M: '#5C4B51', MD: '#A3969C', A: '#D4AF7A', AD: '#D4AF7A', B: 'rgba(212,175,122,0.25)', BD: 'rgba(212,175,122,0.22)', BF: '#C81E5C', BFD: '#C81E5C', BT: '#1F1B1D', BTD: '#D4AF7A', H: '#1F1B1D', HD: '#FAF7F2', TH: '#FFFFFF', THD: '#2A2528', TB: '#FFFFFF', TBD: '#1F1B1D' },
   'arctic-teal': { L: '#EAF7F5', D: '#050D0F', S: '#EAF7F5', SD: '#050D0F', C: '#FFFFFF', CD: '#0C1518', T: '#10201D', TD: '#E8F5F2', M: '#4B6F68', MD: '#7CB8A8', A: '#009E7F', AD: '#00C896', B: 'rgba(0,158,127,0.24)', BD: 'rgba(0,200,150,0.22)', BF: '#009E7F', BFD: '#00C896', BT: '#0F766E', BTD: '#34E8B0', H: '#10201D', HD: '#E8F5F2', TH: '#F4FFFD', THD: '#080F12', TB: '#FFFFFF', TBD: '#050D0F' },
   'sapphire-noir': { L: '#EEF4FF', D: '#04060F', S: '#EEF4FF', SD: '#04060F', C: '#FFFFFF', CD: '#0A0E1A', T: '#0F172A', TD: '#E8EEFF', M: '#4B5D7A', MD: '#8EA6D9', A: '#2563EB', AD: '#4F8EF7', B: 'rgba(37,99,235,0.22)', BD: 'rgba(79,142,247,0.22)', BF: '#2563EB', BFD: '#4F8EF7', BT: '#1E3A8A', BTD: '#82B1FF', H: '#0F172A', HD: '#E8EEFF', TH: '#F7FAFF', THD: '#060914', TB: '#FFFFFF', TBD: '#04060F' },
@@ -41,7 +41,7 @@ export const getThemeTokens = (preset, forceMode = null) => {
   const c = ALL_THEME_COLORS[preset] || ALL_THEME_COLORS['obsidian-gold'];
 
   const luxuryAccents = {
-    'brand-premium': { light: '#D4AF7A', dark: '#E6C99B', companion: '#FAF7F2' },
+    'brand-premium': { light: '#0B8F78', dark: '#18B99B', companion: '#C8A96B' },
     'obsidian-gold': { light: '#D4AF7A', dark: '#E6C99B', companion: '#FAF7F2' },
     'arctic-teal': { light: '#009E7F', dark: '#34E8B0', companion: '#F4FFFD' },
     'sapphire-noir': { light: '#2563EB', dark: '#60A5FA', companion: '#F8FAFC' },
@@ -131,7 +131,7 @@ export const getThemePreviewColors = (preset, forceMode = null) => {
 };
 
 export const THEME_INFO = {
-  'brand-premium': { name: 'BillQyro Premium', category: 'Official', colors: ['#C81E5C', '#D4AF7A', '#1A0F14', '#FFFFFF'] },
+  'brand-premium': { name: 'BillQyro Signature', category: 'Official', colors: ['#0B8F78', '#18B99B', '#C8A96B', '#071411'] },
   'obsidian-gold': { name: 'Brand Standard', category: 'Premium', colors: ['#C81E5C', '#D4AF7A', '#FAF7F2', '#1F1B1D', '#5C4B51'] },
   'arctic-teal': { name: 'Arctic Teal', category: 'Business', colors: ['#009E7F', '#0F766E', '#F4FFFD', '#10201D', '#4B6F68'] },
   'sapphire-noir': { name: 'Sapphire Noir', category: 'Business', colors: ['#2563EB', '#1E3A8A', '#F7FAFF', '#0F172A', '#4B5D7A'] },

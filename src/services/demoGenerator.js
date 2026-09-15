@@ -167,7 +167,8 @@ export const generateDemoWorkspace = () => {
     businessPhone: '+91 98300 00000',
     businessEmail: 'demo@billqyro.app',
     businessAddress: 'Park Street, Kolkata, WB 700016',
-    currency: 'INR'
+    currency: 'INR',
+    themeColor: 'brand-premium'
   });
   localStorage.setItem('billqyro_demo_settings', JSON.stringify(settings));
 

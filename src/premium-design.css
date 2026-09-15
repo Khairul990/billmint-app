@@ -1584,8 +1584,10 @@
    Canonical brand layer for Landing + Owner Control Room
    ============================================================ */
 :root {
-  --billqyro-brand: #0FAF92;
-  --billqyro-brand-deep: #087F6C;
+  /* Brand tokens FOLLOW the active theme (data-theme / custom brand color);
+     emerald remains only as the fallback when no theme has loaded yet. */
+  --billqyro-brand: var(--accent, #0FAF92);
+  --billqyro-brand-deep: var(--accent-dark, #087F6C);
   --billqyro-brand-soft: #E8F8F4;
   --billqyro-ink: #0B1220;
   --billqyro-champagne: #D7B56D;
@@ -1593,7 +1595,7 @@
   --billqyro-radius-xl: 26px;
   --billqyro-radius-lg: 20px;
   --billqyro-shadow: 0 24px 70px rgba(11,18,32,.10);
-  --billqyro-shadow-brand: 0 18px 55px rgba(15,175,146,.16);
+  --billqyro-shadow-brand: 0 18px 55px color-mix(in srgb, var(--accent, #0FAF92) 16%, transparent);
 }
 
 /* ---------- LANDING: premium editorial system ---------- */

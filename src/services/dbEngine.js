@@ -1069,7 +1069,7 @@ export const updateLocalCache = (key, items) => {
 
 export const DEFAULT_SETTINGS = {
   themePreset: 'light',
-  themeColor: 'light',
+  themeColor: 'brand-premium',
   darkMode: false,
   country: 'India',
   countryCode: '',
@@ -2091,7 +2091,7 @@ export const getSettings = () => {
       ownerName: isVideo ? 'Demo Owner' : 'Me',
       email: isVideo ? 'hello@democorp.com' : 'demo@example.com',
       phone: isVideo ? '+1 555-0199' : '9999999999',
-      themeColor: 'obsidian-gold'
+      themeColor: 'brand-premium'
     };
   }
   initializeStorage();
@@ -2120,7 +2120,7 @@ export const getSettings = () => {
   // Ensure default theme is present locally without pushing uninitialized defaults to cloud
   if (settings) {
     if (!settings.themeColor) {
-      settings.themeColor = localStorage.getItem('billqyro_admin_default_theme') || 'obsidian-gold';
+      settings.themeColor = localStorage.getItem('billqyro_admin_default_theme') || 'brand-premium';
       localStorage.setItem(KEYS.SETTINGS, JSON.stringify(settings));
     }
   }
