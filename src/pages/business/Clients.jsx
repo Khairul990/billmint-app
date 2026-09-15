@@ -74,7 +74,7 @@ const Clients = () => {
 
   const stats = [
     { label: 'Total Clients', value: items.length, icon: Users, color: 'text-blue-500' },
-    { label: 'With Email', value: items.filter(i => i.email).length, icon: Mail, color: 'text-emerald-500' },
+    { label: 'With Email', value: items.filter(i => i.email).length, icon: Mail, color: 'text-theme-accent' },
     { label: 'With Phone', value: items.filter(i => i.phone).length, icon: Phone, color: 'text-amber-500' },
   ];
 

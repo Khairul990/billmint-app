@@ -141,7 +141,7 @@ const BusinessProfileTab = (props) => {
                     className="w-full pl-10 pr-20 py-3 bg-slate-100 dark:bg-theme-card/40 border border-slate-200 dark:border-slate-700/50 rounded-xl focus:outline-none text-theme-muted dark:text-theme-muted font-medium cursor-not-allowed opacity-90 shadow-inner"
                   />
                   <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                    <span className="bg-emerald-100 dark:bg-emerald-900/40 text-theme-success dark:text-emerald-400 border border-theme-success/30 dark:border-emerald-800 text-[9px] font-extrabold uppercase px-2 py-1 rounded-lg tracking-wider flex items-center gap-1 shadow-sm">
+                    <span className="bg-theme-tint-bg dark:bg-theme-tint-bg text-theme-success dark:text-theme-accent border border-theme-success/30 dark:border-theme-tint-border text-[9px] font-extrabold uppercase px-2 py-1 rounded-lg tracking-wider flex items-center gap-1 shadow-sm">
                       <Check className="w-2.5 h-2.5" /> Verified
                     </span>
                   </div>

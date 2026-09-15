@@ -10,7 +10,7 @@ const LS_KEY = 'billqyro_servicejobs';
 const STATUS_OPTIONS = ['Pending', 'In Progress', 'Completed', 'Delivered', 'Cancelled'];
 
 const statusColor = (s) => {
-  if (s === 'Completed' || s === 'Delivered') return 'text-emerald-500';
+  if (s === 'Completed' || s === 'Delivered') return 'text-theme-accent';
   if (s === 'In Progress') return 'text-amber-500';
   if (s === 'Pending') return 'text-blue-500';
   return 'text-red-500';
@@ -66,7 +66,7 @@ const ServiceJobs = () => {
   const stats = [
     { label: 'Total Jobs', value: items.length, icon: Wrench, color: 'text-orange-500' },
     { label: 'Active', value: pendingCount, icon: Clock, color: 'text-amber-500' },
-    { label: 'Completed', value: doneCount, icon: CheckCircle, color: 'text-emerald-500' },
+    { label: 'Completed', value: doneCount, icon: CheckCircle, color: 'text-theme-accent' },
   ];
 
   if (loading) return <div className="space-y-6 pb-24"><CardSkeleton lines={4} /><CardSkeleton lines={4} /><CardSkeleton lines={4} /></div>;

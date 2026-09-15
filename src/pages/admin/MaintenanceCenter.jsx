@@ -78,7 +78,7 @@ const MaintenanceCenter = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
           <h2 className="text-3xl font-black text-theme-primary tracking-tight flex items-center gap-3">
-            <Power className={`w-8 h-8 ${isMaintenance ? 'text-rose-500 animate-pulse' : 'text-emerald-500'}`} />
+            <Power className={`w-8 h-8 ${isMaintenance ? 'text-rose-500 animate-pulse' : 'text-theme-accent'}`} />
             Global Maintenance & Kill Switch
           </h2>
           <p className="text-sm text-theme-secondary mt-1">
@@ -94,11 +94,11 @@ const MaintenanceCenter = () => {
       </div>
 
       {/* Main Status Banner */}
-      <Card className={`border-2 transition-all ${isMaintenance ? 'bg-rose-500/10 border-rose-500/30' : 'bg-emerald-500/10 border-emerald-500/30'}`}>
+      <Card className={`border-2 transition-all ${isMaintenance ? 'bg-rose-500/10 border-rose-500/30' : 'bg-theme-tint-bg border-theme-tint-border'}`}>
         <CardContent className="p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="flex items-center gap-3">
-              <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${isMaintenance ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/30' : 'bg-emerald-500 text-white'}`}>
+              <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${isMaintenance ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/30' : 'bg-theme-accent text-white'}`}>
                 {isMaintenance ? 'Platform Locked / In Maintenance' : 'Platform Live / Operational'}
               </span>
               {lastUpdated && (
@@ -123,7 +123,7 @@ const MaintenanceCenter = () => {
             variant={isMaintenance ? 'outline' : 'primary'}
             className={`w-full md:w-auto px-8 py-4 font-black uppercase tracking-wider text-sm shadow-xl active:scale-95 transition-all ${
               isMaintenance
-                ? 'border-emerald-500 text-emerald-500 hover:bg-emerald-500/10'
+                ? 'border-theme-tint-border text-theme-accent hover:bg-theme-tint-bg'
                 : 'bg-rose-600 hover:bg-rose-700 text-white'
             }`}
           >

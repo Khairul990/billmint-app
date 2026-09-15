@@ -88,7 +88,7 @@ const AppHealthCenter = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
           <h2 className="text-3xl font-black text-theme-primary tracking-tight flex items-center gap-3">
-            <Activity className="w-8 h-8 text-emerald-500" />
+            <Activity className="w-8 h-8 text-theme-accent" />
             System Health & Telemetry Monitor
           </h2>
           <p className="text-sm text-theme-secondary mt-1">
@@ -164,7 +164,7 @@ const AppHealthCenter = () => {
             <CardContent className="p-6 flex flex-col flex-1">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-theme-muted text-xs font-bold uppercase tracking-wider">Service Worker & PWA</span>
-                <HardDrive className="w-5 h-5 text-emerald-500" />
+                <HardDrive className="w-5 h-5 text-theme-accent" />
               </div>
               <span className="text-2xl font-black text-theme-primary mb-1">{healthMetrics.serviceWorker.details}</span>
               <p className="text-xs text-theme-muted mb-4">Background caching & offline assets</p>
@@ -198,7 +198,7 @@ const AppHealthCenter = () => {
             <CardContent className="p-6 flex flex-col flex-1">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-theme-muted text-xs font-bold uppercase tracking-wider">Network & Errors</span>
-                <ShieldCheck className="w-5 h-5 text-emerald-500" />
+                <ShieldCheck className="w-5 h-5 text-theme-accent" />
               </div>
               <span className="text-2xl font-black text-theme-primary mb-1">
                 {healthMetrics.network.online ? 'Online' : 'Offline'}

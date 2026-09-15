@@ -983,7 +983,7 @@ export const calculateCollectionPriority = ({ maxDaysOverdue = 0, overdueAmount 
       level: 'LOW',
       label: 'Low Risk',
       color: 'emerald',
-      badgeClass: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
+      badgeClass: 'bg-theme-tint-bg text-theme-accent border-theme-tint-border',
       reason: 'Current / Not overdue'
     };
   }
@@ -1022,7 +1022,7 @@ export const calculateCollectionPriority = ({ maxDaysOverdue = 0, overdueAmount 
     level: 'LOW',
     label: 'Low Priority',
     color: 'emerald',
-    badgeClass: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
+    badgeClass: 'bg-theme-tint-bg text-theme-accent border-theme-tint-border',
     reason: 'Overdue by 1–30 days'
   };
 };

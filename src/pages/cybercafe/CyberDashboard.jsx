@@ -13,7 +13,7 @@ export default function CyberDashboard({ setCurrentTab }) {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <div className="bg-theme-card border border-theme-border-soft p-5 rounded-2xl shadow-premium">
           <div className="flex items-center justify-between mb-4">
-            <div className="p-2.5 bg-emerald-500/10 text-emerald-500 rounded-xl"><IndianRupee className="w-5 h-5" /></div>
+            <div className="p-2.5 bg-theme-tint-bg text-theme-accent rounded-xl"><IndianRupee className="w-5 h-5" /></div>
           </div>
           <h3 className="text-2xl font-black text-theme-primary mb-1">₹ 0</h3>
           <p className="text-xs font-bold text-theme-muted uppercase tracking-wider">Today's Income</p>

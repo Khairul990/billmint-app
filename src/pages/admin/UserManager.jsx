@@ -211,7 +211,7 @@ const UserManager = () => {
                   </TableCell>
                   <TableCell>
                     <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
-                      user.blocked ? 'bg-rose-500/10 text-rose-500' : 'bg-emerald-500/10 text-emerald-500'
+                      user.blocked ? 'bg-rose-500/10 text-rose-500' : 'bg-theme-tint-bg text-theme-accent'
                     }`}>
                       {user.blocked ? 'Suspended' : 'Active'}
                     </span>
@@ -245,7 +245,7 @@ const UserManager = () => {
                         size="sm"
                         disabled={processingId === user.userId}
                         onClick={() => handleToggleBlock(user)}
-                        className={`text-xs font-bold ${user.blocked ? 'text-emerald-500' : 'text-rose-500'}`}
+                        className={`text-xs font-bold ${user.blocked ? 'text-theme-accent' : 'text-rose-500'}`}
                       >
                         {user.blocked ? 'Unblock' : 'Suspend'}
                       </Button>
@@ -310,7 +310,7 @@ const UserManager = () => {
               </div>
               <div>
                 <span className="text-theme-muted uppercase font-bold block mb-0.5">Account Status</span>
-                <span className={`font-bold uppercase ${selectedUser.blocked ? 'text-rose-500' : 'text-emerald-500'}`}>
+                <span className={`font-bold uppercase ${selectedUser.blocked ? 'text-rose-500' : 'text-theme-accent'}`}>
                   {selectedUser.blocked ? 'Suspended' : 'Active'}
                 </span>
               </div>

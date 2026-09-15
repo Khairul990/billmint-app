@@ -18,10 +18,10 @@ export default function CashManagement() {
           <h2 className="text-3xl font-black text-theme-primary">₹ 0</h2>
         </div>
         <div className="bg-theme-card border border-theme-border-soft p-5 rounded-2xl">
-          <div className="flex items-center gap-3 mb-2 text-emerald-500 text-sm font-bold uppercase">
+          <div className="flex items-center gap-3 mb-2 text-theme-accent text-sm font-bold uppercase">
             <ArrowUpRight className="w-4 h-4" /> Total In
           </div>
-          <h2 className="text-3xl font-black text-emerald-500">₹ 0</h2>
+          <h2 className="text-3xl font-black text-theme-accent">₹ 0</h2>
         </div>
         <div className="bg-theme-card border border-theme-border-soft p-5 rounded-2xl">
           <div className="flex items-center gap-3 mb-2 text-rose-500 text-sm font-bold uppercase">

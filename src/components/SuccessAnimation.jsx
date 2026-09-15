@@ -77,7 +77,7 @@ const SuccessAnimation = ({
             animate="visible"
             className="bg-theme-card rounded-2xl p-8 shadow-premium-xl border border-theme-border-soft flex flex-col items-center text-center max-w-xs mx-4 relative"
           >
-            <div className="relative w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center mb-4">
+            <div className="relative w-16 h-16 rounded-full bg-theme-tint-bg flex items-center justify-center mb-4">
               <div className="absolute inset-0 flex items-center justify-center">
                 {confettiParticles.map((p) => (
                   <ConfettiParticle key={p.id} {...p} />
@@ -129,7 +129,7 @@ const SuccessBanner = ({ message, show, onDismiss }) => {
           transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
           className="fixed top-4 left-1/2 -translate-x-1/2 z-[100]"
         >
-          <div className="bg-emerald-500 text-white px-5 py-3 rounded-xl shadow-lg flex items-center gap-2.5 text-sm font-bold">
+          <div className="bg-theme-accent text-white px-5 py-3 rounded-xl shadow-lg flex items-center gap-2.5 text-sm font-bold">
             <CheckCircle className="w-5 h-5" />
             {message}
             <button onClick={onDismiss} className="ml-2 opacity-70 hover:opacity-100">

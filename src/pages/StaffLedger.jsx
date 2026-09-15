@@ -167,7 +167,7 @@ const StaffLedger = ({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="card-premium p-4">
           <div className="flex items-center gap-3 mb-2 text-theme-muted">
-            <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600">
+            <div className="p-2 rounded-xl bg-theme-tint-bg text-theme-accent">
               <Wallet className="w-4 h-4" />
             </div>
             <h3 className="font-bold text-2xs uppercase tracking-wider">Total Earned</h3>

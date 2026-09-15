@@ -138,7 +138,7 @@ const BackupCenter = () => {
         <Card className="bg-theme-surface/50 border-theme-border-soft">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Download className="w-5 h-5 text-emerald-500" />
+              <Download className="w-5 h-5 text-theme-accent" />
               Full Platform Backup
             </CardTitle>
             <p className="text-xs text-theme-secondary">

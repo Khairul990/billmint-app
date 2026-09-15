@@ -492,22 +492,22 @@ const LiveLinkTemplateStudio = ({ settings, businessSettings, onSaveSettings, se
             <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50">
               <p className="text-[9px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Total Views</p>
               <p className="text-2xl font-black text-theme-primary mt-1">1,284</p>
-              <p className="text-[8px] text-theme-muted font-medium mt-1 flex items-center gap-1"><Sparkles className="w-2.5 h-2.5 text-emerald-500" /> +12% vs last month</p>
+              <p className="text-[8px] text-theme-muted font-medium mt-1 flex items-center gap-1"><Sparkles className="w-2.5 h-2.5 text-theme-accent" /> +12% vs last month</p>
             </div>
-            <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/50">
-              <p className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Clicks</p>
+            <div className="p-3 rounded-xl bg-theme-accent dark:bg-theme-tint-bg border border-theme-tint-border dark:border-theme-tint-border">
+              <p className="text-[9px] font-bold text-theme-accent uppercase tracking-wider">Clicks</p>
               <p className="text-2xl font-black text-theme-primary mt-1">847</p>
-              <p className="text-[8px] text-theme-muted font-medium mt-1 flex items-center gap-1"><Sparkles className="w-2.5 h-2.5 text-emerald-500" /> 66% click rate</p>
+              <p className="text-[8px] text-theme-muted font-medium mt-1 flex items-center gap-1"><Sparkles className="w-2.5 h-2.5 text-theme-accent" /> 66% click rate</p>
             </div>
             <div className="p-3 rounded-xl bg-purple-50 dark:bg-purple-950/30 border border-purple-100 dark:border-purple-900/50">
               <p className="text-[9px] font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">Conversions</p>
               <p className="text-2xl font-black text-theme-primary mt-1">523</p>
-              <p className="text-[8px] text-theme-muted font-medium mt-1 flex items-center gap-1"><Sparkles className="w-2.5 h-2.5 text-emerald-500" /> 61.7% conversion</p>
+              <p className="text-[8px] text-theme-muted font-medium mt-1 flex items-center gap-1"><Sparkles className="w-2.5 h-2.5 text-theme-accent" /> 61.7% conversion</p>
             </div>
             <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900/50">
               <p className="text-[9px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">Revenue</p>
               <p className="text-2xl font-black text-theme-primary mt-1">$12.4k</p>
-              <p className="text-[8px] text-theme-muted font-medium mt-1 flex items-center gap-1"><Sparkles className="w-2.5 h-2.5 text-emerald-500" /> +8.3% vs last month</p>
+              <p className="text-[8px] text-theme-muted font-medium mt-1 flex items-center gap-1"><Sparkles className="w-2.5 h-2.5 text-theme-accent" /> +8.3% vs last month</p>
             </div>
           </div>
           <div className="flex items-center justify-center gap-2 text-[9px] text-theme-muted font-bold p-2 rounded-lg bg-theme-app border border-dashed border-theme-border-soft">
@@ -542,7 +542,7 @@ const LiveLinkTemplateStudio = ({ settings, businessSettings, onSaveSettings, se
               {/* Type Badge */}
               <div className="absolute top-3 right-3 z-10 flex gap-2">
                 {template.type === 'free' ? (
-                  <span className="bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400 text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full border border-emerald-200 dark:border-emerald-800 shadow-sm backdrop-blur-md badge-premium">FREE</span>
+                  <span className="bg-theme-tint-bg text-theme-accent dark:bg-theme-tint-bg dark:text-theme-accent text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full border border-theme-tint-border dark:border-theme-tint-border shadow-sm backdrop-blur-md badge-premium">FREE</span>
                 ) : (
                   <span className="bg-gradient-to-r from-amber-200 to-yellow-400 text-amber-900 text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full shadow-sm badge-premium">PRO</span>
                 )}
@@ -601,7 +601,7 @@ const LiveLinkTemplateStudio = ({ settings, businessSettings, onSaveSettings, se
                     {(featureBadgeMapping[template.id] || []).map(feat => {
                       const featColors = {
                         QR: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-                        Payment: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
+                        Payment: 'bg-theme-tint-bg text-theme-accent border-theme-tint-border',
                         Branded: 'bg-purple-500/10 text-purple-500 border-purple-500/20',
                         WhatsApp: 'bg-green-500/10 text-green-500 border-green-500/20',
                         Share: 'bg-amber-500/10 text-amber-500 border-amber-500/20'
@@ -683,7 +683,7 @@ const LiveLinkTemplateStudio = ({ settings, businessSettings, onSaveSettings, se
               <div className="flex items-center justify-between p-4 border-b border-theme-border-soft">
                 <div className="flex items-center gap-3">
                   <h3 className="font-extrabold text-theme-primary text-sm">{tpl.name}</h3>
-                  <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${tpl.type === 'free' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-gradient-to-r from-amber-400 to-yellow-500 text-white'}`}>
+                  <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${tpl.type === 'free' ? 'bg-theme-tint-bg text-theme-accent border border-theme-tint-border' : 'bg-gradient-to-r from-amber-400 to-yellow-500 text-white'}`}>
                     {tpl.type === 'free' ? 'FREE' : 'PRO'}
                   </span>
                   <span className="text-[8px] font-bold text-theme-muted bg-theme-app px-2 py-0.5 rounded-full border border-theme-border-soft">

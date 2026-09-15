@@ -503,7 +503,7 @@ const Reports = ({
                 <span className="text-[10px] font-black uppercase tracking-wider text-theme-muted">
                   Collected Cash
                 </span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-numbers">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-theme-tint-bg text-theme-accent border border-theme-tint-border font-numbers">
                   {collectionsSummary.collectionRate}% Rate
                 </span>
               </div>
@@ -513,7 +513,7 @@ const Reports = ({
                 intent="collection" 
                 size="md" 
               />
-              <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold mt-1">
+              <p className="text-[11px] text-theme-accent font-bold mt-1">
                 {salesSummary.counts.paid} settled in full
               </p>
             </SignatureSurface>
@@ -549,7 +549,7 @@ const Reports = ({
                 </span>
                 {hasExpenses ? (
                   <span className={`px-2 py-0.5 rounded-full text-[10px] font-black border ${
-                    profitLoss.isProfitable ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' : 'bg-rose-500/10 text-rose-600 border-rose-500/20'
+                    profitLoss.isProfitable ? 'bg-theme-tint-bg text-theme-accent border-theme-tint-border' : 'bg-rose-500/10 text-rose-600 border-rose-500/20'
                   }`}>
                     {profitLoss.profitMargin}% Margin
                   </span>
@@ -613,8 +613,8 @@ const Reports = ({
                   <span className="flex items-center gap-1 text-theme-accent">
                     <span className="w-2.5 h-2.5 rounded-full bg-theme-accent"></span> Billed
                   </span>
-                  <span className="flex items-center gap-1 text-emerald-600">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Collected
+                  <span className="flex items-center gap-1 text-theme-accent">
+                    <span className="w-2.5 h-2.5 rounded-full bg-theme-accent"></span> Collected
                   </span>
                 </div>
               </div>
@@ -700,7 +700,7 @@ const Reports = ({
               <div className="grid grid-cols-2 gap-2 pt-3 border-t border-theme-border-soft/60 text-xs">
                 <div className="flex items-center justify-between p-2 rounded-xl bg-theme-surface/70 border border-theme-border-soft/50">
                   <span className="text-theme-muted font-bold flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500"></span> Paid
+                    <span className="w-2 h-2 rounded-full bg-theme-accent"></span> Paid
                   </span>
                   <span className="font-black text-theme-primary">{salesSummary.counts.paid}</span>
                 </div>
@@ -997,7 +997,7 @@ const Reports = ({
                 <span className="text-[10px] font-black uppercase tracking-wider text-theme-muted">Settled Accounts</span>
                 <span className="badge-premium badge-success text-2xs">0 Due</span>
               </div>
-              <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400 font-numbers">
+              <p className="text-2xl font-black text-theme-accent font-numbers">
                 {customerReport.settledCount}
               </p>
             </SignatureSurface>
@@ -1068,7 +1068,7 @@ const Reports = ({
                       </tr>
                     ))}
                     {customerReport.topByDue.length === 0 && (
-                      <tr><td colSpan="2" className="text-center py-4 text-emerald-600 font-bold">All customer accounts settled!</td></tr>
+                      <tr><td colSpan="2" className="text-center py-4 text-theme-accent font-bold">All customer accounts settled!</td></tr>
                     )}
                   </tbody>
                 </table>
@@ -1141,7 +1141,7 @@ const Reports = ({
                     <tr key={item.name}>
                       <td className="font-bold text-theme-primary">{item.name}</td>
                       <td className="text-right font-bold text-theme-muted tabular-nums">{item.totalQty}</td>
-                      <td className="text-right font-black text-emerald-600 dark:text-emerald-400 tabular-nums">
+                      <td className="text-right font-black text-theme-accent tabular-nums">
                         {formatCurrency(item.totalRevenue, currencySymbol)}
                       </td>
                     </tr>
@@ -1242,7 +1242,7 @@ const Reports = ({
                       <td className="text-right font-black text-theme-primary tabular-nums">
                         {formatCurrency(doc.parsedTotal, currencySymbol)}
                       </td>
-                      <td className="text-right font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
+                      <td className="text-right font-bold text-theme-accent tabular-nums">
                         {formatCurrency(doc.parsedPaid, currencySymbol)}
                       </td>
                       <td className="text-right font-bold text-rose-600 dark:text-rose-400 tabular-nums">

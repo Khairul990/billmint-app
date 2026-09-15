@@ -56,7 +56,7 @@ import AnimatedPage from '../components/AnimatedPage';
 import PullToRefresh from '../components/PullToRefresh';
 
 const TRANSACTION_CATEGORIES = [
-  { id: 'customer_payment', label: 'Customer Payment', bucket: 'Website Income', icon: Receipt, color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/30' },
+  { id: 'customer_payment', label: 'Customer Payment', bucket: 'Website Income', icon: Receipt, color: 'text-theme-accent bg-theme-tint-bg border-theme-tint-border' },
   { id: 'withdrawal', label: 'Withdraw', bucket: 'Website → Personal', icon: ArrowUpRight, color: 'text-amber-500 bg-amber-500/10 border-amber-500/30' },
   { id: 'transfer', label: 'Cash ↔ PhonePe', bucket: 'Transfer', icon: Smartphone, color: 'text-indigo-500 bg-indigo-500/10 border-indigo-500/30' },
   { id: 'dream_transfer', label: 'My Dream Transfer', bucket: 'Savings Goal', icon: Heart, color: 'text-pink-500 bg-pink-500/10 border-pink-500/30' },
@@ -809,9 +809,9 @@ const CollectionCenter = ({
             <div className="card-premium p-3.5 border-l-4 border-l-emerald-500 relative overflow-hidden">
               <div className="flex items-center justify-between text-2xs font-bold text-theme-muted uppercase mb-1">
                 <span>Website Income</span>
-                <Receipt className="w-3.5 h-3.5 text-emerald-500" />
+                <Receipt className="w-3.5 h-3.5 text-theme-accent" />
               </div>
-              <div className="text-lg font-black text-emerald-600 tabular-nums">
+              <div className="text-lg font-black text-theme-accent tabular-nums">
                 {formatCurrency(bucketFinancials.websiteIncomeAvailable, currencySymbol)}
               </div>
               <div className="text-[10px] text-theme-muted mt-0.5">Available Business Money</div>
@@ -899,7 +899,7 @@ const CollectionCenter = ({
                   {/* Income Group */}
                   <div>
                     <div className="text-2xs font-bold text-theme-muted uppercase mb-3 flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                      <div className="w-1.5 h-1.5 rounded-full bg-theme-accent"></div>
                       Income & Inflows
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
@@ -913,7 +913,7 @@ const CollectionCenter = ({
                             onClick={() => { setSelectedTxType(t.id); setAmountInput(''); }}
                             className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all duration-300 ${
                               isSelected
-                                ? `${t.color} border-current shadow-md shadow-emerald-500/10 scale-[1.02]`
+                                ? `${t.color} border-current shadow-md shadow-theme-glow scale-[1.02]`
                                 : 'bg-theme-surface/50 border-theme-border-soft text-theme-muted hover:text-theme-primary hover:border-theme-border hover:bg-theme-surface'
                             }`}
                           >
@@ -1123,7 +1123,7 @@ const CollectionCenter = ({
 
                           {customerUnpaidInvoices.length === 0 ? (
                             <div className="p-6 text-center rounded-xl bg-theme-surface/40 border border-dashed border-theme-border-soft">
-                              <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto mb-2 opacity-80" />
+                              <CheckCircle2 className="w-8 h-8 text-theme-accent mx-auto mb-2 opacity-80" />
                               <p className="text-xs font-bold text-theme-primary">No outstanding invoices for this customer!</p>
                               <p className="text-2xs text-theme-muted mt-0.5">All bills have been fully paid and reconciled.</p>
                             </div>
@@ -1189,7 +1189,7 @@ const CollectionCenter = ({
                       <div className="p-4 rounded-xl bg-theme-surface border border-theme-border-soft space-y-2">
                         <div className="flex justify-between items-center text-xs">
                           <span className="text-theme-muted">Source:</span>
-                          <span className="font-black text-emerald-600">Website Income (Business Available: {formatCurrency(bucketFinancials.websiteIncomeAvailable, currencySymbol)})</span>
+                          <span className="font-black text-theme-accent">Website Income (Business Available: {formatCurrency(bucketFinancials.websiteIncomeAvailable, currencySymbol)})</span>
                         </div>
                         <div className="text-2xs text-theme-muted">
                           Withdrawal moves money out of business funds into your personal money location. It is NOT an expense.
@@ -1844,7 +1844,7 @@ const CollectionCenter = ({
                             }}
                             className={`p-2 rounded-lg text-2xs font-bold border text-center transition-all ${
                               selectedPreset === 'total_due'
-                                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600'
+                                ? 'bg-theme-tint-bg border-theme-tint-border text-theme-accent'
                                 : 'bg-theme-surface border-theme-border-soft text-theme-muted hover:text-theme-primary'
                             }`}
                           >
@@ -1869,7 +1869,7 @@ const CollectionCenter = ({
                         </div>
                         <div className="flex justify-between">
                           <span className="text-theme-muted">To This Bill:</span>
-                          <span className="font-mono font-bold text-emerald-600">
+                          <span className="font-mono font-bold text-theme-accent">
                             {formatCurrency(liveAllocation.allocatedToCurrentInvoice, currencySymbol)}
                           </span>
                         </div>
@@ -1969,7 +1969,7 @@ const CollectionCenter = ({
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="card-premium p-4">
                   <div className="text-2xs font-bold text-theme-muted uppercase mb-1">Total Inflow (IN)</div>
-                  <div className="text-xl font-black text-emerald-600 tabular-nums">
+                  <div className="text-xl font-black text-theme-accent tabular-nums">
                     {formatCurrency(historyKPIs.totalIn, currencySymbol)}
                   </div>
                 </div>
@@ -2096,7 +2096,7 @@ const CollectionCenter = ({
                                 <div className="font-bold text-theme-primary">{tx.date?.slice(0, 10)}</div>
                                 <div className="flex items-center gap-1.5 mt-0.5">
                                   <span className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded ${
-                                    isIn ? 'bg-emerald-500/10 text-emerald-600' :
+                                    isIn ? 'bg-theme-tint-bg text-theme-accent' :
                                     isTransfer ? 'bg-indigo-500/10 text-indigo-600' :
                                     isWithdraw ? 'bg-amber-500/10 text-amber-600' : 'bg-rose-500/10 text-rose-600'
                                   }`}>
@@ -2130,7 +2130,7 @@ const CollectionCenter = ({
 
                               <td className="p-4 text-right">
                                 <div className={`font-black text-sm tabular-nums ${
-                                  isIn ? 'text-emerald-600' : isTransfer ? 'text-indigo-600' : isWithdraw ? 'text-amber-600' : 'text-rose-600'
+                                  isIn ? 'text-theme-accent' : isTransfer ? 'text-indigo-600' : isWithdraw ? 'text-amber-600' : 'text-rose-600'
                                 }`}>
                                   {isTransfer ? '⇄ ' : isIn ? '+' : '-'}{formatCurrency(tx.amount, currencySymbol)}
                                 </div>
@@ -2173,7 +2173,7 @@ const CollectionCenter = ({
 
               {pendingPayments.length === 0 ? (
                 <div className="card-premium p-12 text-center text-theme-muted">
-                  <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto mb-3 opacity-80" />
+                  <CheckCircle2 className="w-12 h-12 text-theme-accent mx-auto mb-3 opacity-80" />
                   <h4 className="text-sm font-bold text-theme-primary">All Caught Up!</h4>
                   <p className="text-xs text-theme-muted mt-1">No pending customer payment proofs waiting for verification.</p>
                 </div>
@@ -2192,7 +2192,7 @@ const CollectionCenter = ({
 
                       <div>
                         <div className="text-xs font-bold text-theme-muted">Amount Submitted</div>
-                        <div className="text-xl font-black text-emerald-600">
+                        <div className="text-xl font-black text-theme-accent">
                           {formatCurrency(proof.amount, currencySymbol)}
                         </div>
                       </div>
@@ -2352,7 +2352,7 @@ const CollectionCenter = ({
 
               <div className="p-4 rounded-xl bg-theme-surface/70 border border-theme-border-soft text-center">
                 <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded ${
-                  selectedPaymentDetail.direction === 'IN' ? 'bg-emerald-500/10 text-emerald-600' :
+                  selectedPaymentDetail.direction === 'IN' ? 'bg-theme-tint-bg text-theme-accent' :
                   selectedPaymentDetail.isTransfer ? 'bg-indigo-500/10 text-indigo-600' : 'bg-rose-500/10 text-rose-600'
                 }`}>
                   {selectedPaymentDetail.isTransfer ? 'Transfer' : selectedPaymentDetail.direction} · {selectedPaymentDetail.category}

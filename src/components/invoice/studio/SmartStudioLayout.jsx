@@ -440,8 +440,8 @@ const SmartStudioLayout = ({ customers, products, invoices = [], onSaveInvoice, 
           >
             <div className="w-12 h-1.5 bg-theme-border-soft rounded-full mx-auto mb-4"></div>
             <div className="text-center mb-5">
-              <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                <CheckCircle2 className="w-8 h-8 text-emerald-500" />
+              <div className="w-16 h-16 bg-theme-tint-bg rounded-full flex items-center justify-center mx-auto mb-3">
+                <CheckCircle2 className="w-8 h-8 text-theme-accent" />
               </div>
               <h2 className="text-lg font-black text-theme-primary">Invoice Saved</h2>
               <p className="text-xs font-bold text-theme-muted mt-0.5">
@@ -460,7 +460,7 @@ const SmartStudioLayout = ({ customers, products, invoices = [], onSaveInvoice, 
               <button
                 onClick={handleShareWhatsApp}
                 disabled={!liveLink || isSharingWhatsApp}
-                className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-bold text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50 shadow-sm"
+                className="w-full py-3.5 bg-theme-accent hover:opacity-90 text-white rounded-2xl font-bold text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50 shadow-sm"
               >
                 {isSharingWhatsApp ? <Loader2 className="w-4 h-4 animate-spin" /> : <MessageCircle className="w-4 h-4" />} Share WhatsApp
               </button>

@@ -163,7 +163,7 @@ const AuditLogCenter = () => {
                     {log.target}
                   </TableCell>
                   <TableCell>
-                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-black uppercase ${log.result === 'FAILED' ? 'bg-rose-500/10 text-rose-500' : 'bg-emerald-500/10 text-emerald-500'}`}>
+                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-black uppercase ${log.result === 'FAILED' ? 'bg-rose-500/10 text-rose-500' : 'bg-theme-tint-bg text-theme-accent'}`}>
                       {log.result === 'FAILED' ? <AlertCircle className="w-3 h-3" /> : <CheckCircle2 className="w-3 h-3" />}
                       {log.result || 'SUCCESS'}
                     </span>

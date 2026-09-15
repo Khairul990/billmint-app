@@ -8,7 +8,7 @@ const cardVariants = {
   insight: 'bg-[var(--bq-surface-insight)] border-blue-500/20 shadow-premium-sm',
   activity: 'bg-[var(--bq-surface-activity)] border-theme-border-soft shadow-premium-sm',
   warning: 'bg-[var(--bq-surface-warning)] border-amber-500/25 shadow-premium-sm',
-  success: 'bg-[var(--bq-surface-success)] border-emerald-500/25 shadow-premium-sm',
+  success: 'bg-[var(--bq-surface-success)] border-theme-tint-border shadow-premium-sm',
   danger: 'bg-[var(--bq-surface-danger)] border-rose-500/25 shadow-premium-sm',
 };
 

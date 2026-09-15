@@ -6,7 +6,7 @@ import { Image as ImageIcon, Scissors, FileText, FileDown, Lock, Code, Crop } fr
 const TOOLS = [
   { id: 'passport-photo', name: 'Passport Photo Maker', icon: Crop, desc: 'Auto-crop and generate A4 print sheets', color: 'text-blue-500 bg-blue-500/10 border-blue-500/20' },
   { id: 'bg-remove', name: 'AI Background Remove', icon: Scissors, desc: 'One-click background removal for photos', color: 'text-purple-500 bg-purple-500/10 border-purple-500/20' },
-  { id: 'pdf-merge', name: 'PDF Merge & Split', icon: FileText, desc: 'Combine or separate PDF pages easily', color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20' },
+  { id: 'pdf-merge', name: 'PDF Merge & Split', icon: FileText, desc: 'Combine or separate PDF pages easily', color: 'text-theme-accent bg-theme-tint-bg border-theme-tint-border' },
   { id: 'img-compress', name: 'Image Compressor', icon: FileDown, desc: 'Reduce file size for online forms', color: 'text-amber-500 bg-amber-500/10 border-amber-500/20' },
 ];
 

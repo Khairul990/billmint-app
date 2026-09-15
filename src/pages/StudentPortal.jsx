@@ -97,7 +97,7 @@ export default function StudentPortal({ studentId }) {
             <div>
               <h1 className="text-2xl font-black text-slate-900">{profile?.name || 'Student Portal'}</h1>
               <p className="text-slate-500 text-sm flex items-center gap-2 font-medium mt-1">
-                <ShieldCheck className="w-4 h-4 text-emerald-500" /> ID: {studentId} • {profile?.email}
+                <ShieldCheck className="w-4 h-4 text-theme-accent" /> ID: {studentId} • {profile?.email}
               </p>
             </div>
           </div>
@@ -145,7 +145,7 @@ export default function StudentPortal({ studentId }) {
                   </div>
                   <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden">
                     <h3 className="text-slate-500 text-xs font-bold uppercase mb-2 flex items-center gap-2"><CheckCircle className="w-4 h-4" /> Fees Paid</h3>
-                    <p className="text-4xl font-black text-emerald-500">{formatCurrency(totalPaid, activeSymbol)}</p>
+                    <p className="text-4xl font-black text-theme-accent">{formatCurrency(totalPaid, activeSymbol)}</p>
                   </div>
                   <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden">
                     <h3 className="text-slate-500 text-xs font-bold uppercase mb-2 flex items-center gap-2"><Calendar className="w-4 h-4" /> Overdue Invoices</h3>
@@ -187,7 +187,7 @@ export default function StudentPortal({ studentId }) {
                               <td className="px-6 py-4 font-bold text-slate-900">{formatCurrency(inv.grandTotal, activeSymbol)}</td>
                               <td className="px-6 py-4">
                                 <span className={`px-2.5 py-1 rounded-lg text-[11px] font-black uppercase tracking-wider ${
-                                  inv.paymentStatus === 'Paid' ? 'bg-emerald-100 text-emerald-700' :
+                                  inv.paymentStatus === 'Paid' ? 'bg-theme-tint-bg text-theme-accent' :
                                   inv.paymentStatus === 'Partial' ? 'bg-amber-100 text-amber-700' :
                                   'bg-rose-100 text-rose-700'
                                 }`}>

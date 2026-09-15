@@ -16,7 +16,7 @@ const ORDER_STATUSES = ['All', 'Pending', 'In Progress', 'Completed', 'Delivered
 const STATUS_STYLES = {
   'Pending': 'bg-amber-100 text-amber-700 border border-amber-200',
   'In Progress': 'bg-blue-100 text-blue-700 border border-blue-200',
-  'Completed': 'bg-emerald-100 text-emerald-700 border border-emerald-200',
+  'Completed': 'bg-theme-tint-bg text-theme-accent border border-theme-tint-border',
   'Delivered': 'bg-violet-100 text-violet-700 border border-violet-200',
   'Cancelled': 'bg-rose-100 text-rose-700 border border-rose-200'
 };
@@ -192,7 +192,7 @@ const Orders = ({ invoices = [], customers = [], businessSettings, setCurrentTab
           { label: 'Total Orders', value: stats.total, icon: ShoppingBag, color: 'text-theme-accent', bg: 'bg-theme-accent-light' },
           { label: 'Pending', value: stats.pending, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-100' },
           { label: 'In Progress', value: stats.inProgress, icon: TrendingUp, color: 'text-blue-600', bg: 'bg-blue-100' },
-          { label: 'Completed (Month)', value: stats.thisMonth, icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-100' },
+          { label: 'Completed (Month)', value: stats.thisMonth, icon: CheckCircle2, color: 'text-theme-accent', bg: 'bg-theme-tint-bg' },
         ].map(stat => (
           <motion.div key={stat.label} variants={staggerItem}
             className="stat-premium bg-theme-card rounded-3xl p-5 border border-theme-border-soft shadow-premium">

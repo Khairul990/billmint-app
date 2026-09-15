@@ -176,7 +176,7 @@ const CustomerLedger = ({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pr-8">
               {/* Customer Avatar & Identity */}
               <div className="flex items-center gap-4 min-w-0">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-theme-accent via-emerald-600 to-teal-500 text-white flex items-center justify-center font-black text-xl shadow-md shadow-theme-accent/20 shrink-0">
+                <div className="w-14 h-14 rounded-2xl bg-[image:var(--accent-gradient)] text-white flex items-center justify-center font-black text-xl shadow-md shadow-theme-accent/20 shrink-0">
                   {customer.name ? customer.name.substring(0, 2).toUpperCase() : '??'}
                 </div>
                 <div className="min-w-0">
@@ -274,7 +274,7 @@ const CustomerLedger = ({
                 <div className="grid grid-cols-4 gap-2 text-center">
                   <div className="bg-theme-surface/70 rounded-xl p-2 border border-theme-border-soft/50">
                     <span className="block text-[9px] font-extrabold text-theme-muted uppercase">Current</span>
-                    <span className="block text-xs font-black text-emerald-600 dark:text-emerald-400 tabular-nums mt-0.5">
+                    <span className="block text-xs font-black text-theme-accent tabular-nums mt-0.5">
                       {formatCurrency(aging.current)}
                     </span>
                   </div>
@@ -338,7 +338,7 @@ const CustomerLedger = ({
               {totalDue > 0 && (
                 <button
                   onClick={generateWhatsAppReminder}
-                  className="px-3 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-extrabold flex items-center gap-1.5 transition-all cursor-pointer"
+                  className="px-3 py-1.5 rounded-xl bg-theme-tint-bg hover:bg-theme-tint-bg text-theme-accent border border-theme-tint-border text-xs font-extrabold flex items-center gap-1.5 transition-all cursor-pointer"
                 >
                   <MessageCircle className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">WhatsApp</span> Reminder
@@ -363,7 +363,7 @@ const CustomerLedger = ({
                         <div className={`absolute -left-6 top-3 w-5 h-5 rounded-full flex items-center justify-center text-white border-2 border-theme-surface shadow-2xs ${
                           isInvoice 
                             ? 'bg-theme-accent' 
-                            : 'bg-emerald-500'
+                            : 'bg-theme-accent'
                         }`}>
                           {isInvoice ? <Receipt className="w-2.5 h-2.5" /> : <ArrowDownLeft className="w-2.5 h-2.5" />}
                         </div>
@@ -417,7 +417,7 @@ const CustomerLedger = ({
                                   {isInvoice ? 'Bill Amount' : 'Collected'}
                                 </span>
                                 <span className={`text-sm font-black tabular-nums font-numbers ${
-                                  isInvoice ? 'text-theme-primary' : 'text-emerald-600 dark:text-emerald-400'
+                                  isInvoice ? 'text-theme-primary' : 'text-theme-accent'
                                 }`}>
                                   {isInvoice ? formatCurrency(evt.amount) : `+${formatCurrency(evt.amount)}`}
                                 </span>
@@ -442,7 +442,7 @@ const CustomerLedger = ({
                                   onClose();
                                   onOpenCollection({ customer, invoice: evt.rawInv, tab: 'record' });
                                 }}
-                                className="px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                                className="px-3 py-1.5 bg-theme-tint-bg hover:bg-theme-tint-bg text-theme-accent border border-theme-tint-border rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
                               >
                                 <Banknote className="w-3.5 h-3.5" />
                                 <span>Collect in Collection Center</span>
@@ -480,7 +480,7 @@ const CustomerLedger = ({
                   onClose();
                   onOpenCollection({ customer, tab: 'record' });
                 }}
-                className="flex-1 py-3 px-4 bg-[image:var(--accent-gradient)] text-white hover:opacity-95 rounded-2xl text-xs font-black flex items-center justify-center gap-2 shadow-md shadow-emerald-600/25 transition-all cursor-pointer"
+                className="flex-1 py-3 px-4 bg-[image:var(--accent-gradient)] text-white hover:opacity-95 rounded-2xl text-xs font-black flex items-center justify-center gap-2 shadow-md shadow-theme-glow transition-all cursor-pointer"
               >
                 <Banknote className="w-4 h-4" />
                 <span>Collect Money ({formatCurrency(totalDue)})</span>

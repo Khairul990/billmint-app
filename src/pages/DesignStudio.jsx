@@ -352,7 +352,7 @@ const DesignStudio = ({ setCurrentTab, businessSettings = {}, setSettings, initi
             <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider">Total Templates</p>
           </div>
           <div className="card-premium p-4 text-center">
-            <p className="text-xl font-black text-emerald-500">12</p>
+            <p className="text-xl font-black text-theme-accent">12</p>
             <p className="text-[9px] font-bold text-theme-muted uppercase tracking-wider">Active Templates</p>
           </div>
           <div className="card-premium p-4 text-center">

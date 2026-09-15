@@ -77,7 +77,7 @@ const AdminDashboard = () => {
             desc: `${u.email || u.businessName} created an account.`,
             date: new Date(u.createdAt || Date.now()),
             icon: UserPlus,
-            color: 'text-emerald-500 bg-emerald-500/10'
+            color: 'text-theme-accent bg-theme-tint-bg'
           });
         });
       }
@@ -136,19 +136,19 @@ const AdminDashboard = () => {
 
   const kpis = [
     { label: 'Total Users', value: formatValue(stats.totalUsers), icon: Users, color: 'text-theme-accent' },
-    { label: 'Active Users', value: formatValue(stats.activeUsers), icon: UserPlus, color: 'text-emerald-500' },
+    { label: 'Active Users', value: formatValue(stats.activeUsers), icon: UserPlus, color: 'text-theme-accent' },
     { label: 'Premium Users', value: formatValue(stats.premiumUsers), icon: Crown, color: 'text-theme-accent' },
     { label: 'Free Users', value: formatValue(stats.freeUsers), icon: Users, color: 'text-theme-muted' },
     { label: 'Total Workspaces', value: formatValue(stats.totalWorkspaces), icon: Building2, color: 'text-theme-accent' },
-    { label: 'Active Workspaces', value: formatValue(stats.activeWorkspaces), icon: Building2, color: 'text-emerald-500' },
+    { label: 'Active Workspaces', value: formatValue(stats.activeWorkspaces), icon: Building2, color: 'text-theme-accent' },
     { label: 'Total Invoices', value: formatValue(stats.totalInvoices), icon: Layers, color: 'text-theme-accent' },
     { label: 'Total Customers', value: formatValue(stats.totalCustomers), icon: Users, color: 'text-theme-accent' },
     { label: 'Total Products', value: formatValue(stats.totalProducts), icon: Database, color: 'text-theme-accent' },
-    { label: 'Platform Revenue', value: stats.monthlyRevenue !== null ? `₹${stats.monthlyRevenue.toLocaleString()}` : 'Data unavailable', icon: IndianRupee, color: 'text-emerald-500' },
+    { label: 'Platform Revenue', value: stats.monthlyRevenue !== null ? `₹${stats.monthlyRevenue.toLocaleString()}` : 'Data unavailable', icon: IndianRupee, color: 'text-theme-accent' },
     { label: 'Pending Payments', value: stats.pendingPayments !== null ? `₹${stats.pendingPayments.toLocaleString()}` : 'Data unavailable', icon: AlertTriangle, color: 'text-amber-500' },
-    { label: 'Pending Sync Queue', value: formatValue(stats.failedSyncs), icon: FileWarning, color: stats.failedSyncs > 0 ? 'text-amber-500' : 'text-emerald-500' },
+    { label: 'Pending Sync Queue', value: formatValue(stats.failedSyncs), icon: FileWarning, color: stats.failedSyncs > 0 ? 'text-amber-500' : 'text-theme-accent' },
     { label: 'Storage Footprint', value: formatValue(stats.cloudStorageUsage), icon: Cloud, color: 'text-cyan-500' },
-    { label: 'System Health', value: stats.systemHealth || 'Data unavailable', icon: Activity, color: stats.systemHealth === 'Healthy' ? 'text-emerald-500' : 'text-amber-500' }
+    { label: 'System Health', value: stats.systemHealth || 'Data unavailable', icon: Activity, color: stats.systemHealth === 'Healthy' ? 'text-theme-accent' : 'text-amber-500' }
   ];
 
   return (
@@ -162,9 +162,9 @@ const AdminDashboard = () => {
             <div className="flex items-center gap-2 mb-2">
               <span className="text-[10px] font-black uppercase tracking-[0.18em] text-theme-accent">Owner Command Center</span>
               <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${stats.systemHealth === 'Healthy'
-                ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30'
+                ? 'bg-theme-tint-bg text-theme-accent border-theme-tint-border'
                 : 'bg-amber-500/10 text-amber-500 border-amber-500/30'}`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${stats.systemHealth === 'Healthy' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500 animate-pulse'}`} />
+                <span className={`w-1.5 h-1.5 rounded-full ${stats.systemHealth === 'Healthy' ? 'bg-theme-accent animate-pulse' : 'bg-amber-500 animate-pulse'}`} />
                 {stats.systemHealth || 'Standby'}
               </span>
             </div>
@@ -186,10 +186,10 @@ const AdminDashboard = () => {
         {/* Banner highlight strip */}
         <div className="relative grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t border-theme-border-soft/60">
           {[
-            { label: 'Platform Revenue', value: stats.monthlyRevenue !== null ? `₹${stats.monthlyRevenue.toLocaleString()}` : '—', icon: IndianRupee, tone: 'text-emerald-500' },
+            { label: 'Platform Revenue', value: stats.monthlyRevenue !== null ? `₹${stats.monthlyRevenue.toLocaleString()}` : '—', icon: IndianRupee, tone: 'text-theme-accent' },
             { label: 'Total Users', value: stats.totalUsers !== null ? stats.totalUsers.toLocaleString() : '—', icon: Users, tone: 'text-theme-accent' },
             { label: 'Pending Payouts', value: stats.pendingPayments !== null ? `₹${stats.pendingPayments.toLocaleString()}` : '—', icon: AlertTriangle, tone: 'text-amber-500' },
-            { label: 'Sync Queue', value: stats.failedSyncs !== null ? stats.failedSyncs : '—', icon: RefreshCw, tone: stats.failedSyncs > 0 ? 'text-amber-500' : 'text-emerald-500' }
+            { label: 'Sync Queue', value: stats.failedSyncs !== null ? stats.failedSyncs : '—', icon: RefreshCw, tone: stats.failedSyncs > 0 ? 'text-amber-500' : 'text-theme-accent' }
           ].map((s) => {
             const SIcon = s.icon;
             return (

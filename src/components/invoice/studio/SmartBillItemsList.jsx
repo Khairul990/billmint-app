@@ -146,7 +146,7 @@ const SmartBillItemsList = ({ products = [], invoices = [], wsType }) => {
             {recentProducts.length > 0 && (
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-[10px] font-black uppercase tracking-widest text-theme-muted min-w-[70px] flex items-center gap-1.5">
-                  <ArrowUp className="w-3 h-3 text-emerald-500" /> Recent:
+                  <ArrowUp className="w-3 h-3 text-theme-accent" /> Recent:
                 </span>
                 <div className="flex flex-wrap gap-2">
                   {recentProducts.map((p, idx) => (

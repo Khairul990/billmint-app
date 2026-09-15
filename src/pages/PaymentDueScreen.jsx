@@ -71,7 +71,7 @@ const PaymentDueScreen = ({ pendingAmount, chargeableBills, onCancel, onLogout }
     return (
       <div className="flex flex-col items-center justify-center p-6 text-theme-primary font-sans max-w-md mx-auto my-12">
         <div className="bg-theme-card p-8 rounded-3xl border border-theme-border-soft text-center shadow-premium w-full">
-          <div className="w-16 h-16 bg-emerald-500/10 text-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+          <div className="w-16 h-16 bg-theme-tint-bg text-theme-accent rounded-2xl flex items-center justify-center mx-auto mb-6">
             <CheckCircle className="w-8 h-8" />
           </div>
           <h2 className="text-2xl font-black mb-2">Proof Submitted</h2>

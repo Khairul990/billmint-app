@@ -6,7 +6,7 @@ import { staggerContainer, staggerItem } from '../utils/animations';
 const defaultActions = [
   { id: 'new-bill', label: 'New Bill', icon: Plus, color: 'bg-theme-accent', action: 'onQuickBillOpen' },
   { id: 'invoices', label: 'View Bills', icon: FileText, color: 'bg-blue-500', action: 'invoices' },
-  { id: 'customers', label: 'Customers', icon: Users, color: 'bg-emerald-500', action: 'customers' },
+  { id: 'customers', label: 'Customers', icon: Users, color: 'bg-theme-accent', action: 'customers' },
   { id: 'collect', label: 'Collect Due', icon: CreditCard, color: 'bg-amber-500', action: 'due-ledger' },
 ];
 

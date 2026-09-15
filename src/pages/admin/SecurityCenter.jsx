@@ -43,7 +43,7 @@ const SecurityCenter = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
           <h2 className="text-3xl font-black text-theme-primary tracking-tight flex items-center gap-3">
-            <ShieldCheck className="w-8 h-8 text-emerald-500" />
+            <ShieldCheck className="w-8 h-8 text-theme-accent" />
             Owner Security & Authorization Center
           </h2>
           <p className="text-sm text-theme-secondary mt-1">
@@ -63,7 +63,7 @@ const SecurityCenter = () => {
         <Card className="bg-theme-surface/50 border-theme-border-soft">
           <CardContent className="p-5">
             <span className="text-xs font-bold text-theme-muted uppercase tracking-wider block mb-1">Owner Authorization</span>
-            <div className="text-lg font-black text-emerald-500 flex items-center gap-1.5">
+            <div className="text-lg font-black text-theme-accent flex items-center gap-1.5">
               <UserCheck className="w-5 h-5" /> Authenticated
             </div>
             <span className="text-[11px] text-theme-muted mt-1 block truncate">{securityStatus.ownerEmail}</span>
@@ -93,7 +93,7 @@ const SecurityCenter = () => {
         <Card className="bg-theme-surface/50 border-theme-border-soft">
           <CardContent className="p-5">
             <span className="text-xs font-bold text-theme-muted uppercase tracking-wider block mb-1">Data Transmission</span>
-            <div className="text-lg font-black text-emerald-500 flex items-center gap-1.5">
+            <div className="text-lg font-black text-theme-accent flex items-center gap-1.5">
               <CheckCircle2 className="w-5 h-5" /> TLS / Encrypted
             </div>
             <span className="text-[11px] text-theme-muted mt-1 block">Zero Plaintext Secrets</span>
@@ -131,7 +131,7 @@ const SecurityCenter = () => {
               ))
             ) : (
               <div className="text-center py-8 text-theme-muted">
-                <ShieldCheck className="w-12 h-12 mx-auto mb-3 text-emerald-500 opacity-60" />
+                <ShieldCheck className="w-12 h-12 mx-auto mb-3 text-theme-accent opacity-60" />
                 <p className="font-bold">Zero security violations detected.</p>
               </div>
             )}

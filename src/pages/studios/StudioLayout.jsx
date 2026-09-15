@@ -387,7 +387,7 @@ const StudioLayout = ({
                 {isDirty ? (
                   <span className="flex items-center gap-1 text-amber-500"><span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" /> Unsaved Changes</span>
                 ) : (
-                  <span className="flex items-center gap-1 text-emerald-500"><CheckCircle2 className="w-3 h-3 text-emerald-500" /> Auto-Synced</span>
+                  <span className="flex items-center gap-1 text-theme-accent"><CheckCircle2 className="w-3 h-3 text-theme-accent" /> Auto-Synced</span>
                 )}
               </div>
             </div>
@@ -489,7 +489,7 @@ const StudioLayout = ({
                   {/* Badges and Quick Links */}
                   <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 shrink-0">
                     <div className="p-3 rounded-2xl bg-theme-surface border border-theme-border-soft flex items-center gap-2.5 shadow-2xs">
-                      <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                      <div className="w-2.5 h-2.5 rounded-full bg-theme-accent animate-pulse"></div>
                       <div className="text-left">
                         <p className="text-[9px] font-black uppercase text-theme-muted tracking-wider">Cloud State</p>
                         <p className="text-xs font-black text-theme-primary">Synchronized</p>

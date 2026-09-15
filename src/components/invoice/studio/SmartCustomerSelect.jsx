@@ -193,13 +193,13 @@ const SmartCustomerSelect = ({ customers = [] }) => {
         <div>
           <label className="block text-[10px] font-bold text-theme-muted mb-1 uppercase tracking-wider ml-1">WhatsApp</label>
           <div className="relative group">
-            <MessageCircle className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500 transition-colors group-focus-within:text-emerald-400" />
+            <MessageCircle className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-accent transition-colors group-focus-within:text-theme-accent" />
             <input
               type="tel"
               value={state.customer.whatsapp || ''}
               onChange={(e) => handleQuickChange('whatsapp', e.target.value)}
               placeholder="WhatsApp No."
-              className="w-full pl-9 pr-2 py-2 rounded-xl bg-theme-app border border-theme-border-soft focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-theme-primary text-sm font-bold transition-all"
+              className="w-full pl-9 pr-2 py-2 rounded-xl bg-theme-app border border-theme-border-soft focus:border-theme-tint-border focus:ring-2 focus:ring-emerald-500/20 outline-none text-theme-primary text-sm font-bold transition-all"
             />
           </div>
         </div>

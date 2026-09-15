@@ -354,11 +354,11 @@ const Customers = ({
                 <span className="text-[10px] font-black uppercase tracking-wider text-theme-muted">
                   Settled Accounts
                 </span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-theme-tint-bg text-theme-accent border border-theme-tint-border">
                   Cleared
                 </span>
               </div>
-              <p className="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400 font-numbers">
+              <p className="text-xl sm:text-2xl font-black text-theme-accent font-numbers">
                 {portfolioSnapshot.settledCustomers}
               </p>
             </SignatureSurface>
@@ -415,8 +415,8 @@ const Customers = ({
                 onClick={() => setFilterTab('settled')}
                 className={`px-3.5 py-1.5 rounded-xl font-extrabold whitespace-nowrap transition-all cursor-pointer ${
                   filterTab === 'settled'
-                    ? 'bg-emerald-600 text-white shadow-2xs'
-                    : 'bg-theme-card hover:bg-theme-surface border border-theme-border-soft text-emerald-600 dark:text-emerald-400'
+                    ? 'bg-theme-accent text-white shadow-2xs'
+                    : 'bg-theme-card hover:bg-theme-surface border border-theme-border-soft text-theme-accent'
                 }`}
               >
                 Settled ({portfolioSnapshot.settledCustomers})
@@ -461,7 +461,7 @@ const Customers = ({
                     {/* Top Identity Header */}
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-tr from-theme-accent via-emerald-600 to-teal-500 text-white font-black text-xs shadow-md shadow-theme-accent/20 shrink-0">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[image:var(--accent-gradient)] text-white font-black text-xs shadow-md shadow-theme-accent/20 shrink-0">
                           {(cust.name || '').split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase() || '??'}
                         </div>
                         <div className="min-w-0 flex-1">
@@ -521,10 +521,10 @@ const Customers = ({
                             </div>
                           ) : (
                             <div>
-                              <span className="text-[9px] font-extrabold uppercase text-emerald-600 dark:text-emerald-400 block">
+                              <span className="text-[9px] font-extrabold uppercase text-theme-accent block">
                                 Total Paid
                               </span>
-                              <span className="font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
+                              <span className="font-bold text-theme-accent tabular-nums">
                                 {formatCurrency(stats.totalPaid, currencySymbol)}
                               </span>
                             </div>
@@ -562,7 +562,7 @@ const Customers = ({
                     {hasDue && onOpenCollection ? (
                       <button 
                         onClick={() => onOpenCollection({ customer: cust, tab: 'record' })}
-                        className="flex-1 py-2 px-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1 cursor-pointer shadow-xs"
+                        className="flex-1 py-2 px-2 bg-theme-accent hover:opacity-90 text-white rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1 cursor-pointer shadow-xs"
                         title="Collect Money in Collection Center"
                       >
                         <Banknote className="w-3.5 h-3.5" /> Collect

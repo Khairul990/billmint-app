@@ -324,7 +324,7 @@ export default function Support({ onBack }) {
                             {ticket.issueType}
                           </span>
                           <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border ${
-                            ticket.status === 'Open' ? 'bg-theme-warning/15 text-theme-warning border-theme-warning/20' : 'bg-emerald-500/15 text-emerald-500 border-emerald-500/20'
+                            ticket.status === 'Open' ? 'bg-theme-warning/15 text-theme-warning border-theme-warning/20' : 'bg-theme-tint-bg text-theme-accent border-theme-tint-border'
                           }`}>
                             {ticket.status}
                           </span>
@@ -333,7 +333,7 @@ export default function Support({ onBack }) {
                         <p className="text-[10px] text-theme-muted mt-2">Submitted: {new Date(ticket.createdAt).toLocaleDateString()}</p>
                         
                         {ticket.adminNote && (
-                          <div className="mt-3 text-emerald-600 dark:text-emerald-400 bg-emerald-500/5 p-3 rounded-xl border border-emerald-500/10">
+                          <div className="mt-3 text-theme-accent bg-theme-tint-bg p-3 rounded-xl border border-theme-tint-border">
                             <span className="font-extrabold block text-xs mb-1">Support Reply:</span>
                             {ticket.adminNote}
                           </div>
@@ -412,7 +412,7 @@ export default function Support({ onBack }) {
                         <div className="flex justify-between items-start mb-2">
                           <span className="font-extrabold text-sm text-theme-primary">{req.title}</span>
                           <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border ${
-                            req.status === 'Done' ? 'bg-emerald-500/15 text-emerald-500 border-emerald-500/20' : 
+                            req.status === 'Done' ? 'bg-theme-tint-bg text-theme-accent border-theme-tint-border' : 
                             req.status === 'Planned' ? 'bg-theme-accent/15 text-theme-accent border-theme-accent/20' : 
                             req.status === 'Rejected' ? 'bg-theme-danger/15 text-theme-danger border-theme-danger/20' : 
                             'bg-theme-muted/15 text-theme-muted border-theme-muted/20'
@@ -464,7 +464,7 @@ export default function Support({ onBack }) {
                         <span className="text-[10px] text-theme-muted font-mono font-bold">{new Date(log.date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</span>
                         <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded border ${
                           log.type === 'fix' ? 'bg-theme-danger/10 text-theme-danger border-theme-danger/20' : 
-                          log.type === 'new' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
+                          log.type === 'new' ? 'bg-theme-tint-bg text-theme-accent border-theme-tint-border' : 
                           'bg-theme-accent/10 text-theme-accent border-theme-accent/20'
                         }`}>
                           {log.type}

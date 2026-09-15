@@ -30,7 +30,7 @@ const PRESETS = {
     icon: BarChart3,
     gradient: 'from-emerald-500/20 to-teal-500/10 dark:from-emerald-500/15 dark:to-teal-500/5',
     iconGradient: 'from-emerald-500/30 to-teal-500/15 dark:from-emerald-500/25 dark:to-teal-500/10',
-    iconColor: 'text-emerald-500',
+    iconColor: 'text-theme-accent',
     title: 'No Reports Available',
     description: 'Generate invoices to see detailed reports and analytics.',
     actionLabel: 'View Invoices',

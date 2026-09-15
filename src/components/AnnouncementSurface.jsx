@@ -7,7 +7,7 @@ import { settingsEngine } from '../services/settingsEngine';
 
 const TYPE = {
   feature: { icon: Sparkles, tone: 'text-theme-accent', bg: 'bg-theme-accent/10' },
-  update: { icon: CheckCircle2, tone: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+  update: { icon: CheckCircle2, tone: 'text-theme-accent', bg: 'bg-theme-tint-bg' },
   warning: { icon: AlertTriangle, tone: 'text-amber-500', bg: 'bg-amber-500/10' },
   maintenance: { icon: ShieldAlert, tone: 'text-rose-500', bg: 'bg-rose-500/10' },
   info: { icon: Info, tone: 'text-cyan-500', bg: 'bg-cyan-500/10' },

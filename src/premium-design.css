@@ -1768,15 +1768,15 @@
   border-color: rgba(15,175,146,.28) !important;
   box-shadow: var(--billqyro-shadow-brand) !important;
 }
-.billqyro-admin-premium .text-emerald-500 {
+.billqyro-admin-premium .text-theme-accent {
   color: var(--billqyro-brand) !important;
 }
-.billqyro-admin-premium .bg-emerald-500\/10,
-.billqyro-admin-premium .bg-emerald-500\/20 {
+.billqyro-admin-premium .bg-theme-accent\/10,
+.billqyro-admin-premium .bg-theme-accent\/20 {
   background: rgba(15,175,146,.09) !important;
 }
-.billqyro-admin-premium .border-emerald-500\/20,
-.billqyro-admin-premium .border-emerald-500\/30 {
+.billqyro-admin-premium .border-theme-tint-border\/20,
+.billqyro-admin-premium .border-theme-tint-border\/30 {
   border-color: rgba(15,175,146,.18) !important;
 }
 .billqyro-admin-premium .billqyro-admin-nav-group + button {

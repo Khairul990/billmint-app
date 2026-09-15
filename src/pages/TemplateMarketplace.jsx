@@ -327,7 +327,7 @@ const TemplateMarketplace = ({ settings, onSaveSettings, subscription, setCurren
                     <span className="text-[8px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-full border border-blue-500/20 flex items-center gap-1 badge-premium">
                       <FileText className="w-2.5 h-2.5" /> PDF: {tc.pdf}
                     </span>
-                    <span className="text-[8px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20 flex items-center gap-1 badge-premium">
+                    <span className="text-[8px] font-bold bg-theme-tint-bg text-theme-accent px-2 py-0.5 rounded-full border border-theme-tint-border flex items-center gap-1 badge-premium">
                       <Globe className="w-2.5 h-2.5" /> Live: {tc.live}
                     </span>
                     <span className="text-[8px] font-bold bg-theme-app px-2 py-0.5 rounded-full text-theme-muted border border-theme-border-soft flex items-center gap-1">
@@ -338,7 +338,7 @@ const TemplateMarketplace = ({ settings, onSaveSettings, subscription, setCurren
                         <Star className="w-2.5 h-2.5" /> Premium
                       </span>
                     ) : (
-                      <span className="text-[8px] font-bold bg-emerald-400/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-400/20 flex items-center gap-1">
+                      <span className="text-[8px] font-bold bg-theme-tint-bg text-theme-accent px-2 py-0.5 rounded-full border border-theme-tint-border flex items-center gap-1">
                         <Sparkles className="w-2.5 h-2.5" /> Starter
                       </span>
                     )}
@@ -466,7 +466,7 @@ const TemplateMarketplace = ({ settings, onSaveSettings, subscription, setCurren
                     <span className="text-[10px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 px-3 py-1.5 rounded-full border border-blue-500/20 flex items-center gap-1.5">
                       <FileText className="w-3 h-3" /> PDF Templates: {previewPack.templateCounts.pdf}
                     </span>
-                    <span className="text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-3 py-1.5 rounded-full border border-emerald-500/20 flex items-center gap-1.5">
+                    <span className="text-[10px] font-bold bg-theme-tint-bg text-theme-accent px-3 py-1.5 rounded-full border border-theme-tint-border flex items-center gap-1.5">
                       <Globe className="w-3 h-3" /> Live Links: {previewPack.templateCounts.live}
                     </span>
                   </div>

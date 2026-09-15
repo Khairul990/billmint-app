@@ -32,11 +32,11 @@ const CompactSummaryStrip = () => {
         </div>
 
         {/* Due Amount */}
-        <div className={`flex-[1.5] p-3 flex items-center justify-between sm:flex-col sm:items-start gap-1 ${state.totals.balanceDue > 0 ? 'bg-rose-500/10' : 'bg-emerald-500/10'}`}>
-          <span className={`text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 ${state.totals.balanceDue > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
+        <div className={`flex-[1.5] p-3 flex items-center justify-between sm:flex-col sm:items-start gap-1 ${state.totals.balanceDue > 0 ? 'bg-rose-500/10' : 'bg-theme-tint-bg'}`}>
+          <span className={`text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 ${state.totals.balanceDue > 0 ? 'text-rose-600' : 'text-theme-accent'}`}>
             <AlertCircle className="w-3 h-3" /> Balance Due
           </span>
-          <span className={`text-lg font-black ${state.totals.balanceDue > 0 ? 'text-rose-600' : 'text-emerald-600'} tabular-nums`}>
+          <span className={`text-lg font-black ${state.totals.balanceDue > 0 ? 'text-rose-600' : 'text-theme-accent'} tabular-nums`}>
             ₹{state.totals.balanceDue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </span>
         </div>

@@ -124,7 +124,7 @@ const OwnerTestLab = () => {
 
   const personas = [
     { name: 'Doctor', icon: '🩺', color: 'bg-blue-500/10 text-blue-400 border-blue-500/20 hover:bg-blue-500/20' },
-    { name: 'Teacher', icon: '📚', color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20' },
+    { name: 'Teacher', icon: '📚', color: 'bg-theme-tint-bg text-theme-accent border-theme-tint-border hover:bg-theme-tint-bg' },
     { name: 'Embroidery', icon: '🧵', color: 'bg-purple-500/10 text-purple-400 border-purple-500/20 hover:bg-purple-500/20' },
     { name: 'Retail', icon: '🏪', color: 'bg-amber-500/10 text-amber-400 border-amber-500/20 hover:bg-amber-500/20' },
   ];

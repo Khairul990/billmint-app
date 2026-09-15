@@ -27,7 +27,7 @@ export const Badge = ({
     outline: 'bg-transparent text-theme-secondary border-theme-border-strong',
     solid: 'bg-gradient-to-r from-theme-accent to-theme-accent-dark text-white border-transparent shadow-sm',
     // Signature Financial Statuses
-    paid: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-black',
+    paid: 'bg-theme-tint-bg text-theme-accent border-theme-tint-border font-black',
     partial: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30 font-black',
     unpaid: 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30 font-black',
     overdue: 'bg-red-500/20 text-red-600 dark:text-red-400 border-red-500/40 font-black animate-pulse',
@@ -57,7 +57,7 @@ export const Badge = ({
     neutral: 'bg-theme-muted',
     outline: 'bg-theme-secondary',
     solid: 'bg-white',
-    paid: 'bg-emerald-500',
+    paid: 'bg-theme-accent',
     partial: 'bg-amber-500',
     unpaid: 'bg-rose-500',
     overdue: 'bg-red-500',

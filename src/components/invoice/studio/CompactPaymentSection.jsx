@@ -65,7 +65,7 @@ const CompactPaymentSection = () => {
   ];
 
   const statuses = [
-    { id: 'Paid', label: 'Full Paid', style: 'bg-emerald-500/10 border-emerald-500 text-emerald-600 shadow-sm' },
+    { id: 'Paid', label: 'Full Paid', style: 'bg-theme-tint-bg border-theme-tint-border text-theme-accent shadow-sm' },
     { id: 'Partial', label: 'Partial', style: 'bg-amber-500/10 border-amber-500 text-amber-600 shadow-sm' },
     { id: 'Unpaid', label: 'Due', style: 'bg-rose-500/10 border-rose-500 text-rose-600 shadow-sm' }
   ];

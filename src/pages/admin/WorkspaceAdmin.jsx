@@ -188,7 +188,7 @@ const WorkspaceAdmin = () => {
                     key={mod}
                     className="px-2.5 py-1 rounded-lg bg-theme-surface-elevated border border-theme-border-soft text-xs font-bold text-theme-primary capitalize flex items-center gap-1.5"
                   >
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-theme-accent" />
                     {mod}
                   </span>
                 ))}

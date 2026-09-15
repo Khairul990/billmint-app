@@ -6,15 +6,15 @@ import React from 'react';
  */
 const INTENT_STYLES = {
   neutral: 'text-theme-primary',
-  collection: 'text-emerald-600 dark:text-emerald-400',
+  collection: 'text-theme-accent',
   sales: 'text-theme-accent',
   oldDue: 'text-amber-600 dark:text-amber-400',
   currentBill: 'text-theme-primary',
   totalPayable: 'text-theme-primary font-extrabold',
-  paid: 'text-emerald-600 dark:text-emerald-400',
+  paid: 'text-theme-accent',
   balanceDue: 'text-rose-600 dark:text-rose-400 font-extrabold',
   expense: 'text-rose-600 dark:text-rose-400',
-  money: 'text-emerald-600 dark:text-emerald-400',
+  money: 'text-theme-accent',
 };
 
 const SIZE_STYLES = {

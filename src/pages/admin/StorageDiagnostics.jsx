@@ -90,7 +90,7 @@ const StorageDiagnostics = () => {
         <Card className="bg-theme-surface/50 border-theme-border-soft">
           <CardContent className="p-5">
             <span className="text-xs font-bold text-theme-muted uppercase tracking-wider block mb-1">Browser Storage Quota</span>
-            <div className="text-3xl font-black text-emerald-500">
+            <div className="text-3xl font-black text-theme-accent">
               {telemetry?.storageEstimate?.usageMB ? `${telemetry.storageEstimate.usageMB} MB` : 'Available'}
             </div>
             <span className="text-[11px] text-theme-muted mt-1 block">
@@ -121,7 +121,7 @@ const StorageDiagnostics = () => {
                 </div>
                 <div className="text-right">
                   <span className="text-xs font-mono font-bold text-theme-accent">{store.approxKB} KB</span>
-                  <span className="text-[10px] text-emerald-500 font-bold block flex items-center justify-end gap-1">
+                  <span className="text-[10px] text-theme-accent font-bold block flex items-center justify-end gap-1">
                     <CheckCircle2 className="w-3 h-3" /> Indexed
                   </span>
                 </div>

@@ -34,7 +34,7 @@ const StatCard = ({ title, value, icon: Icon, trend, trendUp = true, accentColor
         {trend && (
           <span className={`flex items-center gap-1 text-2xs font-bold px-2 py-0.5 rounded-full ${
             trendUp
-              ? 'bg-emerald-500/10 text-emerald-500 dark:bg-emerald-500/20'
+              ? 'bg-theme-tint-bg text-theme-accent dark:bg-theme-tint-bg'
               : 'bg-red-500/10 text-red-500 dark:bg-red-500/20'
           }`}>
             {trendUp ? <TrendingUp className="w-2.5 h-2.5" /> : <TrendingDown className="w-2.5 h-2.5" />}

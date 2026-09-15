@@ -196,7 +196,7 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
         <div className="stat-premium p-4 rounded-2xl border border-theme-border-soft bg-theme-card">
           <div className="flex items-center justify-between mb-2">
             <p className="text-[10px] uppercase font-black tracking-widest text-theme-muted">Backup Health</p>
-            <ShieldCheck className="w-4 h-4 text-emerald-500" />
+            <ShieldCheck className="w-4 h-4 text-theme-accent" />
           </div>
           <div className="flex items-center gap-2">
             <span className={`badge-premium ${lastBackupDate === 'Never' ? 'badge-danger' : 'badge-success'}`}>
@@ -422,7 +422,7 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-[10px] font-bold text-blue-700 dark:text-blue-300">
                 <Cloud className="w-3 h-3" /> Cloud Storage
               </span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-[10px] font-bold text-emerald-700 dark:text-emerald-300">
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-theme-tint-bg dark:bg-theme-tint-bg text-[10px] font-bold text-theme-accent">
                 <RefreshCw className="w-3 h-3" /> Regular Exports
               </span>
             </div>
@@ -437,7 +437,7 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
       {/* Safety Information */}
       <motion.div variants={staggerItem} className="card-premium p-5 md:p-6 rounded-2xl border border-theme-border-soft bg-theme-card">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-theme-accent dark:bg-theme-tint-bg text-theme-accent flex items-center justify-center">
             <Shield className="w-5 h-5" />
           </div>
           <div>
@@ -494,7 +494,7 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
       <motion.div variants={staggerItem} className="flex flex-col items-center gap-3 pt-2">
         <div className="divider-premium w-full" />
         <div className="flex items-center justify-center gap-2 text-[10px] font-bold text-theme-muted uppercase tracking-widest">
-          <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" /> Your data is encrypted in transit and stays on your device until you explicitly export or sync
+          <ShieldCheck className="w-3.5 h-3.5 text-theme-accent" /> Your data is encrypted in transit and stays on your device until you explicitly export or sync
         </div>
         <p className="text-[9px] font-semibold text-theme-muted/60 text-center max-w-lg">
           Backup files are standard JSON. For sensitive data, consider encrypting backup files before storing them in cloud services. BillQyro never transmits your data to any external server without your direct action.

@@ -145,7 +145,7 @@ const PremiumChartTooltip = ({ active, payload, label, currencySymbol }) => {
     <div className="bg-theme-surface/95 dark:bg-theme-card/95 backdrop-blur-md p-3.5 rounded-2xl border border-theme-border-soft shadow-xl space-y-2 text-xs min-w-[200px]">
       <div className="font-bold text-theme-primary pb-1.5 border-b border-theme-border-soft/60 flex items-center justify-between">
         <span>{label}</span>
-        <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">{rate}% Realized</span>
+        <span className="text-[10px] font-bold text-theme-accent">{rate}% Realized</span>
       </div>
       <div className="space-y-1.5 text-2xs">
         <div className="flex items-center justify-between">
@@ -157,10 +157,10 @@ const PremiumChartTooltip = ({ active, payload, label, currencySymbol }) => {
           </span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold">
-            <span className="w-2 h-2 rounded-full bg-emerald-500" /> Total Collected:
+          <span className="flex items-center gap-1 text-theme-accent font-semibold">
+            <span className="w-2 h-2 rounded-full bg-theme-accent" /> Total Collected:
           </span>
-          <span className="font-black text-emerald-600 dark:text-emerald-400 font-numbers">
+          <span className="font-black text-theme-accent font-numbers">
             {formatCurrency(collected, currencySymbol)}
           </span>
         </div>
@@ -170,7 +170,7 @@ const PremiumChartTooltip = ({ active, payload, label, currencySymbol }) => {
             <span className="font-bold font-numbers">{formatCurrency(prevDueCollected, currencySymbol)}</span>
           </div>
         )}
-        <div className="flex items-center justify-between pl-3 text-emerald-700 dark:text-emerald-300 text-[10px]">
+        <div className="flex items-center justify-between pl-3 text-theme-accent text-[10px]">
           <span>↳ This Bill:</span>
           <span className="font-bold font-numbers">{formatCurrency(currentBillCollected, currencySymbol)}</span>
         </div>
@@ -1004,7 +1004,7 @@ const Dashboard = ({
               <div className="relative overflow-hidden luxury-glass-card p-4 sm:p-5 lg:p-6 rounded-3xl flex flex-col lg:flex-row lg:items-center justify-between gap-6 border border-theme-border-soft group">
                 {/* Decorative Premium Glow */}
                 <div className="absolute top-0 right-1/4 -mt-10 w-40 h-40 rounded-full bg-theme-accent opacity-[0.08] blur-3xl group-hover:opacity-[0.12] transition-opacity duration-700 pointer-events-none z-0" />
-                <div className="absolute bottom-0 right-0 -mb-10 -mr-10 w-48 h-48 rounded-full bg-emerald-500 opacity-[0.05] blur-3xl pointer-events-none z-0" />
+                <div className="absolute bottom-0 right-0 -mb-10 -mr-10 w-48 h-48 rounded-full bg-theme-accent opacity-[0.05] blur-3xl pointer-events-none z-0" />
 
                 <div className="min-w-0 flex-1 relative z-10 flex flex-col justify-center">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
@@ -1016,7 +1016,7 @@ const Dashboard = ({
                       {categoryExp.labels?.invoice ? `${businessCategory} • ${categoryExp.labels.invoice}s` : 'Business Command Center'}
                     </span>
                     <span className="text-2xs text-theme-muted font-bold flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-theme-accent animate-pulse" />
                       {syncStatus}
                     </span>
                   </div>
@@ -1036,13 +1036,13 @@ const Dashboard = ({
                   {/* Business Health Indicator */}
                   <div className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-bold shadow-sm ${
                     metrics.businessHealth.color === 'emerald'
-                      ? 'bg-emerald-500/10 border-emerald-500/25 text-emerald-600 dark:text-emerald-400'
+                      ? 'bg-theme-tint-bg border-theme-tint-border text-theme-accent'
                       : metrics.businessHealth.color === 'rose'
                       ? 'bg-rose-500/10 border-rose-500/25 text-rose-600 dark:text-rose-400'
                       : 'bg-amber-500/10 border-amber-500/25 text-amber-600 dark:text-amber-400'
                   }`}>
                     <span className={`w-2 h-2 rounded-full animate-pulse ${
-                      metrics.businessHealth.color === 'emerald' ? 'bg-emerald-500' : metrics.businessHealth.color === 'rose' ? 'bg-rose-500' : 'bg-amber-500'
+                      metrics.businessHealth.color === 'emerald' ? 'bg-theme-accent' : metrics.businessHealth.color === 'rose' ? 'bg-rose-500' : 'bg-amber-500'
                     }`} />
                     <span>Business Health: {metrics.businessHealth.label}</span>
                   </div>
@@ -1086,7 +1086,7 @@ const Dashboard = ({
               {isBusinessEmpty ? (
                 <div className="luxury-glass-card p-6 sm:p-10 rounded-3xl border border-theme-border-soft text-center space-y-6">
                   <div className="max-w-md mx-auto space-y-3">
-                    <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-emerald-500/20 to-theme-accent/10 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                    <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-emerald-500/20 to-theme-accent/10 border border-theme-tint-border flex items-center justify-center text-theme-accent">
                       <Sparkles className="w-8 h-8" />
                     </div>
                     <h2 className="text-xl sm:text-2xl font-bold bq-font-display text-theme-primary">
@@ -1117,7 +1117,7 @@ const Dashboard = ({
                       onClick={() => setCurrentTab('create-invoice')}
                       className="luxury-glass-subcard p-5 rounded-2xl border border-theme-border-soft hover:border-theme-accent/40 cursor-pointer transition-all hover:-translate-y-0.5 group"
                     >
-                      <div className="p-2.5 w-fit rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 mb-3 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                      <div className="p-2.5 w-fit rounded-xl bg-theme-tint-bg text-theme-accent mb-3 group-hover:bg-theme-accent group-hover:text-white transition-colors">
                         <FileText className="w-5 h-5" />
                       </div>
                       <h3 className="font-bold text-sm text-theme-primary mb-1">
@@ -1176,7 +1176,7 @@ const Dashboard = ({
                           </span>
                         </div>
                         <span className="text-2xs font-bold text-theme-muted flex items-center gap-1.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-theme-accent" />
                           {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                         </span>
                       </div>
@@ -1193,7 +1193,7 @@ const Dashboard = ({
                           
                           <div className="mt-3 flex items-center gap-3 flex-wrap text-xs">
                             {metrics.todaysSales > 0 ? (
-                              <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-bold">
+                              <span className="inline-flex items-center gap-1 text-theme-accent font-bold">
                                 <TrendingUp className="w-3.5 h-3.5" />
                                 Today's Invoiced Volume: {formatCurrency(metrics.todaysSales, currencySymbol)} ({metrics.todaysInvoicesCount} bills)
                               </span>
@@ -1215,7 +1215,7 @@ const Dashboard = ({
                            <div className="flex items-center justify-between w-full gap-4">
                              <span className="text-xs text-theme-muted font-medium">Growth</span>
                              {metrics.revenueGrowthPercent !== null ? (
-                               <span className={`text-xs font-bold flex items-center gap-1 ${metrics.revenueGrowthPercent >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                               <span className={`text-xs font-bold flex items-center gap-1 ${metrics.revenueGrowthPercent >= 0 ? 'text-theme-accent' : 'text-rose-600 dark:text-rose-400'}`}>
                                  {metrics.revenueGrowthPercent >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                                  {Math.abs(metrics.revenueGrowthPercent)}%
                                </span>
@@ -1229,7 +1229,7 @@ const Dashboard = ({
                       <div className="pt-4 border-t border-theme-border-soft/60 grid grid-cols-2 sm:grid-cols-3 gap-3">
                         <div className="luxury-glass-subcard p-3 rounded-2xl border border-theme-border-soft">
                           <span className="text-[10px] uppercase font-bold text-theme-muted block">Today's Inflow</span>
-                          <span className="text-sm sm:text-base font-bold text-emerald-600 dark:text-emerald-400 bq-financial-number">
+                          <span className="text-sm sm:text-base font-bold text-theme-accent bq-financial-number">
                             <AnimatedNumber value={formatCurrency(metrics.todaysCollected, currencySymbol)} />
                           </span>
                         </div>
@@ -1266,7 +1266,7 @@ const Dashboard = ({
                           </span>
                         </div>
                         <div className="text-right">
-                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-theme-tint-bg text-theme-accent border border-theme-tint-border">
                             {metrics.collectionRate}% Settled
                           </span>
                         </div>
@@ -1312,7 +1312,7 @@ const Dashboard = ({
                             Liquid operating funds
                           </span>
                         </div>
-                        <div className="p-2 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                        <div className="p-2 rounded-xl bg-theme-tint-bg text-theme-accent border border-theme-tint-border">
                           <Wallet className="w-5 h-5" />
                         </div>
                       </SignatureSurface>
@@ -1366,8 +1366,8 @@ const Dashboard = ({
                         <span className="text-[10px] text-theme-muted mt-1 block">Operational & supply expenditures</span>
                       </div>
 
-                      <div className="luxury-glass-subcard p-4 rounded-2xl bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/20">
-                        <span className="text-2xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block mb-1">
+                      <div className="luxury-glass-subcard p-4 rounded-2xl bg-theme-tint-bg dark:bg-theme-tint-bg border border-theme-tint-border">
+                        <span className="text-2xs font-black text-theme-accent uppercase tracking-wider block mb-1">
                           Available Business Money
                         </span>
                         <FinancialValue
@@ -1375,9 +1375,9 @@ const Dashboard = ({
                           currency={currencySymbol}
                           intent="oldDue"
                           size="md"
-                          className="font-black text-emerald-600 dark:text-emerald-400"
+                          className="font-black text-theme-accent"
                         />
-                        <span className="text-[10px] text-emerald-700 dark:text-emerald-400 mt-1 block">Operating balance</span>
+                        <span className="text-[10px] text-theme-accent mt-1 block">Operating balance</span>
                       </div>
                     </div>
                   </div>
@@ -1479,13 +1479,13 @@ const Dashboard = ({
                           <span className="w-2.5 h-2.5 rounded-full bg-theme-accent" />
                           Invoiced: {formatCurrency(heroKPIs.invoiced, currencySymbol)}
                         </span>
-                        <span className="flex items-center gap-1.5 font-bold text-emerald-600 dark:text-emerald-400">
-                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                        <span className="flex items-center gap-1.5 font-bold text-theme-accent">
+                          <span className="w-2.5 h-2.5 rounded-full bg-theme-accent" />
                           Collected: {formatCurrency(heroKPIs.collected, currencySymbol)}
                         </span>
                       </div>
                       <span className="text-theme-muted font-bold">
-                        Period Realization: <span className="text-emerald-600 dark:text-emerald-400">{heroKPIs.collectionRate}%</span>
+                        Period Realization: <span className="text-theme-accent">{heroKPIs.collectionRate}%</span>
                       </span>
                     </div>
                   </div>
@@ -1493,11 +1493,11 @@ const Dashboard = ({
                   {/* ========================================================================= */}
                   {/* LEVEL 5: MONEY STILL TO COLLECT */}
                   {/* ========================================================================= */}
-                  <SignatureSurface variant="financial" className="p-5 sm:p-6 rounded-3xl border border-emerald-500/25 space-y-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-emerald-500/20">
+                  <SignatureSurface variant="financial" className="p-5 sm:p-6 rounded-3xl border border-theme-tint-border space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-theme-tint-border">
                       <div>
                         <h2 className="text-sm sm:text-base font-bold bq-font-display text-theme-primary flex items-center gap-2">
-                          <CreditCard className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                          <CreditCard className="w-4 h-4 text-theme-accent" />
                           Money Still to Collect
                         </h2>
                         <p className="text-xs text-theme-muted">
@@ -1521,13 +1521,13 @@ const Dashboard = ({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                       <div className="luxury-glass-subcard p-3 rounded-2xl border border-theme-border-soft flex items-center justify-between">
                         <span className="text-theme-muted font-medium">Earlier Due Recovered:</span>
-                        <span className="font-bold text-emerald-600 dark:text-emerald-400 bq-financial-number">
+                        <span className="font-bold text-theme-accent bq-financial-number">
                           {formatCurrency(heroKPIs.prevDueCollected, currencySymbol)}
                         </span>
                       </div>
                       <div className="luxury-glass-subcard p-3 rounded-2xl border border-theme-border-soft flex items-center justify-between">
                         <span className="text-theme-muted font-medium">This Bill Collected:</span>
-                        <span className="font-bold text-emerald-600 dark:text-emerald-400 bq-financial-number">
+                        <span className="font-bold text-theme-accent bq-financial-number">
                           {formatCurrency(heroKPIs.currentBillCollected, currencySymbol)}
                         </span>
                       </div>
@@ -1551,10 +1551,10 @@ const Dashboard = ({
                     </div>
 
                     {metrics.overdueCount === 0 && metrics.partialInvoicesCount === 0 && pendingPaymentsCount === 0 && customerAnalytics.withDueCount === 0 ? (
-                      <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-center gap-3">
-                        <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                      <div className="p-4 rounded-2xl bg-theme-tint-bg border border-theme-tint-border flex items-center gap-3">
+                        <CheckCircle2 className="w-5 h-5 text-theme-accent shrink-0" />
                         <div>
-                          <p className="text-xs font-bold text-emerald-700 dark:text-emerald-300">All caught up!</p>
+                          <p className="text-xs font-bold text-theme-accent">All caught up!</p>
                           <p className="text-2xs text-theme-muted">No overdue bills, partial payments, or pending approvals requiring immediate action.</p>
                         </div>
                       </div>
@@ -1672,7 +1672,7 @@ const Dashboard = ({
                           <span className="text-2xs font-bold text-theme-muted uppercase">Paid</span>
                           <StatusBadge status="paid" size="sm" showIcon={false} />
                         </div>
-                        <span className="text-xl font-bold bq-financial-number text-emerald-600 dark:text-emerald-400">
+                        <span className="text-xl font-bold bq-financial-number text-theme-accent">
                           {metrics.paidInvoicesCount}
                         </span>
                         <span className="text-[10px] text-theme-muted block mt-0.5">Fully cleared bills</span>
@@ -2033,7 +2033,7 @@ const Dashboard = ({
                       </div>
                       <div className="flex justify-between text-theme-muted">
                         <span>To My Dream:</span>
-                        <span className="font-bold text-emerald-600">+{formatCurrency(parseFloat(dreamTransferAmount) || 0, currencySymbol)}</span>
+                        <span className="font-bold text-theme-accent">+{formatCurrency(parseFloat(dreamTransferAmount) || 0, currencySymbol)}</span>
                       </div>
                       <div className="flex justify-between font-bold text-theme-primary pt-1 border-t border-pink-500/20">
                         <span>New Dream Saved:</span>
@@ -2151,7 +2151,7 @@ const Dashboard = ({
                       </div>
                       <div className="flex justify-between text-theme-muted">
                         <span>To {dreamWithdrawDest === 'phonepe' ? 'PhonePe' : 'My Cash'}:</span>
-                        <span className="font-bold text-emerald-600">+{formatCurrency(parseFloat(dreamTransferAmount) || 0, currencySymbol)}</span>
+                        <span className="font-bold text-theme-accent">+{formatCurrency(parseFloat(dreamTransferAmount) || 0, currencySymbol)}</span>
                       </div>
                     </div>
                   )}

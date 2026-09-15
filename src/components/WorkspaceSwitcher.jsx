@@ -143,7 +143,7 @@ const WorkspaceSwitcher = ({ businessWorkspaces = [], activeWorkspaceId, setActi
                   {activeWorkspace.name || 'Default Workspace'}
                 </p>
                 <div className="flex items-center gap-1.5 text-[10px] text-theme-muted font-medium mt-0.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-theme-accent"></span>
                   <span className="truncate">Cloud Synced</span>
                 </div>
               </div>

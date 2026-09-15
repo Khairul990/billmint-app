@@ -6,7 +6,7 @@ import { formatCurrency } from '../utils/invoiceUtils';
 
 const activityConfig = {
   invoice_created: { icon: FileText, color: 'text-theme-accent', bg: 'bg-theme-accent/10' },
-  payment_received: { icon: CheckCircle, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+  payment_received: { icon: CheckCircle, color: 'text-theme-accent', bg: 'bg-theme-tint-bg' },
   payment_due: { icon: AlertCircle, color: 'text-red-500', bg: 'bg-red-500/10' },
   invoice_overdue: { icon: Clock, color: 'text-amber-500', bg: 'bg-amber-500/10' },
 };

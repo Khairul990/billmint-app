@@ -10,7 +10,7 @@ const LS_KEY = 'billqyro_delivery';
 const STATUS_OPTIONS = ['Pending', 'Picked Up', 'In Transit', 'Out for Delivery', 'Delivered', 'Cancelled'];
 
 const sc = (s) => {
-  if (s === 'Delivered') return 'text-emerald-500';
+  if (s === 'Delivered') return 'text-theme-accent';
   if (s === 'Out for Delivery' || s === 'In Transit') return 'text-amber-500';
   if (s === 'Picked Up') return 'text-blue-500';
   if (s === 'Pending') return 'text-orange-500';
@@ -73,7 +73,7 @@ const Delivery = () => {
   const stats = [
     { label: 'Total Deliveries', value: items.length, icon: Package, color: 'text-cyan-500' },
     { label: 'Active', value: activeDeliveries, icon: Truck, color: 'text-amber-500' },
-    { label: 'Delivered', value: deliveredCount, icon: CheckCircle, color: 'text-emerald-500' },
+    { label: 'Delivered', value: deliveredCount, icon: CheckCircle, color: 'text-theme-accent' },
   ];
 
   if (loading) return <div className="space-y-6 pb-24"><CardSkeleton lines={4} /><CardSkeleton lines={4} /><CardSkeleton lines={4} /></div>;

@@ -568,8 +568,8 @@ const Invoices = ({
                   {wsName}
                 </span>
                 <span className="text-theme-muted text-xs">•</span>
-                <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                <span className="text-[11px] font-semibold text-theme-accent flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-theme-accent"></span>
                   Cloud Synced
                 </span>
               </div>
@@ -655,11 +655,11 @@ const Invoices = ({
                   <p className="text-[10px] font-extrabold uppercase tracking-wider text-theme-muted">
                     Total Collected
                   </p>
-                  <span className="px-1.5 py-0.2 rounded text-[9px] font-black bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-numbers">
+                  <span className="px-1.5 py-0.2 rounded text-[9px] font-black bg-theme-tint-bg text-theme-accent border border-theme-tint-border font-numbers">
                     {collectionRate}% rate
                   </span>
                 </div>
-                <p className="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400 font-numbers tabular-nums">
+                <p className="text-xl sm:text-2xl font-black text-theme-accent font-numbers tabular-nums">
                   {formatCurrency(summaryMetrics.totalPaid, currencySymbol)}
                 </p>
               </div>
@@ -677,7 +677,7 @@ const Invoices = ({
                   ) : summaryMetrics.totalDue > 0 ? (
                     <span className="w-2 h-2 rounded-full bg-amber-500"></span>
                   ) : (
-                    <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span className="w-2 h-2 rounded-full bg-theme-accent"></span>
                   )}
                 </div>
                 <p className={`text-xl sm:text-2xl font-black font-numbers tabular-nums ${
@@ -1051,7 +1051,7 @@ const Invoices = ({
                         onRecordPayment({ invoice: inv, customer: inv.customer });
                       }
                     }}
-                    className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer shadow-xs mr-1"
+                    className="px-3 py-1.5 bg-theme-accent hover:opacity-90 text-white rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer shadow-xs mr-1"
                     title="Collect Payment in Collection Center"
                   >
                     <CreditCard className="w-3.5 h-3.5" />
@@ -1149,7 +1149,7 @@ const Invoices = ({
                 <div className="space-y-3 pt-1 text-xs">
                   {/* Step 1: Invoice Created */}
                   <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
+                    <div className="w-6 h-6 rounded-full bg-theme-tint-bg text-theme-accent flex items-center justify-center shrink-0 mt-0.5">
                       <Check className="w-3.5 h-3.5" />
                     </div>
                     <div className="flex-1">
@@ -1167,7 +1167,7 @@ const Invoices = ({
                         <CreditCard className="w-3 h-3" />
                       </div>
                       <div className="flex-1">
-                        <p className="font-bold text-emerald-600 dark:text-emerald-400">
+                        <p className="font-bold text-theme-accent">
                           +{formatCurrency(parseFloat(pmt.amount) || 0, currencySymbol)} received ({pmt.method || 'Payment'})
                         </p>
                         <p className="text-[11px] text-theme-muted">
@@ -1180,12 +1180,12 @@ const Invoices = ({
                   {/* Step End: Current Balance */}
                   <div className="flex items-start gap-3 pt-1 border-t border-theme-border-soft">
                     <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
-                      getInvoiceBalanceDue(viewingInvoice) > 0 ? 'bg-rose-500/10 text-rose-500' : 'bg-emerald-500/10 text-emerald-600'
+                      getInvoiceBalanceDue(viewingInvoice) > 0 ? 'bg-rose-500/10 text-rose-500' : 'bg-theme-tint-bg text-theme-accent'
                     }`}>
                       <DollarSign className="w-3.5 h-3.5" />
                     </div>
                     <div className="flex-1 flex items-center justify-between flex-wrap gap-2">
-                      <p className={`font-black ${getInvoiceBalanceDue(viewingInvoice) > 0 ? 'text-rose-500' : 'text-emerald-600'}`}>
+                      <p className={`font-black ${getInvoiceBalanceDue(viewingInvoice) > 0 ? 'text-rose-500' : 'text-theme-accent'}`}>
                         {getInvoiceBalanceDue(viewingInvoice) > 0 
                           ? `Remaining Outstanding: ${formatCurrency(getInvoiceBalanceDue(viewingInvoice), currencySymbol)}` 
                           : 'Fully Settled & Paid in Full'}
@@ -1201,7 +1201,7 @@ const Invoices = ({
                               onRecordPayment({ invoice: inv, customer: inv.customer });
                             }
                           }}
-                          className="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
+                          className="px-3 py-1 bg-theme-accent hover:opacity-90 text-white rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
                         >
                           <CreditCard className="w-3 h-3" />
                           <span>Collect Money</span>
@@ -1260,7 +1260,7 @@ const Invoices = ({
                         <div className="flex sm:flex-row md:flex-col justify-end gap-2 md:w-48 shrink-0">
                           <button
                             onClick={() => handleApproveProof(proof)}
-                            className="flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-sm transition-all cursor-pointer w-full text-center"
+                            className="flex items-center justify-center gap-1.5 bg-theme-accent hover:bg-theme-accent text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-sm transition-all cursor-pointer w-full text-center"
                           >
                             <Check className="w-3.5 h-3.5" />
                             <span>Approve Proof</span>

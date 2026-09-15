@@ -201,7 +201,7 @@ const PaymentProofCenter = () => {
                       {proof.proofType}
                     </span>
                   </TableCell>
-                  <TableCell className="font-mono font-bold text-emerald-500">
+                  <TableCell className="font-mono font-bold text-theme-accent">
                     ₹{parseFloat(proof.amount || 0).toLocaleString()}
                   </TableCell>
                   <TableCell className="font-mono text-xs text-theme-secondary">
@@ -210,7 +210,7 @@ const PaymentProofCenter = () => {
                   <TableCell>
                     <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
                       proof.status === 'Approved' || proof.status === 'Verified'
-                        ? 'bg-emerald-500/10 text-emerald-500'
+                        ? 'bg-theme-tint-bg text-theme-accent'
                         : proof.status === 'Rejected'
                         ? 'bg-rose-500/10 text-rose-500'
                         : 'bg-amber-500/10 text-amber-500'
@@ -238,7 +238,7 @@ const PaymentProofCenter = () => {
                             size="sm"
                             disabled={processingId === proof.id}
                             onClick={() => handleApprove(proof)}
-                            className="text-xs font-bold text-emerald-500 hover:bg-emerald-500/10"
+                            className="text-xs font-bold text-theme-accent hover:bg-theme-tint-bg"
                           >
                             Approve
                           </Button>
@@ -277,7 +277,7 @@ const PaymentProofCenter = () => {
               </div>
               <div>
                 <span className="text-theme-muted uppercase font-bold block mb-0.5">Amount</span>
-                <span className="text-emerald-500 font-bold font-mono text-sm">₹{selectedProof.amount}</span>
+                <span className="text-theme-accent font-bold font-mono text-sm">₹{selectedProof.amount}</span>
               </div>
               <div>
                 <span className="text-theme-muted uppercase font-bold block mb-0.5">Transaction ID</span>
@@ -330,7 +330,7 @@ const PaymentProofCenter = () => {
                     onClick={() => handleApprove(selectedProof)}
                     variant="primary"
                     size="sm"
-                    className="bg-emerald-600 hover:bg-emerald-700 font-bold"
+                    className="bg-theme-accent hover:bg-theme-accent font-bold"
                   >
                     Approve Payment
                   </Button>

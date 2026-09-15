@@ -118,16 +118,16 @@ const MoreMenu = ({
     <div className="max-w-2xl mx-auto pb-16 px-3 sm:px-4 space-y-4 animate-fadeIn">
       
       {/* 1. Signature Business Identity Header */}
-      <div className="rounded-3xl p-6 sm:p-7 relative overflow-hidden shadow-premium bg-gradient-to-br from-[#075E50] via-[#0B8F78] to-[#18B99B] text-white border border-emerald-400/20">
+      <div className="rounded-3xl p-6 sm:p-7 relative overflow-hidden shadow-premium bg-gradient-to-br from-[#075E50] via-[#0B8F78] to-[#18B99B] text-white border border-theme-tint-border">
         <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full blur-2xl pointer-events-none -mr-12 -mt-12"></div>
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1.5 min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-[9px] font-black tracking-widest text-emerald-100 bg-black/20 backdrop-blur-md px-2.5 py-0.5 rounded-full uppercase border border-white/10">
+              <span className="text-[9px] font-black tracking-widest text-theme-accent bg-black/20 backdrop-blur-md px-2.5 py-0.5 rounded-full uppercase border border-white/10">
                 {businessSettings?.activeWorkspaceName || 'Main Business'}
               </span>
-              <span className="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-100/90 bg-emerald-900/40 px-2 py-0.5 rounded-full border border-emerald-400/20">
-                <CheckCircle2 className="w-2.5 h-2.5 text-emerald-300" />
+              <span className="inline-flex items-center gap-1 text-[9px] font-bold text-theme-accent/90 bg-theme-tint-bg px-2 py-0.5 rounded-full border border-theme-tint-border">
+                <CheckCircle2 className="w-2.5 h-2.5 text-theme-accent" />
                 Cloud Active
               </span>
             </div>
@@ -136,14 +136,14 @@ const MoreMenu = ({
               {businessSettings?.businessName || 'BillQyro Workspace'}
             </h2>
 
-            <div className="flex flex-wrap items-center gap-y-1 gap-x-3 text-xs text-emerald-50/80 font-medium">
+            <div className="flex flex-wrap items-center gap-y-1 gap-x-3 text-xs text-theme-accent/80 font-medium">
               <span className="flex items-center gap-1">
-                <User className="w-3 h-3 text-emerald-200" />
+                <User className="w-3 h-3 text-theme-accent" />
                 {businessSettings?.ownerName || 'Administrator'}
               </span>
               <span>•</span>
               <span className="flex items-center gap-1">
-                <Phone className="w-3 h-3 text-emerald-200" />
+                <Phone className="w-3 h-3 text-theme-accent" />
                 {businessSettings?.phone || 'No phone registered'}
               </span>
             </div>

@@ -146,12 +146,12 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false, templat
   return (
     <div 
       id="invoice-preview-capture" 
-      className={`bg-theme-card dark:bg-theme-card border ${templateId === 'minimal' ? 'border-black rounded-none shadow-none' : templateId === 'classic-elegant' ? 'border-emerald-800 rounded-none shadow-md' : 'border-theme-border-soft dark:border-theme-border-soft rounded-2xl sm:rounded-3xl shadow-premium'} p-5 sm:p-7 md:p-8 max-w-4xl mx-auto text-theme-primary dark:text-theme-primary transition-all duration-300 relative`}
+      className={`bg-theme-card dark:bg-theme-card border ${templateId === 'minimal' ? 'border-black rounded-none shadow-none' : templateId === 'classic-elegant' ? 'border-theme-tint-border rounded-none shadow-md' : 'border-theme-border-soft dark:border-theme-border-soft rounded-2xl sm:rounded-3xl shadow-premium'} p-5 sm:p-7 md:p-8 max-w-4xl mx-auto text-theme-primary dark:text-theme-primary transition-all duration-300 relative`}
       style={{ fontFamily: (templateId === 'classic-elegant' || templateId === 'premium-gold') ? "'Georgia', serif" : "'Inter', sans-serif" }}
     >
 
       {/* 1. BRAND HEADER & METADATA GRID */}
-      <div className={`flex flex-row justify-between items-start gap-4 border-b pb-4 mb-2 ${templateId === 'modern' ? 'bg-slate-900 text-slate-200 -mx-5 -mt-5 sm:-mx-7 sm:-mt-7 md:-mx-8 md:-mt-8 p-5 sm:p-7 md:p-8 rounded-t-2xl sm:rounded-t-3xl border-slate-800' : templateId === 'gold' ? 'bg-slate-900 text-amber-100 -mx-5 -mt-5 sm:-mx-7 sm:-mt-7 md:-mx-8 md:-mt-8 p-5 sm:p-7 md:p-8 rounded-t-2xl sm:rounded-t-3xl border-amber-500/30' : templateId === 'corporate' ? 'border-b-4 border-emerald-800' : templateId === 'minimal' ? 'border-black' : 'border-theme-border-soft dark:border-theme-border-soft'}`}>
+      <div className={`flex flex-row justify-between items-start gap-4 border-b pb-4 mb-2 ${templateId === 'modern' ? 'bg-slate-900 text-slate-200 -mx-5 -mt-5 sm:-mx-7 sm:-mt-7 md:-mx-8 md:-mt-8 p-5 sm:p-7 md:p-8 rounded-t-2xl sm:rounded-t-3xl border-slate-800' : templateId === 'gold' ? 'bg-slate-900 text-amber-100 -mx-5 -mt-5 sm:-mx-7 sm:-mt-7 md:-mx-8 md:-mt-8 p-5 sm:p-7 md:p-8 rounded-t-2xl sm:rounded-t-3xl border-amber-500/30' : templateId === 'corporate' ? 'border-b-4 border-theme-tint-border' : templateId === 'minimal' ? 'border-black' : 'border-theme-border-soft dark:border-theme-border-soft'}`}>
         {/* Left Side: Business logo & details */}
         <div className="flex-1 max-w-[55%]">
           <div className="flex items-center gap-3">
@@ -168,7 +168,7 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false, templat
               </div>
             )}
             <div>
-              <h3 className={`font-extrabold text-base sm:text-lg tracking-tight ${templateId === 'modern' ? 'text-white' : templateId === 'gold' ? 'text-amber-400' : templateId === 'corporate' ? 'text-emerald-900' : 'text-theme-primary dark:text-theme-primary'}`}>{cleanText(businessPrefs?.businessName) || 'BillQyro Client'}</h3>
+              <h3 className={`font-extrabold text-base sm:text-lg tracking-tight ${templateId === 'modern' ? 'text-white' : templateId === 'gold' ? 'text-amber-400' : templateId === 'corporate' ? 'text-theme-accent' : 'text-theme-primary dark:text-theme-primary'}`}>{cleanText(businessPrefs?.businessName) || 'BillQyro Client'}</h3>
               {businessPrefs?.gstNumber && (
                 <p className="text-[11px] text-theme-muted dark:text-theme-muted font-semibold uppercase tracking-wider mt-0.5">{regionalPrefs.taxLabel || 'GST'}: {cleanText(businessPrefs.gstNumber)}</p>
               )}
@@ -218,7 +218,7 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false, templat
       </div>
 
       {/* 2. CLIENT CRM GRID */}
-      <div className={`grid grid-cols-2 gap-4 py-3.5 border-b text-xs ${templateId === 'minimal' ? 'border-black' : templateId === 'corporate' ? 'border-emerald-800/30' : 'border-theme-border-soft dark:border-theme-border-soft'}`}>
+      <div className={`grid grid-cols-2 gap-4 py-3.5 border-b text-xs ${templateId === 'minimal' ? 'border-black' : templateId === 'corporate' ? 'border-theme-tint-border' : 'border-theme-border-soft dark:border-theme-border-soft'}`}>
         <div>
           <span className="font-bold text-theme-muted dark:text-theme-muted uppercase tracking-wider block mb-1">{templateId === 'teacher' ? 'Student Details' : 'Billed To'}</span>
           <h4 className="font-extrabold text-sm text-theme-primary dark:text-theme-primary">{cleanText(invoice.customerName)}</h4>
@@ -265,7 +265,7 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false, templat
       <div className="py-3.5 overflow-x-auto no-scrollbar">
         <table className="w-full text-left text-xs border-collapse">
           <thead>
-            <tr className={`border-b text-theme-muted dark:text-theme-muted font-bold uppercase tracking-wider ${templateId === 'classic-elegant' ? 'border-emerald-800 text-emerald-900' : 'border-theme-border-soft dark:border-theme-border-soft'}`}>
+            <tr className={`border-b text-theme-muted dark:text-theme-muted font-bold uppercase tracking-wider ${templateId === 'classic-elegant' ? 'border-theme-tint-border text-theme-accent' : 'border-theme-border-soft dark:border-theme-border-soft'}`}>
               {getInvoiceColumns(invoice, businessSettings).map(col => (
                 <th key={col.id} className={`pb-2 px-2 text-${col.align}`} style={{ width: col.width }}>
                   {col.label}
@@ -380,7 +380,7 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false, templat
             </div>
           )}
           {(financials.previousDue > 0 || financials.amountPaid > 0) && (
-            <div className={`flex justify-between items-center border-t pt-1.5 text-theme-primary dark:text-theme-secondary font-bold ${templateId === 'classic-elegant' ? 'border-emerald-800/30' : 'border-theme-border-soft'}`}>
+            <div className={`flex justify-between items-center border-t pt-1.5 text-theme-primary dark:text-theme-secondary font-bold ${templateId === 'classic-elegant' ? 'border-theme-tint-border' : 'border-theme-border-soft'}`}>
               <span>This Bill</span>
               <span className="font-extrabold tabular-nums">{formatCurrency(financials.currentInvoiceTotal, currencySymbol, regionalPrefs.numberFormat)}</span>
             </div>
@@ -401,13 +401,13 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false, templat
           )}
 
           {financials.amountPaid > 0 && (
-            <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-bold">
+            <div className="flex justify-between text-theme-accent font-bold">
               <span>Paid</span>
               <span className="tabular-nums">-{formatCurrency(financials.amountPaid, currencySymbol, regionalPrefs.numberFormat)}</span>
             </div>
           )}
           
-          <div className={`flex justify-between items-center border-t pt-2 text-theme-primary dark:text-theme-primary ${templateId === 'classic-elegant' ? 'border-emerald-800/50' : 'border-theme-border-soft dark:border-theme-border-soft'}`}>
+          <div className={`flex justify-between items-center border-t pt-2 text-theme-primary dark:text-theme-primary ${templateId === 'classic-elegant' ? 'border-theme-tint-border' : 'border-theme-border-soft dark:border-theme-border-soft'}`}>
             <span className="text-sm font-extrabold text-theme-primary dark:text-theme-secondary">
               {(financials.amountPaid > 0 || financials.previousDue > 0) ? 'Amount Still Due' : 'Grand Total'}
             </span>
@@ -582,7 +582,7 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false, templat
         </div>
       )}
       {templateId === 'doctor' && (
-        <div className="mt-4 p-3 bg-emerald-50 dark:bg-emerald-950/20 border-l-4 border-emerald-500 rounded text-[9px] text-emerald-800 dark:text-emerald-300 font-medium italic">
+        <div className="mt-4 p-3 bg-theme-accent dark:bg-theme-tint-bg border-l-4 border-theme-tint-border rounded text-[9px] text-theme-accent font-medium italic">
           Disclaimer: This document is for billing purposes only and does not constitute medical advice or a formal prescription unless explicitly signed by a registered practitioner.
         </div>
       )}

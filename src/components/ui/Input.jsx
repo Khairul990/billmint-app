@@ -21,7 +21,7 @@ export const Input = React.forwardRef(({
   const isFinancial = variant === 'financial';
   const sizeStyles = size === 'sm' ? 'h-8 text-xs py-1.5' : size === 'lg' ? 'h-12 text-base py-3' : isFinancial ? 'h-11 text-base md:text-lg py-2' : 'h-10 py-2.5';
   const errorStyles = error ? 'border-theme-danger/60 focus:border-theme-danger focus:ring-theme-danger/25' : '';
-  const financialStyles = isFinancial ? 'font-numbers font-bold tracking-tight text-theme-primary bg-[var(--bq-surface-primary)] focus:border-emerald-500 focus:ring-emerald-500/25' : '';
+  const financialStyles = isFinancial ? 'font-numbers font-bold tracking-tight text-theme-primary bg-[var(--bq-surface-primary)] focus:border-theme-tint-border focus:ring-emerald-500/25' : '';
 
   const prefix = currencyPrefix ?? (isFinancial ? '₹' : null);
 

@@ -55,7 +55,7 @@ const Measurements = () => {
   const stats = [
     { label: 'Total Records', value: items.length, icon: Scissors, color: 'text-rose-500' },
     { label: 'Customers', value: [...new Set(items.map(i => i.customerName))].length, icon: User, color: 'text-blue-500' },
-    { label: 'Garment Types', value: [...new Set(items.map(i => i.garmentType).filter(Boolean))].length, icon: Ruler, color: 'text-emerald-500' },
+    { label: 'Garment Types', value: [...new Set(items.map(i => i.garmentType).filter(Boolean))].length, icon: Ruler, color: 'text-theme-accent' },
   ];
 
   if (loading) return <div className="space-y-6 pb-24"><CardSkeleton lines={4} /><CardSkeleton lines={4} /><CardSkeleton lines={4} /></div>;

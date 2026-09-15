@@ -42,7 +42,7 @@ const DataBackupTab = (props) => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
                     <button 
                       onClick={handleExport}
-                      className="flex items-center gap-3 p-4 rounded-xl border border-emerald-500/20 bg-theme-success/5 hover:bg-theme-success/10 transition-colors text-left"
+                      className="flex items-center gap-3 p-4 rounded-xl border border-theme-tint-border bg-theme-success/5 hover:bg-theme-success/10 transition-colors text-left"
                     >
                       <Database className="text-theme-success" size={24} />
                       <div>
@@ -71,7 +71,7 @@ const DataBackupTab = (props) => {
                       <>
                         <button 
                           onClick={handleCleanTemporaryData}
-                          className="flex items-center gap-3 p-4 rounded-xl border border-emerald-500/20 bg-theme-success/5 hover:bg-theme-success/10 transition-colors text-left"
+                          className="flex items-center gap-3 p-4 rounded-xl border border-theme-tint-border bg-theme-success/5 hover:bg-theme-success/10 transition-colors text-left"
                         >
                           <RefreshCw className="text-theme-success" size={24} />
                           <div>

@@ -39,7 +39,7 @@ const StudioHeader = ({ showPreviewModal, setShowPreviewModal, lastSaved, saveSt
             <span className="flex items-center text-[10px] font-bold uppercase tracking-wider transition-colors duration-300">
               {saveStatus === 'saving' && <span className="text-amber-400 flex items-center"><Loader2 className="w-3 h-3 mr-1 animate-spin" /> Saving...</span>}
               {saveStatus === 'unsaved' && <span className="text-rose-400 flex items-center"><CloudOff className="w-3 h-3 mr-1" /> Unsaved Changes</span>}
-              {saveStatus === 'saved' && <span className="text-emerald-400 flex items-center"><Cloud className="w-3 h-3 mr-1" /> Saved just now</span>}
+              {saveStatus === 'saved' && <span className="text-theme-accent flex items-center"><Cloud className="w-3 h-3 mr-1" /> Saved just now</span>}
               {saveStatus === '' && <span className="text-theme-muted flex items-center"><Cloud className="w-3 h-3 mr-1" /> All saved</span>}
             </span>
             <span className="w-1 h-1 rounded-full bg-theme-border-soft"></span>

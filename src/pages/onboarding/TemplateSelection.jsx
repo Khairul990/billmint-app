@@ -10,7 +10,7 @@ const templatesList = [
   { id: 'grocery', label: 'Small Shop / Grocery', icon: ShoppingBasket, color: 'text-orange-500', bg: 'bg-orange-500/10 border-orange-500/30' },
   { id: 'repair', label: 'Service / Repair', icon: Wrench, color: 'text-theme-muted', bg: 'bg-theme-surface/10 border-theme-border-soft/30' },
   { id: 'embroidery', label: 'Embroidery / Tailor', icon: Scissors, color: 'text-pink-500', bg: 'bg-pink-500/10 border-pink-500/30' },
-  { id: 'custom', label: 'Custom (General)', icon: PenTool, color: 'text-emerald-500', bg: 'bg-emerald-500/10 border-emerald-500/30' },
+  { id: 'custom', label: 'Custom (General)', icon: PenTool, color: 'text-theme-accent', bg: 'bg-theme-tint-bg border-theme-tint-border' },
   { id: 'all', label: 'All Templates', icon: LayoutTemplate, color: 'text-theme-accent', bg: 'bg-theme-accent/10 border-theme-accent/30' }
 ];
 

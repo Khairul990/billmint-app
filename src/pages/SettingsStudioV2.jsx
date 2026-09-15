@@ -1425,8 +1425,8 @@ const SettingsStudioV2 = ({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-theme-card border border-theme-border-soft rounded-2xl p-4 shadow-xs">
                 <div className="flex items-center gap-2 mb-2">
-                  <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                  <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">Account</span>
+                  <ShieldCheck className="w-4 h-4 text-theme-accent" />
+                  <span className="text-[10px] font-bold text-theme-accent uppercase tracking-wider">Account</span>
                 </div>
                 <p className="text-xs font-bold text-theme-primary">Authenticated</p>
                 <p className="text-[10px] font-mono text-theme-muted truncate mt-0.5">{loggedInEmail}</p>
@@ -1449,7 +1449,7 @@ const SettingsStudioV2 = ({
 
               <div className="bg-theme-card border border-theme-border-soft rounded-2xl p-4 shadow-xs">
                 <div className="flex items-center gap-2 mb-2">
-                  {firebaseStatus === 'connected' ? <Wifi className="w-4 h-4 text-emerald-500" /> : <WifiOff className="w-4 h-4 text-amber-500" />}
+                  {firebaseStatus === 'connected' ? <Wifi className="w-4 h-4 text-theme-accent" /> : <WifiOff className="w-4 h-4 text-amber-500" />}
                   <span className="text-[10px] font-bold uppercase tracking-wider">{firebaseStatus === 'connected' ? 'Connected' : 'Offline Mode'}</span>
                 </div>
                 <p className="text-xs font-semibold text-theme-muted">
@@ -1672,8 +1672,8 @@ const SettingsStudioV2 = ({
                   <h1 className="text-sm font-black text-theme-primary tracking-tight truncate">
                     {currentSectionItem?.label || 'Business Profile'}
                   </h1>
-                  <span className="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span className="inline-flex items-center gap-1 text-[9px] font-bold text-theme-accent bg-theme-tint-bg px-2 py-0.5 rounded-full border border-theme-tint-border">
+                    <span className="w-1.5 h-1.5 rounded-full bg-theme-accent animate-pulse"></span>
                     Synced
                   </span>
                 </div>
@@ -1763,8 +1763,8 @@ const SettingsStudioV2 = ({
           <span className="font-mono text-[11px] text-theme-muted">ID: {settings?.activeWorkspaceId || 'ws_primary'}</span>
         </div>
         <div className="flex items-center gap-3 text-[11px] font-semibold">
-          <span className="flex items-center gap-1 text-emerald-600 font-bold">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Live Cloud Sync
+          <span className="flex items-center gap-1 text-theme-accent font-bold">
+            <span className="w-1.5 h-1.5 rounded-full bg-theme-accent"></span> Live Cloud Sync
           </span>
           <span className="flex items-center gap-1 text-theme-muted font-bold">
             <span>▣</span> Workspace Isolated

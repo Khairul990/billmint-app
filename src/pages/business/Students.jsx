@@ -90,7 +90,7 @@ const Students = ({ students = [], onSaveStudent, onDeleteStudent }) => {
 
   const stats = [
     { label: 'Total Students', value: items.length, icon: GraduationCap, color: 'text-indigo-500' },
-    { label: 'Active Courses', value: [...new Set(items.map(i => i.course).filter(Boolean))].length, icon: BookOpen, color: 'text-emerald-500' },
+    { label: 'Active Courses', value: [...new Set(items.map(i => i.course).filter(Boolean))].length, icon: BookOpen, color: 'text-theme-accent' },
     { label: 'Batches', value: [...new Set(items.map(i => i.batch).filter(Boolean))].length, icon: Users, color: 'text-amber-500' },
   ];
 

@@ -39,8 +39,8 @@ const JOB_STATUSES = [
   { id: 'In Progress', label: 'In Progress', color: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
   { id: 'Submitted', label: 'Submitted / Review', color: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
   { id: 'Revision', label: 'Revision', color: 'bg-orange-500/10 text-orange-400 border-orange-500/20' },
-  { id: 'Approved', label: 'Approved', color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
-  { id: 'Completed', label: 'Completed', color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
+  { id: 'Approved', label: 'Approved', color: 'bg-theme-tint-bg text-theme-accent border-theme-tint-border' },
+  { id: 'Completed', label: 'Completed', color: 'bg-theme-tint-bg text-theme-accent border-theme-tint-border' },
   { id: 'Cancelled', label: 'Cancelled', color: 'bg-rose-500/10 text-rose-400 border-rose-500/20' }
 ];
 
@@ -437,7 +437,7 @@ const OutsourceVendors = ({ invoices = [], currentTab, setCurrentTab }) => {
 
               <div className="p-4 rounded-xl bg-theme-surface border border-theme-border-soft shadow-sm space-y-1">
                 <span className="text-[10px] font-black uppercase text-theme-muted tracking-wider block">Total Payouts Made</span>
-                <div className="text-xl font-black text-emerald-500">{formatCurrency(profitability.totalPaid)}</div>
+                <div className="text-xl font-black text-theme-accent">{formatCurrency(profitability.totalPaid)}</div>
                 <div className="text-[10px] text-theme-secondary font-medium">{payments.length} transactions</div>
               </div>
 
@@ -633,7 +633,7 @@ const OutsourceVendors = ({ invoices = [], currentTab, setCurrentTab }) => {
                               {vendor.category || 'Specialist'}
                             </span>
                           </div>
-                          <span className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded ${vendor.isActive !== false ? 'bg-emerald-500/10 text-emerald-500' : 'bg-zinc-500/10 text-zinc-500'}`}>
+                          <span className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded ${vendor.isActive !== false ? 'bg-theme-tint-bg text-theme-accent' : 'bg-zinc-500/10 text-zinc-500'}`}>
                             {vendor.isActive !== false ? 'Active' : 'Inactive'}
                           </span>
                         </div>
@@ -651,7 +651,7 @@ const OutsourceVendors = ({ invoices = [], currentTab, setCurrentTab }) => {
                                   href={`https://wa.me/${vendor.whatsapp.replace(/[^0-9]/g, '')}`}
                                   target="_blank"
                                   rel="noreferrer"
-                                  className="text-[10px] font-bold text-emerald-500 hover:underline flex items-center gap-0.5"
+                                  className="text-[10px] font-bold text-theme-accent hover:underline flex items-center gap-0.5"
                                 >
                                   WhatsApp <ExternalLink className="w-2.5 h-2.5" />
                                 </a>
@@ -679,7 +679,7 @@ const OutsourceVendors = ({ invoices = [], currentTab, setCurrentTab }) => {
                           </div>
                           <div className="p-1.5 rounded-lg bg-theme-surface-elevated">
                             <span className="text-[9px] font-bold text-theme-muted uppercase block">Paid</span>
-                            <span className="text-xs font-black text-emerald-500">{formatCurrency(v360.totalPaid)}</span>
+                            <span className="text-xs font-black text-theme-accent">{formatCurrency(v360.totalPaid)}</span>
                           </div>
                           <div className="p-1.5 rounded-lg bg-theme-surface-elevated">
                             <span className="text-[9px] font-bold text-theme-muted uppercase block">Due</span>
@@ -814,7 +814,7 @@ const OutsourceVendors = ({ invoices = [], currentTab, setCurrentTab }) => {
                           <td className="py-3 px-4 text-right font-black text-theme-primary">
                             {formatCurrency(fin.agreedCost)}
                           </td>
-                          <td className="py-3 px-4 text-right font-bold text-emerald-500">
+                          <td className="py-3 px-4 text-right font-bold text-theme-accent">
                             {formatCurrency(fin.totalPaid)}
                           </td>
                           <td className="py-3 px-4 text-right font-black text-rose-500">
@@ -928,7 +928,7 @@ const OutsourceVendors = ({ invoices = [], currentTab, setCurrentTab }) => {
                         <td className="py-3 px-4 max-w-xs text-theme-secondary truncate">
                           {pay.note || pay.reference || '—'}
                         </td>
-                        <td className="py-3 px-4 text-right font-black text-emerald-500">
+                        <td className="py-3 px-4 text-right font-black text-theme-accent">
                           {formatCurrency(pay.amount)}
                         </td>
                         <td className="py-3 px-4 text-right">
@@ -969,7 +969,7 @@ const OutsourceVendors = ({ invoices = [], currentTab, setCurrentTab }) => {
 
               <div className="p-4 rounded-xl bg-theme-surface border border-theme-border-soft shadow-sm space-y-1">
                 <span className="text-[10px] font-black uppercase text-theme-muted tracking-wider block">Gross Profit</span>
-                <div className="text-xl font-black text-emerald-500">{formatCurrency(profitability.linkedGrossProfit)}</div>
+                <div className="text-xl font-black text-theme-accent">{formatCurrency(profitability.linkedGrossProfit)}</div>
                 <div className="text-[10px] text-theme-secondary font-medium">Revenue - Outsource Cost</div>
               </div>
 
@@ -1015,7 +1015,7 @@ const OutsourceVendors = ({ invoices = [], currentTab, setCurrentTab }) => {
                           <td className="py-3 px-4 font-mono text-theme-secondary">{item.invoiceNumber}</td>
                           <td className="py-3 px-4 text-right font-bold text-theme-primary">{formatCurrency(item.invoiceAmount)}</td>
                           <td className="py-3 px-4 text-right font-bold text-rose-500">{formatCurrency(item.agreedCost)}</td>
-                          <td className="py-3 px-4 text-right font-black text-emerald-500">{formatCurrency(item.grossProfit)}</td>
+                          <td className="py-3 px-4 text-right font-black text-theme-accent">{formatCurrency(item.grossProfit)}</td>
                           <td className="py-3 px-4 text-right font-black text-theme-accent">{item.marginPercent}%</td>
                         </tr>
                       ))}
@@ -1509,7 +1509,7 @@ const OutsourceVendors = ({ invoices = [], currentTab, setCurrentTab }) => {
                       </div>
                       <div className="p-3 rounded-xl bg-theme-surface-elevated border border-theme-border-soft text-center">
                         <span className="text-[9px] font-bold text-theme-muted uppercase block">Total Paid</span>
-                        <span className="text-sm font-black text-emerald-500">{formatCurrency(ledger.totalPaid)}</span>
+                        <span className="text-sm font-black text-theme-accent">{formatCurrency(ledger.totalPaid)}</span>
                       </div>
                       <div className="p-3 rounded-xl bg-theme-surface-elevated border border-theme-border-soft text-center">
                         <span className="text-[9px] font-bold text-theme-muted uppercase block">Net Balance Payable</span>
@@ -1543,7 +1543,7 @@ const OutsourceVendors = ({ invoices = [], currentTab, setCurrentTab }) => {
                                 <td className="py-2 px-3 font-bold text-theme-primary">{st.type}</td>
                                 <td className="py-2 px-3 text-theme-secondary">{st.description}</td>
                                 <td className="py-2 px-3 text-right font-bold text-theme-primary">{st.credit > 0 ? formatCurrency(st.credit) : '—'}</td>
-                                <td className="py-2 px-3 text-right font-bold text-emerald-500">{st.debit > 0 ? formatCurrency(st.debit) : '—'}</td>
+                                <td className="py-2 px-3 text-right font-bold text-theme-accent">{st.debit > 0 ? formatCurrency(st.debit) : '—'}</td>
                                 <td className="py-2 px-3 text-right font-black text-rose-500">{formatCurrency(st.balance)}</td>
                               </tr>
                             ))

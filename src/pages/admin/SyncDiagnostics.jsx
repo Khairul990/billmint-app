@@ -78,7 +78,7 @@ const SyncDiagnostics = () => {
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-bold text-theme-muted uppercase">Network State</span>
-              {telemetry?.online ? <Wifi className="w-4 h-4 text-emerald-500" /> : <WifiOff className="w-4 h-4 text-rose-500" />}
+              {telemetry?.online ? <Wifi className="w-4 h-4 text-theme-accent" /> : <WifiOff className="w-4 h-4 text-rose-500" />}
             </div>
             <div className="text-xl font-black text-theme-primary">
               {telemetry?.online ? 'Online (Broadband)' : 'Offline Mode'}
@@ -92,7 +92,7 @@ const SyncDiagnostics = () => {
               <span className="text-xs font-bold text-theme-muted uppercase">Cloud Backend</span>
               <Cloud className="w-4 h-4 text-theme-accent" />
             </div>
-            <div className="text-xl font-black text-emerald-500">
+            <div className="text-xl font-black text-theme-accent">
               {telemetry?.firebaseConnected ? 'Connected & Ready' : 'Standby / Local'}
             </div>
           </CardContent>
@@ -137,7 +137,7 @@ const SyncDiagnostics = () => {
         <CardContent>
           {queueItems.length === 0 ? (
             <div className="text-center py-8 text-theme-muted">
-              <CheckCircle2 className="w-10 h-10 mx-auto mb-2 text-emerald-500" />
+              <CheckCircle2 className="w-10 h-10 mx-auto mb-2 text-theme-accent" />
               <p className="font-bold text-sm text-theme-primary">All local records are synchronized.</p>
               <p className="text-xs mt-0.5">Zero pending offline mutations in the pipeline.</p>
             </div>

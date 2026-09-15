@@ -73,7 +73,7 @@ const RevenueCenter = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
           <h2 className="text-3xl font-black text-theme-primary tracking-tight flex items-center gap-3">
-            <IndianRupee className="w-8 h-8 text-emerald-500" />
+            <IndianRupee className="w-8 h-8 text-theme-accent" />
             Platform Revenue & Billing Engine
           </h2>
           <p className="text-sm text-theme-secondary mt-1">
@@ -93,7 +93,7 @@ const RevenueCenter = () => {
         <Card className="bg-theme-surface/50 border-theme-border-soft">
           <CardContent className="p-5">
             <span className="text-xs font-bold text-theme-muted uppercase tracking-wider block mb-1">Total Revenue Collected</span>
-            <div className="text-2xl font-black text-emerald-500">₹{totalCollected.toLocaleString()}</div>
+            <div className="text-2xl font-black text-theme-accent">₹{totalCollected.toLocaleString()}</div>
             <span className="text-[11px] text-theme-muted mt-1 block">Lifetime verified settlements</span>
           </CardContent>
         </Card>

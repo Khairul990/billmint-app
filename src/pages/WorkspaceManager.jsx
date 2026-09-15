@@ -175,8 +175,8 @@ const WorkspaceManager = ({
               <div>
                 <div className="flex items-center justify-between mb-2.5 px-1">
                   <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <h2 className="text-[11px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400 font-mono">
+                    <span className="w-2 h-2 rounded-full bg-theme-accent animate-pulse"></span>
+                    <h2 className="text-[11px] font-black uppercase tracking-widest text-theme-accent font-mono">
                       Active Business Workspace
                     </h2>
                   </div>
@@ -309,7 +309,7 @@ const WorkspaceManager = ({
                               onClick={() => handleToggleArchive(ws)}
                               className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors cursor-pointer border ${
                                 ws.archived 
-                                  ? 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 border-emerald-500/20' 
+                                  ? 'bg-theme-tint-bg text-theme-accent hover:bg-theme-tint-bg border-theme-tint-border' 
                                   : 'bg-theme-surface text-theme-muted hover:text-rose-500 hover:bg-rose-500/10 border-theme-border-soft'
                               }`}
                               title={ws.archived ? "Restore Workspace" : "Archive Workspace"}

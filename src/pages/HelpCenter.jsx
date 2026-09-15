@@ -410,7 +410,7 @@ const TutorialReaderModal = ({ guide, onClose, setCurrentTab, onSelectGuide, isD
                       isActive 
                         ? 'bg-theme-accent text-white' 
                         : isPassed 
-                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' 
+                        ? 'bg-theme-tint-bg text-theme-accent' 
                         : 'bg-theme-surface text-theme-muted border border-theme-border-soft'
                     }`}>
                       {isPassed ? <Check className="w-3 h-3" /> : idx + 1}
@@ -842,8 +842,8 @@ const HelpCenter = ({ setCurrentTab, activeWorkspaceId, businessSettings }) => {
               </kbd>
             </button>
 
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[11px] font-black shrink-0">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-theme-tint-bg border border-theme-tint-border text-theme-accent text-[11px] font-black shrink-0">
+              <span className="w-2 h-2 rounded-full bg-theme-accent animate-pulse"></span>
               <span className="hidden md:inline">All Systems Operational</span>
             </div>
           </div>
@@ -952,7 +952,7 @@ const HelpCenter = ({ setCurrentTab, activeWorkspaceId, businessSettings }) => {
                       <div className="w-8 h-8 rounded-xl bg-theme-accent/10 text-theme-accent flex items-center justify-center font-bold">
                         <DynamicIcon name={cat.icon} className="w-4 h-4" />
                       </div>
-                      <span className="px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                      <span className="px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-theme-tint-bg text-theme-accent border border-theme-tint-border">
                         Active
                       </span>
                     </div>
@@ -1039,7 +1039,7 @@ const HelpCenter = ({ setCurrentTab, activeWorkspaceId, businessSettings }) => {
                         <span className="font-extrabold text-theme-primary">
                           {wf.preview.client || wf.preview.collected || wf.preview.revenue}
                         </span>
-                        <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                        <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-theme-tint-bg text-theme-accent border border-theme-tint-border">
                           {wf.preview.status || wf.preview.badge || wf.preview.collection}
                         </span>
                       </div>
@@ -1214,7 +1214,7 @@ const HelpCenter = ({ setCurrentTab, activeWorkspaceId, businessSettings }) => {
                       </div>
                       <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider ${
                         guide.difficulty === 'beginner' 
-                          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' 
+                          ? 'bg-theme-tint-bg text-theme-accent border border-theme-tint-border' 
                           : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
                       }`}>
                         {guide.difficulty}
@@ -1317,8 +1317,8 @@ const HelpCenter = ({ setCurrentTab, activeWorkspaceId, businessSettings }) => {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+                <span className="w-2.5 h-2.5 rounded-full bg-theme-accent animate-pulse"></span>
+                <span className="text-xs font-black text-theme-accent uppercase tracking-wider">
                   All Systems Operational • Local Health Verified
                 </span>
               </div>

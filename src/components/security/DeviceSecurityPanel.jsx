@@ -138,11 +138,11 @@ export default function DeviceSecurityPanel() {
               </div>
               <div className="flex items-center gap-3 mt-1 text-[10px] text-theme-muted">
                 <span className="inline-flex items-center gap-1"><Clock3 className="w-3 h-3" /> {formatTime(session.lastSeenAt)}</span>
-                <span className={session.presence === 'active' ? 'text-emerald-500 font-bold' : ''}>{session.presence === 'active' ? 'Active recently' : 'Stale'}</span>
+                <span className={session.presence === 'active' ? 'text-theme-accent font-bold' : ''}>{session.presence === 'active' ? 'Active recently' : 'Stale'}</span>
               </div>
             </div>
             {!session.isCurrentDevice && session.status === 'pending' && (
-              <button type="button" onClick={() => approve(session)} disabled={busy} className="px-3 py-2 rounded-xl bg-emerald-500 text-white text-[10px] font-bold inline-flex items-center justify-center gap-1.5">
+              <button type="button" onClick={() => approve(session)} disabled={busy} className="px-3 py-2 rounded-xl bg-theme-accent text-white text-[10px] font-bold inline-flex items-center justify-center gap-1.5">
                 <CheckCircle2 className="w-3.5 h-3.5" /> Approve
               </button>
             )}

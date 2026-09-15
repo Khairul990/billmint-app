@@ -15,7 +15,7 @@ const statusIcon = (s) => {
   return AlertTriangle;
 };
 const statusColor = (s) => {
-  if (s === 'Completed') return 'text-emerald-500';
+  if (s === 'Completed') return 'text-theme-accent';
   if (s === 'Active') return 'text-blue-500';
   if (s === 'In Progress') return 'text-amber-500';
   if (s === 'On Hold') return 'text-orange-500';
@@ -72,7 +72,7 @@ const Projects = () => {
   const stats = [
     { label: 'Total Projects', value: items.length, icon: Briefcase, color: 'text-violet-500' },
     { label: 'Active', value: activeCount, icon: Clock, color: 'text-amber-500' },
-    { label: 'Completed', value: completedCount, icon: CheckCircle, color: 'text-emerald-500' },
+    { label: 'Completed', value: completedCount, icon: CheckCircle, color: 'text-theme-accent' },
   ];
 
   if (loading) return <div className="space-y-6 pb-24"><CardSkeleton lines={4} /><CardSkeleton lines={4} /><CardSkeleton lines={4} /></div>;

@@ -10,7 +10,7 @@ const LS_KEY = 'billqyro_devices';
 const STATUS_OPTIONS = ['Pending', 'Diagnosing', 'In Repair', 'Completed', 'Delivered', 'Cancelled'];
 
 const statusColor = (s) => {
-  if (s === 'Completed' || s === 'Delivered') return 'text-emerald-500';
+  if (s === 'Completed' || s === 'Delivered') return 'text-theme-accent';
   if (s === 'In Repair' || s === 'Diagnosing') return 'text-amber-500';
   if (s === 'Pending') return 'text-blue-500';
   return 'text-red-500';
@@ -66,7 +66,7 @@ const Devices = () => {
   const stats = [
     { label: 'Total Devices', value: items.length, icon: Smartphone, color: 'text-blue-500' },
     { label: 'In Progress', value: inRepair, icon: Clock, color: 'text-amber-500' },
-    { label: 'Completed', value: completed, icon: CheckCircle, color: 'text-emerald-500' },
+    { label: 'Completed', value: completed, icon: CheckCircle, color: 'text-theme-accent' },
   ];
 
   if (loading) return <div className="space-y-6 pb-24"><CardSkeleton lines={4} /><CardSkeleton lines={4} /><CardSkeleton lines={4} /></div>;

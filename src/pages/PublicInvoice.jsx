@@ -427,7 +427,7 @@ const PublicInvoice = ({ initialInvoice }) => {
           container: "bg-theme-card rounded-xl border border-theme-border-soft shadow-lg p-8 md:p-10 space-y-8 relative overflow-hidden font-sans",
           header: "border-b-4 border-theme-border-soft pb-8",
           addressBox: "bg-theme-surface/50 border-l-4 border-theme-border-soft rounded-r-xl rounded-l-none p-5",
-          tableHeader: "bg-emerald-800 text-white",
+          tableHeader: "bg-theme-accent text-white",
           totalsBox: "bg-theme-surface/50 border border-theme-border-strong rounded-xl p-6"
         };
       case 'minimal':
@@ -625,7 +625,7 @@ const PublicInvoice = ({ initialInvoice }) => {
             <div className="min-w-0">
               <div className="flex items-center gap-1.5 md:gap-2">
                 <h1 className="font-extrabold text-xs md:text-sm text-theme-primary truncate">{business.businessName}</h1>
-                <span className="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-black text-emerald-600 uppercase tracking-wider shrink-0">
+                <span className="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-theme-tint-bg border border-theme-tint-border text-[9px] font-black text-theme-accent uppercase tracking-wider shrink-0">
                   <ShieldCheck className="w-2.5 h-2.5" />
                   Secure Bill
                 </span>
@@ -664,13 +664,13 @@ const PublicInvoice = ({ initialInvoice }) => {
 
           {/* Status Banner */}
           {invoice.paymentStatus === 'Paid' && (
-            <div className="card-premium overflow-hidden bg-emerald-500/10 border-2 border-emerald-500/30 rounded-2xl px-3 md:px-4 py-2.5 md:py-3 flex items-center gap-2.5 md:gap-3 shadow-lg shadow-emerald-500/5">
-              <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0 animate-bounce">
-                <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 text-emerald-500" />
+            <div className="card-premium overflow-hidden bg-theme-tint-bg border-2 border-theme-tint-border rounded-2xl px-3 md:px-4 py-2.5 md:py-3 flex items-center gap-2.5 md:gap-3 shadow-lg shadow-theme-glow">
+              <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-theme-tint-bg flex items-center justify-center shrink-0 animate-bounce">
+                <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 text-theme-accent" />
               </div>
               <div>
-                <p className="text-[11px] md:text-xs font-extrabold text-emerald-600">Paid in Full</p>
-                <p className="text-[9px] md:text-[10px] text-emerald-500/70 font-semibold">This invoice has been settled. Thank you!</p>
+                <p className="text-[11px] md:text-xs font-extrabold text-theme-accent">Paid in Full</p>
+                <p className="text-[9px] md:text-[10px] text-theme-accent/70 font-semibold">This invoice has been settled. Thank you!</p>
               </div>
             </div>
           )}
@@ -829,7 +829,7 @@ const PublicInvoice = ({ initialInvoice }) => {
                     </div>
                   )}
                   {canonical.amountPaid > 0 && (
-                    <div className="flex justify-between py-1 text-[10px] md:text-xs border-b border-theme-border-soft text-emerald-600 font-bold">
+                    <div className="flex justify-between py-1 text-[10px] md:text-xs border-b border-theme-border-soft text-theme-accent font-bold">
                       <span>Paid</span>
                       <span className="tabular-nums">-{formatVal(canonical.amountPaid)}</span>
                     </div>
@@ -857,10 +857,10 @@ const PublicInvoice = ({ initialInvoice }) => {
         {/* ===== RIGHT: PAYMENT / STATUS SIDEBAR ===== */}
         {invoice.paymentStatus === 'Paid' ? (
           <div className="w-full max-w-2xl shrink-0 space-y-3 md:space-y-4 mt-4">
-            <div className="card-premium overflow-hidden border border-emerald-500/25 shadow-lg p-4 md:p-5 space-y-3 md:space-y-4 relative">
-              <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-500/8 rounded-full blur-3xl pointer-events-none"></div>
+            <div className="card-premium overflow-hidden border border-theme-tint-border shadow-lg p-4 md:p-5 space-y-3 md:space-y-4 relative">
+              <div className="absolute top-0 right-0 w-40 h-40 bg-theme-tint-bg rounded-full blur-3xl pointer-events-none"></div>
               <div className="flex items-center gap-3">
-                <div className="w-10 md:w-11 h-10 md:h-11 rounded-xl bg-emerald-500/15 text-emerald-500 flex items-center justify-center">
+                <div className="w-10 md:w-11 h-10 md:h-11 rounded-xl bg-theme-tint-bg text-theme-accent flex items-center justify-center">
                   <CheckCircle2 className="w-5 h-5" />
                 </div>
                 <div>
@@ -868,8 +868,8 @@ const PublicInvoice = ({ initialInvoice }) => {
                   <p className="text-[8px] md:text-[9px] text-theme-muted font-bold uppercase tracking-wider">Payment Completed</p>
                 </div>
               </div>
-              <div className="bg-emerald-500/5 border border-emerald-500/15 rounded-xl p-3 md:p-4 text-center">
-                <p className="text-xl md:text-2xl font-black text-emerald-500">{formatVal(invoice.amountPaid || invoice.grandTotal)}</p>
+              <div className="bg-theme-tint-bg border border-theme-tint-border rounded-xl p-3 md:p-4 text-center">
+                <p className="text-xl md:text-2xl font-black text-theme-accent">{formatVal(invoice.amountPaid || invoice.grandTotal)}</p>
                 <p className="text-[8px] md:text-[9px] text-theme-muted font-bold uppercase tracking-wider mt-1">Amount Paid</p>
               </div>
               {invoice.paymentHistory?.length > 0 && (
@@ -878,11 +878,11 @@ const PublicInvoice = ({ initialInvoice }) => {
                   <div className="relative border-l border-theme-border-soft ml-2 pl-3 space-y-3 mt-2">
                     {invoice.paymentHistory.map((ph, i) => (
                       <div key={i} className="relative">
-                        <div className="absolute -left-[17px] top-1.5 w-2 h-2 rounded-full bg-emerald-500 border-2 border-theme-surface shadow-[0_0_0_2px_rgba(16,185,129,0.2)]" />
+                        <div className="absolute -left-[17px] top-1.5 w-2 h-2 rounded-full bg-theme-accent border-2 border-theme-surface shadow-[0_0_0_2px_rgba(16,185,129,0.2)]" />
                         <div className="flex flex-col gap-0.5 bg-theme-surface rounded-xl p-2 md:p-2.5 border border-theme-border-soft">
                           <div className="flex items-center justify-between text-[10px] md:text-xs">
                             <span className="text-theme-primary font-bold">{ph.date || 'Completed'}</span>
-                            <span className="text-emerald-600 font-extrabold">{formatVal(ph.amount)}</span>
+                            <span className="text-theme-accent font-extrabold">{formatVal(ph.amount)}</span>
                           </div>
                           <div className="flex items-center justify-between text-[8px] md:text-[9px]">
                             <span className="text-theme-muted font-semibold">{ph.method || 'Transfer'} {ph.transactionId && ph.transactionId !== 'N/A' && `• Txn: ${ph.transactionId}`}</span>
@@ -904,12 +904,12 @@ const PublicInvoice = ({ initialInvoice }) => {
                 </div>
               )}
               {/* Premium Trust Badge */}
-              <div className="bg-emerald-500/5 rounded-xl p-2.5 md:p-3 text-center">
-                <div className="flex items-center justify-center gap-1.5 text-[8px] md:text-[9px] text-emerald-600 font-bold">
+              <div className="bg-theme-tint-bg rounded-xl p-2.5 md:p-3 text-center">
+                <div className="flex items-center justify-center gap-1.5 text-[8px] md:text-[9px] text-theme-accent font-bold">
                   <ShieldCheck className="w-3 h-3" />
                   <span>Payment Verified & Secured</span>
                 </div>
-                <p className="text-[7px] md:text-[8px] text-emerald-600/60 mt-0.5 font-semibold">256-bit encrypted transaction</p>
+                <p className="text-[7px] md:text-[8px] text-theme-accent/60 mt-0.5 font-semibold">256-bit encrypted transaction</p>
               </div>
             </div>
           </div>
@@ -1075,7 +1075,7 @@ const PublicInvoice = ({ initialInvoice }) => {
                   <div className="divider-premium"></div>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-theme-surface/50">
-                      <ShieldCheck className="w-3 h-3 text-emerald-500 shrink-0" />
+                      <ShieldCheck className="w-3 h-3 text-theme-accent shrink-0" />
                       <span className="text-[7px] text-theme-muted font-semibold">SSL Secure</span>
                     </div>
                     <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-theme-surface/50">
@@ -1164,7 +1164,7 @@ const PublicInvoice = ({ initialInvoice }) => {
                       <button type="button" onClick={() => setShowPaymentModal(false)} className="btn-premium-outline flex-1 py-2.5 md:py-3 text-[11px] md:text-xs order-last sm:order-first">Back</button>
                       <div className="flex flex-col sm:flex-row flex-[2] gap-2 md:gap-3">
                         {liveLinkPrefs.allowWhatsappProofSubmit && business.whatsapp && (
-                          <a href={`https://wa.me/${business.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent('Hi, I want to submit payment proof for Invoice ' + invoice.invoiceNumber + '. Amount: ' + payAmount + ' ' + payMethod + ' ' + (txnId ? 'TxnID: ' + txnId : ''))}`} target="_blank" rel="noopener noreferrer" className="flex-1 py-2.5 md:py-3 text-[11px] md:text-xs flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl transition-all shadow-md active:scale-95 text-center">
+                          <a href={`https://wa.me/${business.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent('Hi, I want to submit payment proof for Invoice ' + invoice.invoiceNumber + '. Amount: ' + payAmount + ' ' + payMethod + ' ' + (txnId ? 'TxnID: ' + txnId : ''))}`} target="_blank" rel="noopener noreferrer" className="flex-1 py-2.5 md:py-3 text-[11px] md:text-xs flex items-center justify-center gap-2 bg-theme-accent hover:opacity-90 text-white font-bold rounded-xl transition-all shadow-md active:scale-95 text-center">
                             <MessageCircle className="w-3.5 md:w-4 h-3.5 md:h-4" /> Send via WA
                           </a>
                         )}
@@ -1203,7 +1203,7 @@ const PublicInvoice = ({ initialInvoice }) => {
                 <p className="text-[9px] md:text-[10px] text-theme-muted font-semibold mb-2.5 md:mb-3">Contact the business for questions about this invoice.</p>
                 <div className="flex gap-2">
                   {business.whatsapp && (
-                    <a href={`https://wa.me/${business.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent('Hi, I have a question about Invoice ' + invoice.invoiceNumber)}`} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-1.5 py-2.5 md:py-3 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 font-bold rounded-xl transition-all cursor-pointer text-[10px] md:text-xs animate-wa-pulse premium-focus">
+                    <a href={`https://wa.me/${business.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent('Hi, I have a question about Invoice ' + invoice.invoiceNumber)}`} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-1.5 py-2.5 md:py-3 bg-theme-tint-bg hover:bg-theme-tint-bg text-theme-accent font-bold rounded-xl transition-all cursor-pointer text-[10px] md:text-xs animate-wa-pulse premium-focus">
                       <MessageCircle className="w-3.5 md:w-4 h-3.5 md:h-4" />
                       WhatsApp
                     </a>
@@ -1243,7 +1243,7 @@ const PublicInvoice = ({ initialInvoice }) => {
                   Pay Now
                 </button>
               ) : (
-                <a href={`https://wa.me/${business.whatsapp?.replace(/\D/g, '') || business.phone?.replace(/\D/g, '')}?text=${encodeURIComponent('Hi, I want to pay for Invoice ' + invoice.invoiceNumber)}`} target="_blank" rel="noopener noreferrer" className="btn-premium px-6 py-3 text-sm bg-emerald-500 shadow-lg shadow-emerald-500/25" style={{ backgroundImage: 'none', background: '#10B981' }}>
+                <a href={`https://wa.me/${business.whatsapp?.replace(/\D/g, '') || business.phone?.replace(/\D/g, '')}?text=${encodeURIComponent('Hi, I want to pay for Invoice ' + invoice.invoiceNumber)}`} target="_blank" rel="noopener noreferrer" className="btn-premium px-6 py-3 text-sm bg-theme-accent shadow-lg shadow-theme-glow" style={{ backgroundImage: 'none', background: '#10B981' }}>
                   <MessageCircle className="w-4 h-4" />
                   Pay via WhatsApp
                 </a>
@@ -1257,7 +1257,7 @@ const PublicInvoice = ({ initialInvoice }) => {
         <div className="card-premium overflow-hidden bg-gradient-to-r from-theme-card/80 via-theme-card to-theme-card/80 backdrop-blur-sm rounded-2xl border border-theme-border-soft/60 p-4 md:p-5 shadow-lg">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 md:gap-3 mb-3 md:mb-4">
             <div className="flex items-center gap-2 px-2.5 md:px-3 py-2 md:py-2.5 bg-theme-surface/50 rounded-xl border border-theme-border-soft/40">
-              <ShieldCheck className="w-4 h-4 md:w-5 md:h-5 text-emerald-500 shrink-0" />
+              <ShieldCheck className="w-4 h-4 md:w-5 md:h-5 text-theme-accent shrink-0" />
               <div>
                 <p className="text-[8px] md:text-[9px] font-black text-theme-primary leading-tight">BillQyro</p>
                 <p className="text-[7px] md:text-[8px] text-theme-muted font-semibold">Billing Platform</p>

@@ -204,8 +204,8 @@ const InvoiceCard = ({
     switch (status) {
       case 'Paid':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-theme-tint-bg text-theme-accent border border-theme-tint-border">
+            <span className="w-1.5 h-1.5 rounded-full bg-theme-accent"></span>
             PAID
           </span>
         );
@@ -348,7 +348,7 @@ const InvoiceCard = ({
                     <div 
                       className={`h-full transition-all duration-300 ${
                         balanceDue <= 0 
-                          ? 'bg-emerald-500' 
+                          ? 'bg-theme-accent' 
                           : paidTotal > 0 
                             ? 'bg-amber-500' 
                             : 'bg-slate-300 dark:bg-slate-700'
@@ -387,7 +387,7 @@ const InvoiceCard = ({
 
               <div className="text-left sm:text-right">
                 <span className="text-[9px] font-extrabold uppercase tracking-wider text-theme-muted block">Paid</span>
-                <span className="text-sm font-black text-emerald-600 dark:text-emerald-400 tabular-nums">
+                <span className="text-sm font-black text-theme-accent tabular-nums">
                   {formatCurrency(paidTotal, currencySymbol)}
                 </span>
               </div>
@@ -423,7 +423,7 @@ const InvoiceCard = ({
                       onClick={() => onRecordPayment(invoice)}
                       title="Record Payment"
                       aria-label="Record Payment"
-                      className="px-3 py-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                      className="px-3 py-1.5 text-xs font-bold text-theme-accent bg-theme-tint-bg hover:bg-theme-tint-bg border border-theme-tint-border rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
                     >
                       <CreditCard className="w-3.5 h-3.5" />
                       <span className="hidden md:inline">Payment</span>
@@ -435,9 +435,9 @@ const InvoiceCard = ({
                       onClick={() => onRecordPayment(invoice)}
                       title="Collect Payment"
                       aria-label="Collect Payment"
-                      className="px-2.5 py-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 rounded-xl transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
+                      className="px-2.5 py-1.5 text-xs font-bold text-theme-accent bg-theme-tint-bg hover:bg-theme-tint-bg border border-theme-tint-border rounded-xl transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
                     >
-                      <CreditCard className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                      <CreditCard className="w-3.5 h-3.5 text-theme-accent" />
                       <span className="hidden sm:inline">Collect</span>
                     </button>
                   )}
@@ -518,7 +518,7 @@ const InvoiceCard = ({
                             disabled={isSharingWhatsApp}
                             className="flex items-center gap-2 px-2.5 py-2 text-theme-primary hover:bg-theme-surface rounded-xl transition-colors font-semibold w-full text-left cursor-pointer"
                           >
-                            <WhatsAppIcon className="w-3.5 h-3.5 text-emerald-500" />
+                            <WhatsAppIcon className="w-3.5 h-3.5 text-theme-accent" />
                             <span>{isSharingWhatsApp ? 'Preparing...' : 'Share on WhatsApp'}</span>
                           </button>
 

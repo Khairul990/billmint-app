@@ -130,7 +130,7 @@ const AuditLogs = ({ setCurrentTab }) => {
               </div>
               <div className="stat-premium">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500"><Clock className="w-5 h-5" /></div>
+                  <div className="w-10 h-10 rounded-xl bg-theme-tint-bg flex items-center justify-center text-theme-accent"><Clock className="w-5 h-5" /></div>
                   <div><p className="text-xs text-theme-muted font-medium">Today</p><p className="text-xl font-black text-theme-primary">{stats.today.toLocaleString()}</p></div>
                 </div>
               </div>

@@ -229,7 +229,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                 <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-theme-surface border border-theme-border-soft text-theme-muted">
                   {syncStatus === 'Synced' ? (
                     <>
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-theme-accent"></span>
                       <span className="hidden lg:inline">Cloud Synced</span>
                     </>
                   ) : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? (
@@ -272,7 +272,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
               <div className="h-10 px-2 py-1 bg-theme-surface/90 dark:bg-theme-card/90 rounded-2xl border border-theme-border-soft flex items-center gap-1.5 shadow-2xs shrink-0 relative">
                 {/* 1. Live Real-Time Clock Pill */}
                 <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-theme-app/90 dark:bg-theme-surface border border-theme-border-soft/60 shrink-0 select-none">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-theme-accent animate-pulse shrink-0" />
                   <Clock className="w-3 h-3 text-theme-accent shrink-0" />
                   <span className="text-xs font-black text-theme-primary font-numbers tracking-tight">
                     {timeNow.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
@@ -498,8 +498,8 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
               </div>
               <div className="flex items-center gap-1.5 shrink-0">
                 {syncStatus === 'Synced' ? (
-                  <span className="flex items-center gap-1 text-[9.5px] font-bold text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded-full border border-emerald-500/20">
-                    <span className="w-1 h-1 rounded-full bg-emerald-500"></span>
+                  <span className="flex items-center gap-1 text-[9.5px] font-bold text-theme-accent bg-theme-tint-bg px-1.5 py-0.5 rounded-full border border-theme-tint-border">
+                    <span className="w-1 h-1 rounded-full bg-theme-accent"></span>
                     Synced
                   </span>
                 ) : syncStatus === 'Offline' ? (
@@ -539,7 +539,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
               <div className="p-1 bg-white/90 dark:bg-theme-card/90 backdrop-blur-xl rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft flex items-center gap-1 shrink-0 shadow-sm">
                 {/* Mobile Clock Badge */}
                 <div className="flex items-center gap-1 px-2 py-1 rounded-xl bg-[#faf8f5] dark:bg-theme-surface text-[10px] font-black text-[#1c1917] dark:text-theme-primary font-numbers">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-theme-accent animate-pulse" />
                   <span>{timeNow.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}</span>
                 </div>
 
@@ -577,7 +577,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                               onClick={() => markNotificationAsRead(notif.id)}
                               className={`p-2 hover:bg-theme-surface rounded-xl transition-colors cursor-pointer flex gap-2 ${notif.read ? 'opacity-60' : ''}`}
                             >
-                              <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${notif.type === 'success' ? 'bg-emerald-500/10 text-emerald-500' : notif.type === 'error' ? 'bg-rose-500/10 text-rose-500' : 'bg-theme-accent/10 text-theme-accent'}`}>
+                              <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${notif.type === 'success' ? 'bg-theme-tint-bg text-theme-accent' : notif.type === 'error' ? 'bg-rose-500/10 text-rose-500' : 'bg-theme-accent/10 text-theme-accent'}`}>
                                 <Bell className="w-3 h-3" />
                               </div>
                               <div>

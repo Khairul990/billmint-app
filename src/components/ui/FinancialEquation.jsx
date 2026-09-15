@@ -28,7 +28,7 @@ export const FinancialEquation = ({
 
   return (
     <div 
-      className={`p-4 md:p-5 rounded-2xl bq-surface-financial border border-emerald-500/20 ${className}`}
+      className={`p-4 md:p-5 rounded-2xl bq-surface-financial border border-theme-tint-border ${className}`}
       {...props}
     >
       {/* Desktop / Tablet Flow */}

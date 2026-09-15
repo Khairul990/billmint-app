@@ -152,7 +152,7 @@ export default function WhatsAppCommunicationPreview({ workspaceId, userId, invo
   // Attachment chip: Ready / Failed / Disabled per attachment type.
   const AttachmentChip = ({ kind, state, name, size }) => {
     const styles = {
-      ready: 'bg-emerald-500/5 border-emerald-500/20 text-emerald-600 dark:text-emerald-400',
+      ready: 'bg-theme-tint-bg border-theme-tint-border text-theme-accent',
       failed: 'bg-rose-500/5 border-rose-500/20 text-rose-600 dark:text-rose-400',
       disabled: 'bg-theme-app dark:bg-theme-surface border-theme-border-soft text-theme-muted'
     };
@@ -213,7 +213,7 @@ export default function WhatsAppCommunicationPreview({ workspaceId, userId, invo
             </div>
             <div className="p-3 rounded-xl bg-theme-app dark:bg-theme-surface border border-theme-border-soft">
               <div className="text-[9px] uppercase tracking-wider text-theme-muted font-bold">Paid</div>
-              <div className="font-extrabold text-emerald-500">{formatAmount(payload.invoice?.amountPaid)}</div>
+              <div className="font-extrabold text-theme-accent">{formatAmount(payload.invoice?.amountPaid)}</div>
             </div>
             <div className="p-3 rounded-xl bg-theme-app dark:bg-theme-surface border border-theme-border-soft">
               <div className="text-[9px] uppercase tracking-wider text-theme-muted font-bold">Due</div>
@@ -227,7 +227,7 @@ export default function WhatsAppCommunicationPreview({ workspaceId, userId, invo
 
           {/* WhatsApp-style message bubble */}
           <div className="rounded-2xl bg-[#DCF8C6] dark:bg-[#1f2c33] p-4 shadow-inner border border-black/5">
-            <div className="flex items-center gap-2 mb-3 text-[10px] font-bold text-emerald-700 dark:text-emerald-400">
+            <div className="flex items-center gap-2 mb-3 text-[10px] font-bold text-theme-accent">
               <MessageCircle className="w-3.5 h-3.5" /> WhatsApp Message Preview
             </div>
             <pre className="whitespace-pre-wrap text-[13px] leading-relaxed text-gray-800 dark:text-gray-100 font-sans">{editableMessage}</pre>
@@ -242,7 +242,7 @@ export default function WhatsAppCommunicationPreview({ workspaceId, userId, invo
             <AttachmentChip kind="image" state={imageState} name={image?.name} size={image?.size} />
             <div className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-bold ${
               payload.portalLink
-                ? 'bg-emerald-500/5 border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+                ? 'bg-theme-tint-bg border-theme-tint-border text-theme-accent'
                 : 'bg-theme-app dark:bg-theme-surface border-theme-border-soft text-theme-muted'
             }`}>
               <LinkIcon className="w-4 h-4 shrink-0" />

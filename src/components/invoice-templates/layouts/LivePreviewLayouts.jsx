@@ -84,7 +84,7 @@ export const HtmlTotalsSummary = ({
       )}
 
       {fin.amountPaid > 0 && (
-        <div className="flex justify-between text-emerald-600 font-bold">
+        <div className="flex justify-between text-theme-accent font-bold">
           <span>Paid:</span>
           <span className="tabular-nums">-{fmt(fin.amountPaid)}</span>
         </div>
@@ -1534,16 +1534,16 @@ const BillQyroSignature = ({ data }) => (
       <div className="flex justify-between items-start relative">
         <div>
           <h1 className="text-4xl font-black tracking-tight mb-1">INVOICE</h1>
-          <p className="text-emerald-50/90 text-sm font-semibold">{data.invoiceNumber}</p>
-          <p className="text-emerald-50/80 text-sm">{data.date}</p>
+          <p className="text-theme-accent/90 text-sm font-semibold">{data.invoiceNumber}</p>
+          <p className="text-theme-accent/80 text-sm">{data.date}</p>
         </div>
         <div className="text-right">
           {data.businessSettings?.logoUrl ? (
             <img src={data.businessSettings.logoUrl} alt="Logo" className="h-12 object-contain ml-auto mb-2 bg-white/90 rounded-lg p-1" style={{ maxWidth: '130px', maxHeight: '48px', objectFit: 'contain' }} />
           ) : null}
           <h2 className="text-lg font-extrabold">{data.businessSettings?.businessName || 'Your Business'}</h2>
-          <p className="text-xs text-emerald-50/85">{data.businessSettings?.email}</p>
-          <p className="text-xs text-emerald-50/85">{data.businessSettings?.phone}</p>
+          <p className="text-xs text-theme-accent/85">{data.businessSettings?.email}</p>
+          <p className="text-xs text-theme-accent/85">{data.businessSettings?.phone}</p>
         </div>
       </div>
     </div>
@@ -1633,8 +1633,8 @@ const EmeraldEdge = ({ data }) => (
       ) : null}
       <h2 className="text-base font-extrabold leading-tight mb-1">{data.businessSettings?.businessName || 'Your Business'}</h2>
       <div className="w-8 h-1 bg-[#14C79A] rounded-full mb-4" />
-      <p className="text-[11px] text-emerald-100/70 leading-relaxed break-words">{data.businessSettings?.email}</p>
-      <p className="text-[11px] text-emerald-100/70 mb-6">{data.businessSettings?.phone}</p>
+      <p className="text-[11px] text-theme-accent/70 leading-relaxed break-words">{data.businessSettings?.email}</p>
+      <p className="text-[11px] text-theme-accent/70 mb-6">{data.businessSettings?.phone}</p>
       {data.qrCodeBase64 && (
         <div className="mt-auto">
           <p className="text-[9px] uppercase font-black text-[#14C79A] tracking-widest mb-1.5">Scan to Pay</p>
