@@ -363,7 +363,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                 <div className="relative shrink-0 flex items-center" ref={accountMenuRef}>
                   <button
                     onClick={() => setIsAccountMenuOpen(prev => !prev)}
-                    className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#c2410c] to-[#ea580c] p-0.5 shadow-2xs hover:scale-105 active:scale-95 transition-all overflow-hidden flex items-center justify-center cursor-pointer border border-[#c2410c]/20"
+                    className="w-8 h-8 rounded-xl bg-[image:var(--accent-gradient)] p-0.5 shadow-2xs hover:scale-105 active:scale-95 transition-all overflow-hidden flex items-center justify-center cursor-pointer border border-white/20"
                     title="Account Settings"
                   >
                     {businessSettings?.logoUrl ? (

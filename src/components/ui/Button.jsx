@@ -25,7 +25,7 @@ export const Button = React.forwardRef(({
     destructive: 'bg-theme-danger/10 text-theme-danger border border-theme-danger/25 hover:bg-theme-danger hover:text-white shadow-sm',
     success: 'bg-theme-success/10 text-theme-success border border-theme-success/25 hover:bg-theme-success hover:text-white shadow-sm',
     // Financial Action: High-confidence money / collection action
-    financial: 'bg-gradient-to-r from-[#0B8F78] to-[#075E50] text-white shadow-premium hover:shadow-[0_8px_25px_rgba(11,143,120,0.3)] hover:-translate-y-0.5 active:translate-y-0 border border-theme-tint-border font-display font-bold',
+    financial: 'bg-[image:var(--accent-gradient)] text-white shadow-premium hover:shadow-theme-glow hover:-translate-y-0.5 active:translate-y-0 border border-white/10 font-display font-bold',
   };
 
   const sizes = {
