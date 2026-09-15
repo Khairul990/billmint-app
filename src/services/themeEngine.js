@@ -1,99 +1,23 @@
-import { updateFaviconForTheme } from '../utils/themeIcon.js';
-// Note: If using offline engine, dbEngine will route appropriately based on the new architecture.
-
+// ============================================================
+// COMPATIBILITY FACADE for the theme engine.
+//
+// The canonical implementation lives in src/services/themeApplier.js.
+// This module only re-exports it under the historical `themeEngine`
+// object shape so older imports and test suites keep working.
+// Do NOT add logic here - update themeApplier.js instead.
+// ============================================================
+import { applyTheme, applyFullTheme, resolveThemeId } from './themeApplier.js';
 import { ALL_THEME_COLORS, THEME_INFO } from '../utils/themeUtils.js';
 
 export const themeEngine = {
-  hexToRgb(hex) {
-    if (!hex) return null;
-    // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
-    let fullHex = hex.replace(/^#?([a-f\d])([a-f\d])([a-f\d])$/i, (m, r, g, b) => r + r + g + g + b + b);
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(fullHex);
-    return result ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) } : null;
-  },
-
-  shadeColor(color, percent) {
-    let R = parseInt(color.substring(1, 3), 16);
-    let G = parseInt(color.substring(3, 5), 16);
-    let B = parseInt(color.substring(5, 7), 16);
-    R = Math.min(255, parseInt(R * (100 + percent) / 100));
-    G = Math.min(255, parseInt(G * (100 + percent) / 100));
-    B = Math.min(255, parseInt(B * (100 + percent) / 100));
-    const toHex = (n) => (n.toString(16).length === 1 ? '0' + n.toString(16) : n.toString(16));
-    return '#' + toHex(R) + toHex(G) + toHex(B);
-  },
-
-  applyTheme(themeId, brandColor = null, darkMode = false, persist = true) {
-    this.applyFullTheme({ themeColor: themeId, brandColor, darkMode }, persist);
-  },
-
-  applyFullTheme(settings, persist = true) {
-    if (!settings) return;
-    const root = document.documentElement;
-    
-    const { themeColor, brandColor, darkMode, cornerRadius, shadowIntensity, animationSpeed } = settings;
-    const themeId = themeColor || 'brand-premium';
-    // Legacy guard: old saves stored mode values (light/dark/auto) as themeColor - not real themes.
-    const LEGACY_THEME_VALUES = ['light', 'dark', 'auto', 'classic'];
-    const effectiveThemeId = LEGACY_THEME_VALUES.includes(themeId) ? 'brand-premium' : themeId;
-
-    if (darkMode) {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
-
-    if (brandColor && themeId === 'custom') {
-      const rgb = this.hexToRgb(brandColor);
-      if (rgb) {
-        root.removeAttribute('data-theme');
-        root.style.setProperty('--accent', brandColor);
-        root.style.setProperty('--accent-light', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.15)`);
-        root.style.setProperty('--border-soft', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.15)`);
-        root.style.setProperty('--border-strong', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.3)`);
-        root.style.setProperty('--accent-glow', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.25)`);
-        root.style.setProperty('--accent-gradient', `linear-gradient(135deg, ${brandColor}, ${this.shadeColor(brandColor, -20)})`);
-        root.style.setProperty('--chart-primary', brandColor);
-        root.style.setProperty('--sidebar-active', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.1)`);
-        root.style.setProperty('--luxury-accent', this.shadeColor(brandColor, darkMode ? 20 : -10));
-        root.style.setProperty('--theme-tint-bg', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${darkMode ? 0.04 : 0.02})`);
-        root.style.setProperty('--theme-tint-surface', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${darkMode ? 0.06 : 0.03})`);
-        root.style.setProperty('--theme-tint-border', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${darkMode ? 0.12 : 0.08})`);
-        root.style.setProperty('--theme-tint-hover', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${darkMode ? 0.10 : 0.05})`);
-      }
-    } else {
-      root.style.removeProperty('--accent');
-      root.style.removeProperty('--accent-light');
-      root.style.removeProperty('--border-soft');
-      root.style.removeProperty('--border-strong');
-      root.style.removeProperty('--accent-glow');
-      root.style.removeProperty('--accent-gradient');
-      root.style.removeProperty('--chart-primary');
-      root.style.removeProperty('--sidebar-active');
-      root.style.removeProperty('--luxury-accent');
-      root.style.removeProperty('--theme-tint-bg');
-      root.style.removeProperty('--theme-tint-surface');
-      root.style.removeProperty('--theme-tint-border');
-      root.style.removeProperty('--theme-tint-hover');
-      root.setAttribute('data-theme', effectiveThemeId);
-    }
-
-    if (cornerRadius !== undefined) root.style.setProperty('--radius-base', `${cornerRadius}px`);
-    if (animationSpeed !== undefined) root.style.setProperty('--animation-multiplier', `${animationSpeed}s`);
-    if (shadowIntensity !== undefined) root.style.setProperty('--shadow-opacity', `${shadowIntensity / 100}`);
-
-    updateFaviconForTheme(effectiveThemeId);
-    
-    // Engine handles storage. Instead of direct localStorage, we wrap it behind engine.
-    if (persist) {
-      this.saveLocalThemePreference(themeId, darkMode);
-    }
-  },
+  applyTheme,
+  applyFullTheme,
+  resolveThemeId,
 
   saveLocalThemePreference(themeId, darkMode) {
     try {
-      localStorage.setItem('billqyro_theme_color', effectiveThemeId);
-      localStorage.setItem('billqyro_dark_mode', String(darkMode));
+      localStorage.setItem('billqyro_theme_color', resolveThemeId(themeId) === 'custom' ? 'custom' : resolveThemeId(themeId));
+      localStorage.setItem('billqyro_dark_mode', String(darkMode === true || darkMode === 'true'));
     } catch (e) {
       console.warn('Failed to save theme preference', e);
     }
@@ -101,8 +25,9 @@ export const themeEngine = {
 
   getLocalThemePreference() {
     try {
+      const themeColor = resolveThemeId(localStorage.getItem('billqyro_theme_color'));
       return {
-        themeColor: localStorage.getItem('billqyro_theme_color') || 'brand-premium',
+        themeColor,
         darkMode: localStorage.getItem('billqyro_dark_mode') === 'true'
       };
     } catch {
@@ -119,7 +44,7 @@ export const themeEngine = {
   },
 
   getThemePreviewColors(preset, forceMode = null) {
-    const isDark = forceMode === 'dark' ? true : forceMode === 'light' ? false : document.documentElement.classList.contains('dark');
+    const isDark = forceMode === 'dark' ? true : forceMode === 'light' ? false : (typeof document !== 'undefined' && document.documentElement.classList.contains('dark'));
     const c = ALL_THEME_COLORS[preset] || ALL_THEME_COLORS['brand-premium'];
     return {
       background: isDark ? c.D : c.L,

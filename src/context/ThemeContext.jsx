@@ -1,8 +1,15 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { applyTheme } from '../hooks/useThemeEngine';
+import { applyFullTheme, resolveThemeId } from '../hooks/useThemeEngine';
 import { settingsEngine } from '../services/settingsEngine';
 
 const ThemeContext = createContext();
+
+const normalizeThemeState = (settings) => ({
+  themeId: resolveThemeId(settings.themeColor || settings.themePreset || 'brand-premium'),
+  darkMode: settings.darkMode === true || settings.darkMode === 'true',
+  brandColor: settings.brandColor || null,
+  themeType: settings.themeType || 'built-in'
+});
 
 export const ThemeProvider = ({ children }) => {
   const [themeState, setThemeState] = useState({
@@ -17,29 +24,19 @@ export const ThemeProvider = ({ children }) => {
       try {
         const settings = await settingsEngine.getSettings();
         if (settings) {
-          setThemeState({
-            themeId: settings.themeColor || settings.themePreset || 'brand-premium',
-            darkMode: settings.darkMode === true || settings.darkMode === 'true',
-            brandColor: settings.brandColor || null,
-            themeType: settings.themeType || 'built-in'
-          });
+          setThemeState(normalizeThemeState(settings));
         }
       } catch (e) {
         console.warn('Error loading theme:', e);
       }
     };
-    
+
     loadInitialTheme();
 
     const handleSettingsUpdate = (e) => {
       const settings = e.detail;
       if (settings) {
-        setThemeState({
-          themeId: settings.themeColor || settings.themePreset || 'brand-premium',
-          darkMode: settings.darkMode === true || settings.darkMode === 'true',
-          brandColor: settings.brandColor || null,
-          themeType: settings.themeType || 'built-in'
-        });
+        setThemeState(normalizeThemeState(settings));
       }
     };
 
@@ -48,8 +45,13 @@ export const ThemeProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    const effectiveThemeId = themeState.themeType === 'custom' && themeState.brandColor ? 'custom' : themeState.themeId;
-    applyTheme(effectiveThemeId, themeState.brandColor, themeState.darkMode);
+    // applyFullTheme reads themeColor/brandColor/themeType/darkMode keys.
+    applyFullTheme({
+      themeColor: themeState.themeId,
+      brandColor: themeState.brandColor,
+      themeType: themeState.themeType,
+      darkMode: themeState.darkMode
+    });
   }, [themeState]);
 
   return (
@@ -73,9 +75,16 @@ export const useTheme = () => {
     ...context,
     isDarkMode: context.themeState?.darkMode ?? false,
     toggleTheme: () => {
+      const nextDark = !(context.themeState?.darkMode ?? false);
+      // Persist to settings so the choice survives reloads and syncs
+      // across every engine surface (anti-flash, favicon, App hook).
+      settingsEngine.getSettings().then((current) => {
+        const merged = { ...(current || {}), darkMode: nextDark };
+        return settingsEngine.saveSettings(merged);
+      }).catch((e) => console.warn('Could not persist dark mode:', e));
       context.setThemeState(prev => ({
         ...prev,
-        darkMode: !prev.darkMode
+        darkMode: nextDark
       }));
     }
   };

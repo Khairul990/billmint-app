@@ -160,7 +160,7 @@ export const AnimatedThemeToggler = ({
         onThemeChange?.(newTheme ? "dark" : "light")
       } else {
         setInternalIsDark(newTheme)
-        localStorage.setItem("theme", newTheme ? "dark" : "light")
+        localStorage.setItem("theme", newTheme ? "dark" : "light"); localStorage.setItem("billqyro_dark_mode", String(newTheme))
       }
     }
 

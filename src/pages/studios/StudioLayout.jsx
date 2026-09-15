@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Suspense, useMemo } from 'react';
+import React, { useState, useEffect, Suspense, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { pageVariants } from '../../utils/animations';
 import { createPortal } from 'react-dom';
@@ -79,9 +79,24 @@ const StudioLayout = ({
 
   const [isSaving, setIsSaving] = useState(false);
 
+  // Latest draft snapshot for immediate theme publishing.
+  const draftRef = useRef(draftSettings);
+  useEffect(() => { draftRef.current = draftSettings; }, [draftSettings]);
+
   useEffect(() => {
     reset(settings);
   }, [settings, reset]);
+
+  // Theme changes publish instantly - users expect a clicked theme to
+  // stick without pressing Save. Everything else keeps the draft flow.
+  const handleThemeUpdate = (updates) => {
+    handleUpdateDraft(updates);
+    const THEME_KEYS = ['themeColor', 'darkMode', 'brandColor', 'themeType'];
+    if (Object.keys(updates).some((k) => THEME_KEYS.includes(k))) {
+      const merged = { ...draftRef.current, ...updates };
+      Promise.resolve(onSaveSettings(merged)).catch(() => {});
+    }
+  };
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -607,7 +622,7 @@ const StudioLayout = ({
                   {activeStudio === 'business' && <BusinessStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
                   {activeStudio === 'features' && <FeatureControlStudio workspaceId={settings?.activeWorkspaceId || 'default'} />}
                   {activeStudio === 'invoice' && <InvoiceStudio settings={draftSettings} onUpdate={handleUpdateDraft} subscription={subscription} />}
-                  {activeStudio === 'theme' && <ThemeStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
+                  {activeStudio === 'theme' && <ThemeStudio settings={draftSettings} onUpdate={handleThemeUpdate} />}
                   {activeStudio === 'backup' && <BackupStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}
                   {activeStudio === 'subscription' && <SubscriptionStudio settings={draftSettings} onUpdate={handleUpdateDraft} subscription={subscription} />}
                   {activeStudio === 'portal' && <PortalStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}

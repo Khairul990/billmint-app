@@ -1462,6 +1462,9 @@ function App() {
       localStorage.setItem('billqyro_demo_settings', JSON.stringify(payload));
       toast.success('Settings saved to Demo Session');
       window.dispatchEvent(new Event('storage'));
+      // Keep ThemeContext + App state in sync in demo mode too, so the
+      // chosen theme persists to localStorage and survives reloads.
+      window.dispatchEvent(new CustomEvent('billqyro:settings-updated', { detail: payload }));
       return true;
     }
     try {
