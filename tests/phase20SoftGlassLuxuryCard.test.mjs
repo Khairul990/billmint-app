@@ -94,7 +94,12 @@ await test('3.2 Business Money vs Personal Money vs Dream Savings remain strictl
 
 await test('4.1 All presets resolve luxury companion, accent, and tint tokens cleanly', () => {
   const presetKeys = Object.keys(ALL_THEME_COLORS);
-  assert.ok(presetKeys.length >= 35, `Must support at least 35 presets (found ${presetKeys.length})`);
+  assert.ok(presetKeys.length >= 15, `Must support at least 15 presets (found ${presetKeys.length})`);
+  // Curated catalog: removed themes must stay gone, official theme must exist
+  const removed = ['arctic-teal','titanium-blue','lush-green','wine-ash','orchid','jet-black','slate-gray','sunlit-yellow','violet-slate','blush-onyx','turquoise','midnight-blue','midnight-blue-premium','ocean-deep','forest-pine','warm-amber','soft-lavender','pink-blossom','arctic-diamond','carbon-violet'];
+  const present = presetKeys.filter((k) => removed.includes(k));
+  assert.strictEqual(present.length, 0, `Removed themes still present: ${present.join(', ')}`);
+  assert.ok(presetKeys.includes('brand-premium'), 'Official theme brand-premium must exist');
   
   presetKeys.forEach(presetId => {
     const lightTokens = getThemeTokens(presetId, 'light');

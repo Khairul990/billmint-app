@@ -284,7 +284,6 @@ const GlobalSettings = () => {
                 className="w-full bg-theme-app/50 backdrop-blur-sm text-theme-primary border border-theme-border-soft/50 rounded-2xl px-5 py-4 focus:outline-none focus:border-theme-accent focus:ring-2 focus:ring-theme-accent/20 cursor-pointer text-sm font-bold shadow-inner"
               >
                 <option value="obsidian-gold">Obsidian Gold (Luxury)</option>
-                <option value="arctic-teal">Arctic Teal (Corporate)</option>
                 <option value="rose-gold">Rose Gold (Premium)</option>
                 <option value="neon-cyber">Neon Cyber (Modern)</option>
               </select>

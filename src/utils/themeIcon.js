@@ -11,15 +11,11 @@ const themeFolderMap = {
 
   // Map the new 25 valid themes to the closest matching physical folder
   'obsidian-gold': 'champagne-black',
-  'arctic-teal': 'emerald-business',
   'sapphire-noir': 'midnight-blue',
   'rose-platinum': 'rose-gold-luxe',
-  'carbon-violet': 'royal-indigo',
   'graphite-copper': 'champagne-black',
-  'arctic-diamond': 'billqyro-classic',
   'emerald-royal': 'emerald-business',
   'midnight-ruby': 'ruby-burgundy',
-  'titanium-blue': 'midnight-blue',
   'ocean-blue': 'billqyro-classic',
   'sunset-orange': 'ruby-burgundy',
   'forest-green': 'emerald-business',
@@ -35,16 +31,9 @@ const themeFolderMap = {
   'golden-luxury': 'champagne-black',
   
   // Missing ones added to fix favicon updates
-  'pink-blossom': 'pink-premium',
   'ocean-waves': 'billqyro-classic',
-  'lush-green': 'emerald-business',
   'royal-purple': 'royal-indigo',
-  'slate-gray': 'midnight-blue',
-  'warm-amber': 'champagne-black',
   'cyber-teal': 'emerald-business',
-  'soft-lavender': 'royal-indigo',
-  'ocean-deep': 'midnight-blue',
-  'forest-pine': 'emerald-business',
   'cherry-blossom': 'pink-premium',
   'gold-coast': 'champagne-black'
 };
@@ -71,7 +60,7 @@ export const updateFaviconForTheme = (themeId) => {
       name: 'BillQyro',
       short_name: 'BillQyro',
       description: 'Modern Billing & Invoicing Platform',
-      theme_color: '#071B3A',
+      theme_color: '#0A856C',
       background_color: '#f8fafc',
       display: 'standalone',
       start_url: '/',

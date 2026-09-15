@@ -139,10 +139,8 @@ const BRAND_COLORS = [
 
 const THEME_PREVIEWS = [
   { id: 'obsidian-gold', name: 'Obsidian Gold', gradient: 'from-amber-500 to-yellow-500', color: '#B8860B' },
-  { id: 'arctic-teal', name: 'Arctic Teal', gradient: 'from-teal-500 to-emerald-400', color: '#009E7F' },
   { id: 'sapphire-noir', name: 'Sapphire Noir', gradient: 'from-blue-600 to-indigo-500', color: '#2563EB' },
   { id: 'rose-platinum', name: 'Rose Platinum', gradient: 'from-rose-500 to-pink-400', color: '#C75C75' },
-  { id: 'carbon-violet', name: 'Carbon Violet', gradient: 'from-violet-600 to-purple-500', color: '#7C3AFF' },
   { id: 'emerald-royal', name: 'Emerald Royal', gradient: 'from-emerald-600 to-green-400', color: '#10B981' }
 ];
 
@@ -168,21 +166,15 @@ const TEMPLATE_CATEGORIES = ['All', 'Retail', 'Embroidery', 'Tailor', 'Clinic', 
 
 const ALL_THEMES = [
   { id: 'obsidian-gold', name: 'Obsidian Gold', category: 'Premium', gradient: 'linear-gradient(135deg, #B8860B, #1F2937)' },
-  { id: 'arctic-teal', name: 'Arctic Teal', category: 'Business', gradient: 'linear-gradient(135deg, #009E7F, #0F766E)' },
   { id: 'sapphire-noir', name: 'Sapphire Noir', category: 'Business', gradient: 'linear-gradient(135deg, #2563EB, #1E3A8A)' },
   { id: 'rose-platinum', name: 'Rose Platinum', category: 'Premium', gradient: 'linear-gradient(135deg, #C75C75, #8B3A4A)' },
-  { id: 'carbon-violet', name: 'Carbon Violet', category: 'Business', gradient: 'linear-gradient(135deg, #7C3AFF, #4C1D95)' },
   { id: 'graphite-copper', name: 'Graphite Copper', category: 'Premium', gradient: 'linear-gradient(135deg, #B76535, #4B2A1A)' },
-  { id: 'arctic-diamond', name: 'Arctic Diamond', category: 'Light', gradient: 'linear-gradient(135deg, #60A5FA, #CBD5E1)' },
   { id: 'emerald-royal', name: 'Emerald Royal', category: 'Premium', gradient: 'linear-gradient(135deg, #10B981, #D4AF37)' },
   { id: 'midnight-ruby', name: 'Midnight Ruby', category: 'Premium', gradient: 'linear-gradient(135deg, #C0392B, #7F1D1D)' },
-  { id: 'titanium-blue', name: 'Titanium Blue', category: 'Business', gradient: 'linear-gradient(135deg, #2563EB, #94A3B8)' },
-  { id: 'pink-blossom', name: 'Pink Blossom', category: 'Light', gradient: 'linear-gradient(135deg, #F472B6, #EC4899)' },
   { id: 'ocean-waves', name: 'Ocean Waves', category: 'Business', gradient: 'linear-gradient(135deg, #0EA5E9, #0284C7)' },
   { id: 'sunset-orange', name: 'Sunset Orange', category: 'Business', gradient: 'linear-gradient(135deg, #F97316, #EA580C)' },
   { id: 'royal-purple', name: 'Royal Purple', category: 'Business', gradient: 'linear-gradient(135deg, #A855F7, #7C3AED)' },
   { id: 'cyber-teal', name: 'Cyber Teal', category: 'Business', gradient: 'linear-gradient(135deg, #14B8A6, #0D9488)' },
-  { id: 'soft-lavender', name: 'Soft Lavender', category: 'Light', gradient: 'linear-gradient(135deg, #C4B5FD, #A78BFA)' },
   { id: 'gold-coast', name: 'Gold Coast', category: 'Premium', gradient: 'linear-gradient(135deg, #F59E0B, #D97706)' }
 ];
 

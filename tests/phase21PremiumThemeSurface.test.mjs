@@ -39,15 +39,17 @@ const dashboardCode = fs.readFileSync(path.join(rootDir, 'src/pages/Dashboard.js
 // ============================================================================
 
 await test('TEST A: All existing themes remain available and properly cataloged', () => {
-  assert.ok(ALL_THEMES.length >= 35, `Expected >= 35 themes, got ${ALL_THEMES.length}`);
+  assert.ok(ALL_THEMES.length >= 15, `Expected >= 15 themes, got ${ALL_THEMES.length}`);
+  assert.ok(ALL_THEMES.some((t) => t.id === 'brand-premium' && t.name === 'BillQyro Signature'), 'Official BillQyro Signature theme must exist');
   assert.ok(ALL_THEME_COLORS['brand-premium'], 'brand-premium must be defined');
   assert.ok(ALL_THEME_COLORS['obsidian-gold'], 'obsidian-gold must be defined');
   assert.ok(ALL_THEME_COLORS['rose-platinum'], 'rose-platinum must be defined');
   assert.ok(ALL_THEME_COLORS['sapphire-noir'], 'sapphire-noir must be defined');
   assert.ok(ALL_THEME_COLORS['emerald-royal'], 'emerald-royal must be defined');
-  assert.ok(ALL_THEME_COLORS['warm-amber'], 'warm-amber must be defined');
+  assert.ok(ALL_THEME_COLORS['gold-coast'], 'gold-coast must be defined');
   assert.ok(ALL_THEME_COLORS['royal-purple'], 'royal-purple must be defined');
-  assert.ok(ALL_THEME_COLORS['arctic-teal'], 'arctic-teal must be defined');
+  assert.ok(ALL_THEME_COLORS['cyber-teal'], 'cyber-teal must be defined');
+  assert.ok(!ALL_THEME_COLORS['warm-amber'] && !ALL_THEME_COLORS['arctic-teal'], 'Removed themes must stay removed');
 });
 
 await test('TEST B: Theme switching changes surface tokens dynamically', () => {
@@ -86,15 +88,15 @@ await test('TEST F: Purple/Lavender theme produces soft purple-tinted surfaces',
 });
 
 await test('TEST G: Amber theme produces soft amber/honey surfaces', () => {
-  const amber = getThemeTokens('warm-amber', 'light');
-  assert.strictEqual(amber.background, '#FFF8ED');
+  const amber = getThemeTokens('gold-coast', 'light');
+  assert.strictEqual(amber.background, '#FFFBED');
   assert.ok(amber.luxuryCompanion === '#FFFBEB' || amber.luxuryCompanion.length > 0);
 });
 
 await test('TEST H: Teal theme produces soft pearl/aqua surfaces', () => {
-  const teal = getThemeTokens('arctic-teal', 'light');
-  assert.strictEqual(teal.background, '#EAF7F5');
-  assert.ok(teal.luxuryCompanion === '#F4FFFD' || teal.luxuryCompanion.length > 0);
+  const teal = getThemeTokens('cyber-teal', 'light');
+  assert.strictEqual(teal.background, '#EEFDF9');
+  assert.ok(teal.luxuryCompanion === '#F0FDFA' || teal.luxuryCompanion.length > 0);
 });
 
 // ============================================================================

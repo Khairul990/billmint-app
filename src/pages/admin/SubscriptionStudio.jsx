@@ -396,7 +396,6 @@ const SubscriptionStudio = () => {
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         {[
                           { id: 'obsidian-gold', name: 'Obsidian Gold' },
-                          { id: 'arctic-teal', name: 'Arctic Teal' },
                           { id: 'rose-gold', name: 'Rose Gold' },
                           { id: 'neon-cyber', name: 'Neon Cyber' },
                           { id: 'pink-premium', name: 'Pink Premium' },
@@ -411,7 +410,7 @@ const SubscriptionStudio = () => {
                                 checked={isAllowed}
                                 onChange={(e) => {
                                   let current = [...((editingPlan.themeControl || {}).allowedThemes || [])];
-                                  if (current.includes('all')) current = ['obsidian-gold', 'arctic-teal', 'rose-gold', 'neon-cyber', 'pink-premium', 'emerald-business'];
+                                  if (current.includes('all')) current = ['brand-premium', 'obsidian-gold', 'emerald-royal', 'sapphire-noir', 'sunset-orange', 'royal-purple'];
                                   if (e.target.checked) {
                                     if (!current.includes(theme.id)) current.push(theme.id);
                                   } else {
@@ -470,7 +469,6 @@ const SubscriptionStudio = () => {
                         <label className="block text-xs font-black text-theme-muted uppercase tracking-wider mb-2">Default Theme Setting</label>
                         <select className="w-full px-4 py-3.5 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold text-theme-primary focus:border-theme-primary focus:ring-1 focus:ring-theme-primary/50 transition-all cursor-pointer" value={(editingPlan.themeControl || {}).defaultTheme || 'obsidian-gold'} onChange={e => setEditingPlan({...editingPlan, themeControl: { ...(editingPlan.themeControl || {}), defaultTheme: e.target.value }})}>
                           <option value="obsidian-gold">Obsidian Gold</option>
-                          <option value="arctic-teal">Arctic Teal</option>
                           <option value="rose-gold">Rose Gold</option>
                           <option value="neon-cyber">Neon Cyber</option>
                           <option value="pink-premium">Pink Premium</option>
