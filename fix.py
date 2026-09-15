@@ -1,4 +1,4 @@
-﻿import sys
+import sys
 
 with open('src/services/paymentEngine.js', 'r', encoding='utf-8') as f:
     code = f.read()

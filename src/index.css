@@ -46,7 +46,7 @@
   position: absolute;
   inset: -2px;
   border-radius: inherit;
-  background: conic-gradient(from 0deg, transparent 0 340deg, #D4AF7A 360deg);
+  background: conic-gradient(from 0deg, transparent 0 340deg, var(--accent, #0B8F78) 360deg);
   animation: border-rotate 3s linear infinite;
   z-index: -1;
 }
@@ -116,7 +116,7 @@ body, body *, ::before, ::after {
    (from design-reference/billqyro-redesign.html)
    ========================================= */
 :root {
-  --bg-gradient: radial-gradient(1200px 600px at 10% 0%, color-mix(in srgb, var(--accent, #c2410c) 7%, var(--app-bg, #FAF7F2)) 0%, var(--app-bg, #FAF7F2) 60%, color-mix(in srgb, var(--luxury-companion, var(--app-bg, #FAF7F2)) 80%, #ffffff 20%) 100%);
+  --bg-gradient: radial-gradient(1200px 600px at 10% 0%, color-mix(in srgb, var(--accent, #c2410c) 7%, var(--app-bg, #FAF7F2)) 0%, var(--app-bg, #FAF7F2) 60%, color-mix(in srgb, var(--accent, #c2410c) 5%, var(--app-bg, #FAF7F2)) 100%);
   --glass-bg: color-mix(in srgb, var(--surface, #ffffff) 65%, color-mix(in srgb, var(--luxury-companion, var(--app-bg, #faf7f2)) 80%, var(--accent, #c2410c) 20%) 35%);
   --glass-card: color-mix(in srgb, var(--surface, #ffffff) 65%, color-mix(in srgb, var(--luxury-companion, var(--app-bg, #faf7f2)) 80%, var(--accent, #c2410c) 20%) 35%);
   --glass-border: color-mix(in srgb, var(--border-soft, rgba(0,0,0,0.08)) 75%, var(--accent, #c2410c) 25%);
@@ -219,28 +219,28 @@ body {
     --text-secondary: #E5E7EB;
     --text-muted: #9CA3AF;
     --button-text: #000000;
-    --border-soft: rgba(200, 169, 107, 0.15);
-    --border-strong: rgba(200, 169, 107, 0.4);
+    --border-soft: rgba(24, 185, 155, 0.18);
+    --border-strong: rgba(24, 185, 155, 0.5);
     
-    --accent: #C8A96B;
-    --accent-light: rgba(200, 169, 107, 0.12);
+    --accent: #18B99B;
+    --accent-light: rgba(24, 185, 155, 0.15);
     --accent-dark: #10B981; 
     
-    --accent-gradient: linear-gradient(135deg, #C8A96B, #10B981);
+    --accent-gradient: linear-gradient(135deg, #18B99B, #0B8F78);
     --accent-glow: rgba(16, 185, 129, 0.25);
     --luxury-accent: #10B981;
     --luxury-companion: #0B1121;
     
     --theme-tint-bg: rgba(16, 185, 129, 0.03);
     --theme-tint-surface: rgba(16, 185, 129, 0.06);
-    --theme-tint-border: rgba(200, 169, 107, 0.2);
-    --theme-tint-hover: rgba(200, 169, 107, 0.08);
+    --theme-tint-border: rgba(24, 185, 155, 0.25);
+    --theme-tint-hover: rgba(24, 185, 155, 0.10);
     
     --sidebar-bg: #0B1121;
-    --sidebar-active: rgba(200, 169, 107, 0.15);
+    --sidebar-active: rgba(24, 185, 155, 0.18);
     --sidebar-text: #F3F4F6;
     --input-bg: #111827;
-    --chart-primary: #D4AF7A;
+    --chart-primary: #18B99B;
     --status-success: #10B981;
     --status-warning: #F59E0B;
     --status-danger: #EF4444;
@@ -299,7 +299,7 @@ body {
     --accent-gradient: linear-gradient(135deg, #0B8F78 0%, #18B99B 52%, #0A7766 100%);
     --accent-glow: rgba(11, 143, 120, 0.25);
     --luxury-accent: #0B8F78;
-    --luxury-companion: #C8A96B;
+    --luxury-companion: #7DD3C0;
     --theme-tint-bg: rgba(11, 143, 120, 0.03);
     --theme-tint-surface: rgba(11, 143, 120, 0.06);
     --theme-tint-border: rgba(11, 143, 120, 0.16);
@@ -331,7 +331,7 @@ body {
     --accent-gradient: linear-gradient(135deg, #0FAF92 0%, #18B99B 50%, #0B8F78 100%);
     --accent-glow: rgba(24, 185, 155, 0.30);
     --luxury-accent: #18B99B;
-    --luxury-companion: #C8A96B;
+    --luxury-companion: #155E4F;
     --theme-tint-bg: rgba(24, 185, 155, 0.04);
     --theme-tint-surface: rgba(24, 185, 155, 0.07);
     --theme-tint-border: rgba(24, 185, 155, 0.18);
@@ -2356,7 +2356,7 @@ button:active {
   --billqyro-brand: var(--accent, #0B8F78);
   --billqyro-brand-deep: var(--accent-dark, #075E50);
   --billqyro-brand-bright: var(--accent-dark, #18B99B);
-  --billqyro-champagne: #C8A96B;
+  --billqyro-champagne: #7DD3C0;
 }
 
 .billqyro-hero-cockpit {
@@ -2372,7 +2372,7 @@ button:active {
   inset: -35%;
   background:
     radial-gradient(circle at 30% 25%, color-mix(in srgb, var(--accent, #18B99B) 16%, transparent), transparent 22%),
-    radial-gradient(circle at 72% 70%, rgba(200,169,107,0.10), transparent 20%);
+    radial-gradient(circle at 72% 70%, color-mix(in srgb, var(--accent, #0B8F78) 10%, transparent), transparent 20%);
   pointer-events: none;
 }
 .billqyro-luxury-card {
@@ -2393,7 +2393,7 @@ button:active {
 .billqyro-landing-premium {
   background:
     radial-gradient(circle at 12% 8%, color-mix(in srgb, var(--accent, #0B8F78) 10%, transparent), transparent 30%),
-    radial-gradient(circle at 88% 18%, rgba(200,169,107,0.08), transparent 24%),
+    radial-gradient(circle at 88% 18%, color-mix(in srgb, var(--accent, #0B8F78) 8%, transparent), transparent 24%),
     linear-gradient(180deg, var(--app-bg) 0%, var(--app-bg) 60%, var(--surface) 100%);
 }
 
@@ -2437,7 +2437,7 @@ button:active {
 .billqyro-admin-premium {
   background:
     radial-gradient(circle at 12% 0%, color-mix(in srgb, var(--accent, #0B8F78) 10%, transparent), transparent 30%),
-    radial-gradient(circle at 92% 12%, rgba(200,169,107,0.06), transparent 24%),
+    radial-gradient(circle at 92% 12%, color-mix(in srgb, var(--accent, #0B8F78) 6%, transparent), transparent 24%),
     var(--app-bg);
 }
 .billqyro-admin-premium .vip-text-glow {

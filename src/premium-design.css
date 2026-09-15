@@ -1590,7 +1590,7 @@
   --billqyro-brand-deep: var(--accent-dark, #087F6C);
   --billqyro-brand-soft: #E8F8F4;
   --billqyro-ink: #0B1220;
-  --billqyro-champagne: #D7B56D;
+  --billqyro-champagne: #7DD3C0;
   --billqyro-white: #F9FBFA;
   --billqyro-radius-xl: 26px;
   --billqyro-radius-lg: 20px;
@@ -1603,7 +1603,7 @@
   --billqyro-surface: color-mix(in srgb, var(--theme-card, #fff) 94%, var(--billqyro-brand-soft));
   background-image:
     radial-gradient(circle at 10% 8%, rgba(15,175,146,.10), transparent 30%),
-    radial-gradient(circle at 92% 16%, rgba(215,181,109,.08), transparent 24%),
+    radial-gradient(circle at 92% 16%, color-mix(in srgb, var(--billqyro-brand, #0FAF92) 8%, transparent), transparent 24%),
     linear-gradient(180deg, rgba(255,255,255,.02), transparent 18%);
 }
 .billqyro-landing-premium nav > div {
@@ -1626,7 +1626,7 @@
   width: min(92%, 1180px);
   height: 1px;
   transform: translateX(-50%);
-  background: linear-gradient(90deg, transparent, rgba(15,175,146,.18), rgba(215,181,109,.12), transparent);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--billqyro-brand, #0FAF92) 18%, transparent), color-mix(in srgb, var(--billqyro-brand, #0FAF92) 12%, transparent), transparent);
 }
 .billqyro-landing-premium section h2 {
   letter-spacing: -.035em;
@@ -1682,8 +1682,8 @@
   --admin-brand: var(--billqyro-brand);
   --admin-brand-deep: var(--billqyro-brand-deep);
   background:
-    radial-gradient(circle at 0% 0%, rgba(15,175,146,.10), transparent 28%),
-    radial-gradient(circle at 100% 100%, rgba(215,181,109,.07), transparent 25%),
+    radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--billqyro-brand, #0FAF92) 10%, transparent), transparent 28%),
+    radial-gradient(circle at 100% 100%, color-mix(in srgb, var(--billqyro-brand, #0FAF92) 7%, transparent), transparent 25%),
     var(--theme-main, #f6f8f7);
 }
 .billqyro-admin-premium aside {
