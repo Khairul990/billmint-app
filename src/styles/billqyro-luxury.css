@@ -6,9 +6,9 @@
 
 :root {
   /* BillQyro Official Brand Family */
-  --bq-emerald: #0B8F78;
-  --bq-emerald-deep: #075E50;
-  --bq-emerald-bright: #18B99B;
+  --bq-emerald: var(--accent, #0B8F78);
+  --bq-emerald-deep: var(--accent-dark, #075E50);
+  --bq-emerald-bright: color-mix(in srgb, var(--accent, #0B8F78) 72%, #FFFFFF 28%);
   --bq-champagne: #C8A96B;
 
   /* Level 1 - 5 Surface Hierarchy (Adaptive to active theme) */
