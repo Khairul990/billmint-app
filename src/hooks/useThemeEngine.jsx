@@ -26,11 +26,11 @@ export const applyFullTheme = (settings, persist = true) => {
   const root = document.documentElement;
   
   const { themeColor, brandColor, darkMode, cornerRadius, shadowIntensity, animationSpeed, fontDensity, themeType } = settings;
-  const themeId = (themeType === 'custom' && brandColor) ? 'custom' : (themeColor || 'brand-premium');
+  const themeId = (themeType === 'custom' && brandColor) ? 'custom' : (themeColor || 'sapphire-noir');
   // Legacy guard: old saves stored mode values (light/dark/auto/classic) as themeColor.
   // Those are not real themes, so fall back to the official default theme.
   const LEGACY_THEME_VALUES = ['light', 'dark', 'auto', 'classic'];
-  const effectiveThemeId = LEGACY_THEME_VALUES.includes(themeId) ? 'brand-premium' : themeId;
+  const effectiveThemeId = LEGACY_THEME_VALUES.includes(themeId) ? 'sapphire-noir' : themeId;
 
   if (darkMode) {
     root.classList.add('dark');
