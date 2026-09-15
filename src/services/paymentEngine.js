@@ -1,4 +1,4 @@
-import { invoiceEngine } from './invoiceEngine.js';
+﻿import { invoiceEngine } from './invoiceEngine.js';
 import { 
   getInvoicePaymentStatus, 
   calculateCanonicalInvoiceFinancials, 
@@ -113,9 +113,10 @@ class PaymentEngine {
       : new Date().toISOString();
 
     let cumulativeOldDueSettled = 0;
+      const waterfallGroupId = 'grp_' + Date.now() + '_' + Math.random().toString(36).substring(2,9);
 
-    // Waterfall Cascade
-    for (const inv of customerInvoices) {
+      // Waterfall Cascade
+      for (const inv of customerInvoices) {
       // If previous invoices were settled in this cascade, reduce this invoice's previousDue accordingly
       if (cumulativeOldDueSettled > 0 && inv.previousDue > 0) {
         const reduction = Math.min(inv.previousDue, cumulativeOldDueSettled);
@@ -182,6 +183,7 @@ class PaymentEngine {
           createdBy,
           workspaceId: workspaceId || inv.workspaceId || null,
           verified: true,
+          groupId: waterfallGroupId,
           createdAt: new Date().toISOString()
         };
 
@@ -260,11 +262,117 @@ class PaymentEngine {
       allocation: primaryAllocation
     };
   }
+    async voidCustomerPayment(paymentId, reason = 'Voided via Collection Center', workspaceId = null, createdBy = 'Merchant') {
+    if (!paymentId) throw new Error('Payment ID is required to void.');
+    
+    const invoices = await invoiceEngine.getInvoices(true);
+    let targetGroupId = null;
+    invoices.forEach(inv => {
+      if (Array.isArray(inv.paymentHistory)) {
+        const match = inv.paymentHistory.find(p => p.id === paymentId);
+        if (match && match.groupId) targetGroupId = match.groupId;
+      }
+    });
+
+    const affectedInvoices = invoices.filter(inv => 
+      Array.isArray(inv.paymentHistory) && inv.paymentHistory.some(p => 
+        p.id === paymentId || (targetGroupId && p.groupId === targetGroupId)
+      )
+    );
+
+    if (affectedInvoices.length === 0) {
+      throw new Error('Payment not found in any active invoice.');
+    }
+
+    affectedInvoices.forEach(inv => {
+      if (workspaceId && inv.workspaceId && inv.workspaceId !== workspaceId) {
+        throw new Error('Access denied: Payment belongs to another workspace.');
+      }
+      if (inv.paymentHistory.some(p => p.type === 'payment_reversal' && p.originalPaymentId === paymentId)) {
+        throw new Error('This payment has already been reversed.');
+      }
+    });
+
+    const modifiedInvoices = [];
+    const effectiveDate = new Date().toISOString();
+
+    for (const inv of affectedInvoices) {
+      const origPayment = inv.paymentHistory.find(p => p.id === paymentId || (targetGroupId && p.groupId === targetGroupId));
+      if (!origPayment) continue;
+
+      const reversalEntry = {
+        id: 'rev_' + paymentId + '_' + Date.now(),
+        type: 'payment_reversal',
+        originalPaymentId: paymentId,
+        amount: -Math.abs(parseFloat(origPayment.amount) || 0),
+        method: origPayment.method || 'System',
+        transactionId: origPayment.transactionId || '',
+        reference: origPayment.reference || '',
+        date: effectiveDate,
+        note: 'Reversal of ' + paymentId + ': ' + reason,
+        source: 'manual_reversal',
+        allocatedToOldDue: -(origPayment.allocatedToOldDue || 0),
+        allocatedToCurrentInvoice: -(origPayment.allocatedToCurrentInvoice || 0),
+        earlierBalancePaid: -(origPayment.earlierBalancePaid || 0),
+        thisBillPaid: -(origPayment.thisBillPaid || 0),
+        customerId: origPayment.customerId || null,
+        customerName: origPayment.customerName || '',
+        invoiceId: inv.id,
+        invoiceNumber: inv.invoiceNumber || '',
+        createdBy,
+        workspaceId: inv.workspaceId || workspaceId || null,
+        verified: true,
+        createdAt: effectiveDate
+      };
+
+      inv.paymentHistory.push(reversalEntry);
+      
+      const { normalizeInvoiceFinancials } = await import('../utils/invoiceMath.js');
+      const normalized = normalizeInvoiceFinancials(inv);
+      modifiedInvoices.push(normalized);
+    }
+
+    const savedInvoices = await Promise.all(modifiedInvoices.map(inv => invoiceEngine.saveInvoice(inv)));
+
+    try {
+      logAudit(
+        'payment_voided', 
+        'invoice', 
+        savedInvoices[0].id, 
+        null, 
+        { 
+          paymentId,
+          reason,
+          waterfallInvoices: savedInvoices.map(i => i.id),
+          workspaceId: savedInvoices[0].workspaceId 
+        }
+      );
+    } catch (e) {}
+
+    try {
+      const { bankEngine } = await import('./bankEngine.js');
+      await bankEngine.reverseTransaction(paymentId, reason);
+    } catch (e) {
+      console.warn('[BANK] Could not reverse transaction or already reversed:', e);
+    }
+
+    if (typeof window !== 'undefined') {
+      savedInvoices.forEach(inv => {
+        window.dispatchEvent(new CustomEvent('billqyro_invoice_updated', { detail: inv }));
+        window.dispatchEvent(new CustomEvent('billqyro:data-updated', { detail: { collectionName: 'invoices', doc: inv } }));
+      });
+      window.dispatchEvent(new Event('billqyro_bank_updated'));
+      window.dispatchEvent(new Event('billqyro_sync'));
+    }
+
+    return {
+      success: true,
+      invoices: savedInvoices
+    };
+  }
 
   /**
-   * CANONICAL STAFF / SALARY / ADVANCE RECORDING
-   */
-  async recordStaffPayment({
+   * CANONICAL STAFFSALARY / ADVANCE RECORDING  async recordStaffPayment({
     staffId,
     staffName = '',
     amount,
@@ -798,7 +906,7 @@ class PaymentEngine {
       type: 'moneyOut',
       amountRupees: withdrawAmount,
       category: 'Withdrawal',
-      title: `Withdrawal: Website Income → ${destName}`,
+      title: `Withdrawal: Website Income ? ${destName}`,
       account: paymentMethod || (destination === 'phonepe' ? 'PhonePe' : 'Cash'),
       sourceLocation: 'website_income',
       destinationLocation: destination || 'my_cash',
@@ -877,7 +985,7 @@ class PaymentEngine {
       isTransfer: true,
       amountRupees: transferAmount,
       category,
-      title: `Transfer: ${fromLabel} → ${toLabel}`,
+      title: `Transfer: ${fromLabel} ? ${toLabel}`,
       account: fromLocation === 'phonepe' ? 'PhonePe' : 'Cash',
       sourceLocation: fromLocation,
       destinationLocation: toLocation,
@@ -1102,13 +1210,16 @@ class PaymentEngine {
       if (inv.isDeleted || inv.status === 'Cancelled' || inv.status === 'Void') return;
       const history = Array.isArray(inv.paymentHistory) ? inv.paymentHistory : [];
       history.forEach(p => {
-        const amt = roundTo2(parseFloat(p.amount) || 0);
-        if (amt > 0) {
-          totalCustomerPayments += amt;
-          if (p.id) seenInvoiceTxIds.add(p.id);
-          if (p.proofId) seenInvoiceTxIds.add(p.proofId);
-        }
-      });
+          const rawAmt = parseFloat(p.amount) || 0;
+          const amt = roundTo2(rawAmt);
+          if (amt > 0 && p.type !== "payment_reversal") {
+            totalCustomerPayments += amt;
+            if (p.id) seenInvoiceTxIds.add(p.id);
+            if (p.proofId) seenInvoiceTxIds.add(p.proofId);
+          } else if (p.type === "payment_reversal") {
+            totalCustomerPayments += amt;
+          }
+        });
     });
 
     let otherBusinessIncome = 0;
@@ -1591,3 +1702,11 @@ class PaymentEngine {
 }
 
 export const paymentEngine = new PaymentEngine();
+
+
+
+
+
+
+
+

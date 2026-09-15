@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+﻿import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   CreditCard, 
@@ -736,7 +736,7 @@ const CollectionCenter = ({
   return (
     <AnimatedPage>
       <PullToRefresh onRefresh={handleRefresh}>
-        <div className="w-full max-w-7xl mx-auto space-y-6 pb-28">
+        <div className="w-full max-w-full mx-auto space-y-6 pb-28 px-2 md:px-4">
 
           {/* 1. TOP HEADER & MAIN NAVIGATION SEGMENT */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -872,52 +872,165 @@ const CollectionCenter = ({
           {activeTab === 'record' && (
             <div className="space-y-6">
 
-              {/* Transaction Type Picker Bar */}
-              <div className="card-premium p-4">
-                <div className="text-2xs uppercase tracking-wider font-bold text-theme-muted mb-3 flex items-center justify-between">
-                  <div className="flex items-center gap-1.5">
-                    <SlidersHorizontal className="w-3.5 h-3.5 text-theme-accent" />
-                    Select Transaction Category
+              {/* Transaction Type Picker Bar (Redesigned) */}
+              <div className="card-premium p-6 overflow-hidden relative">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-theme-accent/5 rounded-full blur-3xl -z-10 translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+                
+                <div className="text-xs uppercase tracking-wider font-black text-theme-muted mb-6 flex items-center justify-between border-b border-theme-border-soft pb-4">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-lg bg-theme-accent/10">
+                      <SlidersHorizontal className="w-4 h-4 text-theme-accent" />
+                    </div>
+                    <span>Select Transaction Category</span>
                   </div>
                   {selectedTxType === 'dream_transfer' && (
                     <button
                       type="button"
                       onClick={() => setShowDreamModal(true)}
-                      className="text-2xs font-bold text-pink-600 hover:underline flex items-center gap-1"
+                      className="text-xs font-bold text-pink-600 hover:text-pink-700 bg-pink-500/10 hover:bg-pink-500/20 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1"
                     >
-                      <Plus className="w-3 h-3" />
+                      <Plus className="w-3.5 h-3.5" />
                       Add Dream Goal
                     </button>
                   )}
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
-                  {TRANSACTION_CATEGORIES.map(t => {
-                    const Icon = t.icon;
-                    const isSelected = selectedTxType === t.id;
-                    return (
-                      <button
-                        key={t.id}
-                        type="button"
-                        onClick={() => {
-                          setSelectedTxType(t.id);
-                          setAmountInput('');
-                        }}
-                        className={`flex flex-col items-center justify-center p-3 rounded-xl border text-center transition-all ${
-                          isSelected
-                            ? `${t.color} border-current shadow-md scale-[1.02] font-black`
-                            : 'bg-theme-surface/50 border-theme-border-soft text-theme-muted hover:text-theme-primary hover:border-theme-border'
-                        }`}
-                      >
-                        <div className="flex items-center justify-center mb-1.5">
-                          <Icon className="w-5 h-5" />
-                        </div>
-                        <span className="text-2xs font-bold leading-tight line-clamp-1">{t.label}</span>
-                        <span className="text-[9px] font-mono text-theme-muted opacity-80 mt-0.5">
-                          {t.bucket}
-                        </span>
-                      </button>
-                    );
-                  })}
+
+                <div className="flex flex-col space-y-6">
+                  {/* Income Group */}
+                  <div>
+                    <div className="text-2xs font-bold text-theme-muted uppercase mb-3 flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                      Income & Inflows
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                      {TRANSACTION_CATEGORIES.filter(t => ['customer_payment', 'money_in'].includes(t.id)).map(t => {
+                        const Icon = t.icon;
+                        const isSelected = selectedTxType === t.id;
+                        return (
+                          <button
+                            key={t.id}
+                            type="button"
+                            onClick={() => { setSelectedTxType(t.id); setAmountInput(''); }}
+                            className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all duration-300 ${
+                              isSelected
+                                ? `${t.color} border-current shadow-md shadow-emerald-500/10 scale-[1.02]`
+                                : 'bg-theme-surface/50 border-theme-border-soft text-theme-muted hover:text-theme-primary hover:border-theme-border hover:bg-theme-surface'
+                            }`}
+                          >
+                            <div className={`p-2 rounded-lg ${isSelected ? 'bg-current/10' : 'bg-theme-surface border border-theme-border-soft'}`}>
+                              <Icon className="w-4 h-4" />
+                            </div>
+                            <div className="text-left flex-1 min-w-0">
+                              <div className={`text-xs font-bold truncate ${isSelected ? '' : 'text-theme-primary'}`}>{t.label}</div>
+                              <div className="text-[10px] font-mono opacity-80 mt-0.5 truncate">{t.bucket}</div>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Expenses Group */}
+                  <div>
+                    <div className="text-2xs font-bold text-theme-muted uppercase mb-3 flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-rose-500"></div>
+                      Expenses & Outflows
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                      {TRANSACTION_CATEGORIES.filter(t => ['expense', 'personal_expense', 'vendor_payment', 'customer_refund', 'money_out'].includes(t.id)).map(t => {
+                        const Icon = t.icon;
+                        const isSelected = selectedTxType === t.id;
+                        return (
+                          <button
+                            key={t.id}
+                            type="button"
+                            onClick={() => { setSelectedTxType(t.id); setAmountInput(''); }}
+                            className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all duration-300 ${
+                              isSelected
+                                ? `${t.color} border-current shadow-md scale-[1.02]`
+                                : 'bg-theme-surface/50 border-theme-border-soft text-theme-muted hover:text-theme-primary hover:border-theme-border hover:bg-theme-surface'
+                            }`}
+                          >
+                            <div className={`p-2 rounded-lg ${isSelected ? 'bg-current/10' : 'bg-theme-surface border border-theme-border-soft'}`}>
+                              <Icon className="w-4 h-4" />
+                            </div>
+                            <div className="text-left flex-1 min-w-0">
+                              <div className={`text-xs font-bold truncate ${isSelected ? '' : 'text-theme-primary'}`}>{t.label}</div>
+                              <div className="text-[10px] font-mono opacity-80 mt-0.5 truncate">{t.bucket}</div>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Staff Group */}
+                  <div>
+                    <div className="text-2xs font-bold text-theme-muted uppercase mb-3 flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                      Team & Salary
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                      {TRANSACTION_CATEGORIES.filter(t => ['staff_salary', 'staff_advance', 'my_salary'].includes(t.id)).map(t => {
+                        const Icon = t.icon;
+                        const isSelected = selectedTxType === t.id;
+                        return (
+                          <button
+                            key={t.id}
+                            type="button"
+                            onClick={() => { setSelectedTxType(t.id); setAmountInput(''); }}
+                            className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all duration-300 ${
+                              isSelected
+                                ? `${t.color} border-current shadow-md scale-[1.02]`
+                                : 'bg-theme-surface/50 border-theme-border-soft text-theme-muted hover:text-theme-primary hover:border-theme-border hover:bg-theme-surface'
+                            }`}
+                          >
+                            <div className={`p-2 rounded-lg ${isSelected ? 'bg-current/10' : 'bg-theme-surface border border-theme-border-soft'}`}>
+                              <Icon className="w-4 h-4" />
+                            </div>
+                            <div className="text-left flex-1 min-w-0">
+                              <div className={`text-xs font-bold truncate ${isSelected ? '' : 'text-theme-primary'}`}>{t.label}</div>
+                              <div className="text-[10px] font-mono opacity-80 mt-0.5 truncate">{t.bucket}</div>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Transfers Group */}
+                  <div>
+                    <div className="text-2xs font-bold text-theme-muted uppercase mb-3 flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-indigo-500"></div>
+                      Internal Transfers
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                      {TRANSACTION_CATEGORIES.filter(t => ['transfer', 'withdrawal', 'dream_transfer'].includes(t.id)).map(t => {
+                        const Icon = t.icon;
+                        const isSelected = selectedTxType === t.id;
+                        return (
+                          <button
+                            key={t.id}
+                            type="button"
+                            onClick={() => { setSelectedTxType(t.id); setAmountInput(''); }}
+                            className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all duration-300 ${
+                              isSelected
+                                ? `${t.color} border-current shadow-md scale-[1.02]`
+                                : 'bg-theme-surface/50 border-theme-border-soft text-theme-muted hover:text-theme-primary hover:border-theme-border hover:bg-theme-surface'
+                            }`}
+                          >
+                            <div className={`p-2 rounded-lg ${isSelected ? 'bg-current/10' : 'bg-theme-surface border border-theme-border-soft'}`}>
+                              <Icon className="w-4 h-4" />
+                            </div>
+                            <div className="text-left flex-1 min-w-0">
+                              <div className={`text-xs font-bold truncate ${isSelected ? '' : 'text-theme-primary'}`}>{t.label}</div>
+                              <div className="text-[10px] font-mono opacity-80 mt-0.5 truncate">{t.bucket}</div>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -2443,3 +2556,4 @@ const CollectionCenter = ({
 };
 
 export default CollectionCenter;
+

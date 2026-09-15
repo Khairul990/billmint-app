@@ -1147,8 +1147,7 @@ const CreateInvoice = ({
                       <input 
                         type="number" min="0" 
                         className="w-24 px-2.5 py-1 bg-theme-surface border border-amber-500/30 rounded-lg text-sm text-right font-black text-amber-600 dark:text-amber-400 focus:outline-none focus:border-theme-accent transition-colors tabular-nums bq-financial-number"
-                        value={oldDue} 
-                        onChange={(e) => setOldDue(e.target.value)} 
+                        value={oldDue} readOnly 
                         title="Customer prior unpaid balance"
                       />
                     </div>

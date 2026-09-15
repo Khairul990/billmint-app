@@ -569,7 +569,7 @@ const Customers = ({
                       </button>
                     ) : onCreateBill ? (
                       <button 
-                        onClick={() => onCreateBill(cust)} 
+                        onClick={() => onCreateBill({ ...cust, totalDue: stats?.totalDue || 0 })} 
                         className="flex-1 py-2 px-2 bg-theme-accent text-white hover:opacity-95 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer shadow-xs"
                       >
                         <Plus className="w-3.5 h-3.5" /> Bill

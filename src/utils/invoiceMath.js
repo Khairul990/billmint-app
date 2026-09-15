@@ -1,4 +1,4 @@
-/**
+﻿/**
  * BillQyro Centralized Canonical Financial Math Engine
  *
  * Single Source of Truth for all financial calculations across:
@@ -86,7 +86,7 @@ export const getInvoicePaidTotal = (inv) => {
   if (!inv) return 0;
   if (Array.isArray(inv.paymentHistory) && inv.paymentHistory.length > 0) {
     const sum = inv.paymentHistory.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0);
-    if (sum > 0) return roundTo2(sum);
+    return Math.max(0, roundTo2(sum));
   }
   const val = parseFloat(inv.amountPaid ?? inv.paidAmount);
   if (!isNaN(val) && val >= 0) return roundTo2(val);
@@ -1087,3 +1087,4 @@ export const calculateAgingDistribution = (invoices = [], asOfDate = new Date())
 
   return result;
 };
+

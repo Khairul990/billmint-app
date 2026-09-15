@@ -1001,8 +1001,12 @@ const Dashboard = ({
               {/* ========================================================================= */}
               {/* LEVEL 1: EXECUTIVE HEADER & REAL-TIME BUSINESS HEALTH COCKPIT */}
               {/* ========================================================================= */}
-              <div className="luxury-glass-card p-4 sm:p-5 lg:p-6 rounded-3xl flex flex-col md:flex-row md:items-center justify-between gap-4 border border-theme-border-soft">
-                <div className="min-w-0 flex-1">
+              <div className="relative overflow-hidden luxury-glass-card p-4 sm:p-5 lg:p-6 rounded-3xl flex flex-col md:flex-row md:items-center justify-between gap-4 border border-theme-border-soft group">
+                {/* Decorative Premium Glow */}
+                <div className="absolute top-0 right-1/4 -mt-10 w-40 h-40 rounded-full bg-theme-accent opacity-[0.08] blur-3xl group-hover:opacity-[0.12] transition-opacity duration-700 pointer-events-none z-0" />
+                <div className="absolute bottom-0 right-0 -mb-10 -mr-10 w-48 h-48 rounded-full bg-emerald-500 opacity-[0.05] blur-3xl pointer-events-none z-0" />
+
+                <div className="min-w-0 flex-1 relative z-10">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-theme-surface text-theme-accent border border-theme-border-soft flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-theme-accent" />
@@ -1028,7 +1032,7 @@ const Dashboard = ({
                 </div>
 
                 {/* Right Header Controls & Quick Actions */}
-                <div className="flex items-center gap-2.5 self-start md:self-auto flex-wrap shrink-0">
+                <div className="flex items-center gap-2.5 self-start md:self-auto flex-wrap shrink-0 relative z-10">
                   {/* Business Health Indicator */}
                   <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-bold ${
                     metrics.businessHealth.color === 'emerald'
@@ -1047,7 +1051,7 @@ const Dashboard = ({
                   <Button
                     variant="financial"
                     size="sm"
-                    onClick={() => setCurrentTab('create-bill')}
+                    onClick={() => setCurrentTab('create-invoice')}
                     leftIcon={Plus}
                     className="shadow-sm"
                   >
@@ -1108,7 +1112,7 @@ const Dashboard = ({
                     </div>
 
                     <div 
-                      onClick={() => setCurrentTab('create-bill')}
+                      onClick={() => setCurrentTab('create-invoice')}
                       className="luxury-glass-subcard p-5 rounded-2xl border border-theme-border-soft hover:border-theme-accent/40 cursor-pointer transition-all hover:-translate-y-0.5 group"
                     >
                       <div className="p-2.5 w-fit rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 mb-3 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
@@ -1155,8 +1159,14 @@ const Dashboard = ({
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
                     
                     {/* HERO FINANCIAL FOCAL POINT (7 Columns on Desktop) */}
-                    <div className="lg:col-span-7 luxury-glass-card p-6 rounded-3xl border border-theme-border-soft flex flex-col justify-between relative overflow-hidden bg-gradient-to-br from-theme-surface via-theme-surface to-theme-surface-elevated">
-                      <div className="flex items-center justify-between pb-3 border-b border-theme-border-soft/60">
+                    <div className="lg:col-span-7 luxury-glass-card p-6 rounded-3xl border border-theme-border-soft flex flex-col justify-between relative overflow-hidden bg-gradient-to-br from-theme-surface via-theme-surface to-theme-surface-elevated group">
+                      {/* Premium Decorative Background Elements */}
+                      <div className="absolute -right-8 -bottom-8 w-64 h-64 bg-theme-accent/5 rounded-full blur-3xl group-hover:bg-theme-accent/10 transition-all duration-700 pointer-events-none z-0" />
+                      <div className="absolute right-8 top-1/2 -translate-y-1/2 opacity-[0.03] text-theme-accent pointer-events-none transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-700 z-0">
+                        <TrendingUp style={{ width: '160px', height: '160px' }} />
+                      </div>
+
+                      <div className="flex items-center justify-between pb-3 border-b border-theme-border-soft/60 relative z-10">
                         <div className="flex items-center gap-2">
                           <Calendar className="w-4 h-4 text-theme-accent" />
                           <span className="text-xs font-bold uppercase tracking-wider text-theme-muted">
@@ -1169,7 +1179,7 @@ const Dashboard = ({
                         </span>
                       </div>
 
-                      <div className="py-5">
+                      <div className="py-5 relative z-10">
                         <FinancialValue
                           label="Month Revenue"
                           value={metrics.thisMonthRevenue > 0 ? metrics.thisMonthRevenue : metrics.totalRevenue}
@@ -1387,8 +1397,13 @@ const Dashboard = ({
                     </div>
 
                     {/* Chart Container */}
-                    <div className="h-[260px] sm:h-[300px] w-full pt-2">
-                      <ResponsiveContainer width="100%" height="100%">
+                    <div className="h-[260px] sm:h-[300px] w-full pt-2 relative group">
+                      {/* Abstract background for the chart */}
+                      <div className="absolute inset-0 flex items-center justify-center opacity-[0.02] group-hover:opacity-[0.04] transition-opacity duration-700 pointer-events-none z-0">
+                         <BarChart3 style={{ width: '240px', height: '240px' }} />
+                      </div>
+                      <div className="absolute right-0 top-0 w-1/3 h-full bg-gradient-to-l from-theme-surface-elevated to-transparent opacity-30 pointer-events-none z-0" />
+                      <ResponsiveContainer width="100%" height="100%" className="relative z-10">
                         <AreaChart data={chartSeries} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                           <defs>
                             <linearGradient id="invoicedGradient" x1="0" y1="0" x2="0" y2="1">
@@ -1527,9 +1542,11 @@ const Dashboard = ({
                     ) : (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {metrics.overdueCount > 0 && (
-                          <div 
+                          <motion.div 
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
                             onClick={() => setCurrentTab('invoices')}
-                            className="luxury-glass-subcard p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/25 flex items-center justify-between cursor-pointer hover:bg-rose-500/15 transition-all"
+                            className="luxury-glass-subcard p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/25 flex items-center justify-between cursor-pointer hover:bg-rose-500/15 transition-all shadow-premium-sm hover:shadow-premium-md"
                           >
                             <div className="flex items-center gap-3">
                               <AlertTriangle className="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0" />
@@ -1543,13 +1560,15 @@ const Dashboard = ({
                               </div>
                             </div>
                             <Button variant="outline" size="sm" className="!text-xs">Review</Button>
-                          </div>
+                          </motion.div>
                         )}
 
                         {metrics.partialInvoicesCount > 0 && (
-                          <div 
+                          <motion.div 
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
                             onClick={() => setCurrentTab('invoices')}
-                            className="luxury-glass-subcard p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-between cursor-pointer hover:bg-amber-500/15 transition-all"
+                            className="luxury-glass-subcard p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-between cursor-pointer hover:bg-amber-500/15 transition-all shadow-premium-sm hover:shadow-premium-md"
                           >
                             <div className="flex items-center gap-3">
                               <Clock className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" />
@@ -1563,13 +1582,15 @@ const Dashboard = ({
                               </div>
                             </div>
                             <Button variant="outline" size="sm" className="!text-xs">Inspect</Button>
-                          </div>
+                          </motion.div>
                         )}
 
                         {pendingPaymentsCount > 0 && (
-                          <div 
+                          <motion.div 
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
                             onClick={onOpenCollection}
-                            className="luxury-glass-subcard p-3.5 rounded-2xl bg-sky-500/10 border border-sky-500/25 flex items-center justify-between cursor-pointer hover:bg-sky-500/15 transition-all"
+                            className="luxury-glass-subcard p-3.5 rounded-2xl bg-sky-500/10 border border-sky-500/25 flex items-center justify-between cursor-pointer hover:bg-sky-500/15 transition-all shadow-premium-sm hover:shadow-premium-md"
                           >
                             <div className="flex items-center gap-3">
                               <CreditCard className="w-5 h-5 text-sky-600 dark:text-sky-400 shrink-0" />
@@ -1583,7 +1604,7 @@ const Dashboard = ({
                               </div>
                             </div>
                             <Button variant="outline" size="sm" className="!text-xs">Approve</Button>
-                          </div>
+                          </motion.div>
                         )}
 
                         {customerAnalytics.withDueCount > 0 && (

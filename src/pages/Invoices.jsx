@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+﻿import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import AnimatedPage from '../components/AnimatedPage';
@@ -951,20 +951,21 @@ const Invoices = ({
                   Cancel
                 </button>
                 <button
-                  onClick={() => {
-                    onDeleteInvoice(paidDeleteTarget.id, false, true);
-                    setPaidDeleteTarget(null);
-                  }}
+                  disabled={(paidDeleteTarget?.paymentHistory?.length > 0) || getInvoicePaidTotal(paidDeleteTarget) > 0}
+                    onClick={() => {
+                      onDeleteInvoice(paidDeleteTarget.id, false, true);
+                      setPaidDeleteTarget(null);
+                    }}
                   className="flex-1 bg-rose-600 text-white font-bold py-2.5 rounded-xl transition-all hover:bg-rose-700 text-xs shadow-md shadow-rose-500/20"
                 >
-                  Move To Trash
-                </button>
+                  {(paidDeleteTarget?.paymentHistory?.length > 0) ? "Cannot Trash Invoice With History" : "Move To Trash"}
+                  </button>
+                </div>
               </div>
-            </div>
-          </motion.div>
-        </div>,
-        document.body
-      )}
+            </motion.div>
+          </div>,
+          document.body
+        )}
 
       {/* Permanent Delete Confirmation */}
       {permanentDeleteTarget && createPortal(
@@ -1001,7 +1002,7 @@ const Invoices = ({
                   Cancel
                 </button>
                 <button
-                  disabled={deleteConfirmText !== 'DELETE'}
+                  disabled={deleteConfirmText !== 'DELETE' || (permanentDeleteTarget?.paymentHistory?.length > 0) || getInvoicePaidTotal(permanentDeleteTarget) > 0}
                   onClick={() => {
                     onDeleteInvoice(permanentDeleteTarget.id, true);
                     setPermanentDeleteTarget(null);
@@ -1294,3 +1295,5 @@ const Invoices = ({
 };
 
 export default Invoices;
+
+

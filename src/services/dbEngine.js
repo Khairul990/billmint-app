@@ -1,4 +1,4 @@
-import { db, firebaseReady, auth } from './firebaseConfig.js';
+﻿import { db, firebaseReady, auth } from './firebaseConfig.js';
 
 
 // ==========================================
@@ -4289,3 +4289,4 @@ export const verifyCustomerPortal = async (customerId, phone) => {
     return false;
   }
 };
+

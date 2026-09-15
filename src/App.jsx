@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Trash2, AlertTriangle, Lock, ServerCrash } from 'lucide-react';
@@ -1179,6 +1179,20 @@ function App() {
   };
 
   const handleDeleteInvoice = async (id, permanent = false, skipConfirmation = false) => {
+    const targetInv = (invoices || []).find(inv => inv.id === id);
+    if (targetInv) {
+      let paidVal = 0;
+      if (Array.isArray(targetInv.paymentHistory) && targetInv.paymentHistory.length > 0) {
+        paidVal = targetInv.paymentHistory.reduce((s, p) => s + (Number(p.amount) || 0), 0);
+      } else {
+        paidVal = Number(targetInv.paidAmount ?? targetInv.amountPaid ?? 0);
+      }
+      if (paidVal > 0) {
+        toast.error('Cannot delete invoices with collected revenue. Void payments first.');
+        return;
+      }
+    }
+
     if (isDemoSessionActive) {
       deleteDemoInvoice(id);
       toast.success('Deleted from Demo Session');
@@ -1296,6 +1310,27 @@ function App() {
   };
 
   const handleDeleteCustomer = async (id) => {
+    const targetCust = (customers || []).find(c => c.id === id);
+    if (targetCust) {
+      const custInvoices = (invoices || []).filter(inv => (inv.customerId || inv.customer?.id) === id && !inv.isDeleted && inv.status !== 'Cancelled' && inv.status !== 'Void');
+      const openingDue = parseFloat(targetCust.previousDue ?? targetCust.openingDue ?? targetCust.openingBalance) || 0;
+      let totalBilled = 0;
+      let totalPaid = 0;
+      custInvoices.forEach(inv => {
+        totalBilled += parseFloat(inv.grandTotal || inv.total) || 0;
+        if (Array.isArray(inv.paymentHistory) && inv.paymentHistory.length > 0) {
+          totalPaid += inv.paymentHistory.reduce((s, p) => s + (Number(p.amount) || 0), 0);
+        } else {
+          totalPaid += Number(inv.paidAmount ?? inv.amountPaid ?? 0);
+        }
+      });
+      const totalDue = openingDue + totalBilled - totalPaid;
+      if (totalDue > 0.05) {
+        toast.error('Cannot delete a customer with an active outstanding balance.');
+        return;
+      }
+    }
+
     if (isDemoSessionActive) {
       const customers = getDemoCustomers().filter(i => i.id !== id);
       localStorage.setItem('billqyro_demo_customers', JSON.stringify(customers));
@@ -1883,7 +1918,7 @@ function App() {
                 customerId: cust?.id || null,
                 customer: cust || null,
                 customerPhone: cust?.phone || '',
-                oldDue: parseFloat(cust?.previousDue ?? cust?.openingDue ?? cust?.openingBalance) || 0
+                oldDue: parseFloat(cust?.totalDue ?? cust?.previousDue ?? cust?.openingDue ?? cust?.openingBalance) || 0
               });
               setCurrentTab('create-invoice');
             }}
@@ -2530,3 +2565,4 @@ function App() {
 }
 
 export default App;
+
