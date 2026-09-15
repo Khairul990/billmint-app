@@ -1001,13 +1001,13 @@ const Dashboard = ({
               {/* ========================================================================= */}
               {/* LEVEL 1: EXECUTIVE HEADER & REAL-TIME BUSINESS HEALTH COCKPIT */}
               {/* ========================================================================= */}
-              <div className="relative overflow-hidden luxury-glass-card p-4 sm:p-5 lg:p-6 rounded-3xl flex flex-col md:flex-row md:items-center justify-between gap-4 border border-theme-border-soft group">
+              <div className="relative overflow-hidden luxury-glass-card p-4 sm:p-5 lg:p-6 rounded-3xl flex flex-col lg:flex-row lg:items-center justify-between gap-6 border border-theme-border-soft group">
                 {/* Decorative Premium Glow */}
                 <div className="absolute top-0 right-1/4 -mt-10 w-40 h-40 rounded-full bg-theme-accent opacity-[0.08] blur-3xl group-hover:opacity-[0.12] transition-opacity duration-700 pointer-events-none z-0" />
                 <div className="absolute bottom-0 right-0 -mb-10 -mr-10 w-48 h-48 rounded-full bg-emerald-500 opacity-[0.05] blur-3xl pointer-events-none z-0" />
 
-                <div className="min-w-0 flex-1 relative z-10">
-                  <div className="flex items-center gap-2 flex-wrap">
+                <div className="min-w-0 flex-1 relative z-10 flex flex-col justify-center">
+                  <div className="flex items-center gap-2 flex-wrap mb-1">
                     <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-theme-surface text-theme-accent border border-theme-border-soft flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-theme-accent" />
                       {workspaceName}
@@ -1021,20 +1021,20 @@ const Dashboard = ({
                     </span>
                   </div>
                   
-                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold bq-font-display text-theme-primary tracking-tight flex items-center gap-2 mt-2 truncate">
+                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold bq-font-display text-theme-primary tracking-tight flex items-center gap-2 mt-1 truncate">
                     <span>{greeting.text},</span>
                     <span className="text-theme-accent truncate">{ownerName}</span>
                     <span>👋</span>
                   </h1>
-                  <p className="text-xs sm:text-sm text-theme-muted font-medium mt-0.5">
+                  <p className="text-xs sm:text-sm text-theme-muted font-medium mt-1">
                     Your business at a glance — Real-time revenue intelligence, collection flow, and customer ledger.
                   </p>
                 </div>
 
                 {/* Right Header Controls & Quick Actions */}
-                <div className="flex items-center gap-2.5 self-start md:self-auto flex-wrap shrink-0 relative z-10">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 shrink-0 relative z-10">
                   {/* Business Health Indicator */}
-                  <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-bold ${
+                  <div className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-bold shadow-sm ${
                     metrics.businessHealth.color === 'emerald'
                       ? 'bg-emerald-500/10 border-emerald-500/25 text-emerald-600 dark:text-emerald-400'
                       : metrics.businessHealth.color === 'rose'
@@ -1047,36 +1047,38 @@ const Dashboard = ({
                     <span>Business Health: {metrics.businessHealth.label}</span>
                   </div>
 
-                  {/* Primary Create Bill / Invoice Action */}
-                  <Button
-                    variant="financial"
-                    size="sm"
-                    onClick={() => setCurrentTab('create-invoice')}
-                    leftIcon={Plus}
-                    className="shadow-sm"
-                  >
-                    {categoryExp.labels?.invoice ? `Create ${categoryExp.labels.invoice}` : 'Create Invoice'}
-                  </Button>
+                  <div className="flex items-center gap-2.5">
+                    {/* Primary Create Bill / Invoice Action */}
+                    <Button
+                      variant="financial"
+                      size="sm"
+                      onClick={() => setCurrentTab('create-invoice')}
+                      leftIcon={Plus}
+                      className="shadow-sm"
+                    >
+                      {categoryExp.labels?.invoice ? `Create ${categoryExp.labels.invoice}` : 'Create Invoice'}
+                    </Button>
 
-                  {/* Quick Collect Action */}
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={onOpenCollection}
-                    leftIcon={CreditCard}
-                  >
-                    Record Payment
-                  </Button>
+                    {/* Quick Collect Action */}
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={onOpenCollection}
+                      leftIcon={CreditCard}
+                    >
+                      Record Payment
+                    </Button>
 
-                  {/* Refresh Button */}
-                  <button
-                    onClick={handleRefresh}
-                    className="flex items-center justify-center p-2 rounded-xl bg-theme-surface hover:bg-theme-surface-elevated border border-theme-border-soft text-theme-muted hover:text-theme-accent transition-all cursor-pointer group"
-                    title="Sync Latest Data"
-                    aria-label="Sync Data"
-                  >
-                    <RefreshCw className="w-4 h-4 transition-transform group-hover:rotate-180 duration-500" />
-                  </button>
+                    {/* Refresh Button */}
+                    <button
+                      onClick={handleRefresh}
+                      className="flex items-center justify-center p-2 rounded-xl bg-theme-surface hover:bg-theme-surface-elevated border border-theme-border-soft text-theme-muted hover:text-theme-accent transition-all cursor-pointer group shadow-sm"
+                      title="Sync Latest Data"
+                      aria-label="Sync Data"
+                    >
+                      <RefreshCw className="w-4 h-4 transition-transform group-hover:rotate-180 duration-500" />
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -1179,31 +1181,48 @@ const Dashboard = ({
                         </span>
                       </div>
 
-                      <div className="py-5 relative z-10">
-                        <FinancialValue
-                          label="Month Revenue"
-                          value={metrics.thisMonthRevenue > 0 ? metrics.thisMonthRevenue : metrics.totalRevenue}
-                          currency={currencySymbol}
-                          intent="sales"
-                          size="xl"
-                        />
-                        
-                        <div className="mt-3 flex items-center gap-3 flex-wrap text-xs">
-                          {metrics.todaysSales > 0 ? (
-                            <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-bold">
-                              <TrendingUp className="w-3.5 h-3.5" />
-                              Today's Invoiced Volume: {formatCurrency(metrics.todaysSales, currencySymbol)} ({metrics.todaysInvoicesCount} bills)
-                            </span>
-                          ) : (
-                            <span className="text-theme-muted font-medium">
-                              Today's Invoiced Volume: {formatCurrency(0, currencySymbol)} • {scopedInvoices.length} active invoices
-                            </span>
-                          )}
+                      <div className="py-5 relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div className="flex-1">
+                          <FinancialValue
+                            label="Month Revenue"
+                            value={metrics.thisMonthRevenue > 0 ? metrics.thisMonthRevenue : metrics.totalRevenue}
+                            currency={currencySymbol}
+                            intent="sales"
+                            size="xl"
+                          />
                           
-                          <span className="text-theme-muted/50">•</span>
-                          <span className="text-theme-muted font-medium">
-                            Net Cash Flow: <span className="font-bold text-theme-primary">{formatCurrency(metrics.thisMonthNetCash, currencySymbol)}</span>
-                          </span>
+                          <div className="mt-3 flex items-center gap-3 flex-wrap text-xs">
+                            {metrics.todaysSales > 0 ? (
+                              <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-bold">
+                                <TrendingUp className="w-3.5 h-3.5" />
+                                Today's Invoiced Volume: {formatCurrency(metrics.todaysSales, currencySymbol)} ({metrics.todaysInvoicesCount} bills)
+                              </span>
+                            ) : (
+                              <span className="text-theme-muted font-medium">
+                                Today's Invoiced Volume: {formatCurrency(0, currencySymbol)} • {scopedInvoices.length} active invoices
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Right side balanced metrics */}
+                        <div className="shrink-0 flex flex-col gap-3 md:items-end p-4 rounded-2xl bg-theme-surface/50 border border-theme-border-soft backdrop-blur-sm min-w-[220px]">
+                           <div className="flex items-center justify-between w-full gap-4">
+                             <span className="text-xs text-theme-muted font-medium">Net Cash Flow</span>
+                             <span className="font-bold text-theme-primary text-sm">{formatCurrency(metrics.thisMonthNetCash, currencySymbol)}</span>
+                           </div>
+                           <div className="w-full h-px bg-theme-border-soft/60" />
+                           <div className="flex items-center justify-between w-full gap-4">
+                             <span className="text-xs text-theme-muted font-medium">Growth</span>
+                             {metrics.revenueGrowthPercent !== null ? (
+                               <span className={`text-xs font-bold flex items-center gap-1 ${metrics.revenueGrowthPercent >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                                 {metrics.revenueGrowthPercent >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                                 {Math.abs(metrics.revenueGrowthPercent)}%
+                               </span>
+                             ) : (
+                               <span className="text-xs font-bold text-theme-muted">—</span>
+                             )}
+                           </div>
                         </div>
                       </div>
 
