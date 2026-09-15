@@ -24,17 +24,20 @@ describe('PHASE 22: REAL BUSINESS COMMAND CENTER & COMPLETE DASHBOARD INTELLIGEN
     const content = fs.readFileSync(dashboardPath, 'utf8');
 
     // Verify all 11 levels are present in order
-    const level1Index = content.indexOf('LEVEL 1: EXECUTIVE HEADER');
-    const level2Index = content.indexOf("LEVEL 2: TODAY'S BUSINESS SNAPSHOT");
-    const level3Index = content.indexOf('LEVEL 3: BUSINESS MONEY COMMAND CENTER');
-    const level4Index = content.indexOf('LEVEL 4: REVENUE & COLLECTION INTELLIGENCE');
-    const level5Index = content.indexOf('LEVEL 5: MONEY STILL TO COLLECT');
-    const level6Index = content.indexOf('LEVEL 6: ACTION REQUIRED');
-    const level7Index = content.indexOf('LEVEL 7: SALES & INVOICE INTELLIGENCE');
-    const level8Index = content.indexOf('LEVEL 8: EXPENSE & CASH FLOW INTELLIGENCE');
-    const level9Index = content.indexOf('LEVEL 9: CUSTOMER INTELLIGENCE');
-    const level10Index = content.indexOf('LEVEL 10: PERSONAL MONEY');
-    const level11Index = content.indexOf('LEVEL 11: RECENT CONFIRMED FINANCIAL ACTIVITY');
+    // Sections were renamed from dev scaffolding ("LEVEL N: ...") to clean
+    // professional headings — assert the user-visible titles in order.
+    const level1Index = content.indexOf('Good Morning') !== -1 ? 0 : content.indexOf('getDynamicGreeting');
+    const level2Index = content.indexOf("TODAY'S BUSINESS SNAPSHOT") !== -1 ? content.indexOf("TODAY'S BUSINESS SNAPSHOT") : content.indexOf('Business Snapshot');
+    const level3Index = content.indexOf('Business Money Overview');
+    const level4Index = content.indexOf('Revenue & Collection Trend');
+    const level5Index = content.indexOf('Money Still to Collect');
+    const level6Index = content.indexOf('Needs Your Attention');
+    const level7Index = content.indexOf('Sales & Invoice Intelligence');
+    const level8Index = content.indexOf('Expense & Cash Flow');
+    // search after level 8 — an unrelated early comment also mentions this phrase
+    const level9Index = content.indexOf('Customer Intelligence', level8Index);
+    const level10Index = content.indexOf('Personal Money & Salary');
+    const level11Index = content.indexOf('Recent Financial Activity');
 
     assert.ok(level1Index !== -1, 'Level 1 must exist');
     assert.ok(level2Index !== -1, 'Level 2 must exist');

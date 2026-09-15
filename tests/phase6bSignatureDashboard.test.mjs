@@ -24,16 +24,16 @@ describe('PHASE 6B: BILLQYRO UNLIKE SIGNATURE DASHBOARD', () => {
 
   test('2. Dashboard contains all core signature financial sections', () => {
     assert.ok(dashboardCode.includes('LEVEL 1: EXECUTIVE HEADER'), 'Level 1 Executive Header must exist');
-    assert.ok(dashboardCode.includes("LEVEL 2: TODAY'S BUSINESS SNAPSHOT"), 'Level 2 Business Snapshot & Pulse must exist');
-    assert.ok(dashboardCode.includes('LEVEL 3: BUSINESS MONEY COMMAND CENTER'), 'Level 3 Business Money Command Center must exist');
-    assert.ok(dashboardCode.includes('LEVEL 4: REVENUE & COLLECTION INTELLIGENCE'), 'Level 4 Revenue & Collection Intelligence must exist');
-    assert.ok(dashboardCode.includes('LEVEL 5: MONEY STILL TO COLLECT'), 'Level 5 Money Still to Collect must exist');
-    assert.ok(dashboardCode.includes('LEVEL 6: ACTION REQUIRED'), 'Level 6 Action Required / Attention Center must exist');
-    assert.ok(dashboardCode.includes('LEVEL 7: SALES & INVOICE INTELLIGENCE'), 'Level 7 Sales & Invoice Intelligence must exist');
-    assert.ok(dashboardCode.includes('LEVEL 8: EXPENSE & CASH FLOW INTELLIGENCE'), 'Level 8 Expense & Cash Flow Intelligence must exist');
-    assert.ok(dashboardCode.includes('LEVEL 9: CUSTOMER INTELLIGENCE'), 'Level 9 Customer Intelligence must exist');
-    assert.ok(dashboardCode.includes('LEVEL 10: PERSONAL MONEY'), 'Level 10 Personal Money must exist');
-    assert.ok(dashboardCode.includes('LEVEL 11: RECENT CONFIRMED FINANCIAL ACTIVITY'), 'Level 11 Recent Confirmed Financial Activity must exist');
+    assert.ok(dashboardCode.includes("TODAY'S BUSINESS SNAPSHOT"), 'Level 2 Business Snapshot & Pulse must exist');
+    assert.ok(dashboardCode.includes('Business Money Overview'), 'Level 3 Business Money Command Center must exist');
+    assert.ok(dashboardCode.includes('Revenue & Collection Trend'), 'Level 4 Revenue & Collection Intelligence must exist');
+    assert.ok(dashboardCode.includes('Money Still to Collect'), 'Level 5 Money Still to Collect must exist');
+    assert.ok(dashboardCode.includes('Needs Your Attention'), 'Level 6 Action Required / Attention Center must exist');
+    assert.ok(dashboardCode.includes('Sales & Invoice Intelligence'), 'Level 7 Sales & Invoice Intelligence must exist');
+    assert.ok(dashboardCode.includes('Expense & Cash Flow'), 'Level 8 Expense & Cash Flow Intelligence must exist');
+    assert.ok(dashboardCode.includes('Customer Intelligence'), 'Level 9 Customer Intelligence must exist');
+    assert.ok(dashboardCode.includes('Personal Money & Salary'), 'Level 10 Personal Money must exist');
+    assert.ok(dashboardCode.includes('Recent Financial Activity'), 'Level 11 Recent Confirmed Financial Activity must exist');
   });
 
   test('3. Canonical financial terminology & equation architecture', () => {

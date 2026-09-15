@@ -25,7 +25,7 @@ const dashboardCode = fs.readFileSync(path.join(rootDir, 'src/pages/Dashboard.js
 // ----------------------------------------------------------------------------
 // TEST A: Business Command Center sections exist in proper hierarchy
 // ----------------------------------------------------------------------------
-const businessMoneyIndex = dashboardCode.indexOf('BUSINESS MONEY');
+const businessMoneyIndex = dashboardCode.indexOf('Business Money Overview');
 const revenueHeroIndex = dashboardCode.indexOf('Revenue & Collection');
 const receivablesIndex = dashboardCode.indexOf('Money Still to Collect') !== -1 ? dashboardCode.indexOf('Money Still to Collect') : dashboardCode.indexOf('Receivables');
 const recentInvoicesIndex = dashboardCode.indexOf('Recent Invoices') !== -1 ? dashboardCode.indexOf('Recent Invoices') : dashboardCode.indexOf('Recent Bills');

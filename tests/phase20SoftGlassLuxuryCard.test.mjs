@@ -83,8 +83,8 @@ await test('3.1 Financial Semantic Colors remain strictly standard (Green/Amber/
 });
 
 await test('3.2 Business Money vs Personal Money vs Dream Savings remain strictly isolated', () => {
-  assert.ok(dashboardCode.includes('BUSINESS MONEY'), 'Must have distinct Business Money section');
-  assert.ok(dashboardCode.includes('MONEY LOCATIONS & SALARY'), 'Must have distinct Liquid/Personal Funds section');
+  assert.ok(dashboardCode.includes('Business Money Overview'), 'Must have distinct Business Money section');
+  assert.ok(dashboardCode.includes('Personal Money & Salary'), 'Must have distinct Liquid/Personal Funds section');
   assert.ok(dashboardCode.includes('MY DREAM SAVINGS'), 'Must have distinct Dream Savings section');
 });
 
