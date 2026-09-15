@@ -48,7 +48,7 @@ const templateStyles = {
   'minimal-classic': 'Minimal', 'modern-corporate': 'Corporate', 'teal-bold-header': 'Modern',
   'sage-green-curved': 'Modern', 'creative-agency': 'Creative', 'purple-corporate': 'Corporate',
   'orange-gradient-modern': 'Modern', 'orange-geometric': 'Modern', 'black-orange-bold': 'Bold',
-  'luxury-gold-black': 'Luxury', 'black-header-professional': 'Professional', 'blue-rounded-modern': 'Modern',
+  'luxury-gold-black': 'Luxury', 'black-header-professional': 'Professional', 'blue-rounded-modern': 'Modern', 'billqyro-signature': 'Official', 'emerald-edge': 'Modern', 'royal-navy': 'Corporate', 'blush-rose': 'Elegant',
   'red-corporate-clean': 'Corporate', 'clean-two-column': 'Modern'
 };
 

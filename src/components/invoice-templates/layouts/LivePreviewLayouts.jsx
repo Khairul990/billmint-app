@@ -1525,6 +1525,358 @@ const CleanTwoColumnModern = ({ data }) => (
   </div>
 );
 
+const BillQyroSignature = ({ data }) => (
+  <div className="bg-white font-sans text-gray-800 shadow-xl w-[595px] min-h-fit mx-auto overflow-hidden">
+    {/* Official emerald header band */}
+    <div className="bg-gradient-to-br from-[#0A856C] via-[#0FAE8A] to-[#14C79A] px-10 pt-9 pb-8 text-white relative overflow-hidden">
+      <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-white/10" />
+      <div className="absolute right-16 bottom-[-30px] w-24 h-24 rounded-full bg-[#7CE0C3]/20" />
+      <div className="flex justify-between items-start relative">
+        <div>
+          <h1 className="text-4xl font-black tracking-tight mb-1">INVOICE</h1>
+          <p className="text-emerald-50/90 text-sm font-semibold">{data.invoiceNumber}</p>
+          <p className="text-emerald-50/80 text-sm">{data.date}</p>
+        </div>
+        <div className="text-right">
+          {data.businessSettings?.logoUrl ? (
+            <img src={data.businessSettings.logoUrl} alt="Logo" className="h-12 object-contain ml-auto mb-2 bg-white/90 rounded-lg p-1" style={{ maxWidth: '130px', maxHeight: '48px', objectFit: 'contain' }} />
+          ) : null}
+          <h2 className="text-lg font-extrabold">{data.businessSettings?.businessName || 'Your Business'}</h2>
+          <p className="text-xs text-emerald-50/85">{data.businessSettings?.email}</p>
+          <p className="text-xs text-emerald-50/85">{data.businessSettings?.phone}</p>
+        </div>
+      </div>
+    </div>
+
+    <div className="px-10 py-8">
+      {/* Billed To / summary strip */}
+      <div className="grid grid-cols-2 gap-4 mb-8">
+        <div className="bg-[#F4FAF7] border border-[#7CE0C3]/40 rounded-2xl p-4">
+          <h3 className="text-[10px] font-black text-[#0A856C] uppercase tracking-widest mb-1.5">Billed To</h3>
+          <p className="font-extrabold text-gray-900 text-sm">{data.customerName}</p>
+          {data.customerPhone && <p className="text-xs text-gray-600">{data.customerPhone}</p>}
+          {data.customerEmail && <p className="text-xs text-gray-600">{data.customerEmail}</p>}
+        </div>
+        <div className="flex items-end justify-end">
+          <div className="text-right">
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Total Due</p>
+            <p className="text-3xl font-black text-[#0A856C]">{formatCurrency(data.totals?.totalDue ?? data.grandTotal ?? 0)}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Items table */}
+      <table className="w-full text-left mb-8 text-sm">
+        <thead>
+          <tr className="bg-[#0A856C] text-white">
+            {getInvoiceColumns(data, data.businessSettings).map(col => (
+              <th key={col.id} className="py-2.5 px-3 font-bold text-xs uppercase tracking-wider first:rounded-l-xl last:rounded-r-xl">{col.label}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {data.items?.map((item, i) => (
+            <tr key={i} className={i % 2 === 0 ? 'bg-[#F4FAF7]/60' : 'bg-white'}>
+              {getInvoiceColumns(data, data.businessSettings).map(col => {
+                const val = getItemValue(item, col.id, data.billType);
+                const displayVal = (col.id === 'amount' || col.id === 'rate' || col.id === 'tax' || col.id === 'discount') && val !== '' ? formatCurrency(val) : val;
+                return <td key={col.id} className={`py-3 px-3 text-${col.align} ${(col.id === 'amount' || col.id === 'total') ? 'font-bold text-gray-900' : 'text-gray-700'}`}>{displayVal}</td>;
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <div className="flex justify-end mb-8">
+        <HtmlTotalsSummary data={data} widthClass="w-72" />
+      </div>
+
+      {/* Footer */}
+      <div className="flex justify-between items-end gap-6 border-t-2 border-[#7CE0C3] pt-5">
+        <div>
+          {data.qrCodeBase64 && (
+            <div>
+              <p className="text-[10px] uppercase font-black text-[#0A856C] mb-1.5">Scan to Pay</p>
+              <img src={data.qrCodeBase64} alt="QR Code" className="w-24 h-24 border-2 border-[#7CE0C3]/50 p-1 rounded-xl" />
+            </div>
+          )}
+        </div>
+        <div className="text-right text-xs text-gray-600 flex flex-col gap-1 items-end">
+          {data.businessSettings?.bankDetails?.bankName && (
+            <div className="bg-[#F4FAF7] rounded-xl px-4 py-3 text-left border border-[#7CE0C3]/30">
+              <strong className="text-[#0A856C] text-[11px] uppercase tracking-wide">Bank Details</strong>
+              <div>Bank: {data.businessSettings.bankDetails.bankName}</div>
+              <div>A/C No: {data.businessSettings.bankDetails.accountNumber}</div>
+              <div>IFSC: {data.businessSettings.bankDetails.ifscCode}</div>
+              {data.businessSettings.bankDetails.upiId && <div>UPI ID: {data.businessSettings.bankDetails.upiId}</div>}
+            </div>
+          )}
+          {data.notes && (
+            <div className="max-w-[260px] text-right">
+              <p className="font-bold text-gray-700">{data.notesLabel || 'Notes / Terms'}</p>
+              <p className="text-gray-500">{data.notes}</p>
+            </div>
+          )}
+          <p className="text-[10px] font-bold text-[#0A856C]/60 tracking-widest uppercase mt-2">Powered by BillQyro</p>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const EmeraldEdge = ({ data }) => (
+  <div className="bg-white font-sans text-gray-800 shadow-xl w-[595px] min-h-fit mx-auto flex overflow-hidden">
+    {/* Emerald sidebar */}
+    <div className="w-44 bg-[#0A1F19] text-white px-5 py-9 flex flex-col">
+      {data.businessSettings?.logoUrl ? (
+        <img src={data.businessSettings.logoUrl} alt="Logo" className="w-full object-contain mb-4 bg-white/95 rounded-lg p-1.5" style={{ maxHeight: '52px', objectFit: 'contain' }} />
+      ) : null}
+      <h2 className="text-base font-extrabold leading-tight mb-1">{data.businessSettings?.businessName || 'Your Business'}</h2>
+      <div className="w-8 h-1 bg-[#14C79A] rounded-full mb-4" />
+      <p className="text-[11px] text-emerald-100/70 leading-relaxed break-words">{data.businessSettings?.email}</p>
+      <p className="text-[11px] text-emerald-100/70 mb-6">{data.businessSettings?.phone}</p>
+      {data.qrCodeBase64 && (
+        <div className="mt-auto">
+          <p className="text-[9px] uppercase font-black text-[#14C79A] tracking-widest mb-1.5">Scan to Pay</p>
+          <img src={data.qrCodeBase64} alt="QR Code" className="w-20 h-20 bg-white p-1 rounded-lg" />
+        </div>
+      )}
+    </div>
+
+    {/* Main content */}
+    <div className="flex-1 px-8 py-9">
+      <div className="flex justify-between items-start mb-7">
+        <div>
+          <h1 className="text-3xl font-black text-[#0A856C] tracking-tight mb-0.5">INVOICE</h1>
+          <p className="text-xs text-gray-500 font-semibold">{data.invoiceNumber} &middot; {data.date}</p>
+        </div>
+        <div className="text-right">
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Due</p>
+          <p className="text-xl font-black text-gray-900">{formatCurrency(data.totals?.totalDue ?? data.grandTotal ?? 0)}</p>
+        </div>
+      </div>
+
+      <div className="bg-[#F4FAF7] rounded-xl px-4 py-3 mb-6 border-l-4 border-[#14C79A]">
+        <p className="text-[10px] font-black text-[#0A856C] uppercase tracking-widest mb-0.5">Billed To</p>
+        <p className="font-extrabold text-sm text-gray-900">{data.customerName}</p>
+        {data.customerPhone && <p className="text-xs text-gray-600">{data.customerPhone}</p>}
+      </div>
+
+      <table className="w-full text-left mb-7 text-sm">
+        <thead>
+          <tr className="border-b-2 border-[#0A856C] text-[#0A856C]">
+            {getInvoiceColumns(data, data.businessSettings).map(col => (
+              <th key={col.id} className="py-2 px-2 font-black text-[11px] uppercase tracking-wider">{col.label}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {data.items?.map((item, i) => (
+            <tr key={i} className="border-b border-gray-100">
+              {getInvoiceColumns(data, data.businessSettings).map(col => {
+                const val = getItemValue(item, col.id, data.billType);
+                const displayVal = (col.id === 'amount' || col.id === 'rate' || col.id === 'tax' || col.id === 'discount') && val !== '' ? formatCurrency(val) : val;
+                return <td key={col.id} className={`py-2.5 px-2 text-${col.align} ${(col.id === 'amount' || col.id === 'total') ? 'font-bold' : 'text-gray-600'}`}>{displayVal}</td>;
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <div className="flex justify-end mb-6">
+        <HtmlTotalsSummary data={data} widthClass="w-64" />
+      </div>
+
+      <div className="flex justify-between items-end text-[11px]">
+        <div className="text-gray-500 max-w-[55%]">
+          {data.notes && (<><p className="font-bold text-gray-700 mb-0.5">Notes</p><p>{data.notes}</p></>)}
+        </div>
+        {data.businessSettings?.bankDetails?.bankName && (
+          <div className="text-right text-gray-600 bg-[#F4FAF7] rounded-xl px-4 py-3">
+            <strong className="text-[#0A856C] block mb-0.5">Bank Details</strong>
+            <div>{data.businessSettings.bankDetails.bankName} &middot; A/C {data.businessSettings.bankDetails.accountNumber}</div>
+            <div>IFSC: {data.businessSettings.bankDetails.ifscCode}{data.businessSettings.bankDetails.upiId ? ` &middot; UPI: ${data.businessSettings.bankDetails.upiId}` : ''}</div>
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+);
+
+const RoyalNavy = ({ data }) => (
+  <div className="bg-white font-sans text-gray-800 shadow-xl w-[595px] min-h-fit mx-auto">
+    <div className="bg-[#163169] px-10 pt-10 pb-7 text-white relative">
+      <div className="absolute left-0 bottom-0 w-full h-1.5 bg-gradient-to-r from-[#D4AF7A] via-[#F0D9A8] to-[#D4AF7A]" />
+      <div className="flex justify-between items-end">
+        <div>
+          {data.businessSettings?.logoUrl && (
+            <img src={data.businessSettings.logoUrl} alt="Logo" className="h-11 object-contain mb-3 bg-white/95 rounded-lg p-1" style={{ maxWidth: '120px', maxHeight: '44px', objectFit: 'contain' }} />
+          )}
+          <h2 className="text-xl font-extrabold tracking-tight">{data.businessSettings?.businessName || 'Your Business'}</h2>
+          <p className="text-xs text-blue-100/80 mt-0.5">{data.businessSettings?.email} {data.businessSettings?.phone ? `&middot; ${data.businessSettings.phone}` : ''}</p>
+        </div>
+        <div className="text-right">
+          <h1 className="text-3xl font-black tracking-tight text-[#D4AF7A]">INVOICE</h1>
+          <p className="text-xs text-blue-100/80 font-semibold mt-0.5">{data.invoiceNumber}</p>
+          <p className="text-xs text-blue-100/80">{data.date}</p>
+        </div>
+      </div>
+    </div>
+
+    <div className="px-10 py-8">
+      <div className="flex justify-between items-start mb-8">
+        <div className="border-l-4 border-[#D4AF7A] pl-3">
+          <p className="text-[10px] font-black text-[#163169] uppercase tracking-widest mb-1">Billed To</p>
+          <p className="font-extrabold text-gray-900 text-sm">{data.customerName}</p>
+          {data.customerPhone && <p className="text-xs text-gray-600">{data.customerPhone}</p>}
+        </div>
+        <div className="text-right">
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Total Due</p>
+          <p className="text-2xl font-black text-[#163169]">{formatCurrency(data.totals?.totalDue ?? data.grandTotal ?? 0)}</p>
+        </div>
+      </div>
+
+      <table className="w-full text-left mb-8 text-sm">
+        <thead>
+          <tr className="bg-[#EEF2FB] text-[#163169]">
+            {getInvoiceColumns(data, data.businessSettings).map(col => (
+              <th key={col.id} className="py-2.5 px-3 font-black text-[11px] uppercase tracking-wider first:rounded-l-lg last:rounded-r-lg">{col.label}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {data.items?.map((item, i) => (
+            <tr key={i} className="border-b border-[#EEF2FB]">
+              {getInvoiceColumns(data, data.businessSettings).map(col => {
+                const val = getItemValue(item, col.id, data.billType);
+                const displayVal = (col.id === 'amount' || col.id === 'rate' || col.id === 'tax' || col.id === 'discount') && val !== '' ? formatCurrency(val) : val;
+                return <td key={col.id} className={`py-3 px-3 text-${col.align} ${(col.id === 'amount' || col.id === 'total') ? 'font-bold text-gray-900' : 'text-gray-600'}`}>{displayVal}</td>;
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <div className="flex justify-end mb-8">
+        <HtmlTotalsSummary data={data} widthClass="w-64" />
+      </div>
+
+      <div className="flex justify-between items-end gap-6 border-t border-[#D4AF7A]/60 pt-5">
+        <div>
+          {data.qrCodeBase64 && (
+            <div>
+              <p className="text-[10px] uppercase font-black text-[#163169] mb-1.5">Scan to Pay</p>
+              <img src={data.qrCodeBase64} alt="QR Code" className="w-24 h-24 border border-[#D4AF7A]/50 p-1 rounded-lg" />
+            </div>
+          )}
+        </div>
+        <div className="text-right text-[11px] text-gray-600 flex flex-col gap-1 items-end">
+          {data.businessSettings?.bankDetails?.bankName && (
+            <div className="bg-[#EEF2FB] rounded-xl px-4 py-3 text-left">
+              <strong className="text-[#163169] text-[11px] uppercase tracking-wide">Bank Details</strong>
+              <div>Bank: {data.businessSettings.bankDetails.bankName}</div>
+              <div>A/C No: {data.businessSettings.bankDetails.accountNumber}</div>
+              <div>IFSC: {data.businessSettings.bankDetails.ifscCode}</div>
+              {data.businessSettings.bankDetails.upiId && <div>UPI ID: {data.businessSettings.bankDetails.upiId}</div>}
+            </div>
+          )}
+          {data.notes && <div className="max-w-[250px] text-right mt-2"><p className="font-bold text-gray-700">Notes</p><p className="text-gray-500">{data.notes}</p></div>}
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const BlushRose = ({ data }) => (
+  <div className="bg-[#FFFBFC] font-sans text-gray-800 shadow-xl w-[595px] min-h-fit mx-auto rounded-2xl overflow-hidden border border-rose-100">
+    <div className="px-10 pt-10 pb-6">
+      <div className="flex justify-between items-start">
+        <div className="flex items-center gap-3">
+          {data.businessSettings?.logoUrl ? (
+            <img src={data.businessSettings.logoUrl} alt="Logo" className="h-12 w-12 rounded-2xl object-cover border-2 border-rose-200" style={{ objectFit: 'contain' }} />
+          ) : (
+            <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-[#BE4F68] to-[#E8A0B0] flex items-center justify-center text-white font-black text-xl">
+              {(data.businessSettings?.businessName || 'B').charAt(0)}
+            </div>
+          )}
+          <div>
+            <h2 className="text-lg font-extrabold text-gray-900 leading-tight">{data.businessSettings?.businessName || 'Your Business'}</h2>
+            <p className="text-xs text-gray-500">{data.businessSettings?.email}</p>
+            <p className="text-xs text-gray-500">{data.businessSettings?.phone}</p>
+          </div>
+        </div>
+        <div className="text-right">
+          <h1 className="text-2xl font-black text-[#BE4F68] tracking-tight">Invoice</h1>
+          <p className="text-xs text-gray-500 font-semibold mt-0.5">{data.invoiceNumber}</p>
+          <p className="text-xs text-gray-400">{data.date}</p>
+        </div>
+      </div>
+    </div>
+
+    <div className="px-10">
+      <div className="bg-white rounded-2xl border border-rose-100 px-5 py-4 mb-6 flex justify-between items-center shadow-sm">
+        <div>
+          <p className="text-[10px] font-black text-[#BE4F68] uppercase tracking-widest mb-1">Billed To</p>
+          <p className="font-extrabold text-gray-900 text-sm">{data.customerName}</p>
+          {data.customerPhone && <p className="text-xs text-gray-500">{data.customerPhone}</p>}
+        </div>
+        <div className="text-right">
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Amount Due</p>
+          <p className="text-xl font-black text-[#BE4F68]">{formatCurrency(data.totals?.totalDue ?? data.grandTotal ?? 0)}</p>
+        </div>
+      </div>
+
+      <table className="w-full text-left mb-7 text-sm">
+        <thead>
+          <tr className="text-[#BE4F68]">
+            {getInvoiceColumns(data, data.businessSettings).map(col => (
+              <th key={col.id} className="py-2.5 px-3 font-black text-[11px] uppercase tracking-wider border-b-2 border-rose-200">{col.label}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {data.items?.map((item, i) => (
+            <tr key={i} className="border-b border-rose-50">
+              {getInvoiceColumns(data, data.businessSettings).map(col => {
+                const val = getItemValue(item, col.id, data.billType);
+                const displayVal = (col.id === 'amount' || col.id === 'rate' || col.id === 'tax' || col.id === 'discount') && val !== '' ? formatCurrency(val) : val;
+                return <td key={col.id} className={`py-3 px-3 text-${col.align} ${(col.id === 'amount' || col.id === 'total') ? 'font-bold text-gray-900' : 'text-gray-600'}`}>{displayVal}</td>;
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <div className="flex justify-end mb-7">
+        <HtmlTotalsSummary data={data} widthClass="w-64" />
+      </div>
+    </div>
+
+    <div className="bg-[#FFF1F5] px-10 py-6 flex justify-between items-end">
+      <div>
+        {data.qrCodeBase64 && (
+          <div>
+            <p className="text-[10px] uppercase font-black text-[#BE4F68] mb-1.5">Scan to Pay</p>
+            <img src={data.qrCodeBase64} alt="QR Code" className="w-22 h-22 w-24 h-24 bg-white border border-rose-200 p-1 rounded-xl" />
+          </div>
+        )}
+      </div>
+      <div className="text-right text-[11px] text-gray-600 flex flex-col gap-1.5 items-end">
+        {data.businessSettings?.bankDetails?.bankName && (
+          <div className="bg-white rounded-2xl px-4 py-3 text-left border border-rose-100">
+            <strong className="text-[#BE4F68] text-[10px] uppercase tracking-widest">Bank Details</strong>
+            <div>Bank: {data.businessSettings.bankDetails.bankName}</div>
+            <div>A/C No: {data.businessSettings.bankDetails.accountNumber}</div>
+            <div>IFSC: {data.businessSettings.bankDetails.ifscCode}</div>
+            {data.businessSettings.bankDetails.upiId && <div>UPI ID: {data.businessSettings.bankDetails.upiId}</div>}
+          </div>
+        )}
+        {data.notes && <div className="max-w-[240px] text-right"><p className="font-bold text-gray-700">Notes</p><p className="text-gray-500">{data.notes}</p></div>}
+      </div>
+    </div>
+  </div>
+);
+
 export const LivePreviewLayouts = {
   'minimal-classic': MinimalClassic,
   'modern-corporate': ModernCorporate,
@@ -1539,5 +1891,9 @@ export const LivePreviewLayouts = {
   'black-header-professional': BlackHeaderProfessional,
   'blue-rounded-modern': BlueRoundedModern,
   'red-corporate-clean': RedCorporateClean,
-  'clean-two-column': CleanTwoColumnModern
+  'clean-two-column': CleanTwoColumnModern,
+  'billqyro-signature': BillQyroSignature,
+  'emerald-edge': EmeraldEdge,
+  'royal-navy': RoyalNavy,
+  'blush-rose': BlushRose
 };
