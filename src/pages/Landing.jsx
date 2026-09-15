@@ -5,7 +5,7 @@ import {
   Download, Link2, Smartphone, Printer, CreditCard, ChevronDown,
   MessageCircle, Mail, MapPin, DollarSign, Clock, BarChart3, Globe,
   Zap, Lock, RefreshCw, Check, ArrowUpRight, FileSpreadsheet,
-  Layers, Landmark, Scissors, Stethoscope, GraduationCap, Wrench, ShoppingBag
+  Layers, Landmark, Scissors, Stethoscope, GraduationCap, Wrench, ShoppingBag, Languages
 } from 'lucide-react';
 import Logo from '../components/Logo';
 import Login from './Login';
@@ -15,12 +15,27 @@ import ScrollReveal from '../components/ScrollReveal';
 import AnimatedNumber from '../components/AnimatedNumber';
 import { AnimatedThemeToggler } from '../components/AnimatedThemeToggler';
 
+// ── WhatsApp business number for the landing CTA ──────────────────────────
+// ⚠️ এখানে তোমার নিজের WhatsApp নম্বর বসাও (country code সহ, '+' ছাড়া)।
+// যেমন: ভারতের ৯৮৩০০ ০০০০০ নম্বরের জন্য '919830000000'
+const WHATSAPP_NUMBER = '910000000000';
+
 const Landing = ({ onLoginSuccess }) => {
   const [faqOpen, setFaqOpen] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [portalMode, setPortalMode] = useState('business'); // 'business' | 'customer'
   const [activePreviewTab, setActivePreviewTab] = useState('dashboard');
+  // ── Bilingual support (English / বাংলা) ──────────────────────────────────
+  const [lang, setLang] = useState(() => {
+    try { return localStorage.getItem('billqyro_landing_lang') === 'bn' ? 'bn' : 'en'; } catch { return 'en'; }
+  });
+  const tr = (en, bn) => (lang === 'bn' ? bn : en);
+  const toggleLang = () => {
+    const next = lang === 'bn' ? 'en' : 'bn';
+    setLang(next);
+    try { localStorage.setItem('billqyro_landing_lang', next); } catch { /* ignore */ }
+  };
 
   // Launch the full interactive demo journey (sandbox data, no signup needed).
   // Mirrors the flag sequence used by the admin Owner Test Lab so App.jsx
@@ -65,89 +80,89 @@ const Landing = ({ onLoginSuccess }) => {
   const businessCategories = [
     {
       id: 'retail',
-      name: 'Retail & Supermarket',
+      name: tr('Retail & Supermarket', 'রিটেইল ও সুপারমার্কেট'),
       icon: ShoppingBag,
-      tag: 'Inventory & POS',
-      desc: 'Barcode scanning, product variants, real-time stock alert thresholds, and rapid itemized billing.',
-      highlight: 'Auto-decrementing inventory & GST/VAT breakdowns'
+      tag: tr('Inventory & POS', 'ইনভেন্টরি ও POS'),
+      desc: tr('Barcode scanning, product variants, real-time stock alert thresholds, and rapid itemized billing.', 'বারকোড স্ক্যানিং, প্রোডাক্ট ভ্যারিয়েন্ট, রিয়েল-টাইম স্টক অ্যালার্ট আর দ্রুত আইটেমাইজড বিলিং।'),
+      highlight: tr('Auto-decrementing inventory & GST/VAT breakdowns', 'অটো-কমতে ইনভেন্টরি ও GST/VAT বিশ্লেষণ')
     },
     {
       id: 'tailor',
-      name: 'Tailoring & Boutiques',
+      name: tr('Tailoring & Boutiques', 'টেইলারিং ও বুটিক'),
       icon: Scissors,
-      tag: 'Custom Orders',
-      desc: 'Custom measurements, cloth swatch tracking, stitching stages, delivery dates, and advance payment logging.',
-      highlight: 'Order status lifecycle & measurement cards'
+      tag: tr('Custom Orders', 'কাস্টম অর্ডার'),
+      desc: tr('Custom measurements, cloth swatch tracking, stitching stages, delivery dates, and advance payment logging.', 'কাস্টম মাপ, কাপড়ের নমুনা ট্র্যাকিং, সেলাইয়ের ধাপ, ডেলিভারির তারিখ আর অ্যাডভান্স পেমেন্টের হিসাব।'),
+      highlight: tr('Order status lifecycle & measurement cards', 'অর্ডার স্টেটাস লাইফসাইকেল ও মাপের কার্ড')
     },
     {
       id: 'clinic',
-      name: 'Clinics & Healthcare',
+      name: tr('Clinics & Healthcare', 'ক্লিনিক ও হেলথকেয়ার'),
       icon: Stethoscope,
-      tag: 'Patient CRM',
-      desc: 'Patient history records, consultation fees, prescription attachments, and automated follow-up dues.',
-      highlight: 'Clinical disclaimer headers & patient ledger'
+      tag: tr('Patient CRM', 'পেশেন্ট CRM'),
+      desc: tr('Patient history records, consultation fees, prescription attachments, and automated follow-up dues.', 'রোগীর ইতিহাস, কনসালটেশন ফি, প্রেসক্রিপশন অ্যাটাচমেন্ট আর অটোমেটিক ফলো-আপ বাকি।'),
+      highlight: tr('Clinical disclaimer headers & patient ledger', 'ক্লিনিকাল ডিসক্লেইমার হেডার ও পেশেন্ট লেজার')
     },
     {
       id: 'repair',
-      name: 'Repair & Electronics',
+      name: tr('Repair & Electronics', 'রিপেয়ার ও ইলেকট্রনিক্স'),
       icon: Wrench,
-      tag: 'Service Jobs',
-      desc: 'Job-sheet numbers, problem diagnostics, replacement parts billing, labour estimates, and service warranty tracking.',
-      highlight: 'Job-sheet lifecycle & parts breakdown'
+      tag: tr('Service Jobs', 'সার্ভিস জব'),
+      desc: tr('Job-sheet numbers, problem diagnostics, replacement parts billing, labour estimates, and service warranty tracking.', 'জব-শিট নম্বর, সমস্যার ডায়াগনোসিস, পার্টস বিলিং, লেবার এস্টিমেট আর ওয়ারেন্টি ট্র্যাকিং।'),
+      highlight: tr('Job-sheet lifecycle & parts breakdown', 'জব-শিট লাইফসাইকেল ও পার্টস ব্রেকডাউন')
     },
     {
       id: 'education',
-      name: 'Coaching & Education',
+      name: tr('Coaching & Education', 'কোচিং ও শিক্ষা'),
       icon: GraduationCap,
-      tag: 'Fee Management',
-      desc: 'Batch tracking, monthly tuition fee schedules, student admission records, and parent payment receipts.',
-      highlight: 'Monthly fee dues & student directory'
+      tag: tr('Fee Management', 'ফি ম্যানেজমেন্ট'),
+      desc: tr('Batch tracking, monthly tuition fee schedules, student admission records, and parent payment receipts.', 'ব্যাচ ট্র্যাকিং, মাসিক টিউশন ফি, শিক্ষার্থীর ভর্তির রেকর্ড আর অভিভাবকের পেমেন্ট রসিদ।'),
+      highlight: tr('Monthly fee dues & student directory', 'মাসিক ফি বাকি ও শিক্ষার্থী ডিরেক্টরি')
     }
   ];
 
   const workflowSteps = [
     {
       step: '01',
-      title: 'Create & Itemize',
-      desc: 'Add items in seconds with auto-complete product catalog, dynamic discounts, and regional tax computations.'
+      title: tr('Create & Itemize', 'তৈরি ও আইটেম যোগ'),
+      desc: tr('Add items in seconds with auto-complete product catalog, dynamic discounts, and regional tax computations.', 'অটো-কমপ্লিট প্রোডাক্ট ক্যাটালগ, ডাইনামিক ডিসকাউন্ট আর রিজিওনাল ট্যাক্স হিসাব দিয়ে সেকেন্ডেই আইটেম যোগ করুন।')
     },
     {
       step: '02',
-      title: 'Instant Live Link / PDF',
-      desc: 'Generate pixel-perfect A4/A5 PDF documents and shareable encrypted web links for client self-service.'
+      title: tr('Instant Live Link / PDF', 'সাথে সাথে লাইভ লিংক / PDF'),
+      desc: tr('Generate pixel-perfect A4/A5 PDF documents and shareable encrypted web links for client self-service.', 'নিখুঁত A4/A5 PDF আর শেয়ারযোগ্য এনক্রিপ্টেড ওয়েব লিংক তৈরি করুন — কাস্টমার নিজেই দেখে নিতে পারবে।')
     },
     {
       step: '03',
-      title: 'Collect Payment via UPI / QR',
-      desc: 'Clients scan dynamic QR codes, submit digital transaction proof, or pay on delivery with real-time feedback.'
+      title: tr('Collect Payment via UPI / QR', 'UPI / QR-এ পেমেন্ট আদায়'),
+      desc: tr('Clients scan dynamic QR codes, submit digital transaction proof, or pay on delivery with real-time feedback.', 'কাস্টমার QR স্ক্যান করে টাকা পাঠায়, ডিজিটাল প্রমাণ জমা দেয় — সবকিছুর রিয়েল-টাইম আপডেট পাবেন।')
     },
     {
       step: '04',
-      title: 'Reconciliation & Ledger',
-      desc: 'One-click proof approval automatically updates Customer Ledger, Cash Book, and Executive Dashboard.'
+      title: tr('Reconciliation & Ledger', 'রিকনসিলিয়েশন ও লেজার'),
+      desc: tr('One-click proof approval automatically updates Customer Ledger, Cash Book, and Executive Dashboard.', 'এক ক্লিকে প্রমাণ অনুমোদন করলেই কাস্টমার লেজার, ক্যাশ বুক আর ড্যাশবোর্ড নিজে থেকেই আপডেট হয়ে যায়।')
     }
   ];
 
   const faqs = [
     {
-      q: 'How does BillQyro operate offline?',
-      a: 'BillQyro utilizes an IndexedDB local-first architecture. You can generate invoices, look up customer balances, and create estimates without an active internet connection. As soon as you reconnect, changes synchronize bidirectionally with Firebase.'
+      q: tr('How does BillQyro operate offline?', 'BillQyro অফলাইনে কীভাবে চলে?'),
+      a: tr('BillQyro utilizes an IndexedDB local-first architecture. You can generate invoices, look up customer balances, and create estimates without an active internet connection. As soon as you reconnect, changes synchronize bidirectionally with Firebase.', 'BillQyro ব্যবহার করে IndexedDB লোকাল-ফার্স্ট আর্কিটেকচার। ইন্টারনেট ছাড়াই ইনভয়েস তৈরি, কাস্টমারের ব্যালেন্স দেখা আর এস্টিমেট বানানো যায়। নেটওয়ার্ক ফিরলেই সব পরিবর্তন Firebase-এর সাথে দুই দিকে সিঙ্ক হয়ে যায়।')
     },
     {
-      q: 'Is multi-workspace data isolated securely?',
-      a: 'Yes. Every workspace operates in a strictly segregated sandbox. Invoices, customers, bank transactions, and reports are partitioned by workspace ID and authenticated credentials with server-side security rules.'
+      q: tr('Is multi-workspace data isolated securely?', 'মাল্টি-ওয়ার্কস্পেসের ডেটা কি নিরাপদে আলাদা থাকে?'),
+      a: tr('Yes. Every workspace operates in a strictly segregated sandbox. Invoices, customers, bank transactions, and reports are partitioned by workspace ID and authenticated credentials with server-side security rules.', 'হ্যাঁ। প্রতিটি ওয়ার্কস্পেস সম্পূর্ণ আলাদা স্যান্ডবক্সে চলে। ইনভয়েস, কাস্টমার, ব্যাংক লেনদেন আর রিপোর্ট — সব ওয়ার্কস্পেস আইডি ও অথেনটিকেশন অনুযায়ী সার্ভার-সাইড নিয়মে পৃথক থাকে।')
     },
     {
-      q: 'Can customers view and pay invoices without creating an account?',
-      a: 'Yes. Each invoice comes with a secure, unique Live Link. Customers can open the link in any mobile or desktop browser to view invoice line items, scan payment QR codes, and upload transaction proof directly.'
+      q: tr('Can customers view and pay invoices without creating an account?', 'কাস্টমার কি অ্যাকাউন্ট খুলে না ইনভয়েস দেখতে ও টাকা দিতে পারে?'),
+      a: tr('Yes. Each invoice comes with a secure, unique Live Link. Customers can open the link in any mobile or desktop browser to view invoice line items, scan payment QR codes, and upload transaction proof directly.', 'হ্যাঁ। প্রতিটি ইনভয়েসের সাথে একটা নিরাপদ, ইউনিক লাইভ লিংক থাকে। কাস্টমার যেকোনো ব্রাউজারে লিংকটা খুলে ইনভয়েস দেখতে পারে, QR স্ক্যান করে টাকা দিতে পারে, সরাসরি লেনদেনের প্রমাণও আপলোড করতে পারে।')
     },
     {
-      q: 'How are old dues and balances calculated?',
-      a: 'BillQyro enforces canonical mathematical invariants across all screens: Balance Due = max(0, Old Due + Current Invoice - Paid Now). Lifetime customer dues and dashboard totals stay 100% consistent.'
+      q: tr('How are old dues and balances calculated?', 'পুরনো বাকি ও ব্যালেন্স কীভাবে হিসাব হয়?'),
+      a: tr('BillQyro enforces canonical mathematical invariants across all screens: Balance Due = max(0, Old Due + Current Invoice - Paid Now). Lifetime customer dues and dashboard totals stay 100% consistent.', 'সব স্ক্রিনে BillQyro একটাই অটল গাণিতিক নিয়ম মানে: বাকি = max(0, পুরনো বাকি + বর্তমান বিল − এখন প্রদত্ত)। কাস্টমারের লাইফটাইম বাকি আর ড্যাশবোর্ডের টোটাল সবসময় ১০০% মিলে থাকে।')
     },
     {
-      q: 'Can I export reports and financial statements?',
-      a: 'Yes. Export Sales Summaries, Profit & Loss Statements, Due Ledgers, Inventory Valuation Reports, and Customer Statements into structured Excel spreadsheets or PDF archives at any time.'
+      q: tr('Can I export reports and financial statements?', 'রিপোর্ট ও আর্থিক বিবরণী কি এক্সপোর্ট করা যায়?'),
+      a: tr('Yes. Export Sales Summaries, Profit & Loss Statements, Due Ledgers, Inventory Valuation Reports, and Customer Statements into structured Excel spreadsheets or PDF archives at any time.', 'হ্যাঁ। সেলস সামারি, লাভ-ক্ষতি বিবরণী, বাকির লেজার, ইনভেন্টরি ভ্যালুয়েশন আর কাস্টমার স্টেটমেন্ট — যেকোনো সময় সুবিন্যস্ত Excel বা PDF আকারে এক্সপোর্ট করুন।')
     }
   ];
 
@@ -167,31 +182,40 @@ const Landing = ({ onLoginSuccess }) => {
 
           {/* Desktop Nav Links */}
           <div className="hidden lg:flex items-center gap-7">
-            <button onClick={() => scrollTo('preview')} className="text-[13px] font-semibold text-theme-muted hover:text-theme-primary transition-colors">Platform</button>
-            <button onClick={() => scrollTo('why-billqyro')} className="text-[13px] font-semibold text-theme-muted hover:text-theme-primary transition-colors">Why BillQyro</button>
-            <button onClick={() => scrollTo('categories')} className="text-[13px] font-semibold text-theme-muted hover:text-theme-primary transition-colors">Categories</button>
-            <button onClick={() => scrollTo('workflow')} className="text-[13px] font-semibold text-theme-muted hover:text-theme-primary transition-colors">Workflow</button>
-            <button onClick={() => scrollTo('payments')} className="text-[13px] font-semibold text-theme-muted hover:text-theme-primary transition-colors">Payments</button>
-            <button onClick={() => scrollTo('offline-security')} className="text-[13px] font-semibold text-theme-muted hover:text-theme-primary transition-colors">Security</button>
-            <button onClick={() => scrollTo('faq')} className="text-[13px] font-semibold text-theme-muted hover:text-theme-primary transition-colors">FAQ</button>
+            <button onClick={() => scrollTo('preview')} className="text-[13px] font-semibold text-theme-muted hover:text-theme-primary transition-colors">{tr('Platform', 'প্ল্যাটফর্ম')}</button>
+            <button onClick={() => scrollTo('why-billqyro')} className="text-[13px] font-semibold text-theme-muted hover:text-theme-primary transition-colors">{tr('Why BillQyro', 'কেন BillQyro')}</button>
+            <button onClick={() => scrollTo('categories')} className="text-[13px] font-semibold text-theme-muted hover:text-theme-primary transition-colors">{tr('Categories', 'ক্যাটাগরি')}</button>
+            <button onClick={() => scrollTo('workflow')} className="text-[13px] font-semibold text-theme-muted hover:text-theme-primary transition-colors">{tr('Workflow', 'ওয়ার্কফ্লো')}</button>
+            <button onClick={() => scrollTo('payments')} className="text-[13px] font-semibold text-theme-muted hover:text-theme-primary transition-colors">{tr('Payments', 'পেমেন্ট')}</button>
+            <button onClick={() => scrollTo('offline-security')} className="text-[13px] font-semibold text-theme-muted hover:text-theme-primary transition-colors">{tr('Security', 'নিরাপত্তা')}</button>
+            <button onClick={() => scrollTo('faq')} className="text-[13px] font-semibold text-theme-muted hover:text-theme-primary transition-colors">{tr('FAQ', 'সাধারণ প্রশ্ন')}</button>
           </div>
 
           <div className="flex items-center gap-3">
             <button onClick={() => scrollTo('login')} className="text-[13px] font-semibold text-theme-muted hover:text-theme-primary transition-colors hidden sm:block">
-              Sign In
+              {tr('Sign In', 'সাইন ইন')}
             </button>
             <a
               href="/BillQyro-Setup.exe"
               download
               className="hidden md:flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-theme-border-soft hover:bg-theme-surface hover:text-theme-primary text-theme-muted text-xs font-bold transition-all"
             >
-              <Download className="w-3.5 h-3.5" /> Desktop App
+              <Download className="w-3.5 h-3.5" /> {tr('Desktop App', 'ডেস্কটপ অ্যাপ')}
             </a>
             <button
               onClick={() => scrollTo('login')}
               className="btn-premium px-5 py-2 text-xs font-bold shadow-theme-glow"
             >
-              Get Started Free
+              {tr('Get Started Free', 'ফ্রি শুরু করুন')}
+            </button>
+            <button
+              onClick={toggleLang}
+              title={lang === 'bn' ? 'Switch to English' : 'বাংলায় দেখুন'}
+              aria-label="Toggle language"
+              className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border border-theme-border-soft text-theme-muted hover:text-theme-primary hover:bg-theme-surface text-[11px] font-black transition-all cursor-pointer"
+            >
+              <Languages className="w-3.5 h-3.5" />
+              {lang === 'bn' ? 'EN' : 'বাং'}
             </button>
             <AnimatedThemeToggler />
 
@@ -215,14 +239,17 @@ const Landing = ({ onLoginSuccess }) => {
             animate={{ opacity: 1, y: 0 }}
             className="absolute top-20 left-4 right-4 bg-theme-card border border-theme-border-soft rounded-2xl p-5 shadow-2xl space-y-3 z-50 backdrop-blur-2xl"
           >
-            <button onClick={() => scrollTo('preview')} className="block w-full text-left text-sm font-bold text-theme-primary py-2 border-b border-theme-border-soft/40">Platform Preview</button>
-            <button onClick={() => scrollTo('why-billqyro')} className="block w-full text-left text-sm font-bold text-theme-primary py-2 border-b border-theme-border-soft/40">Why BillQyro</button>
-            <button onClick={() => scrollTo('categories')} className="block w-full text-left text-sm font-bold text-theme-primary py-2 border-b border-theme-border-soft/40">Business Categories</button>
-            <button onClick={() => scrollTo('workflow')} className="block w-full text-left text-sm font-bold text-theme-primary py-2 border-b border-theme-border-soft/40">Invoice Workflow</button>
-            <button onClick={() => scrollTo('payments')} className="block w-full text-left text-sm font-bold text-theme-primary py-2 border-b border-theme-border-soft/40">Payment Collections</button>
-            <button onClick={() => scrollTo('offline-security')} className="block w-full text-left text-sm font-bold text-theme-primary py-2 border-b border-theme-border-soft/40">Security & Offline</button>
-            <button onClick={() => scrollTo('faq')} className="block w-full text-left text-sm font-bold text-theme-primary py-2 border-b border-theme-border-soft/40">FAQ</button>
-            <button onClick={() => scrollTo('login')} className="w-full btn-premium py-2.5 text-sm mt-2">Sign In / Register</button>
+            <button onClick={toggleLang} className="w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-theme-surface border border-theme-border-soft text-xs font-black text-theme-accent">
+              <Languages className="w-3.5 h-3.5" /> {lang === 'bn' ? 'Switch to English' : 'বাংলায় দেখুন'}
+            </button>
+            <button onClick={() => scrollTo('preview')} className="block w-full text-left text-sm font-bold text-theme-primary py-2 border-b border-theme-border-soft/40">{tr('Platform Preview', 'প্ল্যাটফর্ম প্রিভিউ')}</button>
+            <button onClick={() => scrollTo('why-billqyro')} className="block w-full text-left text-sm font-bold text-theme-primary py-2 border-b border-theme-border-soft/40">{tr('Why BillQyro', 'কেন BillQyro')}</button>
+            <button onClick={() => scrollTo('categories')} className="block w-full text-left text-sm font-bold text-theme-primary py-2 border-b border-theme-border-soft/40">{tr('Business Categories', 'বিজনেস ক্যাটাগরি')}</button>
+            <button onClick={() => scrollTo('workflow')} className="block w-full text-left text-sm font-bold text-theme-primary py-2 border-b border-theme-border-soft/40">{tr('Invoice Workflow', 'ইনভয়েস ওয়ার্কফ্লো')}</button>
+            <button onClick={() => scrollTo('payments')} className="block w-full text-left text-sm font-bold text-theme-primary py-2 border-b border-theme-border-soft/40">{tr('Payment Collections', 'পেমেন্ট কালেকশন')}</button>
+            <button onClick={() => scrollTo('offline-security')} className="block w-full text-left text-sm font-bold text-theme-primary py-2 border-b border-theme-border-soft/40">{tr('Security & Offline', 'নিরাপত্তা ও অফলাইন')}</button>
+            <button onClick={() => scrollTo('faq')} className="block w-full text-left text-sm font-bold text-theme-primary py-2 border-b border-theme-border-soft/40">{tr('FAQ', 'সাধারণ প্রশ্ন')}</button>
+            <button onClick={() => scrollTo('login')} className="w-full btn-premium py-2.5 text-sm mt-2">{tr('Sign In / Register', 'সাইন ইন / রেজিস্টার')}</button>
           </motion.div>
         )}
       </nav>
@@ -238,7 +265,7 @@ const Landing = ({ onLoginSuccess }) => {
             >
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               <span className="text-[11px] font-extrabold uppercase tracking-widest text-theme-secondary">
-                BILLQYRO SIGNATURE · OFFICIAL EMERALD STANDARD
+                {tr('BILLQYRO SIGNATURE · OFFICIAL EMERALD STANDARD', 'BILLQYRO সিগনেচার · অফিসিয়াল এমারল্ড স্ট্যান্ডার্ড')}
               </span>
             </motion.div>
 
@@ -248,9 +275,9 @@ const Landing = ({ onLoginSuccess }) => {
               transition={{ delay: 0.1 }}
               className="text-4xl sm:text-5xl lg:text-[4.7rem] font-black tracking-[-0.045em] text-theme-primary leading-[1.02] max-w-3xl"
             >
-              Smart Billing. <br />
+              {tr('Smart Billing.', 'স্মার্ট বিলিং।')} <br />
               <span className="text-transparent bg-clip-text bg-[image:var(--accent-gradient)] bq-shimmer-text">
-                Premium Invoicing Platform.
+                {tr('Premium Invoicing Platform.', 'প্রিমিয়াম ইনভয়েসিং প্ল্যাটফর্ম।')}
               </span>
             </motion.h1>
 
@@ -260,7 +287,7 @@ const Landing = ({ onLoginSuccess }) => {
               transition={{ delay: 0.2 }}
               className="text-base sm:text-lg text-theme-muted max-w-xl mx-auto lg:mx-0 font-medium leading-relaxed"
             >
-              A premium billing command center for modern businesses. Create beautiful invoices, collect faster, manage customer dues, and keep working even when the network disappears.
+              {tr('A premium billing command center for modern businesses. Create beautiful invoices, collect faster, manage customer dues, and keep working even when the network disappears.', 'আধুনিক ব্যবসার জন্য প্রিমিয়াম বিলিং কমান্ড সেন্টার। সুন্দর ইনভয়েস তৈরি করুন, দ্রুত টাকা আদায় করুন, কাস্টমারের বাকি ম্যানেজ করুন — নেটওয়ার্ক চলে গেলেও কাজ থেমে থাকবে না।')}
             </motion.p>
 
             <motion.div
@@ -273,14 +300,14 @@ const Landing = ({ onLoginSuccess }) => {
                 onClick={() => scrollTo('login')}
                 className="btn-premium px-8 py-3.5 text-base font-bold shadow-lg shadow-theme-glow flex items-center justify-center gap-2 w-full sm:w-auto"
               >
-                Create Free Account
+                {tr('Create Free Account', 'ফ্রি অ্যাকাউন্ট খুলুন')}
                 <ArrowRight className="w-4 h-4" />
               </button>
               <button
                 onClick={() => scrollTo('preview')}
                 className="btn-premium-outline px-6 py-3.5 text-base font-bold w-full sm:w-auto flex items-center justify-center gap-2"
               >
-                Explore Platform
+                {tr('Explore Platform', 'প্ল্যাটফর্ম দেখুন')}
               </button>
               <button
                 onClick={launchLiveDemo}
@@ -288,7 +315,7 @@ const Landing = ({ onLoginSuccess }) => {
                 title="Explore the full platform with sample data — no signup required"
               >
                 <Zap className="w-4 h-4" />
-                Try Live Demo
+                {tr('Try Live Demo', 'লাইভ ডেমো দেখুন')}
               </button>
             </motion.div>
 
@@ -299,7 +326,7 @@ const Landing = ({ onLoginSuccess }) => {
               className="text-[11px] font-semibold text-theme-muted flex items-center gap-1.5 justify-center lg:justify-start"
             >
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-              Free forever plan · No credit card · Works offline
+              {tr('Free forever plan · No credit card · Works offline', 'চিরকাল ফ্রি প্ল্যান · ক্রেডিট কার্ড লাগবে না · অফলাইনেও চলে')}
             </motion.p>
 
             <motion.div
@@ -308,9 +335,9 @@ const Landing = ({ onLoginSuccess }) => {
               transition={{ delay: 0.4 }}
               className="pt-2 flex flex-wrap items-center gap-5 justify-center lg:justify-start text-theme-muted text-xs font-bold"
             >
-              <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-500" /> Offline-Ready PWA</span>
-              <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-500" /> Multi-Workspace</span>
-              <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-500" /> Real-time Sync</span>
+              <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-500" /> {tr('Offline-Ready PWA', 'অফলাইন-রেডি PWA')}</span>
+              <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-500" /> {tr('Multi-Workspace', 'মাল্টি-ওয়ার্কস্পেস')}</span>
+              <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-500" /> {tr('Real-time Sync', 'রিয়েল-টাইম সিঙ্ক')}</span>
             </motion.div>
           </div>
 
@@ -406,12 +433,12 @@ const Landing = ({ onLoginSuccess }) => {
                   <Sparkles className="w-5 h-5 text-theme-accent" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-theme-accent">Official BillQyro Brand System</p>
-                  <p className="text-xs sm:text-sm font-bold text-theme-primary mt-0.5">Signature Emerald · Financial clarity with a premium edge</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-theme-accent">{tr('Official BillQyro Brand System','অফিসিয়াল BillQyro ব্র্যান্ড সিস্টেম')}</p>
+                  <p className="text-xs sm:text-sm font-bold text-theme-primary mt-0.5">{tr('Signature Emerald · Financial clarity with a premium edge','সিগনেচার এমারল্ড · প্রিমিয়াম ছোঁয়ায় আর্থিক স্বচ্ছতা')}</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 w-full lg:w-auto">
-                <span className="brand-proof-pill">Local-first</span><span className="brand-proof-pill">Live links</span><span className="brand-proof-pill">Secure sync</span><span className="brand-proof-pill">Premium PDFs</span>
+                <span className="brand-proof-pill">{tr('Local-first','লোকাল-ফার্স্ট')}</span><span className="brand-proof-pill">{tr('Live links','লাইভ লিংক')}</span><span className="brand-proof-pill">{tr('Secure sync','সিকিউর সিঙ্ক')}</span><span className="brand-proof-pill">{tr('Premium PDFs','প্রিমিয়াম PDF')}</span>
               </div>
             </div>
           </div>
@@ -425,7 +452,7 @@ const Landing = ({ onLoginSuccess }) => {
             <div className="bq-marquee-track gap-3 pr-3">
               {[0, 1].map((dup) => (
                 <div key={dup} className="flex items-center gap-3 pr-3" aria-hidden={dup === 1}>
-                  {['Tailoring & Boutiques', 'Retail & Supermarkets', 'Clinics & Healthcare', 'Repair & Electronics', 'Coaching & Education', 'Embroidery Studios', 'Cyber Cafes', 'Salons & Parlours', 'Wholesale Trading', 'Freelancers'].map((cat) => (
+                  {[tr('Tailoring & Boutiques','টেইলারিং ও বুটিক'), tr('Retail & Supermarkets','রিটেইল ও সুপারমার্কেট'), tr('Clinics & Healthcare','ক্লিনিক ও হেলথকেয়ার'), tr('Repair & Electronics','রিপেয়ার ও ইলেকট্রনিক্স'), tr('Coaching & Education','কোচিং ও শিক্ষা'), tr('Embroidery Studios','এমব্রয়ডারি স্টুডিও'), tr('Cyber Cafes','সাইবার ক্যাফে'), tr('Salons & Parlours','সেলুন ও পার্লার'), tr('Wholesale Trading','হোলসেল ট্রেডিং'), tr('Freelancers','ফ্রিল্যান্সার')].map((cat) => (
                     <span key={cat + dup} className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-theme-border-soft bg-theme-card px-4 py-1.5 text-[11px] font-black text-theme-secondary tracking-wide">
                       <Sparkles className="w-3 h-3 text-theme-accent" />
                       {cat}
@@ -444,13 +471,13 @@ const Landing = ({ onLoginSuccess }) => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-2xl mx-auto mb-12">
             <span className="text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-3.5 py-1 rounded-full border border-theme-accent/20">
-              Interactive Product Architecture
+              {tr('Interactive Product Architecture', 'ইন্টারঅ্যাক্টিভ প্রোডাক্ট আর্কিটেকচার')}
             </span>
             <h2 className="text-3xl sm:text-4xl font-black text-theme-primary tracking-tight mt-3">
-              Purpose-Built for Financial Clarity
+              {tr('Purpose-Built for Financial Clarity', 'আর্থিক স্বচ্ছতার জন্য বিশেষভাবে তৈরি')}
             </h2>
             <p className="text-sm text-theme-muted font-medium mt-2">
-              Inspect key workflows across our unified billing platform.
+              {tr('Inspect key workflows across our unified billing platform.', 'আমাদের একীভূত বিলিং প্ল্যাটফর্মের গুরুত্বপূর্ণ ওয়ার্কফ্লোগুলো দেখে নিন।')}
             </p>
 
             {/* Preview Navigation Tabs */}
@@ -482,7 +509,7 @@ const Landing = ({ onLoginSuccess }) => {
               <div className="space-y-6">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-theme-border-soft">
                   <div>
-                    <h3 className="text-lg font-black text-theme-primary">Executive Summary & Cash Position</h3>
+                    <h3 className="text-lg font-black text-theme-primary">{tr('Executive Summary & Cash Position','এক্সিকিউটিভ সামারি ও ক্যাশ পজিশন')}</h3>
                     <p className="text-xs text-theme-muted">Real-time ledger updates across all active workspaces</p>
                   </div>
                   <span className="text-[11px] font-bold text-theme-secondary bg-theme-surface px-3 py-1 rounded-lg border border-theme-border-soft">
@@ -517,7 +544,7 @@ const Landing = ({ onLoginSuccess }) => {
             {activePreviewTab === 'invoice-studio' && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
-                  <h3 className="text-base font-black text-theme-primary">Invoice Studio Builder</h3>
+                  <h3 className="text-base font-black text-theme-primary">{tr('Invoice Studio Builder','ইনভয়েস স্টুডিও বিল্ডার')}</h3>
                   <div className="bg-theme-surface p-3.5 rounded-xl border border-theme-border-soft text-xs space-y-2">
                     <div className="flex justify-between font-bold text-theme-muted">
                       <span>Item</span>
@@ -554,7 +581,7 @@ const Landing = ({ onLoginSuccess }) => {
               <div className="space-y-4">
                 <div className="flex justify-between items-center pb-3 border-b border-theme-border-soft">
                   <div>
-                    <h3 className="text-base font-black text-theme-primary">Customer 360 & Lifetime Ledger</h3>
+                    <h3 className="text-base font-black text-theme-primary">{tr('Customer 360 & Lifetime Ledger','কাস্টমার ৩৬০ ও লাইফটাইম লেজার')}</h3>
                     <p className="text-xs text-theme-muted">Rahim Enterprises · Account ID: #CUST-9104</p>
                   </div>
                   <span className="px-3 py-1 rounded-full text-xs font-black bg-amber-500/15 text-amber-500 border border-amber-500/30">
@@ -582,7 +609,7 @@ const Landing = ({ onLoginSuccess }) => {
               <div className="space-y-4">
                 <div className="flex justify-between items-center pb-3 border-b border-theme-border-soft">
                   <div>
-                    <h3 className="text-base font-black text-theme-primary">Internal Treasury & Cash Book</h3>
+                    <h3 className="text-base font-black text-theme-primary">{tr('Internal Treasury & Cash Book','ইন্টারনাল ট্রেজারি ও ক্যাশ বুক')}</h3>
                     <p className="text-xs text-theme-muted">Real-time debit/credit transaction record</p>
                   </div>
                   <span className="px-3 py-1 rounded-full text-xs font-black bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 font-numbers">
@@ -619,15 +646,15 @@ const Landing = ({ onLoginSuccess }) => {
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-[0.9fr_1.1fr] gap-12 lg:gap-20 items-start">
             <div className="lg:sticky lg:top-28">
-              <span className="text-[10px] font-black uppercase tracking-[0.24em] text-theme-accent">The BillQyro Difference</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.24em] text-theme-accent">{tr('The BillQyro Difference','BillQyro-এর পার্থক্য')}</span>
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-theme-primary leading-[1.05] mt-4">
-                One system for the work that happens after the sale.
+                {tr('One system for the work that happens after the sale.', 'বিক্রির পরের সব কাজের জন্য একটাই সিস্টেম।')}
               </h2>
               <p className="text-sm sm:text-base text-theme-muted font-medium leading-relaxed mt-5 max-w-lg">
-                Billing is only the beginning. BillQyro connects invoices, payments, customer balances, live links, reports and workspace controls into one disciplined operating layer.
+                {tr('Billing is only the beginning. BillQyro connects invoices, payments, customer balances, live links, reports and workspace controls into one disciplined operating layer.','বিলিং তো শুধু শুরু। BillQyro ইনভয়েস, পেমেন্ট, কাস্টমার ব্যালেন্স, লাইভ লিংক, রিপোর্ট আর ওয়ার্কস্পেস কন্ট্রোল — সব জুড়ে দেয় একটা সুশৃঙ্খল অপারেটিং লেয়ারে।')}
               </p>
               <button onClick={() => scrollTo('preview')} className="mt-7 inline-flex items-center gap-2 text-xs font-black text-theme-accent hover:gap-3 transition-all">
-                See the platform in action <ArrowRight className="w-4 h-4" />
+                {tr('See the platform in action', 'প্ল্যাটফর্মটি লাইভ দেখুন')} <ArrowRight className="w-4 h-4" />
               </button>
             </div>
 
@@ -635,25 +662,25 @@ const Landing = ({ onLoginSuccess }) => {
               <div className="billqyro-luxury-card p-6 rounded-3xl border border-theme-accent/15 bg-theme-card/80 backdrop-blur-xl">
                 <div className="w-11 h-11 rounded-2xl bg-theme-accent-light text-theme-accent flex items-center justify-center mb-5"><Zap className="w-5 h-5" /></div>
                 <p className="text-[10px] font-black uppercase tracking-widest text-theme-accent">01 · Speed</p>
-                <h3 className="text-lg font-black text-theme-primary mt-2">Fast enough for the counter</h3>
+                <h3 className="text-lg font-black text-theme-primary mt-2">{tr('Fast enough for the counter','কাউন্টারের গতিতে দ্রুত')}</h3>
                 <p className="text-xs text-theme-muted leading-relaxed mt-2">Optimistic local saves and focused workflows keep everyday billing responsive instead of form-heavy.</p>
               </div>
               <div className="billqyro-luxury-card p-6 rounded-3xl border border-theme-accent/15 bg-theme-card/80 backdrop-blur-xl">
                 <div className="w-11 h-11 rounded-2xl bg-theme-accent-light text-theme-accent flex items-center justify-center mb-5"><Layers className="w-5 h-5" /></div>
                 <p className="text-[10px] font-black uppercase tracking-widest text-theme-accent">02 · Control</p>
-                <h3 className="text-lg font-black text-theme-primary mt-2">Everything stays connected</h3>
+                <h3 className="text-lg font-black text-theme-primary mt-2">{tr('Everything stays connected','সবকিছু একসাথে যুক্ত')}</h3>
                 <p className="text-xs text-theme-muted leading-relaxed mt-2">Invoice totals, payments, customer dues and reporting are designed around the same financial source of truth.</p>
               </div>
               <div className="billqyro-luxury-card p-6 rounded-3xl border border-theme-accent/15 bg-theme-card/80 backdrop-blur-xl">
                 <div className="w-11 h-11 rounded-2xl bg-theme-accent-light text-theme-accent flex items-center justify-center mb-5"><ShieldCheck className="w-5 h-5" /></div>
                 <p className="text-[10px] font-black uppercase tracking-widest text-theme-accent">03 · Trust</p>
-                <h3 className="text-lg font-black text-theme-primary mt-2">Built around safe boundaries</h3>
+                <h3 className="text-lg font-black text-theme-primary mt-2">{tr('Built around safe boundaries','নিরাপদ সীমানায় তৈরি')}</h3>
                 <p className="text-xs text-theme-muted leading-relaxed mt-2">Workspace isolation, authenticated access and audit-oriented controls make business data easier to govern.</p>
               </div>
               <div className="billqyro-luxury-card p-6 rounded-3xl border border-theme-accent/15 bg-theme-card/80 backdrop-blur-xl">
                 <div className="w-11 h-11 rounded-2xl bg-theme-accent-light text-theme-accent flex items-center justify-center mb-5"><Sparkles className="w-5 h-5" /></div>
                 <p className="text-[10px] font-black uppercase tracking-widest text-theme-accent">04 · Presentation</p>
-                <h3 className="text-lg font-black text-theme-primary mt-2">A brand customers remember</h3>
+                <h3 className="text-lg font-black text-theme-primary mt-2">{tr('A brand customers remember','কাস্টমারের মনে থাকা ব্র্যান্ড')}</h3>
                 <p className="text-xs text-theme-muted leading-relaxed mt-2">Premium invoice layouts, polished live links and a consistent visual system make every customer touchpoint feel intentional.</p>
               </div>
             </div>
@@ -667,8 +694,8 @@ const Landing = ({ onLoginSuccess }) => {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
             <div>
-              <span className="text-[10px] font-black uppercase tracking-[0.24em] text-theme-accent">Platform Architecture</span>
-              <h2 className="text-3xl sm:text-4xl font-black text-theme-primary tracking-tight mt-3">Every operational layer, designed to work together.</h2>
+              <span className="text-[10px] font-black uppercase tracking-[0.24em] text-theme-accent">{tr('Platform Architecture','প্ল্যাটফর্ম আর্কিটেকচার')}</span>
+              <h2 className="text-3xl sm:text-4xl font-black text-theme-primary tracking-tight mt-3">{tr('Every operational layer, designed to work together.','প্রতিটি অপারেশনাল লেয়ার, একসাথে কাজ করার জন্য ডিজাইন করা।')}</h2>
             </div>
             <p className="text-xs sm:text-sm text-theme-muted max-w-md leading-relaxed">
               From first draft to final collection, the platform keeps the workflow visible, structured and measurable.
@@ -698,13 +725,13 @@ const Landing = ({ onLoginSuccess }) => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-2xl mx-auto mb-12">
             <span className="text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-3.5 py-1 rounded-full border border-theme-accent/20">
-              Industry Tailored Workspaces
+              {tr('Industry Tailored Workspaces', 'ইন্ডাস্ট্রি-অনুযায়ী ওয়ার্কস্পেস')}
             </span>
             <h2 className="text-3xl sm:text-4xl font-black text-theme-primary tracking-tight mt-3">
-              Configured for Your Exact Business Workflow
+              {tr('Configured for Your Exact Business Workflow', 'আপনার ব্যবসার হুবহু ওয়ার্কফ্লো অনুযায়ী কনফিগার করা')}
             </h2>
             <p className="text-sm text-theme-muted font-medium mt-2">
-              Switch seamlessly between business modes. Dynamic fields adapt to retail, healthcare, garment tailoring, and education.
+              {tr('Switch seamlessly between business modes. Dynamic fields adapt to retail, healthcare, garment tailoring, and education.', 'ব্যবসার ধরন বদলান এক ক্লিকে। রিটেইল, হেলথকেয়ার, জামাকাপড়ের টেইলারিং বা শিক্ষা — ডাইনামিক ফিল্ড নিজে নিজে বদলে যায়।')}
             </p>
           </div>
 
@@ -749,13 +776,13 @@ const Landing = ({ onLoginSuccess }) => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-2xl mx-auto mb-14">
             <span className="text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-3.5 py-1 rounded-full border border-theme-accent/20">
-              End-to-End Lifecycle
+              {tr('End-to-End Lifecycle', 'সম্পূর্ণ লাইফসাইকেল')}
             </span>
             <h2 className="text-3xl sm:text-4xl font-black text-theme-primary tracking-tight mt-3">
-              Streamlined 4-Step Billing Flow
+              {tr('Streamlined 4-Step Billing Flow', 'সহজ ৪ ধাপের বিলিং ফ্লো')}
             </h2>
             <p className="text-sm text-theme-muted font-medium mt-2">
-              From fast draft creation to verified bank reconciliation.
+              {tr('From fast draft creation to verified bank reconciliation.', 'দ্রুত ড্রাফট তৈরি থেকে যাচাইকৃত ব্যাংক রিকনসিলিয়েশন পর্যন্ত।')}
             </p>
           </div>
 
@@ -778,20 +805,20 @@ const Landing = ({ onLoginSuccess }) => {
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12">
           <div className="flex-1 space-y-5">
             <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500 bg-emerald-500/10 px-3.5 py-1 rounded-full border border-emerald-500/20">
-              Frictionless Payment Rails
+              {tr('Frictionless Payment Rails', 'ঘর্ষণহীন পেমেন্ট রেল')}
             </span>
             <h2 className="text-3xl sm:text-4xl font-black text-theme-primary tracking-tight">
-              Instant UPI QR & Real-Time Proof Verification
+              {tr('Instant UPI QR & Real-Time Proof Verification', 'তাৎক্ষণিক UPI QR ও রিয়েল-টাইম প্রমাণ যাচাই')}
             </h2>
             <p className="text-sm text-theme-muted font-medium leading-relaxed">
-              Share live digital invoices with your customers. They scan standard UPI QR codes, transfer funds, and upload confirmation receipts. You verify and approve with a single tap.
+              {tr('Share live digital invoices with your customers. They scan standard UPI QR codes, transfer funds, and upload confirmation receipts. You verify and approve with a single tap.','কাস্টমারকে লাইভ ডিজিটাল ইনভয়েস পাঠান। তারা UPI QR স্ক্যান করে টাকা পাঠায়, কনফার্মেশন রসিদ আপলোড করে। আপনি এক ট্যাপে যাচাই করে অনুমোদন দেন।')}
             </p>
             <div className="space-y-3 pt-2">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-theme-surface border border-theme-border-soft flex items-center justify-center text-theme-accent">
                   <CreditCard className="w-4 h-4" />
                 </div>
-                <span className="text-xs font-bold text-theme-primary">Dynamic QR Codes on Web Links & PDF documents</span>
+                <span className="text-xs font-bold text-theme-primary">{tr('Dynamic QR Codes on Web Links & PDF documents','ওয়েব লিংক ও PDF-এ ডাইনামিক QR কোড')}</span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-theme-surface border border-theme-border-soft flex items-center justify-center text-theme-accent">
@@ -836,9 +863,9 @@ const Landing = ({ onLoginSuccess }) => {
             <div className="w-12 h-12 rounded-2xl bg-theme-accent/10 text-theme-accent flex items-center justify-center">
               <Smartphone className="w-6 h-6" />
             </div>
-            <h3 className="text-xl font-black text-theme-primary">Offline-First IndexedDB Engine</h3>
+            <h3 className="text-xl font-black text-theme-primary">{tr('Offline-First IndexedDB Engine','অফলাইন-ফার্স্ট IndexedDB ইঞ্জিন')}</h3>
             <p className="text-xs text-theme-muted leading-relaxed font-medium">
-              Network drops in your shop will never interrupt your billing counter. BillQyro saves every invoice locally with cryptographic idempotency and automatically reconciles when internet restores.
+              {tr('Network drops in your shop will never interrupt your billing counter. BillQyro saves every invoice locally with cryptographic idempotency and automatically reconciles when internet restores.','দোকানে নেটওয়ার্ক চলে গেলেও বিলিং কাউন্টার থামবে না। BillQyro প্রতিটি ইনভয়েস লোকালি সেভ করে রাখে, ইন্টারনেট ফিরলেই সব অটোমেটিক সিঙ্ক হয়ে যায়।')}
             </p>
             <div className="text-[11px] font-bold text-emerald-500 flex items-center gap-1.5 pt-2">
               <Check className="w-4 h-4" /> Zero data loss guarantee during network outages
@@ -867,10 +894,10 @@ const Landing = ({ onLoginSuccess }) => {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <span className="text-[10px] font-black uppercase tracking-widest text-theme-accent bg-theme-accent-light px-3.5 py-1 rounded-full border border-theme-accent/20">
-              Clear & Transparent
+              {tr('Clear & Transparent', 'পরিষ্কার ও স্বচ্ছ')}
             </span>
             <h2 className="text-3xl sm:text-4xl font-black text-theme-primary tracking-tight mt-3">
-              Frequently Asked Questions
+              {tr('Frequently Asked Questions', 'সাধারণ প্রশ্ন ও উত্তর')}
             </h2>
           </div>
 
@@ -902,9 +929,9 @@ const Landing = ({ onLoginSuccess }) => {
         <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-theme-accent/10 to-transparent pointer-events-none" />
         <div className="max-w-6xl mx-auto grid lg:grid-cols-[1fr_1.15fr] gap-10 lg:gap-14 items-start relative">
           <div className="text-center lg:text-left pt-4">
-            <span className="text-[10px] font-black uppercase tracking-[0.24em] text-theme-accent">Ready when you are</span>
-            <h2 className="text-3xl sm:text-4xl font-black text-theme-primary tracking-tight mt-2">Bring your billing desk into focus.</h2>
-            <p className="text-xs text-theme-muted mt-2 font-medium leading-relaxed">Log into your existing business account or register a new workspace in seconds.</p>
+            <span className="text-[10px] font-black uppercase tracking-[0.24em] text-theme-accent">{tr('Ready when you are','আপনি প্রস্তুত হলেই')}</span>
+            <h2 className="text-3xl sm:text-4xl font-black text-theme-primary tracking-tight mt-2">{tr('Bring your billing desk into focus.','আপনার বিলিং ডেস্ককে গুছিয়ে নিন।')}</h2>
+            <p className="text-xs text-theme-muted mt-2 font-medium leading-relaxed">{tr('Log into your existing business account or register a new workspace in seconds.','আপনার ব্যবসার অ্যাকাউন্টে লগইন করুন, বা কয়েক সেকেন্ডে নতুন ওয়ার্কস্পেস খুলে ফেলুন।')}</p>
             <div className="hidden lg:block mt-8">
               <div className="grid grid-cols-3 gap-3">
                 <div className="p-4 rounded-2xl bg-theme-card border border-theme-border-soft"><p className="text-[10px] font-black uppercase tracking-wider text-theme-accent">Setup</p><p className="text-xs font-bold text-theme-primary mt-1">Business workspace</p></div>
@@ -924,7 +951,7 @@ const Landing = ({ onLoginSuccess }) => {
                       : 'text-theme-muted hover:text-theme-primary'
                     }`}
                 >
-                  Business Login / Register
+                  {tr('Business Login / Register', 'বিজনেস লগইন / রেজিস্টার')}
                 </button>
                 <button
                   onClick={() => setPortalMode('customer')}
@@ -933,7 +960,7 @@ const Landing = ({ onLoginSuccess }) => {
                       : 'text-theme-muted hover:text-theme-primary'
                     }`}
                 >
-                  Customer Portal
+                  {tr('Customer Portal', 'কাস্টমার পোর্টাল')}
                 </button>
               </div>
 
@@ -958,15 +985,15 @@ const Landing = ({ onLoginSuccess }) => {
                       <Zap className="w-4 h-4 text-theme-accent" />
                     </div>
                     <div>
-                      <p className="text-xs font-black text-theme-primary">Not ready to register?</p>
-                      <p className="text-[11px] font-semibold text-theme-muted mt-0.5">Tour the full platform with sample business data.</p>
+                      <p className="text-xs font-black text-theme-primary">{tr('Not ready to register?','এখনই রেজিস্টার করবেন না?')}</p>
+                      <p className="text-[11px] font-semibold text-theme-muted mt-0.5">{tr('Tour the full platform with sample business data.','নমুনা ব্যবসার ডেটা দিয়ে পুরো প্ল্যাটফর্ম ঘুরে দেখুন।')}</p>
                     </div>
                   </div>
                   <button
                     onClick={launchLiveDemo}
                     className="shrink-0 px-4 py-2 rounded-xl bg-theme-accent text-white text-xs font-black hover:opacity-90 transition-opacity shadow-md shadow-theme-glow/40"
                   >
-                    Launch Live Demo →
+                    {tr('Launch Live Demo →', 'লাইভ ডেমো শুরু করুন →')}
                   </button>
                 </div>
               </div>
@@ -975,6 +1002,21 @@ const Landing = ({ onLoginSuccess }) => {
         </div>
       </ScrollReveal>
       </section>
+
+      {/* ===== FLOATING WHATSAPP CTA ===== */}
+      <a
+        href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(lang === 'bn' ? 'হ্যালো BillQyro! প্ল্যাটফর্মটি সম্পর্কে জানতে চাই।' : 'Hi BillQyro! I would like to know more about the platform.')}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={tr('Chat on WhatsApp', 'WhatsApp-এ কথা বলুন')}
+        className="fixed bottom-6 right-6 z-40 group flex items-center gap-2.5 h-14 w-14 sm:w-auto sm:px-5 rounded-full bg-[#25D366] text-white shadow-2xl shadow-emerald-600/30 hover:scale-[1.04] active:scale-95 transition-transform"
+      >
+        <span aria-hidden="true" className="absolute inset-0 rounded-full bg-[#25D366] bq-breathe -z-10" />
+        <svg className="relative w-7 h-7 mx-auto sm:mx-0 shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+        </svg>
+        <span className="hidden sm:block text-sm font-black tracking-tight">{tr('Chat with us', 'আমাদের সাথে কথা বলুন')}</span>
+      </a>
 
       {/* ===== FOOTER ===== */}
       <footer className="border-t border-theme-border-soft bg-theme-app px-6 pt-14 pb-8 text-xs text-theme-muted relative overflow-hidden">
@@ -985,56 +1027,56 @@ const Landing = ({ onLoginSuccess }) => {
             <div className="col-span-2 md:col-span-1 space-y-4">
               <Logo type="horizontal" forceWhiteText={false} />
               <p className="text-[11px] font-medium leading-relaxed max-w-[26ch]">
-                The premium billing command center for small shops, studios and service businesses. Built in India 🇮🇳, made for the world.
+                {tr('The premium billing command center for small shops, studios and service businesses. Built in India 🇮🇳, made for the world.','ছোট দোকান, স্টুডিও আর সার্ভিস ব্যবসার জন্য প্রিমিয়াম বিলিং কমান্ড সেন্টার। ভারতে তৈরি 🇮🇳, সারা বিশ্বের জন্য।')}
               </p>
               <div className="flex items-center gap-2">
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-theme-surface border border-theme-border-soft text-[10px] font-bold text-theme-secondary">
-                  <ShieldCheck className="w-3 h-3 text-emerald-500" /> Secure Sync
+                  <ShieldCheck className="w-3 h-3 text-emerald-500" /> {tr('Secure Sync', 'সিকিউর সিঙ্ক')}
                 </span>
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-theme-surface border border-theme-border-soft text-[10px] font-bold text-theme-secondary">
-                  <Zap className="w-3 h-3 text-amber-500" /> Offline First
+                  <Zap className="w-3 h-3 text-amber-500" /> {tr('Offline First', 'অফলাইন ফার্স্ট')}
                 </span>
               </div>
             </div>
 
             {/* Product column */}
             <div className="space-y-3">
-              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-theme-primary">Product</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-theme-primary">{tr('Product', 'প্রোডাক্ট')}</p>
               <div className="space-y-2.5 font-semibold">
-                <button onClick={() => scrollTo('preview')} className="block hover:text-theme-primary transition-colors">Platform Tour</button>
-                <button onClick={() => scrollTo('categories')} className="block hover:text-theme-primary transition-colors">Business Categories</button>
-                <button onClick={() => scrollTo('workflow')} className="block hover:text-theme-primary transition-colors">How It Works</button>
-                <button onClick={launchLiveDemo} className="block text-theme-accent hover:opacity-80 transition-opacity">Live Demo</button>
+                <button onClick={() => scrollTo('preview')} className="block hover:text-theme-primary transition-colors">{tr('Platform Tour', 'প্ল্যাটফর্ম ট্যুর')}</button>
+                <button onClick={() => scrollTo('categories')} className="block hover:text-theme-primary transition-colors">{tr('Business Categories', 'বিজনেস ক্যাটাগরি')}</button>
+                <button onClick={() => scrollTo('workflow')} className="block hover:text-theme-primary transition-colors">{tr('How It Works', 'কীভাবে কাজ করে')}</button>
+                <button onClick={launchLiveDemo} className="block text-theme-accent hover:opacity-80 transition-opacity">{tr('Live Demo', 'লাইভ ডেমো')}</button>
               </div>
             </div>
 
             {/* Resources column */}
             <div className="space-y-3">
-              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-theme-primary">Resources</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-theme-primary">{tr('Resources', 'রিসোর্স')}</p>
               <div className="space-y-2.5 font-semibold">
-                <button onClick={() => scrollTo('faq')} className="block hover:text-theme-primary transition-colors">FAQ</button>
-                <a href="/support" className="block hover:text-theme-primary transition-colors">Help Center</a>
-                <button onClick={() => scrollTo('offline-security')} className="block hover:text-theme-primary transition-colors">Security & Privacy</button>
-                <button onClick={() => scrollTo('payments')} className="block hover:text-theme-primary transition-colors">Payment Collection</button>
+                <button onClick={() => scrollTo('faq')} className="block hover:text-theme-primary transition-colors">{tr('FAQ', 'সাধারণ প্রশ্ন')}</button>
+                <a href="/support" className="block hover:text-theme-primary transition-colors">{tr('Help Center', 'হেল্প সেন্টার')}</a>
+                <button onClick={() => scrollTo('offline-security')} className="block hover:text-theme-primary transition-colors">{tr('Security & Privacy', 'নিরাপত্তা ও প্রাইভেসি')}</button>
+                <button onClick={() => scrollTo('payments')} className="block hover:text-theme-primary transition-colors">{tr('Payment Collection', 'পেমেন্ট কালেকশন')}</button>
               </div>
             </div>
 
             {/* Legal column */}
             <div className="space-y-3">
-              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-theme-primary">Legal</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-theme-primary">{tr('Legal', 'লিগ্যাল')}</p>
               <div className="space-y-2.5 font-semibold">
-                <a href="/terms" className="block hover:text-theme-primary transition-colors">Terms of Service</a>
-                <a href="/privacy" className="block hover:text-theme-primary transition-colors">Privacy Policy</a>
-                <a href="/refund" className="block hover:text-theme-primary transition-colors">Refund Policy</a>
-                <a href="/data-deletion" className="block hover:text-theme-primary transition-colors">Data Deletion</a>
+                <a href="/terms" className="block hover:text-theme-primary transition-colors">{tr('Terms of Service', 'সার্ভিসের শর্তাবলী')}</a>
+                <a href="/privacy" className="block hover:text-theme-primary transition-colors">{tr('Privacy Policy', 'প্রাইভেসি পলিসি')}</a>
+                <a href="/refund" className="block hover:text-theme-primary transition-colors">{tr('Refund Policy', 'রিফান্ড পলিসি')}</a>
+                <a href="/data-deletion" className="block hover:text-theme-primary transition-colors">{tr('Data Deletion', 'ডেটা ডিলিশন')}</a>
               </div>
             </div>
           </div>
 
           <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-6">
-            <span className="text-[10px] font-bold">© 2026 BillQyro Platform · All rights reserved.</span>
+            <span className="text-[10px] font-bold">{tr('© 2026 BillQyro Platform · All rights reserved.','© ২০২৬ BillQyro প্ল্যাটফর্ম · সর্বস্বত্ব সংরক্ষিত।')}</span>
             <div className="flex items-center gap-5 font-bold">
-              <button onClick={() => scrollTo('login')} className="hover:text-theme-primary transition-colors">Sign In</button>
+              <button onClick={() => scrollTo('login')} className="hover:text-theme-primary transition-colors">{tr('Sign In', 'সাইন ইন')}</button>
               <a href="mailto:support@billqyro.com" className="hover:text-theme-primary transition-colors flex items-center gap-1.5">
                 <Mail className="w-3.5 h-3.5" /> support@billqyro.com
               </a>
