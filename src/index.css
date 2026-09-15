@@ -278,7 +278,10 @@ body {
   /* 1b. BillQyro Signature — brand-premium (Official Emerald Standard)
      Previously this theme id had no CSS block, so it silently fell back to
      the obsidian-gold champagne palette. This is the real default theme. */
-  [data-theme="brand-premium"] {
+  /* :root shares the Signature Emerald tokens so a missing/unknown theme
+     attribute still renders the default palette (the old :root default was
+     obsidian-gold champagne). */
+  :root, [data-theme="brand-premium"] {
     --app-bg: #F5F9F7;
     --app-bg-soft: #ECF4F0;
     --surface: #FFFFFF;
