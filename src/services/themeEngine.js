@@ -31,12 +31,12 @@ export const themeEngine = {
         darkMode: localStorage.getItem('billqyro_dark_mode') === 'true'
       };
     } catch {
-      return { themeColor: 'brand-premium', darkMode: false };
+      return { themeColor: 'sapphire-noir', darkMode: false };
     }
   },
 
   getThemeInfo(id) {
-    return THEME_INFO[id] || THEME_INFO['brand-premium'];
+    return THEME_INFO[id] || THEME_INFO['sapphire-noir'];
   },
 
   getAllThemes() {
@@ -45,7 +45,7 @@ export const themeEngine = {
 
   getThemePreviewColors(preset, forceMode = null) {
     const isDark = forceMode === 'dark' ? true : forceMode === 'light' ? false : (typeof document !== 'undefined' && document.documentElement.classList.contains('dark'));
-    const c = ALL_THEME_COLORS[preset] || ALL_THEME_COLORS['brand-premium'];
+    const c = ALL_THEME_COLORS[preset] || ALL_THEME_COLORS['sapphire-noir'];
     return {
       background: isDark ? c.D : c.L,
       sidebar: isDark ? c.SD : c.S,

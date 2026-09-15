@@ -168,7 +168,7 @@ export const generateDemoWorkspace = () => {
     businessEmail: 'demo@billqyro.app',
     businessAddress: 'Park Street, Kolkata, WB 700016',
     currency: 'INR',
-    themeColor: settings.themeColor || 'brand-premium'
+    themeColor: settings.themeColor || 'sapphire-noir'
   });
   localStorage.setItem('billqyro_demo_settings', JSON.stringify(settings));
 

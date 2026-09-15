@@ -33,7 +33,7 @@ const shadeColor = (color, percent) => {
 };
 
 export const LEGACY_THEME_VALUES = ['light', 'dark', 'auto', 'classic'];
-export const DEFAULT_THEME_ID = 'brand-premium';
+export const DEFAULT_THEME_ID = 'sapphire-noir';
 
 // Resolve any stored/raw theme id to a valid catalog id.
 // Returns 'custom' untouched (custom brand colors are applied inline).

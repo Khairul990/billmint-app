@@ -13,7 +13,7 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="apple-touch-icon" href="/app-icon.svg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#0A856C" />
+    <meta name="theme-color" content="#2563EB" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -76,9 +76,9 @@
           var adminTheme = localStorage.getItem('billqyro_admin_default_theme');
           var adminMode = localStorage.getItem('billqyro_admin_default_mode');
           
-          var activeTheme = userTheme || adminTheme || 'brand-premium';
+          var activeTheme = userTheme || adminTheme || 'sapphire-noir';
           // legacy guard — mode values are not themes
-          if (activeTheme === 'light' || activeTheme === 'dark' || activeTheme === 'auto' || activeTheme === 'classic') activeTheme = 'brand-premium';
+          if (activeTheme === 'light' || activeTheme === 'dark' || activeTheme === 'auto' || activeTheme === 'classic') activeTheme = 'sapphire-noir';
           var isDark = userMode !== null ? userMode === 'true' : (adminMode === 'dark');
           
           document.documentElement.setAttribute('data-theme', activeTheme);

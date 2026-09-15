@@ -5,7 +5,7 @@ import { settingsEngine } from '../services/settingsEngine';
 const ThemeContext = createContext();
 
 const normalizeThemeState = (settings) => ({
-  themeId: resolveThemeId(settings.themeColor || settings.themePreset || 'brand-premium'),
+  themeId: resolveThemeId(settings.themeColor || settings.themePreset || 'sapphire-noir'),
   darkMode: settings.darkMode === true || settings.darkMode === 'true',
   brandColor: settings.brandColor || null,
   themeType: settings.themeType || 'built-in'
@@ -13,7 +13,7 @@ const normalizeThemeState = (settings) => ({
 
 export const ThemeProvider = ({ children }) => {
   const [themeState, setThemeState] = useState({
-    themeId: 'brand-premium',
+    themeId: 'sapphire-noir',
     darkMode: false,
     brandColor: null,
     themeType: 'built-in'
@@ -65,7 +65,7 @@ export const useTheme = () => {
   const context = useContext(ThemeContext);
   if (!context) {
     return {
-      themeState: { themeId: 'brand-premium', darkMode: false },
+      themeState: { themeId: 'sapphire-noir', darkMode: false },
       setThemeState: () => {},
       isDarkMode: false,
       toggleTheme: () => {}
