@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { computeCustomerLedger } from '../../utils/financialCalculations';
+import { buildCustomerStatementText } from '../../utils/moneyCenterReports';
 import { FinancialValue, FinancialEquation, StatusBadge, SignatureSurface, Button } from '../ui';
 import { toast } from 'react-hot-toast';
 
@@ -133,6 +134,16 @@ const CustomerLedger = ({
       maximumFractionDigits: 2
     }).format(amount || 0);
     return `${currencySymbol}${formattedNum}`;
+  };
+
+  const shareFullStatement = () => {
+    const message = buildCustomerStatementText({ customer, ledger: ledgerData, currencySymbol });
+    const phone = customer.phone ? customer.phone.replace(/[^0-9]/g, '') : '';
+    if (phone) {
+      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+    } else {
+      toast.error("No phone number found for this customer.");
+    }
   };
 
   const generateWhatsAppReminder = () => {
@@ -344,6 +355,14 @@ const CustomerLedger = ({
                   <span className="hidden sm:inline">WhatsApp</span> Reminder
                 </button>
               )}
+              <button
+                onClick={shareFullStatement}
+                className="px-3 py-1.5 rounded-xl bg-theme-tint-bg hover:bg-theme-tint-bg text-theme-accent border border-theme-tint-border text-xs font-extrabold flex items-center gap-1.5 transition-all cursor-pointer"
+                title="Share the full account statement on WhatsApp"
+              >
+                <FileText className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Share</span> Statement
+              </button>
             </div>
 
             {/* 2D. CHRONOLOGICAL TIMELINE LIST */}

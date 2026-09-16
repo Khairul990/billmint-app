@@ -85,6 +85,7 @@ export default defineConfig(({ mode }) => ({
   ],
   server: {
     host: '0.0.0.0',
+    allowedHosts: ['.e2b.app', '.e2b-studio.app', 'localhost'],
     watch: {
       ignored: ['**/*.md', '**/dist/**', '**/.git/**', '**/dev-dist/**', '**/docs/**']
     }

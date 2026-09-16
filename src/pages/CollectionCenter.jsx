@@ -37,9 +37,14 @@ import {
   Coins,
   Heart,
   Plus,
-  Target
+  Target,
+  BookOpen,
+  Download,
+  Printer
 } from 'lucide-react';
 import { formatCurrency } from '../utils/invoiceUtils';
+import { buildDayBook, downloadCSV, printDayBook, todayStr } from '../utils/moneyCenterReports';
+import { isDemoModeActive } from '../utils/demoDataManager';
 import { 
   calculateCanonicalInvoiceFinancials, 
   getInvoicePaidTotal, 
@@ -90,7 +95,8 @@ const CollectionCenter = ({
   onPaymentSuccess = null,
   setCurrentTab = null
 }) => {
-  const [activeTab, setActiveTab] = useState(initialTab === 'history' ? 'history' : (initialTab === 'requests' ? 'requests' : 'record'));
+  const [activeTab, setActiveTab] = useState(['history', 'requests', 'daybook'].includes(initialTab) ? initialTab : 'record');
+  const [dayBookDate, setDayBookDate] = useState(todayStr());
   const [selectedTxType, setSelectedTxType] = useState('customer_payment');
 
   // --- Dynamic Store Hooks for Bank, Outsource, and Dreams ---
@@ -137,13 +143,19 @@ const CollectionCenter = ({
   }, []);
 
   // --- Workspace Scoped Data ---
+  // Demo data carries no workspaceId, so workspace scoping would hide every
+  // demo invoice/customer and make the whole Money Center look empty.
+  const demoBypass = isDemoModeActive();
+
   const scopedInvoices = useMemo(() => {
-    return filterByWorkspace(invoices, activeWsId).filter(inv => !inv.isDeleted && inv.status !== 'Cancelled' && inv.status !== 'Void');
-  }, [invoices, activeWsId]);
+    const base = demoBypass ? (Array.isArray(invoices) ? invoices : []) : filterByWorkspace(invoices, activeWsId);
+    return base.filter(inv => !inv.isDeleted && inv.status !== 'Cancelled' && inv.status !== 'Void');
+  }, [invoices, activeWsId, demoBypass]);
 
   const scopedCustomers = useMemo(() => {
+    if (demoBypass) return Array.isArray(customers) ? customers : [];
     return filterByWorkspace(customers, activeWsId);
-  }, [customers, activeWsId]);
+  }, [customers, activeWsId, demoBypass]);
 
   const scopedStaffs = useMemo(() => {
     return staffs || [];
@@ -440,6 +452,49 @@ const CollectionCenter = ({
   }, [scopedInvoices, liveBankLedger, activeWsId, historyTypeFilter, historyTimeframe, historyMethod, historySearch]);
 
   // Financial History KPI Stats
+  // Unfiltered unified history (single source for Day Book & CSV export)
+  const unifiedAllTx = useMemo(() => paymentEngine.getUnifiedTransactionHistory({
+    invoices: scopedInvoices,
+    bankLedger: liveBankLedger,
+    workspaceId: activeWsId
+  }), [scopedInvoices, liveBankLedger, activeWsId]);
+
+  const dayBookData = useMemo(() => buildDayBook(unifiedAllTx, dayBookDate), [unifiedAllTx, dayBookDate]);
+
+  const handleExportHistoryCSV = () => {
+    downloadCSV(`MoneyCenter_History_${todayStr()}.csv`,
+      unifiedHistoryList.map(t => ({
+        Date: t.date, Type: t.type, Direction: t.direction,
+        Party: t.customerName || t.staffName || t.vendorName || t.title || '',
+        Category: t.category || '', Invoice: t.invoiceNumber || '',
+        Method: t.paymentMethod || '', Amount: t.amount,
+        Reference: t.reference || '', Note: t.note || ''
+      })));
+    toast.success('Transaction history exported to CSV');
+  };
+
+  const handleExportDayBookCSV = () => {
+    downloadCSV(`DayBook_${dayBookDate}.csv`,
+      dayBookData.transactions.map(t => ({
+        Date: t.date, Direction: t.direction,
+        Party: t.customerName || t.staffName || t.vendorName || t.title || '',
+        Category: t.category || '', Invoice: t.invoiceNumber || '',
+        Method: t.paymentMethod || '', Amount: t.amount, Note: t.note || ''
+      })));
+    toast.success('Day Book exported to CSV');
+  };
+
+  const handlePrintDayBook = () => {
+    const ok = printDayBook({ dayBook: dayBookData, currencySymbol, businessName: businessSettings?.businessName || 'Business' });
+    if (!ok) toast.error('Please allow pop-ups to print the Day Book.');
+  };
+
+  const shiftDay = (delta) => setDayBookDate(d => {
+    const dt = new Date(d || todayStr());
+    dt.setDate(dt.getDate() + delta);
+    return dt.toISOString().split('T')[0];
+  });
+
   const historyKPIs = useMemo(() => {
     let totalIn = 0;
     let totalOut = 0;
@@ -780,6 +835,18 @@ const CollectionCenter = ({
               >
                 <Layers className="w-4 h-4" />
                 <span>Unified History</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('daybook')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                  activeTab === 'daybook'
+                    ? 'bg-theme-accent text-white shadow-lg shadow-theme-accent/20'
+                    : 'text-theme-muted hover:text-theme-primary'
+                }`}
+              >
+                <BookOpen className="w-4 h-4" />
+                <span>Day Book</span>
               </button>
 
               <button
@@ -1965,6 +2032,14 @@ const CollectionCenter = ({
           {activeTab === 'history' && (
             <div className="space-y-6">
 
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="text-sm font-black text-theme-primary flex items-center gap-2"><Layers className="w-4 h-4 text-theme-accent" /> Unified Transaction History</h3>
+                <button onClick={handleExportHistoryCSV} className="btn-premium-ghost !min-h-[36px] !px-3.5 text-[11px] flex items-center gap-1.5" title="Export the current filtered list to CSV">
+                  <Download className="w-3.5 h-3.5" />
+                  Export CSV
+                </button>
+              </div>
+
               {/* KPI Aggregate Cards */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="card-premium p-4">
@@ -2153,6 +2228,138 @@ const CollectionCenter = ({
                 </div>
               </div>
 
+            </div>
+          )}
+
+          {/* ========================================================================= */}
+          {/* TAB 2.5: DAY BOOK — DAILY CASH SUMMARY */}
+          {/* ========================================================================= */}
+          {activeTab === 'daybook' && (
+            <div className="space-y-6">
+
+              {/* Date Navigation */}
+              <div className="card-premium p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-xl bg-theme-accent/10 text-theme-accent border border-theme-accent/20">
+                    <BookOpen className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-black text-theme-primary">Day Book</h3>
+                    <p className="text-[10px] text-theme-muted font-bold uppercase tracking-wider">Every rupee in & out for one day</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <button onClick={() => shiftDay(-1)} className="btn-premium-ghost !min-h-[36px] !px-3 text-xs">&lsaquo; Prev</button>
+                  <input type="date" value={dayBookDate} onChange={(e) => setDayBookDate(e.target.value || todayStr())} className="input-premium !min-h-[36px] text-xs w-[150px]" />
+                  <button onClick={() => shiftDay(1)} className="btn-premium-ghost !min-h-[36px] !px-3 text-xs">Next &rsaquo;</button>
+                  <button onClick={() => setDayBookDate(todayStr())} className="btn-premium-ghost !min-h-[36px] !px-3 text-xs">Today</button>
+                </div>
+              </div>
+
+              {/* Day KPI Cards */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="card-premium p-4 border-l-4 border-l-emerald-500">
+                  <div className="text-2xs font-bold text-theme-muted uppercase mb-1">Collected Today</div>
+                  <div className="text-xl font-black text-emerald-600 tabular-nums">{formatCurrency(dayBookData.totals.collected, currencySymbol)}</div>
+                  <div className="text-[10px] text-theme-muted mt-0.5">{dayBookData.collections.length} receipt{dayBookData.collections.length !== 1 ? 's' : ''}</div>
+                </div>
+                <div className="card-premium p-4 border-l-4 border-l-rose-500">
+                  <div className="text-2xs font-bold text-theme-muted uppercase mb-1">Spent Today</div>
+                  <div className="text-xl font-black text-rose-600 tabular-nums">{formatCurrency(dayBookData.totals.spent, currencySymbol)}</div>
+                  <div className="text-[10px] text-theme-muted mt-0.5">{dayBookData.outflows.length} payment{dayBookData.outflows.length !== 1 ? 's' : ''}</div>
+                </div>
+                <div className="card-premium p-4 border-l-4 border-l-theme-accent">
+                  <div className="text-2xs font-bold text-theme-muted uppercase mb-1">Net Cash Flow</div>
+                  <div className={`text-xl font-black tabular-nums ${dayBookData.totals.net >= 0 ? 'text-theme-primary' : 'text-rose-600'}`}>{formatCurrency(dayBookData.totals.net, currencySymbol)}</div>
+                  <div className="text-[10px] text-theme-muted mt-0.5">{dayBookData.totals.net >= 0 ? 'Surplus day' : 'Deficit day'}</div>
+                </div>
+                <div className="card-premium p-4 border-l-4 border-l-amber-500">
+                  <div className="text-2xs font-bold text-theme-muted uppercase mb-1">Internal Transfers</div>
+                  <div className="text-xl font-black text-amber-600 tabular-nums">{formatCurrency(dayBookData.totals.internal, currencySymbol)}</div>
+                  <div className="text-[10px] text-theme-muted mt-0.5">Wallet &rarr; wallet moves</div>
+                </div>
+              </div>
+
+              {/* Breakdowns */}
+              {(dayBookData.collectionsByMethod.length > 0 || dayBookData.outflowsByCategory.length > 0) && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="card-premium p-4">
+                    <h4 className="text-2xs font-black text-theme-muted uppercase tracking-wider mb-3">Collections by Method</h4>
+                    <div className="space-y-2">
+                      {dayBookData.collectionsByMethod.length === 0 && <p className="text-xs text-theme-muted">No collections on this date.</p>}
+                      {dayBookData.collectionsByMethod.map(([method, amt]) => (
+                        <div key={method} className="flex items-center justify-between text-xs font-bold">
+                          <span className="text-theme-primary">{method}</span>
+                          <span className="text-emerald-600 tabular-nums">{formatCurrency(amt, currencySymbol)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="card-premium p-4">
+                    <h4 className="text-2xs font-black text-theme-muted uppercase tracking-wider mb-3">Spend by Category</h4>
+                    <div className="space-y-2">
+                      {dayBookData.outflowsByCategory.length === 0 && <p className="text-xs text-theme-muted">No expenses on this date.</p>}
+                      {dayBookData.outflowsByCategory.map(([cat, amt]) => (
+                        <div key={cat} className="flex items-center justify-between text-xs font-bold">
+                          <span className="text-theme-primary truncate max-w-[70%]">{cat}</span>
+                          <span className="text-rose-600 tabular-nums">{formatCurrency(amt, currencySymbol)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Transactions of the day */}
+              <div className="card-premium p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-2xs font-black text-theme-muted uppercase tracking-wider">Transactions &mdash; {dayBookDate} ({dayBookData.totals.count})</h4>
+                  <div className="flex items-center gap-2">
+                    <button onClick={handlePrintDayBook} className="btn-premium-ghost !min-h-[32px] !px-3 text-[11px] flex items-center gap-1.5">
+                      <Printer className="w-3.5 h-3.5" /> Print
+                    </button>
+                    <button onClick={handleExportDayBookCSV} className="btn-premium-ghost !min-h-[32px] !px-3 text-[11px] flex items-center gap-1.5">
+                      <Download className="w-3.5 h-3.5" /> CSV
+                    </button>
+                  </div>
+                </div>
+                <div className="max-h-[420px] overflow-y-auto divide-y divide-theme-border-soft/40">
+                  {dayBookData.transactions.length === 0 && (
+                    <p className="text-xs text-theme-muted text-center py-8">No money movement recorded on this date. Record a transaction or pick another day.</p>
+                  )}
+                  {dayBookData.transactions.map(t => {
+                    const internal = t.isTransfer || t.direction === 'TRANSFER' || t.direction === 'WITHDRAW';
+                    const party = t.customerName || t.staffName || t.vendorName || t.title || t.category || 'Transaction';
+                    return (
+                      <div key={t.id} className="flex items-center justify-between gap-3 py-2.5">
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-theme-primary truncate">{party}</p>
+                          <p className="text-[10px] text-theme-muted truncate">
+                            {[t.category, t.invoiceNumber && `#${t.invoiceNumber}`, t.note].filter(Boolean).join(' • ')}
+                          </p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className={`text-xs font-black tabular-nums ${internal ? 'text-amber-600' : t.direction === 'IN' ? 'text-emerald-600' : 'text-rose-600'}`}>
+                            {t.direction === 'IN' ? '+' : '−'}{formatCurrency(t.amount, currencySymbol)}
+                          </p>
+                          <p className="text-[10px] text-theme-muted">{internal ? 'Internal' : t.paymentMethod || ''}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Aging shortcut */}
+              <div className="card-premium p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-theme-accent/5 border border-theme-accent/20">
+                <div>
+                  <h4 className="text-xs font-black text-theme-primary">Who owes you money?</h4>
+                  <p className="text-[11px] text-theme-muted">See the Aging report (0&ndash;7 / 8&ndash;15 / 16&ndash;30 / 30+ days) and send one-click WhatsApp reminders from the Collections ledger.</p>
+                </div>
+                <button onClick={() => setCurrentTab?.('due-ledger')} className="btn-premium !min-h-[36px] !px-4 text-xs flex items-center gap-1.5 shrink-0">
+                  View Aging &amp; Collections <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
           )}
 
