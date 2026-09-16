@@ -558,6 +558,54 @@ const InvoiceStudio = ({ settings, onUpdate, subscription }) => {
                         Show Shipping Input
                       </label>
                     </div>
+                    <div className="flex items-center gap-3 p-4 bg-theme-surface/50 border border-theme-border-soft rounded-xl">
+                      <input 
+                        type="checkbox" 
+                        id="showDueDate"
+                        checked={invoiceBuilderSettings.showDueDate !== false}
+                        onChange={(e) => handleUpdateBuilderSettings({ showDueDate: e.target.checked })} 
+                        className="w-4 h-4 rounded text-theme-success focus:ring-theme-success bg-theme-surface border border-theme-border-soft"
+                      />
+                      <label htmlFor="showDueDate" className="text-sm font-bold text-theme-primary cursor-pointer select-none">
+                        Show Due Date on Bills
+                      </label>
+                    </div>
+                    <div className="flex items-center gap-3 p-4 bg-theme-surface/50 border border-theme-border-soft rounded-xl">
+                      <input 
+                        type="checkbox" 
+                        id="showTerms"
+                        checked={invoiceBuilderSettings.showTerms !== false}
+                        onChange={(e) => handleUpdateBuilderSettings({ showTerms: e.target.checked })} 
+                        className="w-4 h-4 rounded text-theme-success focus:ring-theme-success bg-theme-surface border border-theme-border-soft"
+                      />
+                      <label htmlFor="showTerms" className="text-sm font-bold text-theme-primary cursor-pointer select-none">
+                        Show Terms & Conditions Block
+                      </label>
+                    </div>
+                    <div className="flex items-center gap-3 p-4 bg-theme-surface/50 border border-theme-border-soft rounded-xl">
+                      <input 
+                        type="checkbox" 
+                        id="showAmountInWords"
+                        checked={invoiceBuilderSettings.showAmountInWords !== false}
+                        onChange={(e) => handleUpdateBuilderSettings({ showAmountInWords: e.target.checked })} 
+                        className="w-4 h-4 rounded text-theme-success focus:ring-theme-success bg-theme-surface border border-theme-border-soft"
+                      />
+                      <label htmlFor="showAmountInWords" className="text-sm font-bold text-theme-primary cursor-pointer select-none">
+                        Show Amount in Words Line
+                      </label>
+                    </div>
+                    <div className="flex items-center gap-3 p-4 bg-theme-surface/50 border border-theme-border-soft rounded-xl">
+                      <input 
+                        type="checkbox" 
+                        id="showSignature"
+                        checked={invoiceBuilderSettings.showSignature !== false}
+                        onChange={(e) => handleUpdateBuilderSettings({ showSignature: e.target.checked })} 
+                        className="w-4 h-4 rounded text-theme-success focus:ring-theme-success bg-theme-surface border border-theme-border-soft"
+                      />
+                      <label htmlFor="showSignature" className="text-sm font-bold text-theme-primary cursor-pointer select-none">
+                        Show Signature / Stamp
+                      </label>
+                    </div>
                   </div>
                 </div>
               </div>

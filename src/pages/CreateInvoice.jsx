@@ -213,6 +213,11 @@ const CreateInvoice = ({
     };
   }, [isInclusive, items, discountType, discountAmount, taxPctVal, shipping, amountPaid, oldDue, totals]);
 
+  const builderFlags = draftBusinessSettings?.invoiceBuilderSettings || {};
+  const flagShowDueDate = builderFlags.showDueDate !== false;
+  const flagShowTerms = builderFlags.showTerms !== false;
+  const flagShowWords = builderFlags.showAmountInWords !== false;
+
   const amountInWords = formatAmountInWords(totals.grandTotal || 0, draftBusinessSettings?.currency || '\u20B9');
 
   // Auto-calculate canonical Old Due when selectedCustomerId changes
@@ -420,6 +425,9 @@ const CreateInvoice = ({
     selectedTemplate,
     pdfTemplate: selectedTemplate,
     taxInclusive: isInclusive,
+    dueDate: flagShowDueDate ? dueDate : '',
+    terms: flagShowTerms ? terms : '',
+    amountInWords: flagShowWords ? amountInWords : '',
     items: (isInclusive ? saveTotals.netItems : items).map(i => ({ 
       ...i, 
       description: i.name, 
@@ -447,9 +455,6 @@ const CreateInvoice = ({
       paymentStatus: totals.paymentStatus
     },
     notes,
-    dueDate,
-    terms,
-    amountInWords,
     businessSettings: {
       ...draftBusinessSettings,
       selectedPdfTemplate: selectedTemplate,
@@ -995,10 +1000,12 @@ const CreateInvoice = ({
                   <label className="text-[10px] font-bold text-theme-muted uppercase mb-1.5 block">Date</label>
                   <input type="date" className="input-premium bg-theme-surface" value={date} onChange={(e) => setDate(e.target.value)} />
                 </div>
+                {flagShowDueDate && (
                 <div className="form-group">
                   <label className="text-[10px] font-bold text-theme-muted uppercase mb-1.5 block">Due Date</label>
                   <input type="date" className="input-premium bg-theme-surface" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
                 </div>
+                )}
               </div>
             </section>
 
@@ -1331,10 +1338,12 @@ const CreateInvoice = ({
                   <label className="text-[10px] font-bold text-theme-muted uppercase mb-1.5 block">Notes (shown on invoice)</label>
                   <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} className="input-premium w-full resize-none" placeholder="Thank you for your business!" />
                 </div>
+                {flagShowTerms && (
                 <div>
                   <label className="text-[10px] font-bold text-theme-muted uppercase mb-1.5 block">Terms &amp; Conditions</label>
                   <textarea value={terms} onChange={(e) => setTerms(e.target.value)} rows={3} className="input-premium w-full resize-none" placeholder="e.g. Payment due within 7 days. Goods once sold will not be taken back." />
                 </div>
+                )}
               </div>
 
               {/* Invariant Totals Box */}
@@ -1420,7 +1429,7 @@ const CreateInvoice = ({
                       currency={draftBusinessSettings?.currency || '₹'}
                     />
                   </div>
-                  <p className="text-[10px] italic text-theme-muted text-center pt-1" title="Amount in words">{amountInWords}</p>
+                  {flagShowWords && <p className="text-[10px] italic text-theme-muted text-center pt-1" title="Amount in words">{amountInWords}</p>}
                   
                   {totals.oldDue > 0 && totals.paidVal > 0 && (
                     <div className="mt-4 p-2.5 rounded-xl bg-theme-surface/70 border border-theme-border-soft space-y-1 text-2xs font-semibold">

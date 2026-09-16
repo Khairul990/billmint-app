@@ -362,7 +362,8 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false, templat
             </>
           )}
           {(() => {
-            const sig = invoice.businessSettings?.signatureDataUrl || invoice.signatureDataUrl;
+            const sigFlagOff = invoice.businessSettings?.invoiceBuilderSettings?.showSignature === false;
+            const sig = sigFlagOff ? null : (invoice.businessSettings?.signatureDataUrl || invoice.signatureDataUrl);
             if (!sig) return null;
             return (
               <div className="mt-3">
