@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { 
   FileText, LayoutTemplate, Columns, Droplet, ArrowUp, ArrowDown, Eye, EyeOff, 
-  Trash2, Building, DollarSign, Palette, Settings2, ShieldCheck, Maximize, X
+  Trash2, Building, DollarSign, Palette, Settings2, ShieldCheck, Maximize, X, PenLine
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import PdfTemplateStudio from '../PdfTemplateStudio';
@@ -330,6 +330,54 @@ const InvoiceStudio = ({ settings, onUpdate, subscription }) => {
                         placeholder="1. Payment due in 30 days..."
                         className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-semibold text-theme-primary focus:outline-none focus:border-theme-warning transition-colors resize-none" 
                       />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-theme-muted uppercase tracking-wider mb-2">Signature / Stamp (shown on invoices)</label>
+                      {settings?.signatureDataUrl ? (
+                        <div className="relative inline-block">
+                          <img src={settings.signatureDataUrl} alt="Signature" className="h-20 object-contain rounded-xl border border-theme-border-soft bg-white p-1" />
+                          <button
+                            onClick={() => handleChange('signatureDataUrl', '')}
+                            className="absolute -top-2 -right-2 p-1 rounded-lg bg-theme-card border border-theme-border-soft text-theme-muted hover:text-theme-danger"
+                            title="Remove signature"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ) : (
+                        <label className="flex items-center justify-center gap-2 w-full px-4 py-5 bg-theme-surface border border-dashed border-theme-border-soft rounded-xl text-xs font-bold text-theme-muted hover:text-theme-accent hover:border-theme-accent/50 transition-all cursor-pointer">
+                          <PenLine className="w-4 h-4" /> Upload signature or stamp image
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const f = e.target.files && e.target.files[0];
+                              if (!f) return;
+                              if (!f.type.startsWith('image/')) return;
+                              const r = new FileReader();
+                              r.onload = () => {
+                                const img = new Image();
+                                img.onload = () => {
+                                  try {
+                                    const maxW = 500;
+                                    const scale = Math.min(1, maxW / img.width);
+                                    const c = document.createElement('canvas');
+                                    c.width = Math.round(img.width * scale);
+                                    c.height = Math.round(img.height * scale);
+                                    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+                                    handleChange('signatureDataUrl', c.toDataURL('image/png'));
+                                  } catch (err) { console.error(err); }
+                                };
+                                img.src = r.result;
+                              };
+                              r.readAsDataURL(f);
+                              e.target.value = '';
+                            }}
+                          />
+                        </label>
+                      )}
+                      <p className="text-[10px] text-theme-muted mt-1.5">Transparent PNG works best. Saved with your invoice profile and printed under Terms.</p>
                     </div>
                   </div>
                 </div>
