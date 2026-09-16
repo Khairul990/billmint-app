@@ -47,8 +47,32 @@ export const getDemoReports = () => {
   } catch { return {}; }
 };
 
+// Assign a sequential invoice/estimate number for demo invoices, mirroring
+// the dbEngine logic (prefix from demo settings, skip duplicates, advance
+// the counter) so demo bills are not saved with placeholder numbers.
+const ensureDemoInvoiceNumber = (invoice, invoices) => {
+  if (invoice.invoiceNumber) return invoice;
+  let settings = {};
+  try { settings = JSON.parse(localStorage.getItem(KEYS.SETTINGS) || '{}') || {}; } catch (e) { settings = {}; }
+  const isEstimate = invoice.billType === 'Estimate';
+  const prefix = isEstimate ? (settings.estimatePrefix || 'EST-') : (settings.invoicePrefix || 'INV-');
+  const counterKey = isEstimate ? 'nextEstimateNumber' : 'nextInvoiceNumber';
+  let n = parseInt(settings[counterKey], 10) || 1;
+  const existing = new Set(invoices.map(i => i.invoiceNumber).filter(Boolean));
+  let candidate = `${prefix}${String(n).padStart(4, '0')}`;
+  while (existing.has(candidate)) {
+    n += 1;
+    candidate = `${prefix}${String(n).padStart(4, '0')}`;
+  }
+  invoice.invoiceNumber = candidate;
+  settings[counterKey] = n + 1;
+  localStorage.setItem(KEYS.SETTINGS, JSON.stringify(settings));
+  return invoice;
+};
+
 export const saveDemoInvoice = (invoice) => {
   const invoices = getDemoInvoices();
+  ensureDemoInvoiceNumber(invoice, invoices);
   const existingIndex = invoices.findIndex(i => i.id === invoice.id);
   if (existingIndex >= 0) invoices[existingIndex] = invoice;
   else invoices.push(invoice);

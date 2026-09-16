@@ -1063,7 +1063,8 @@ function App() {
     if (isDemoSessionActive) {
       if (!payload.id) {
         payload.id = 'demo-inv-' + Date.now();
-        if (!payload.invoiceNumber) payload.invoiceNumber = 'DEMO-INV-' + (1000 + demoInvoices.length);
+        // Sequential number (prefix + counter, dedupe-safe) is assigned by
+        // saveDemoInvoice - no more DEMO-INV placeholder numbers.
         payload.createdAt = new Date().toISOString();
         payload.updatedAt = payload.createdAt;
       } else {

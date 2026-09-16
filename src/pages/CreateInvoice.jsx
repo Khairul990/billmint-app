@@ -20,6 +20,20 @@ import { customerEngine } from '../services/customerEngine';
 import { computeCustomerLedger, allocatePayment } from '../utils/financialCalculations';
 import { toast } from 'react-hot-toast';
 
+// Preview of the next sequential invoice number (dbEngine assigns the
+// authoritative number at save time; this is only the form prefill).
+const previewNextInvoiceNumber = (settings, invoices) => {
+  const prefix = settings?.invoicePrefix || 'INV-';
+  let n = parseInt(settings?.nextInvoiceNumber, 10) || 1;
+  const existing = new Set((invoices || []).map(i => i.invoiceNumber).filter(Boolean));
+  let candidate = `${prefix}${String(n).padStart(4, '0')}`;
+  while (existing.has(candidate)) {
+    n += 1;
+    candidate = `${prefix}${String(n).padStart(4, '0')}`;
+  }
+  return candidate;
+};
+
 const CreateInvoice = ({ 
   onSaveInvoice, 
   invoices = [], 
@@ -39,7 +53,7 @@ const CreateInvoice = ({
   const [showPreviewPanel, setShowPreviewPanel] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [draftBusinessSettings, setDraftBusinessSettings] = useState(businessSettings || {});
-  const [invoiceNumber, setInvoiceNumber] = useState(`INV-${Math.floor(1000 + Math.random() * 9000)}`);
+  const [invoiceNumber, setInvoiceNumber] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
   const [selectedStaffId, setSelectedStaffId] = useState('');
@@ -227,14 +241,22 @@ const CreateInvoice = ({
           sNo: it.sNo || (idx + 1).toString(),
           name: it.itemService || it.name || it.description || '',
           description: it.description || '',
-          qty: parseFloat(it.qty ?? it.quantity) || 1,
+          qty: Number.isFinite(parseFloat(it.qty ?? it.quantity)) ? parseFloat(it.qty ?? it.quantity) : 1,
           price: parseFloat(it.rate ?? it.price) || 0,
           customFields: it.customFields || {}
         })));
       }
-      setDiscountAmount(parseFloat(editingInvoice.discountAmount) || 0);
-      setDiscountType(parseFloat(editingInvoice.discountAmount) > 0 ? 'flat' : 'none');
-      setTaxPercent(parseFloat(editingInvoice.taxAmount) ? (parseFloat(editingInvoice.taxAmount) / (parseFloat(editingInvoice.subtotal) || 1)) * 100 : 0);
+      // Restore the saved discount input/type; legacy invoices (saved before
+      // these fields existed) fall back to inferring a flat discount.
+      setDiscountAmount(parseFloat(editingInvoice.discountInput ?? editingInvoice.discountAmount) || 0);
+      setDiscountType(editingInvoice.discountType || (parseFloat(editingInvoice.discountAmount) > 0 ? 'flat' : 'none'));
+      // Use the SAVED tax percentage. Reconstructing it from taxAmount/subtotal
+      // is wrong whenever a discount existed (tax is computed after discount).
+      setTaxPercent(
+        editingInvoice.taxPercentage !== undefined && editingInvoice.taxPercentage !== null
+          ? (parseFloat(editingInvoice.taxPercentage) || 0)
+          : (parseFloat(editingInvoice.taxAmount) ? (parseFloat(editingInvoice.taxAmount) / (parseFloat(editingInvoice.subtotal) || 1)) * 100 : 0)
+      );
       setShipping(parseFloat(editingInvoice.shipping) || 0);
       setOldDue(parseFloat(editingInvoice.oldDue) || 0);
       setAmountPaid(parseFloat(editingInvoice.amountPaid ?? editingInvoice.paidAmount) || 0);
@@ -243,7 +265,7 @@ const CreateInvoice = ({
       setSelectedTemplate(editingInvoice.selectedTemplate || businessSettings?.selectedPdfTemplate || defaultTemplate);
     } else {
       // Clean blank state for Create mode
-      setInvoiceNumber(`INV-${Math.floor(1000 + Math.random() * 9000)}`);
+      setInvoiceNumber(previewNextInvoiceNumber(businessSettings, invoices));
       setDate(new Date().toISOString().split('T')[0]);
       setSelectedCustomerId('');
       setSelectedStaffId('');
@@ -403,6 +425,16 @@ const CreateInvoice = ({
   const handleSave = async () => {
     if (isSaving) return;
     const isEditing = Boolean(editingInvoice?.id);
+
+    // Item cleanup: drop fully blank rows, clamp negative qty/price.
+    const cleanedItems = items
+      .map(i => ({ ...i, qty: Math.max(0, parseFloat(i.qty) || 0), price: Math.max(0, parseFloat(i.price) || 0) }))
+      .filter(i => String(i.name || '').trim() !== '' || i.qty > 0 || i.price > 0);
+    const hasValidItem = cleanedItems.some(i => String(i.name || '').trim() !== '' && (i.qty > 0 || i.price > 0));
+    if (!hasValidItem) {
+      toast.error('Add at least one item with a name and amount before saving.');
+      return;
+    }
     const existingPaymentHistory = Array.isArray(editingInvoice?.paymentHistory) ? [...editingInvoice.paymentHistory] : [];
     
     // In edit mode: if legacy invoice had paid amount > 0 but empty history, initialize baseline
@@ -461,7 +493,9 @@ const CreateInvoice = ({
 
     const payload = {
       id: editingInvoice?.id || undefined,
-      invoiceNumber: editingInvoice?.invoiceNumber || invoiceNumber,
+      // New invoices: let the engine assign the authoritative sequential
+      // number (dedupe + counter increment). The form prefill is a preview.
+      invoiceNumber: editingInvoice?.invoiceNumber || undefined,
       createdAt: editingInvoice?.createdAt || undefined,
       publicToken: editingInvoice?.publicToken || undefined,
       verificationCode: editingInvoice?.verificationCode || undefined,
@@ -478,6 +512,8 @@ const CreateInvoice = ({
       taxAmount: totals.tax,
       taxPercentage: parseFloat(taxPercent) || 0,
       discountAmount: totals.discount,
+      discountType,
+      discountInput: parseFloat(discountAmount) || 0,
       shipping: parseFloat(shipping) || 0,
       grandTotal: totals.grandTotal,
       oldDue: totals.oldDue,
@@ -488,7 +524,7 @@ const CreateInvoice = ({
       paymentStatus: totals.paymentStatus,
       paymentMethod,
       paymentHistory: finalPaymentHistory,
-      items: items.map((i, idx) => ({
+      items: cleanedItems.map((i, idx) => ({
         id: i.id,
         sNo: i.sNo || (idx + 1).toString(),
         itemService: i.name,
@@ -788,6 +824,10 @@ const CreateInvoice = ({
                     <tr>
                       {invoiceColumns.map(c => {
                         if (!c.visible) return null;
+                        // Per-item discount/tax inputs were never part of the
+                        // totals math - hide them to avoid misleading inputs.
+                        // Use the bill-level Tax & Discount controls instead.
+                        if (c.id === 'discount' || c.id === 'tax') return null;
                         const widthClass = c.id === 'sn' ? 'w-16' : c.id === 'qty' ? 'w-24' : (c.id === 'rate' || c.id === 'amount') ? 'w-32' : '';
                         return <th key={c.id} className={`pb-3 px-2 text-[10px] font-bold text-theme-muted uppercase tracking-wider border-b border-theme-border-soft ${widthClass}`}>{c.label}</th>;
                       })}
@@ -836,16 +876,6 @@ const CreateInvoice = ({
                               if (c.id === 'rate') return (
                                 <td key={c.id} className="py-2 px-2">
                                   <input type="number" min="0" step="0.01" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" value={item.price} onChange={(e) => handleUpdateItem(item.id, 'price', e.target.value)} />
-                                </td>
-                              );
-                              if (c.id === 'discount') return (
-                                <td key={c.id} className="py-2 px-2">
-                                  <input type="number" min="0" step="0.01" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" value={item.discount || ''} onChange={(e) => handleUpdateItem(item.id, 'discount', e.target.value)} />
-                                </td>
-                              );
-                              if (c.id === 'tax') return (
-                                <td key={c.id} className="py-2 px-2">
-                                  <input type="number" min="0" step="0.01" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" value={item.tax || ''} onChange={(e) => handleUpdateItem(item.id, 'tax', e.target.value)} />
                                 </td>
                               );
                               if (c.id === 'amount') return (
