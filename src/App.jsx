@@ -894,7 +894,7 @@ function App() {
   // --- DATA SYNCHRONIZERS ---
 
   // Invoices
-  const handleSaveInvoice = async (payload, saveCustomerAsNew = false, isSilent = false) => {
+  const handleSaveInvoice = async (payload, saveCustomerAsNew = false, isSilent = false, opts = {}) => {
     const targetInvoices = isDemoSessionActive ? demoInvoices : invoices;
 
     // Flatten nested InvoiceContext state if present
@@ -1075,8 +1075,10 @@ function App() {
       
       if (!isSilent) {
         toast.success('Saved to Demo Session');
-        setEditingInvoice(null);
-        setCurrentTab('dashboard'); 
+        if (!opts.stay) {
+          setEditingInvoice(null);
+          setCurrentTab('dashboard'); 
+        }
         
         // Trigger Confetti in Sandbox!
         if (subscription?.planStatus === 'premium' || (subscription?.planId && subscription.planId.toLowerCase() !== 'free')) {
@@ -1169,8 +1171,10 @@ function App() {
           toast.error('Low stock or insufficient stock for some products.', { duration: 4000 });
         }
 
-        setEditingInvoice(null);
-        setCurrentTab('invoices');
+        if (!opts.stay) {
+          setEditingInvoice(null);
+          setCurrentTab('invoices');
+        }
       }
       return payload;
     } catch (e) {
@@ -1466,7 +1470,7 @@ function App() {
       // Keep ThemeContext + App state in sync in demo mode too, so the
       // chosen theme persists to localStorage and survives reloads.
       window.dispatchEvent(new CustomEvent('billqyro:settings-updated', { detail: payload }));
-      return true;
+      return payload;
     }
     try {
       const updatedSettings = await settingsEngine.saveSettings(payload);

@@ -131,3 +131,43 @@ export const autoIncrementString = (str, items = []) => {
   const nextNumStr = nextNum.toString().padStart(numLength, '0');
   return `${prefix}${nextNumStr}`;
 };
+
+// ===== Amount in words (Indian numbering: crore / lakh / thousand) =====
+const W_ONES = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten',
+  'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+const W_TENS = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+const twoDigitWords = (n) => {
+  if (n < 20) return W_ONES[n];
+  const t = Math.floor(n / 10), o = n % 10;
+  return W_TENS[t] + (o ? ' ' + W_ONES[o] : '');
+};
+
+export const numberToIndianWords = (num) => {
+  const n = Math.floor(Math.abs(num));
+  if (n === 0) return 'Zero';
+  const parts = [];
+  const crore = Math.floor(n / 10000000);
+  const lakh = Math.floor((n % 10000000) / 100000);
+  const thousand = Math.floor((n % 100000) / 1000);
+  const hundred = Math.floor((n % 1000) / 100);
+  const rest = n % 100;
+  if (crore) parts.push(numberToIndianWords(crore) + ' Crore');
+  if (lakh) parts.push(twoDigitWords(lakh) + ' Lakh');
+  if (thousand) parts.push(twoDigitWords(thousand) + ' Thousand');
+  if (hundred) parts.push(W_ONES[hundred] + ' Hundred');
+  if (rest) parts.push(twoDigitWords(rest));
+  return parts.join(' ');
+};
+
+const CURRENCY_NAMES = { '\u20B9': 'Rupees', '\u09F3': 'Taka', '$': 'Dollars', '\u20AC': 'Euros', '\u00A3': 'Pounds' };
+
+export const formatAmountInWords = (amount, currencySymbol = '\u20B9') => {
+  const amt = parseFloat(amount) || 0;
+  const name = CURRENCY_NAMES[currencySymbol] || 'Amount';
+  const whole = Math.floor(amt);
+  const fraction = Math.round((amt - whole) * 100);
+  let out = `${name} ${numberToIndianWords(whole)}`;
+  if (fraction > 0) out += ` and ${twoDigitWords(fraction)} Paise`;
+  return out + ' Only';
+};

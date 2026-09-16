@@ -111,6 +111,9 @@ export const HtmlTotalsSummary = ({
           {fmt(fin.customerTotalDue ?? (fin.previousDue > 0 ? (fin.remainingOldDue + fin.currentBillDue) : fin.balanceDue))}
         </span>
       </div>
+      {data.amountInWords && (
+        <p className={`mt-1.5 text-[9px] italic ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{data.amountInWords}</p>
+      )}
     </div>
   );
 };

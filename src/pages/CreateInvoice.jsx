@@ -6,7 +6,7 @@ import {
   DollarSign, UserPlus, CreditCard, Layers, Tag, ChevronUp, AlertCircle
 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
-import { formatCurrency } from '../utils/invoiceUtils';
+import { formatCurrency, formatAmountInWords } from '../utils/invoiceUtils';
 import { motion, AnimatePresence } from 'framer-motion';
 import QRCode from 'qrcode';
 import { FinancialEquation } from '../components/ui/FinancialEquation';
@@ -69,6 +69,8 @@ const CreateInvoice = ({
   const [amountPaid, setAmountPaid] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState(businessSettings?.defaultPaymentMethod || 'Cash');
   const [notes, setNotes] = useState('Thank you for your business!');
+  const [dueDate, setDueDate] = useState('');
+  const [terms, setTerms] = useState('');
   const [previewQrCode, setPreviewQrCode] = useState(null);
   const [enableQrCode, setEnableQrCode] = useState(true);
 
@@ -161,6 +163,8 @@ const CreateInvoice = ({
       paymentStatus: allocation.currentInvoicePaymentStatus 
     };
   }, [items, discountType, discountAmount, taxPercent, shipping, oldDue, amountPaid]);
+
+  const amountInWords = formatAmountInWords(totals.grandTotal || 0, draftBusinessSettings?.currency || '\u20B9');
 
   // Auto-calculate canonical Old Due when selectedCustomerId changes
   useEffect(() => {
@@ -262,6 +266,8 @@ const CreateInvoice = ({
       setAmountPaid(parseFloat(editingInvoice.amountPaid ?? editingInvoice.paidAmount) || 0);
       setPaymentMethod(editingInvoice.paymentMethod || 'Cash');
       setNotes(editingInvoice.notes || '');
+      setDueDate(editingInvoice.dueDate || '');
+      setTerms(editingInvoice.terms || '');
       setSelectedTemplate(editingInvoice.selectedTemplate || businessSettings?.selectedPdfTemplate || defaultTemplate);
     } else {
       // Clean blank state for Create mode
@@ -278,8 +284,42 @@ const CreateInvoice = ({
       setAmountPaid(0);
       setPaymentMethod(businessSettings?.defaultPaymentMethod || 'Cash');
       setNotes(businessSettings?.defaultNotes || 'Thank you for your business!');
+      setDueDate('');
+      setTerms(businessSettings?.invoiceTerms || '');
+      // Restore an unsaved draft so an accidental refresh never loses work
+      try {
+        const draft = JSON.parse(localStorage.getItem('billqyro_invoice_draft') || 'null');
+        if (draft && Array.isArray(draft.items) && draft.items.some(i => String(i.name || '').trim())) {
+          if (draft.invoiceNumber) setInvoiceNumber(draft.invoiceNumber);
+          if (draft.date) setDate(draft.date);
+          setDueDate(draft.dueDate || '');
+          setSelectedCustomerId(draft.selectedCustomerId || '');
+          setItems(draft.items.map(i => ({ ...i })));
+          setDiscountType(draft.discountType || 'none');
+          setDiscountAmount(parseFloat(draft.discountAmount) || 0);
+          setTaxPercent(parseFloat(draft.taxPercent) || 0);
+          setShipping(parseFloat(draft.shipping) || 0);
+          setAmountPaid(parseFloat(draft.amountPaid) || 0);
+          setPaymentMethod(draft.paymentMethod || 'Cash');
+          setNotes(draft.notes || businessSettings?.defaultNotes || 'Thank you for your business!');
+          setTerms(draft.terms || '');
+          toast.info('Unsaved draft restored');
+        }
+      } catch (e) { /* corrupt draft - start fresh */ }
     }
   }, [editingInvoice]);
+
+  // Autosave draft (create mode only)
+  useEffect(() => {
+    if (editingInvoice) return;
+    try {
+      localStorage.setItem('billqyro_invoice_draft', JSON.stringify({
+        invoiceNumber, date, dueDate, selectedCustomerId, items,
+        discountType, discountAmount, taxPercent, shipping,
+        amountPaid, paymentMethod, notes, terms, savedAt: Date.now()
+      }));
+    } catch (e) { /* storage unavailable - ignore */ }
+  }, [editingInvoice, invoiceNumber, date, dueDate, selectedCustomerId, items, discountType, discountAmount, taxPercent, shipping, amountPaid, paymentMethod, notes, terms]);
 
   const customer = customers.find(c => c.id === selectedCustomerId);
   const staff = staffs.find(s => s.id === selectedStaffId);
@@ -319,6 +359,9 @@ const CreateInvoice = ({
       paymentStatus: totals.paymentStatus
     },
     notes,
+    dueDate,
+    terms,
+    amountInWords,
     businessSettings: {
       ...draftBusinessSettings,
       selectedPdfTemplate: selectedTemplate,
@@ -342,7 +385,7 @@ const CreateInvoice = ({
     currencySymbol: draftBusinessSettings?.currency || '₹',
     invoiceColumns,
     qrCodeBase64: previewQrCode
-  }), [invoiceNumber, date, customer, staff, billingTarget, selectedTemplate, items, shipping, totals, notes, draftBusinessSettings, bankDetails, paymentMethod, invoiceColumns, previewQrCode]);
+  }), [invoiceNumber, date, dueDate, customer, staff, billingTarget, selectedTemplate, items, shipping, totals, notes, terms, amountInWords, draftBusinessSettings, bankDetails, paymentMethod, invoiceColumns, previewQrCode]);
 
   const handleAddItem = () => {
     const sNo = items.length > 0 ? (parseInt(items[items.length-1].sNo) + 1).toString() : '1';
@@ -422,7 +465,7 @@ const CreateInvoice = ({
     }
   };
 
-  const handleSave = async () => {
+  const handleSave = async (stayAfterSave = false) => {
     if (isSaving) return;
     const isEditing = Boolean(editingInvoice?.id);
 
@@ -508,6 +551,8 @@ const CreateInvoice = ({
       customerPhone: customer?.phone || editingInvoice?.customerPhone || '',
       customerId: customer?.id || editingInvoice?.customerId || '',
       notes,
+      dueDate,
+      terms,
       subtotal: totals.subtotal,
       taxAmount: totals.tax,
       taxPercentage: parseFloat(taxPercent) || 0,
@@ -543,12 +588,58 @@ const CreateInvoice = ({
     if (onSaveInvoice) {
       setIsSaving(true);
       try {
-        await onSaveInvoice(payload, false, false);
+        const saved = await Promise.resolve(onSaveInvoice(payload, false, false, { stay: stayAfterSave === true }));
+        try { localStorage.removeItem('billqyro_invoice_draft'); } catch (e) {}
+        if (stayAfterSave) {
+          // Fresh blank form for the next bill, prefilled with the next number.
+          // Prefer the number the engine actually assigned (returned payload).
+          const savedNum = saved && saved.invoiceNumber;
+          const base = savedNum ? parseInt(String(savedNum).replace(/\D/g, ''), 10) : NaN;
+          if (Number.isFinite(base) && base > 0) {
+            const prefix = String(savedNum).replace(/\d+$/, '');
+            const existing = new Set([...(invoices || []).map(i => i?.invoiceNumber), savedNum].filter(Boolean));
+            let n = base + 1;
+            let cand = `${prefix}${String(n).padStart(4, '0')}`;
+            while (existing.has(cand)) { n += 1; cand = `${prefix}${String(n).padStart(4, '0')}`; }
+            setInvoiceNumber(cand);
+          } else {
+            setInvoiceNumber(previewNextInvoiceNumber(businessSettings, [...(invoices || []), payload]));
+          }
+          setDate(new Date().toISOString().split('T')[0]);
+          setDueDate('');
+          setSelectedCustomerId('');
+          setSelectedStaffId('');
+          setItems([{ id: Date.now().toString(), sNo: '1', name: '', qty: 1, price: 0, customFields: {} }]);
+          setDiscountType('none');
+          setDiscountAmount(0);
+          setTaxPercent(businessSettings?.defaultTax || 0);
+          setShipping(0);
+          setOldDue(0);
+          setAmountPaid(0);
+          setPaymentMethod(businessSettings?.defaultPaymentMethod || 'Cash');
+          setNotes(businessSettings?.defaultNotes || 'Thank you for your business!');
+          setTerms(businessSettings?.invoiceTerms || '');
+          lastInitializedIdRef.current = 'new';
+        }
       } finally {
         setIsSaving(false);
       }
     }
   };
+
+  // Ctrl/Cmd+S saves the invoice
+  const saveRef = React.useRef(null);
+  saveRef.current = handleSave;
+  useEffect(() => {
+    const onKey = (e) => {
+      if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) {
+        e.preventDefault();
+        saveRef.current?.(false);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   const invoiceLimit = subscription?.limits?.maxInvoices ?? subscription?.limits?.invoices ?? 50;
   const isLimitHit = !editingInvoice?.id && invoices.length >= invoiceLimit;
@@ -678,6 +769,12 @@ const CreateInvoice = ({
             {isSaving ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> : <Save className="w-4 h-4" />}
             {isSaving ? 'Saving...' : (editingInvoice ? 'Update Invoice' : 'Save Invoice')}
           </button>
+          {!editingInvoice && (
+            <button onClick={() => handleSave(true)} disabled={isSaving} className="btn-premium-outline ml-2 flex items-center justify-center gap-2 min-w-[130px]">
+              <Plus className="w-4 h-4" />
+              Save &amp; New
+            </button>
+          )}
         </div>,
         getStudioHeaderTarget('studio-header-actions-portal')
       )}
@@ -808,6 +905,10 @@ const CreateInvoice = ({
                 <div className="form-group">
                   <label className="text-[10px] font-bold text-theme-muted uppercase mb-1.5 block">Date</label>
                   <input type="date" className="input-premium bg-theme-surface" value={date} onChange={(e) => setDate(e.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label className="text-[10px] font-bold text-theme-muted uppercase mb-1.5 block">Due Date</label>
+                  <input type="date" className="input-premium bg-theme-surface" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
                 </div>
               </div>
             </section>
@@ -1109,6 +1210,18 @@ const CreateInvoice = ({
                 </div>
               </div>
 
+              {/* Notes & Terms */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[10px] font-bold text-theme-muted uppercase mb-1.5 block">Notes (shown on invoice)</label>
+                  <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} className="input-premium w-full resize-none" placeholder="Thank you for your business!" />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-theme-muted uppercase mb-1.5 block">Terms &amp; Conditions</label>
+                  <textarea value={terms} onChange={(e) => setTerms(e.target.value)} rows={3} className="input-premium w-full resize-none" placeholder="e.g. Payment due within 7 days. Goods once sold will not be taken back." />
+                </div>
+              </div>
+
               {/* Invariant Totals Box */}
               <div className="space-y-3 bg-white dark:bg-theme-card p-6 rounded-2xl border border-theme-border-soft shadow-sm">
                 <div className="flex justify-between items-center text-sm font-semibold text-theme-muted">
@@ -1192,6 +1305,7 @@ const CreateInvoice = ({
                       currency={draftBusinessSettings?.currency || '₹'}
                     />
                   </div>
+                  <p className="text-[10px] italic text-theme-muted text-center pt-1" title="Amount in words">{amountInWords}</p>
                   
                   {totals.oldDue > 0 && totals.paidVal > 0 && (
                     <div className="mt-4 p-2.5 rounded-xl bg-theme-surface/70 border border-theme-border-soft space-y-1 text-2xs font-semibold">

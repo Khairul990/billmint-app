@@ -353,6 +353,14 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false, templat
               </p>
             </>
           )}
+          {invoice.terms && (
+            <>
+              <span className="font-bold text-theme-muted dark:text-theme-muted uppercase tracking-wider block text-[9px] mb-1 mt-2">Terms &amp; Conditions</span>
+              <p className="text-[10px] text-theme-muted dark:text-theme-muted font-medium leading-relaxed">
+                {cleanText(invoice.terms)}
+              </p>
+            </>
+          )}
         </div>
 
         {/* Math summary */}
@@ -415,6 +423,9 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false, templat
               {formatCurrency(financials.customerTotalDue ?? (financials.previousDue > 0 ? (financials.remainingOldDue + financials.currentBillDue) : financials.balanceDue), currencySymbol, regionalPrefs.numberFormat)}
             </span>
           </div>
+          {invoice.amountInWords && (
+            <p className="text-[10px] italic text-theme-muted dark:text-theme-muted text-right mt-1">{invoice.amountInWords}</p>
+          )}
         </div>
       </div>
 
