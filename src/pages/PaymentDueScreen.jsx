@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldAlert, Image as ImageIcon, Send, Clock, CheckCircle, ArrowLeft, Loader2 } from 'lucide-react';
+import { ShieldAlert, Image as ImageIcon, Send, Clock, CheckCircle, ArrowLeft, Loader2, Crown } from 'lucide-react';
 import { authEngine } from '../services/authEngine';
 import { paymentEngine } from '../services/paymentEngine';
 import { adminEngine } from '../services/adminEngine';
@@ -195,6 +195,12 @@ const PaymentDueScreen = ({ pendingAmount, chargeableBills, onCancel, onLogout }
             className="w-full py-2 bg-transparent text-theme-accent text-xs font-bold transition-colors hover:underline"
           >
             View Data & Pay Later
+          </button>
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent('navigate_tab', { detail: 'upgrade' }))}
+            className="w-full py-2.5 bg-amber-500/10 text-amber-600 border border-amber-500/30 text-xs font-black rounded-xl transition-all hover:bg-amber-500/20 flex items-center justify-center gap-1.5"
+          >
+            <Crown className="w-3.5 h-3.5" /> Or Upgrade to Pro — unlimited bills, no dues
           </button>
           {onLogout && (
             <button 

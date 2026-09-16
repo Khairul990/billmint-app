@@ -105,6 +105,7 @@ const CashManagement = React.lazy(() => import('./pages/cybercafe/CashManagement
 const PaymentDueScreen = React.lazy(() => import('./pages/PaymentDueScreen'));
 const SandboxAdmin = React.lazy(() => import('./pages/admin/SandboxAdmin'));
 const StudentPortal = React.lazy(() => import('./pages/StudentPortal'));
+const UpgradeCenter = React.lazy(() => import('./pages/UpgradeCenter'));
 const CustomerWorkspace = React.lazy(() => import('./pages/CustomerWorkspace'));
 const CustomerPortalConfig = React.lazy(() => import('./pages/CustomerPortalConfig'));
 class ErrorBoundary extends React.Component {
@@ -2036,6 +2037,17 @@ function App() {
             billPrefill={billPrefill}
             onPrefillConsumed={() => setBillPrefill(null)}
           />
+        );
+      case 'upgrade':
+        return (
+          <React.Suspense fallback={<div className="flex h-screen items-center justify-center"><ClassicLoader /></div>}>
+            <UpgradeCenter
+              subscription={subscription}
+              revenueStatus={revenueStatus}
+              businessSettings={activeSettings}
+              setCurrentTab={setCurrentTab}
+            />
+          </React.Suspense>
         );
       case 'guide':
         // Legacy fallback

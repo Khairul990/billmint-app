@@ -3,9 +3,10 @@ import { createPortal } from 'react-dom';
 import { 
   ArrowLeft, Save, LayoutTemplate, Plus, Trash2, Copy, FileText, 
   Eye, EyeOff, Maximize, X, Check, ChevronDown, Palette, Columns, 
-  DollarSign, UserPlus, CreditCard, Layers, Tag, ChevronUp, AlertCircle, Scan
+  DollarSign, UserPlus, CreditCard, Layers, Tag, ChevronUp, AlertCircle, Scan, Sparkles, Wand2, Loader2
 } from 'lucide-react';
 import BarcodeScannerModal from '../components/BarcodeScannerModal';
+import { analyzeCustomerHistory, buildSmartBillDraft, generateLocalInsight, generateGeminiInsight } from '../utils/aiBillCreator';
 import { Button } from '../components/ui/Button';
 import { formatCurrency, formatAmountInWords } from '../utils/invoiceUtils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -56,6 +57,12 @@ const CreateInvoice = ({
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [taxMode, setTaxMode] = useState('exclusive'); // 'exclusive' | 'inclusive'
   const [showCsvModal, setShowCsvModal] = useState(false);
+  const [showAiModal, setShowAiModal] = useState(false);
+  const [aiAnalysis, setAiAnalysis] = useState(null);
+  const [aiInsight, setAiInsight] = useState('');
+  const [aiGeminiUsed, setAiGeminiUsed] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiSelected, setAiSelected] = useState([]);
   const [csvText, setCsvText] = useState('');
   const prefillAppliedRef = React.useRef(null);
   const [showPreviewPanel, setShowPreviewPanel] = useState(false);
@@ -558,6 +565,43 @@ const CreateInvoice = ({
     }
   };
 
+  // ===== AI Bill Creator =====
+  const openAiAssistant = async () => {
+    if (!customer) {
+      toast.error('Select a customer first — the AI learns from their history');
+      return;
+    }
+    setAiLoading(true);
+    setShowAiModal(true);
+    try {
+      const analysis = analyzeCustomerHistory(customer, invoices, { excludeInvoiceId: editingInvoice?.id });
+      setAiAnalysis(analysis);
+      setAiSelected(analysis.topItems.slice(0, 3).map(i => i.name));
+      const cur = draftBusinessSettings?.currency || '\u20B9';
+      setAiInsight(generateLocalInsight(analysis, customer, cur));
+      setAiGeminiUsed(false);
+      const key = draftBusinessSettings?.geminiApiKey || businessSettings?.geminiApiKey;
+      if (key) {
+        try {
+          const text = await generateGeminiInsight(analysis, customer, key, cur);
+          setAiInsight(text);
+          setAiGeminiUsed(true);
+        } catch (e) { /* local insight already shown */ }
+      }
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const applyAiDraft = () => {
+    if (!aiAnalysis?.hasHistory) { setShowAiModal(false); return; }
+    const draft = buildSmartBillDraft(aiAnalysis, aiSelected);
+    if (!draft.length) { toast.error('Tick at least one usual item'); return; }
+    setItems(prev => [...prev.filter(r => String(r.name || '').trim() !== ''), ...draft].map((r, i) => ({ ...r, sNo: String(i + 1) })));
+    setShowAiModal(false);
+    toast.success('Smart bill pre-filled (' + draft.length + ' item' + (draft.length !== 1 ? 's' : '') + ')');
+  };
+
   const handleSave = async (stayAfterSave = false) => {
     if (isSaving) return;
     const isEditing = Boolean(editingInvoice?.id);
@@ -975,6 +1019,14 @@ const CreateInvoice = ({
                           className="text-[10px] font-bold text-theme-accent hover:underline flex items-center gap-1"
                         >
                           <UserPlus className="w-3 h-3" /> + New Customer
+                        </button>
+                        <button
+                          type="button"
+                          onClick={openAiAssistant}
+                          className="text-[10px] font-black px-2 py-0.5 rounded-full bg-[image:var(--accent-gradient)] text-white flex items-center gap-1 hover:opacity-90 transition-all"
+                          title="AI Bill Creator — analyse this customer's history and prefill the bill"
+                        >
+                          <Sparkles className="w-3 h-3" /> AI Bill
                         </button>
                       </div>
                       <select className="input-premium bg-theme-surface" value={selectedCustomerId} onChange={(e) => setSelectedCustomerId(e.target.value)}>
@@ -1574,6 +1626,87 @@ const CreateInvoice = ({
           </option>
         ))}
       </datalist>
+
+      {showAiModal && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setShowAiModal(false)}>
+          <div className="card-premium w-full max-w-lg p-5 max-h-[88vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-3">
+              <div>
+                <h3 className="text-base font-black text-theme-primary flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-theme-accent" /> AI Bill Creator
+                </h3>
+                <p className="text-[10px] font-bold text-theme-muted uppercase">
+                  {customer ? customer.name : 'No customer'} — history analysis
+                </p>
+              </div>
+              <button onClick={() => setShowAiModal(false)}><X className="w-5 h-5" /></button>
+            </div>
+
+            {aiLoading ? (
+              <div className="py-10 flex flex-col items-center gap-3">
+                <Loader2 className="w-7 h-7 animate-spin text-theme-accent" />
+                <p className="text-xs font-bold text-theme-muted">Analysing billing history…</p>
+              </div>
+            ) : !aiAnalysis?.hasHistory ? (
+              <div className="text-center py-8">
+                <Wand2 className="w-9 h-9 text-theme-muted mx-auto mb-2 opacity-50" />
+                <p className="text-xs text-theme-muted font-semibold max-w-xs mx-auto">{aiInsight}</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="bg-theme-surface border border-theme-border-soft rounded-xl p-2.5 text-center">
+                    <p className="text-[9px] font-black text-theme-muted uppercase">Bills</p>
+                    <p className="text-base font-black text-theme-primary tabular-nums">{aiAnalysis.billCount}</p>
+                  </div>
+                  <div className="bg-theme-surface border border-theme-border-soft rounded-xl p-2.5 text-center">
+                    <p className="text-[9px] font-black text-theme-muted uppercase">Lifetime</p>
+                    <p className="text-base font-black text-theme-primary tabular-nums">{formatCurrency(aiAnalysis.totalBilled, draftBusinessSettings?.currency || '\u20B9')}</p>
+                  </div>
+                  <div className="bg-theme-surface border border-theme-border-soft rounded-xl p-2.5 text-center">
+                    <p className="text-[9px] font-black text-theme-muted uppercase">Pending</p>
+                    <p className={`text-base font-black tabular-nums ${aiAnalysis.pendingDue > 0 ? 'text-rose-500' : 'text-emerald-500'}`}>{formatCurrency(aiAnalysis.pendingDue, draftBusinessSettings?.currency || '\u20B9')}</p>
+                  </div>
+                </div>
+
+                <div className="bg-theme-accent/5 border border-theme-accent/20 rounded-xl p-3">
+                  <p className="text-[9px] font-black text-theme-accent uppercase mb-1 flex items-center gap-1">
+                    <Sparkles className="w-3 h-3" /> {aiGeminiUsed ? 'Gemini Insight' : 'Smart Insight'} · Avg {formatCurrency(aiAnalysis.avgBill, draftBusinessSettings?.currency || '\u20B9')}{aiAnalysis.frequencyDays ? ' · every ~' + aiAnalysis.frequencyDays + ' days' : ''}
+                  </p>
+                  <p className="text-xs text-theme-primary font-semibold leading-relaxed">{aiInsight}</p>
+                </div>
+
+                <div>
+                  <p className="text-[10px] font-black text-theme-muted uppercase tracking-wider mb-2">Usual items — tick what goes on this bill</p>
+                  <div className="space-y-1.5">
+                    {aiAnalysis.topItems.map(it => {
+                      const on = aiSelected.includes(it.name);
+                      return (
+                        <label key={it.name} className={`flex items-center justify-between gap-3 px-3 py-2 rounded-xl border cursor-pointer transition-all ${on ? 'bg-theme-accent/10 border-theme-accent/40' : 'bg-theme-surface border-theme-border-soft'}`}>
+                          <span className="flex items-center gap-2.5 min-w-0">
+                            <input type="checkbox" checked={on} onChange={() => setAiSelected(prev => on ? prev.filter(n => n !== it.name) : [...prev, it.name])} className="w-4 h-4" />
+                            <span className="text-xs font-bold text-theme-primary truncate">{it.name}</span>
+                          </span>
+                          <span className="text-[10px] font-bold text-theme-muted shrink-0 tabular-nums">
+                            {it.times}&times; · qty {it.avgQty} @ {formatCurrency(it.lastPrice, draftBusinessSettings?.currency || '\u20B9')}
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-1">
+                  <button onClick={() => setShowAiModal(false)} className="btn-premium-ghost flex-1 py-3 text-xs">Cancel</button>
+                  <button onClick={applyAiDraft} className="btn-premium flex-1 py-3 text-xs flex items-center justify-center gap-2">
+                    <Wand2 className="w-3.5 h-3.5" /> Prefill Bill
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {showCsvModal && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setShowCsvModal(false)}>

@@ -273,6 +273,16 @@ const StudioLayout = ({
           <ChevronDown className="w-3.5 h-3.5 text-theme-muted shrink-0 ml-1.5" />
         </button>
 
+        {subscription && !['premium'].includes(String(subscription?.planStatus || subscription?.status || 'free').toLowerCase()) && (
+          <button
+            onClick={() => setCurrentTab && setCurrentTab('upgrade')}
+            className="h-9 px-3 text-xs font-black rounded-xl flex items-center gap-1.5 shrink-0 cursor-pointer bg-amber-500/10 text-amber-600 border border-amber-500/30 hover:bg-amber-500/20 transition-all"
+            title="Upgrade to Pro"
+          >
+            <Crown className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Upgrade</span>
+          </button>
+        )}
         <button
           onClick={handleSave}
           disabled={!isDirty || isSaving}
