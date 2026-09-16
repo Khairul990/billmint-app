@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { User, Phone, Mail, MapPin, Search, FileText, Check } from 'lucide-react';
-import * as Icons from 'lucide-react';
+import Icons from '../../../../utils/iconRegistry';
 import { useInvoice } from '../../../../context/InvoiceContext';
 import { invoiceTemplates } from '../../../../config/invoiceTemplates';
 import { getCustomerLabelByType } from '../../../../config/businessPresets';

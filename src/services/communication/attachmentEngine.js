@@ -7,9 +7,7 @@
  */
 
 import React from 'react';
-import { pdf } from '@react-pdf/renderer';
 import QRCode from 'qrcode';
-import PdfDocument from '../../components/PdfDocument';
 import { calculateCanonicalInvoiceFinancials, roundTo2 } from '../../utils/invoiceMath';
 
 /**
@@ -112,6 +110,13 @@ export async function generateInvoicePdfBlob(invoice, businessSettings) {
   ]);
 
   // Emoji CDN registration removed to prevent network hangs. Emojis will be stripped or use default system fallbacks.
+
+  // Lazy-load the vector PDF renderer: @react-pdf is ~2.7MB and must stay
+  // off the boot path — it is only needed when a PDF is actually generated.
+  const [{ pdf }, { default: PdfDocument }] = await Promise.all([
+    import('@react-pdf/renderer'),
+    import('../../components/PdfDocument.jsx')
+  ]);
 
   // Deeply sanitize known unsupported characters that crash React-PDF without a font fallback
   const safeInvoice = JSON.parse(JSON.stringify(invoice).replace(/₹/g, 'Rs. ').replace(/৳/g, 'Tk. '));

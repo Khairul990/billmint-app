@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LogOut, FileText, CheckCircle, Clock, ShieldCheck, Download, Printer, User, Search, Eye, Building2, MapPin, Phone, Mail, FileCheck2, Calendar, CreditCard, ChevronRight } from 'lucide-react';
-import * as LucideIcons from 'lucide-react';
+import LucideIcons from '../utils/iconRegistry';
 import { getPortalLabelByType, getCustomerLabelByType, getInvoiceLabelByType, getIconForCustomer, getIconForInvoice } from '../config/businessPresets';
 import { invoiceEngine } from '../services/invoiceEngine';
 import CustomerPortalLogin from '../components/portal/CustomerPortalLogin';

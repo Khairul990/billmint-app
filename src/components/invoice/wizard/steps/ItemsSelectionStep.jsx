@@ -19,7 +19,7 @@ import {
   useSortable
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import * as Icons from 'lucide-react';
+import Icons from '../../../../utils/iconRegistry';
 import ProductSearch from '../../ProductSearch';
 
 const CustomTemplateBuilder = ({ templateFields, setTemplateFields }) => {

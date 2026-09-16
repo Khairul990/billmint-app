@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AnimatedPage from '../components/AnimatedPage';
 import { Search, ChevronRight, Languages, Clock, X, Play, CheckCircle2 } from 'lucide-react';
-import * as Icons from 'lucide-react';
+import Icons from '../utils/iconRegistry';
 import { guides, categories, faqs as faqsData } from '../data/guides';
 
 // FAQ Accordion Component

@@ -12,7 +12,7 @@ import {
   HelpCircle as HelpIcon, ArrowLeft, ArrowUpRight, History, Layers,
   Compass, Eye, PlayCircle, Award, CheckSquare, ChevronLeft
 } from 'lucide-react';
-import * as Icons from 'lucide-react';
+import Icons from '../utils/iconRegistry';
 import { 
   categories, 
   guides, 
