@@ -35,7 +35,8 @@ import {
   Clock,
   DollarSign,
   TrendingUp,
-  RotateCcw
+  RotateCcw,
+  Repeat
 } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { formatCurrency } from '../utils/invoiceUtils';
@@ -83,7 +84,10 @@ const Invoices = ({
   businessSettings,
   onPaymentRecorded,
   onRecordPayment,
-  onOpenCollection
+  onOpenCollection,
+  onDuplicate,
+  onToggleRecurring,
+  onGenerateRecurring
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
@@ -284,6 +288,21 @@ const Invoices = ({
   // --- FINANCIAL SUMMARY METRICS ---
   const activeInvoices = useMemo(() => {
     return invoices.filter(inv => !inv.isDeleted);
+  }, [invoices]);
+
+  // Monthly recurring bills not yet generated for the current month
+  const dueRecurringInvoices = useMemo(() => {
+    const cur = new Date().toISOString().slice(0, 7);
+    const seriesKey = (inv) => inv.recurringSeriesId || `${inv.customerName || 'customer'}|${(inv.items || []).map(i => i.itemService || i.name).join('+')}`;
+    const posted = new Set();
+    invoices.forEach(inv => {
+      if (inv.recurring && String(inv.date || '').slice(0, 7) === cur) posted.add(seriesKey(inv));
+    });
+    const seen = new Set();
+    return invoices
+      .filter(inv => inv.recurring && !inv.isDeleted && String(inv.date || '').slice(0, 7) !== cur && !posted.has(seriesKey(inv)))
+      .filter(inv => { const k = seriesKey(inv); if (seen.has(k)) return false; seen.add(k); return true; })
+      .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
   }, [invoices]);
 
   const summaryMetrics = useMemo(() => {
@@ -861,6 +880,47 @@ const Invoices = ({
             )}
           </AnimatePresence>
 
+          {/* 5.5 RECURRING BILLS DUE THIS MONTH */}
+          {dueRecurringInvoices.length > 0 && viewMode === 'active' && (
+            <div className="bg-theme-accent/5 border border-theme-accent/25 rounded-2xl p-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-xl bg-theme-accent/15 text-theme-accent border border-theme-accent/25 shrink-0">
+                    <Repeat className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-black text-theme-primary">
+                      {dueRecurringInvoices.length} monthly bill{dueRecurringInvoices.length !== 1 ? 's' : ''} to generate for {new Date().toLocaleString('en-IN', { month: 'long' })}
+                    </p>
+                    <p className="text-[11px] text-theme-muted">Duplicate the latest bill of each monthly customer with a fresh number and today's date.</p>
+                  </div>
+                </div>
+                {onGenerateRecurring && (
+                  <button
+                    onClick={async () => { for (const inv of dueRecurringInvoices) { await onGenerateRecurring(inv); } }}
+                    className="btn-premium !min-h-[36px] !px-4 text-xs shrink-0"
+                  >
+                    Generate All ({dueRecurringInvoices.length})
+                  </button>
+                )}
+              </div>
+              <div className="space-y-1.5">
+                {dueRecurringInvoices.slice(0, 4).map(inv => (
+                  <div key={inv.id} className="flex items-center justify-between gap-3 text-[11px] bg-theme-card border border-theme-border-soft rounded-xl px-3 py-2">
+                    <span className="font-bold text-theme-primary truncate">
+                      {inv.customerName || 'Customer'} <span className="text-theme-muted">• last {inv.invoiceNumber} ({inv.date}) • {currencySymbol}{inv.grandTotal}</span>
+                    </span>
+                    {onGenerateRecurring && (
+                      <button onClick={() => onGenerateRecurring(inv)} className="btn-premium-ghost !min-h-[26px] !px-2.5 text-[10px] shrink-0">
+                        Generate
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* 6. INVOICE FINANCIAL LEDGER LIST */}
           <div className="space-y-2.5">
             {paginatedInvoices.map((invoice) => (
@@ -898,6 +958,8 @@ const Invoices = ({
                   onDownload={onDownloadPDF}
                   onDownloadImage={onDownloadImage}
                   onDownloadBackup={() => handleDownloadBackup(invoice)}
+                  onDuplicate={onDuplicate}
+                  onToggleRecurring={onToggleRecurring}
                   isDeleted={viewMode === 'trash'}
                 />
               </motion.div>

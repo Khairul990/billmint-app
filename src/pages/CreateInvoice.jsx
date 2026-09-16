@@ -45,13 +45,19 @@ const CreateInvoice = ({
   editingInvoice, 
   onBack, 
   defaultTemplate = 'minimal-classic', 
-  subscription 
+  subscription,
+  billPrefill = null,
+  onPrefillConsumed = null
 }) => {
   const [selectedTemplate, setSelectedTemplate] = useState(businessSettings?.selectedPdfTemplate || defaultTemplate);
   const [viewMode, setViewMode] = useState('pdf');
   const [activeTab, setActiveTab] = useState('listing');
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [taxMode, setTaxMode] = useState('exclusive'); // 'exclusive' | 'inclusive'
+  const [showCsvModal, setShowCsvModal] = useState(false);
+  const [csvText, setCsvText] = useState('');
+  const prefillAppliedRef = React.useRef(null);
   const [showPreviewPanel, setShowPreviewPanel] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [draftBusinessSettings, setDraftBusinessSettings] = useState(businessSettings || {});
@@ -165,6 +171,47 @@ const CreateInvoice = ({
       paymentStatus: allocation.currentInvoicePaymentStatus 
     };
   }, [items, discountType, discountAmount, taxPercent, shipping, oldDue, amountPaid]);
+
+  // ===== Tax-inclusive conversion =====
+  // When rates include tax, save net rates (rate / (1 + t%)) so every
+  // downstream engine/template (subtotal + tax = total) stays consistent.
+  const taxPctVal = parseFloat(taxPercent) || 0;
+  const isInclusive = taxMode === 'inclusive' && taxPctVal > 0;
+  const divisor = 1 + taxPctVal / 100;
+
+  const saveTotals = useMemo(() => {
+    if (!isInclusive) return totals;
+    const netItems = items.map(i => ({ ...i, price: (parseFloat(i.price) || 0) / divisor }));
+    const netDiscountInput = discountType === 'flat' ? (parseFloat(discountAmount) || 0) / divisor : discountAmount;
+    const sub = netItems.reduce((sum, item) => sum + ((parseFloat(item.qty) || 0) * (parseFloat(item.price) || 0)), 0);
+    const dAmt = parseFloat(netDiscountInput) || 0;
+    let disc = 0;
+    if (discountType === 'percent') disc = sub * (dAmt / 100);
+    else if (discountType === 'flat') disc = dAmt;
+    const afterDisc = Math.max(0, sub - disc);
+    const tax = afterDisc * (taxPctVal / 100);
+    const grand = Math.round((afterDisc + tax + (parseFloat(shipping) || 0)) * 100) / 100;
+    const paidVal = parseFloat(amountPaid) || 0;
+    const oldDueVal = parseFloat(oldDue) || 0;
+    const allocation = allocatePayment(paidVal, oldDueVal, grand);
+    return {
+      subtotal: Math.round(sub * 100) / 100,
+      discount: Math.round(disc * 100) / 100,
+      tax: Math.round(tax * 100) / 100,
+      grandTotal: grand,
+      oldDue: oldDueVal,
+      totalDue: allocation.totalReceivable,
+      totalReceivable: allocation.totalReceivable,
+      paidVal,
+      allocatedToOldDue: allocation.allocatedToOldDue,
+      remainingOldDue: allocation.remainingOldDue,
+      allocatedToCurrentInvoice: allocation.allocatedToCurrentInvoice,
+      currentBillDue: allocation.remainingCurrentInvoiceDue,
+      balanceDue: allocation.customerTotalDue,
+      paymentStatus: allocation.currentInvoicePaymentStatus,
+      netItems
+    };
+  }, [isInclusive, items, discountType, discountAmount, taxPctVal, shipping, amountPaid, oldDue, totals]);
 
   const amountInWords = formatAmountInWords(totals.grandTotal || 0, draftBusinessSettings?.currency || '\u20B9');
 
@@ -305,11 +352,49 @@ const CreateInvoice = ({
           setPaymentMethod(draft.paymentMethod || 'Cash');
           setNotes(draft.notes || businessSettings?.defaultNotes || 'Thank you for your business!');
           setTerms(draft.terms || '');
+          setTaxMode(draft.taxMode === 'inclusive' ? 'inclusive' : 'exclusive');
           toast.info('Unsaved draft restored');
         }
       } catch (e) { /* corrupt draft - start fresh */ }
     }
   }, [editingInvoice]);
+
+  // Consume a prefill (Duplicate Bill / Student Fee Bill) from App
+  useEffect(() => {
+    if (!billPrefill || editingInvoice) return;
+    const key = billPrefill._prefillId || JSON.stringify(billPrefill).slice(0, 80);
+    if (prefillAppliedRef.current === key) return;
+    prefillAppliedRef.current = key;
+    try {
+      if (billPrefill.mode === 'duplicate' && billPrefill.source) {
+        const src = billPrefill.source;
+        setSelectedCustomerId(src.customerId || '');
+        setItems((src.items || []).map((i, idx) => ({
+          id: `dup_${Date.now()}_${idx}`,
+          sNo: String(idx + 1),
+          name: i.itemService || i.name || i.description || '',
+          qty: parseFloat(i.qty) || 0,
+          price: parseFloat(i.rate ?? i.price) || 0,
+          customFields: i.customFields || {}
+        })));
+        setDiscountType(src.discountType || 'none');
+        setDiscountAmount(parseFloat(src.discountInput ?? src.discountAmount) || 0);
+        setTaxPercent(parseFloat(src.taxPercentage) || 0);
+        setShipping(parseFloat(src.shipping) || 0);
+        setNotes(src.notes || '');
+        setTerms(src.terms || '');
+        toast.success('Bill duplicated — review and save');
+      } else if (billPrefill.mode === 'fee' && billPrefill.student) {
+        const st = billPrefill.student;
+        setSelectedCustomerId(st.customerId || st.id || '');
+        setItems([{ id: `fee_${Date.now()}`, sNo: '1', name: `Monthly Fee — ${st.name || 'Student'}`, qty: 1, price: parseFloat(st.monthlyFee ?? st.fee) || 0, customFields: {} }]);
+        setNotes('Monthly tuition fee. Thank you!');
+        toast.success(`Fee bill started for ${st.name || 'student'}`);
+      }
+    } finally {
+      onPrefillConsumed?.();
+    }
+  }, [billPrefill, editingInvoice, onPrefillConsumed]);
 
   // Autosave draft (create mode only)
   useEffect(() => {
@@ -318,7 +403,7 @@ const CreateInvoice = ({
       localStorage.setItem('billqyro_invoice_draft', JSON.stringify({
         invoiceNumber, date, dueDate, selectedCustomerId, items,
         discountType, discountAmount, taxPercent, shipping,
-        amountPaid, paymentMethod, notes, terms, savedAt: Date.now()
+        amountPaid, paymentMethod, notes, terms, taxMode, savedAt: Date.now()
       }));
     } catch (e) { /* storage unavailable - ignore */ }
   }, [editingInvoice, invoiceNumber, date, dueDate, selectedCustomerId, items, discountType, discountAmount, taxPercent, shipping, amountPaid, paymentMethod, notes, terms]);
@@ -334,18 +419,19 @@ const CreateInvoice = ({
     billingTarget,
     selectedTemplate,
     pdfTemplate: selectedTemplate,
-    items: items.map(i => ({ 
+    taxInclusive: isInclusive,
+    items: (isInclusive ? saveTotals.netItems : items).map(i => ({ 
       ...i, 
       description: i.name, 
       rate: parseFloat(i.price) || 0, 
       qty: parseFloat(i.qty) || 0, 
       amount: (parseFloat(i.qty) || 0) * (parseFloat(i.price) || 0) 
     })),
-    subtotal: totals.subtotal,
-    taxAmount: totals.tax,
-    discountAmount: totals.discount,
+    subtotal: saveTotals.subtotal,
+    taxAmount: saveTotals.tax,
+    discountAmount: saveTotals.discount,
     shipping: parseFloat(shipping) || 0,
-    grandTotal: totals.grandTotal,
+    grandTotal: saveTotals.grandTotal,
     oldDue: totals.oldDue,
     totalDue: totals.totalReceivable,
     totalReceivable: totals.totalReceivable,
@@ -555,23 +641,24 @@ const CreateInvoice = ({
       notes,
       dueDate,
       terms,
-      subtotal: totals.subtotal,
-      taxAmount: totals.tax,
+      subtotal: saveTotals.subtotal,
+      taxAmount: saveTotals.tax,
       taxPercentage: parseFloat(taxPercent) || 0,
-      discountAmount: totals.discount,
+      taxInclusive: isInclusive,
+      discountAmount: saveTotals.discount,
       discountType,
       discountInput: parseFloat(discountAmount) || 0,
       shipping: parseFloat(shipping) || 0,
-      grandTotal: totals.grandTotal,
-      oldDue: totals.oldDue,
-      totalReceivable: totals.totalReceivable,
-      amountPaid: totals.paidVal,
-      paidAmount: totals.paidVal,
-      balanceDue: totals.balanceDue,
-      paymentStatus: totals.paymentStatus,
+      grandTotal: saveTotals.grandTotal,
+      oldDue: saveTotals.oldDue,
+      totalReceivable: saveTotals.totalReceivable,
+      amountPaid: saveTotals.paidVal,
+      paidAmount: saveTotals.paidVal,
+      balanceDue: saveTotals.balanceDue,
+      paymentStatus: saveTotals.paymentStatus,
       paymentMethod,
       paymentHistory: finalPaymentHistory,
-      items: cleanedItems.map((i, idx) => ({
+      items: (isInclusive ? cleanedItems.map(i => ({ ...i, price: (parseFloat(i.price) || 0) / divisor })) : cleanedItems).map((i, idx) => ({
         id: i.id,
         sNo: i.sNo || (idx + 1).toString(),
         itemService: i.name,
@@ -929,6 +1016,14 @@ const CreateInvoice = ({
                   >
                     <Scan className="w-3.5 h-3.5" /> Scan
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => { setCsvText(''); setShowCsvModal(true); }}
+                    className="flex items-center gap-1.5 text-2xs font-bold px-2.5 py-1.5 rounded-xl bg-theme-surface border border-theme-border-soft text-theme-accent hover:bg-theme-card transition-all"
+                    title="Import items from CSV (Name, Qty, Rate)"
+                  >
+                    <FileText className="w-3.5 h-3.5" /> Import CSV
+                  </button>
                 </div>
               </div>
               <div className="overflow-x-auto -mx-6 px-6">
@@ -1213,6 +1308,14 @@ const CreateInvoice = ({
                     </select>
                   </div>
 
+                  <label className="pt-2 flex items-center justify-between text-xs font-bold cursor-pointer">
+                    <span className="text-theme-muted flex items-center gap-1.5">
+                      Prices include tax
+                      {isInclusive && <span className="text-[9px] text-theme-accent font-black">({formatCurrency(totals.tax, draftBusinessSettings?.currency || '\u20B9')} extracted)</span>}
+                    </span>
+                    <input type="checkbox" checked={taxMode === 'inclusive'} onChange={(e) => setTaxMode(e.target.checked ? 'inclusive' : 'exclusive')} className="w-4 h-4" />
+                  </label>
+
                   <div className="pt-2 flex items-center justify-between text-xs font-bold">
                     <span className="text-theme-muted">Payment Status:</span>
                     <span className={`badge-premium ${totals.paymentStatus === 'Paid' ? 'badge-success' : totals.paymentStatus === 'Partial' ? 'badge-warning' : 'badge-neutral'}`}>
@@ -1462,6 +1565,67 @@ const CreateInvoice = ({
           </option>
         ))}
       </datalist>
+
+      {showCsvModal && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setShowCsvModal(false)}>
+          <div className="card-premium w-full max-w-lg p-5" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-3">
+              <div>
+                <h3 className="text-base font-black text-theme-primary">Import Items from CSV</h3>
+                <p className="text-[10px] font-bold text-theme-muted uppercase">One item per line: Name, Qty, Rate</p>
+              </div>
+              <button onClick={() => setShowCsvModal(false)}><X className="w-5 h-5" /></button>
+            </div>
+            <textarea
+              value={csvText}
+              onChange={(e) => setCsvText(e.target.value)}
+              rows={7}
+              placeholder={'Silk Kurti, 2, 899\nScreen Printing, 10, 95\nStitching Charge, 1, 350'}
+              className="input-premium w-full text-xs font-mono resize-none"
+            />
+            <div className="flex items-center gap-2 mt-2">
+              <input
+                type="file"
+                accept=".csv,text/csv,text/plain"
+                onChange={(e) => {
+                  const f = e.target.files && e.target.files[0];
+                  if (!f) return;
+                  const r = new FileReader();
+                  r.onload = () => setCsvText(String(r.result || ''));
+                  r.readAsText(f);
+                  e.target.value = '';
+                }}
+                className="text-[10px] text-theme-muted"
+              />
+              <span className="text-[10px] text-theme-muted"> commas / semicolons / tabs all work</span>
+            </div>
+            <div className="flex gap-3 mt-4">
+              <button onClick={() => setShowCsvModal(false)} className="btn-premium-ghost flex-1 py-3 text-xs">Cancel</button>
+              <button
+                onClick={() => {
+                  const rows = csvText.split(/\r?\n/).map(l => l.trim()).filter(Boolean)
+                    .map(l => l.split(/[,;\t]/).map(c => c.trim()));
+                  const parsed = [];
+                  rows.forEach((cells, ri) => {
+                    if (ri === 0 && /name/i.test(cells[0]) && cells.length >= 2) return; // header
+                    const name = cells[0] || '';
+                    const qty = parseFloat(cells[1]) || 1;
+                    const price = parseFloat(cells[2]) || 0;
+                    if (name) parsed.push({ id: `csv_${Date.now()}_${parsed.length}`, sNo: '1', name, qty, price, customFields: {} });
+                  });
+                  if (!parsed.length) return toast.error('No valid rows found — use: Name, Qty, Rate');
+                  setItems(prev => [...prev.filter(r => String(r.name || '').trim() !== ''), ...parsed].map((r, i) => ({ ...r, sNo: String(i + 1) })));
+                  setShowCsvModal(false);
+                  toast.success(`${parsed.length} item${parsed.length !== 1 ? 's' : ''} imported`);
+                }}
+                className="btn-premium flex-1 py-3 text-xs"
+              >
+                Import Items
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <BarcodeScannerModal
         isOpen={isScannerOpen}

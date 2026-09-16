@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { GraduationCap, Plus, Search, Trash2, Edit2, Phone, Mail, BookOpen, Users, RefreshCw, AlertTriangle } from 'lucide-react';
+import { GraduationCap, Plus, Search, Trash2, Edit2, Phone, Mail, BookOpen, Users, RefreshCw, AlertTriangle, Wallet } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { pageVariants, staggerContainer, staggerItem } from '../../utils/animations';
 import { CardSkeleton } from '../../components/PremiumSkeleton';
@@ -8,14 +8,14 @@ import BottomSheet from '../../components/BottomSheet';
 import PremiumEmptyState from '../../components/PremiumEmptyState';
 import PullToRefresh from '../../components/PullToRefresh';
 
-const Students = ({ students = [], onSaveStudent, onDeleteStudent }) => {
+const Students = ({ students = [], onSaveStudent, onDeleteStudent, onFeeInvoice }) => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ name: '', phone: '', email: '', course: '', batch: '', enrollmentDate: '' });
+  const [form, setForm] = useState({ name: '', phone: '', email: '', course: '', batch: '', enrollmentDate: '', monthlyFee: '' });
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
@@ -23,9 +23,9 @@ const Students = ({ students = [], onSaveStudent, onDeleteStudent }) => {
     setLoading(false);
   }, [students]);
 
-  const openAdd = () => { setEditItem(null); setForm({ name: '', phone: '', email: '', course: '', batch: '', enrollmentDate: '' }); setModalOpen(true); };
+  const openAdd = () => { setEditItem(null); setForm({ name: '', phone: '', email: '', course: '', batch: '', enrollmentDate: '', monthlyFee: '' }); setModalOpen(true); };
 
-  const openEdit = (item) => { setEditItem(item); setForm({ name: item.name, phone: item.phone || '', email: item.email || '', course: item.course || '', batch: item.batch || '', enrollmentDate: item.enrollmentDate || '' }); setModalOpen(true); };
+  const openEdit = (item) => { setEditItem(item); setForm({ name: item.name, phone: item.phone || '', email: item.email || '', course: item.course || '', batch: item.batch || '', enrollmentDate: item.enrollmentDate || '', monthlyFee: item.monthlyFee ?? '' }); setModalOpen(true); };
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -152,6 +152,9 @@ const Students = ({ students = [], onSaveStudent, onDeleteStudent }) => {
                   </div>
                 </div>
                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {onFeeInvoice && (
+                    <button title="Create monthly fee bill" aria-label="Create monthly fee bill" onClick={() => onFeeInvoice(item)} className="p-1.5 rounded-lg hover:bg-theme-accent/10 text-theme-muted hover:text-theme-accent transition-colors"><Wallet className="w-3.5 h-3.5" /></button>
+                  )}
                   <button title="Edit student" aria-label="Edit student" onClick={() => openEdit(item)} className="p-1.5 rounded-lg hover:bg-theme-accent/10 text-theme-muted hover:text-theme-accent transition-colors"><Edit2 className="w-3.5 h-3.5" /></button>
                   <button title="Delete student" aria-label="Delete student" onClick={() => handleDelete(item.id)} className="p-1.5 rounded-lg hover:bg-theme-danger/10 text-theme-muted hover:text-theme-danger transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
                 </div>
@@ -206,6 +209,7 @@ const Students = ({ students = [], onSaveStudent, onDeleteStudent }) => {
             <div><label className="block mb-1">Batch</label><input type="text" value={form.batch} onChange={e => setForm(f => ({ ...f, batch: e.target.value }))} placeholder="e.g. 2026-A" className="input-premium w-full px-4 py-3 bg-theme-app border border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-theme-primary font-bold" /></div>
           </div>
           <div><label className="block mb-1">Enrollment Date</label><input type="date" value={form.enrollmentDate} onChange={e => setForm(f => ({ ...f, enrollmentDate: e.target.value }))} className="input-premium w-full px-4 py-3 bg-theme-app border border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-theme-primary font-bold" /></div>
+          <div><label className="block mb-1">Monthly Fee (optional)</label><input type="number" min="0" step="any" value={form.monthlyFee} onChange={e => setForm(f => ({ ...f, monthlyFee: e.target.value }))} placeholder="e.g. 800" className="input-premium w-full px-4 py-3 bg-theme-app border border-theme-border-soft rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent/30 text-theme-primary font-bold" /></div>
           <div className="pt-4">
             <button type="submit" disabled={saving} className="w-full py-3.5 bg-[image:var(--accent-gradient)] text-white font-black uppercase tracking-wider rounded-xl hover:opacity-90 transition-all shadow-md active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2">
               {saving ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><GraduationCap className="w-4 h-4" />{editItem ? 'Update' : 'Save'} Student</>}

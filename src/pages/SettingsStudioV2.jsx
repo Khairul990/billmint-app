@@ -21,7 +21,7 @@ import {
   Check, CheckCircle2, QrCode, Palette, LayoutTemplate, Database,
   Download, Upload, Wifi, WifiOff, RotateCcw, Users,
   Globe, Sliders, Sparkles, Link, Smartphone, Search,
-  X, Star, Bell, Shield, CreditCard, Settings2,
+  X, Star, Bell, Shield, CreditCard, Settings2, PenLine,
   MessageCircle, ShieldCheck, Key, Zap,
   Sun, Moon, Eye, Clock, AlertTriangle, ArrowLeft,
   Layers, PaintBucket, Briefcase,
@@ -200,6 +200,7 @@ const SettingsStudioV2 = ({
   const [defaultTax, setDefaultTax] = useState(0);
   const [defaultNotes, setDefaultNotes] = useState('');
   const [terms, setTerms] = useState('');
+  const [signatureDataUrl, setSignatureDataUrl] = useState('');
   const [pdfFooter, setPdfFooter] = useState('');
   const [brandColor, setBrandColor] = useState('#14b8a6');
   const [invoiceTemplate, setInvoiceTemplate] = useState('modern');
@@ -291,6 +292,7 @@ const SettingsStudioV2 = ({
       setDefaultTax(settings.defaultTax !== undefined ? settings.defaultTax : 0);
       setDefaultNotes(settings.defaultNotes || '');
       setTerms(settings.terms || '');
+      setSignatureDataUrl(settings.signatureDataUrl || '');
       setPdfFooter(settings.pdfFooter || '');
       setUpiId(settings.upiId || '');
       setPaymentQrEnabled(settings.paymentQrEnabled || false);
@@ -493,7 +495,7 @@ const SettingsStudioV2 = ({
         ...settings, businessName, businessType, logoUrl, ownerName, phone, whatsapp, email, address, gstNumber,
         geminiApiKey, twilioAccountSid, twilioAuthToken, country, language, currency, currencyCode,
         taxLabel, vatTax, dateFormat, numberFormat, invoicePrefix, defaultTax: parseFloat(defaultTax) || 0,
-        defaultNotes, terms, pdfFooter, upiId, paymentQrEnabled, paymentMethod, bkashNumber, nagadNumber,
+        defaultNotes, terms, pdfFooter, signatureDataUrl, upiId, paymentQrEnabled, paymentMethod, bkashNumber, nagadNumber,
         rocketNumber, payeeName, paymentNote, showQrInPdf, showQrInPreview, customPaymentLink,
         themeColor: themeId, themePreset, darkMode, brandColor, invoiceTemplate, defaultBillingTemplate,
         enableHaptics: true, enableSounds: true, cornerRadius, shadowIntensity, animationSpeed, fontDensity,
@@ -588,6 +590,7 @@ const SettingsStudioV2 = ({
     setDefaultTax(settings.defaultTax !== undefined ? settings.defaultTax : 0);
     setDefaultNotes(settings.defaultNotes || '');
     setTerms(settings.terms || '');
+      setSignatureDataUrl(settings.signatureDataUrl || '');
     setPdfFooter(settings.pdfFooter || '');
     setUpiId(settings.upiId || '');
     setPaymentQrEnabled(settings.paymentQrEnabled || false);
@@ -1118,6 +1121,55 @@ const SettingsStudioV2 = ({
                 <div className="md:col-span-2">
                   <label className="block text-xs font-bold text-theme-primary mb-1">Default Payment Terms</label>
                   <textarea value={terms} onChange={(e) => setTerms(e.target.value)} rows={2} placeholder="e.g. Payment due within 7 days of invoice date." className="w-full px-3.5 py-2.5 bg-theme-surface/60 border border-theme-border-soft rounded-xl text-xs font-semibold text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent transition-all resize-none" />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-xs font-bold text-theme-primary mb-1">Signature / Stamp (shown on invoices)</label>
+                  {signatureDataUrl ? (
+                    <div className="relative inline-block">
+                      <img src={signatureDataUrl} alt="Signature" className="h-20 object-contain rounded-xl border border-theme-border-soft bg-white p-1" />
+                      <button
+                        onClick={() => setSignatureDataUrl('')}
+                        className="absolute -top-2 -right-2 p-1 rounded-lg bg-theme-card border border-theme-border-soft text-theme-muted hover:text-theme-danger"
+                        title="Remove signature"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="flex items-center justify-center gap-2 w-full px-3.5 py-4 bg-theme-surface/60 border border-dashed border-theme-border-soft rounded-xl text-xs font-bold text-theme-muted hover:text-theme-accent hover:border-theme-accent/50 transition-all cursor-pointer">
+                      <PenLine className="w-4 h-4" /> Upload signature or stamp image
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const f = e.target.files && e.target.files[0];
+                          if (!f) return;
+                          if (!f.type.startsWith('image/')) { toast.error('Please choose an image'); return; }
+                          const r = new FileReader();
+                          r.onload = () => {
+                            const img = new Image();
+                            img.onload = () => {
+                              try {
+                                const maxW = 500;
+                                const scale = Math.min(1, maxW / img.width);
+                                const c = document.createElement('canvas');
+                                c.width = Math.round(img.width * scale);
+                                c.height = Math.round(img.height * scale);
+                                c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+                                setSignatureDataUrl(c.toDataURL('image/png'));
+                                toast.success('Signature added — save to apply');
+                              } catch (err) { toast.error('Could not process the image'); }
+                            };
+                            img.src = r.result;
+                          };
+                          r.readAsDataURL(f);
+                          e.target.value = '';
+                        }}
+                      />
+                    </label>
+                  )}
+                  <p className="text-[10px] text-theme-muted mt-1">Transparent PNG works best. Compressed and stored with your business profile.</p>
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-xs font-bold text-theme-primary mb-1">PDF Footer Notice / Bank Details</label>

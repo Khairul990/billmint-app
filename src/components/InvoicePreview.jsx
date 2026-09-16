@@ -361,6 +361,16 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false, templat
               </p>
             </>
           )}
+          {(() => {
+            const sig = invoice.businessSettings?.signatureDataUrl || invoice.signatureDataUrl;
+            if (!sig) return null;
+            return (
+              <div className="mt-3">
+                <img src={sig} alt="Signature" className="h-14 object-contain self-start mix-blend-multiply dark:mix-blend-normal" style={{ maxHeight: 56 }} />
+                <p className="text-[9px] text-theme-muted dark:text-theme-muted border-t border-theme-border-soft dark:border-theme-border-soft pt-0.5 mt-0.5 inline-block pr-3">Authorised Signature</p>
+              </div>
+            );
+          })()}
         </div>
 
         {/* Math summary */}

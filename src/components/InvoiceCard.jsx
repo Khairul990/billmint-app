@@ -26,7 +26,7 @@ import {
   ShoppingBag,
   GraduationCap,
   Wrench,
-  Package
+  Package, Repeat
 } from 'lucide-react';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { 
@@ -75,7 +75,9 @@ const InvoiceCard = ({
   isDeleted,
   isSelected = false,
   onToggleSelect,
-  onRecordPayment
+  onRecordPayment,
+  onDuplicate,
+  onToggleRecurring
 }) => {
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const menuRef = useRef(null);
@@ -600,6 +602,32 @@ const InvoiceCard = ({
                             <Copy className="w-3.5 h-3.5 text-theme-muted" />
                             <span>Copy Summary</span>
                           </button>
+
+                          {onDuplicate && !isDeleted && (
+                            <button
+                              onClick={() => {
+                                onDuplicate(invoice);
+                                setShowMoreMenu(false);
+                              }}
+                              className="flex items-center gap-2 px-2.5 py-2 text-theme-primary hover:bg-theme-surface rounded-xl transition-colors font-semibold w-full text-left cursor-pointer"
+                            >
+                              <Copy className="w-3.5 h-3.5 text-theme-accent" />
+                              <span>Duplicate Bill</span>
+                            </button>
+                          )}
+
+                          {onToggleRecurring && !isDeleted && (
+                            <button
+                              onClick={() => {
+                                onToggleRecurring(invoice);
+                                setShowMoreMenu(false);
+                              }}
+                              className="flex items-center gap-2 px-2.5 py-2 text-theme-primary hover:bg-theme-surface rounded-xl transition-colors font-semibold w-full text-left cursor-pointer"
+                            >
+                              <Repeat className="w-3.5 h-3.5 text-theme-accent" />
+                              <span>{invoice.recurring ? 'Turn Off Monthly Billing' : 'Make Monthly Bill'}</span>
+                            </button>
+                          )}
 
                           {onDownloadBackup && (
                             <button

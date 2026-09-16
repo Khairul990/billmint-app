@@ -289,6 +289,96 @@ function App() {
   const [userRole, setUserRole] = useState(() => localStorage.getItem('billqyro_user_role') || 'user');
   const [userPermissions, setUserPermissions] = useState(null);
   const [workspaceVerified, setWorkspaceVerified] = useState(false);
+  const [billPrefill, setBillPrefill] = useState(null);
+
+  // ===== Duplicate / Fee-bill prefill channel =====
+  const handleDuplicateInvoice = (inv) => {
+    setEditingInvoice(null);
+    setBillPrefill({ mode: 'duplicate', source: inv, _prefillId: 'dup_' + (inv?.id || Date.now()) });
+    setCurrentTab('create-invoice');
+  };
+
+  const handleFeeInvoice = (student) => {
+    setEditingInvoice(null);
+    setBillPrefill({ mode: 'fee', student, _prefillId: 'fee_' + (student?.id || Date.now()) });
+    setCurrentTab('create-invoice');
+  };
+
+  // ===== Recurring (monthly) invoices =====
+  const nextInvoiceNumberPreview = (list) => {
+    const settings = activeSettings || {};
+    const prefix = settings.invoicePrefix || 'INV-';
+    let max = 0;
+    (list || []).forEach(i => {
+      const n = parseInt(String(i?.invoiceNumber || '').replace(/\D/g, ''), 10);
+      if (Number.isFinite(n) && n > max) max = n;
+    });
+    const start = Number.isFinite(max) && max > 0 ? max : (parseInt(settings.nextInvoiceNumber, 10) || 1000);
+    let n = start + 1;
+    const existing = new Set((list || []).map(i => i?.invoiceNumber).filter(Boolean));
+    let cand = `${prefix}${String(n).padStart(4, '0')}`;
+    while (existing.has(cand)) { n += 1; cand = `${prefix}${String(n).padStart(4, '0')}`; }
+    return cand;
+  };
+
+  const handleToggleRecurring = async (inv) => {
+    const updated = { ...inv, recurring: !inv.recurring };
+    try {
+      if (isDemoSessionActive) {
+        const list = getDemoInvoices().map(i => (i.id === inv.id ? updated : i));
+        localStorage.setItem('billqyro_demo_invoices', JSON.stringify(list));
+        setDemoInvoices(list);
+      } else {
+        await invoiceEngine.saveInvoice(updated);
+        setInvoices(prev => prev.map(i => (i.id === inv.id ? updated : i)));
+      }
+      toast.success(updated.recurring ? `"${inv.invoiceNumber}" marked as a monthly bill` : 'Monthly billing turned off');
+    } catch (e) {
+      console.error(e);
+      toast.error('Could not update monthly billing');
+    }
+  };
+
+  const handleGenerateRecurring = async (srcInv) => {
+    const today = new Date().toISOString().split('T')[0];
+    const payload = {
+      ...srcInv,
+      id: undefined,
+      invoiceNumber: nextInvoiceNumberPreview(isDemoSessionActive ? demoInvoices : invoices),
+      date: today,
+      dueDate: '',
+      amountPaid: 0,
+      paidAmount: 0,
+      balanceDue: srcInv.grandTotal,
+      paymentStatus: 'Unpaid',
+      paymentHistory: [],
+      paymentProofs: [],
+      recurring: true,
+      recurringSeriesId: srcInv.recurringSeriesId || `${srcInv.customerName || 'customer'}|${(srcInv.items || []).map(i => i.itemService || i.name).join('+')}`,
+      generatedFrom: srcInv.invoiceNumber,
+      createdAt: new Date().toISOString(),
+      publicToken: undefined,
+      verificationCode: undefined
+    };
+    try {
+      if (isDemoSessionActive) {
+        const list = [payload, ...getDemoInvoices()];
+        localStorage.setItem('billqyro_demo_invoices', JSON.stringify(list));
+        setDemoInvoices(list);
+        toast.success(`Monthly bill ${payload.invoiceNumber} created`);
+      } else {
+        await invoiceEngine.saveInvoice(payload);
+        setInvoices(prev => [payload, ...prev]);
+        toast.success(`Monthly bill ${payload.invoiceNumber} created`);
+      }
+      return payload;
+    } catch (e) {
+      console.error(e);
+      toast.error('Could not generate the monthly bill');
+      return null;
+    }
+  };
+
   const [collectionContext, setCollectionContext] = useState({ 
     initialCustomer: null, 
     initialInvoice: null,
@@ -1874,6 +1964,9 @@ function App() {
             onPaymentRecorded={handlePaymentRecorded}
             onRecordPayment={handleOpenCollectionCenter}
             onOpenCollection={handleOpenCollectionCenter}
+            onDuplicate={handleDuplicateInvoice}
+            onToggleRecurring={handleToggleRecurring}
+            onGenerateRecurring={handleGenerateRecurring}
           />
         );
       case 'estimates':
@@ -1940,6 +2033,8 @@ function App() {
             }}
             onQuickBillOpen={() => setIsQuickBillOpen(true)}
             subscription={subscription}
+            billPrefill={billPrefill}
+            onPrefillConsumed={() => setBillPrefill(null)}
           />
         );
       case 'guide':
@@ -2013,7 +2108,7 @@ function App() {
           setTimeout(() => setCurrentTab('customers'), 0);
           return <div className="min-h-screen flex items-center justify-center"><ClassicLoader /></div>;
         }
-        return <Students students={students} onSaveStudent={handleSaveStudent} onDeleteStudent={handleDeleteStudent} />;
+        return <Students students={students} onSaveStudent={handleSaveStudent} onDeleteStudent={handleDeleteStudent} onFeeInvoice={handleFeeInvoice} />;
       case 'clients':
         return <Clients />;
       case 'measurements':
