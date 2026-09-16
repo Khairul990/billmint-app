@@ -3,8 +3,9 @@ import { createPortal } from 'react-dom';
 import { 
   ArrowLeft, Save, LayoutTemplate, Plus, Trash2, Copy, FileText, 
   Eye, EyeOff, Maximize, X, Check, ChevronDown, Palette, Columns, 
-  DollarSign, UserPlus, CreditCard, Layers, Tag, ChevronUp, AlertCircle
+  DollarSign, UserPlus, CreditCard, Layers, Tag, ChevronUp, AlertCircle, Scan
 } from 'lucide-react';
+import BarcodeScannerModal from '../components/BarcodeScannerModal';
 import { Button } from '../components/ui/Button';
 import { formatCurrency, formatAmountInWords } from '../utils/invoiceUtils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -50,6 +51,7 @@ const CreateInvoice = ({
   const [viewMode, setViewMode] = useState('pdf');
   const [activeTab, setActiveTab] = useState('listing');
   const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [showPreviewPanel, setShowPreviewPanel] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [draftBusinessSettings, setDraftBusinessSettings] = useState(businessSettings || {});
@@ -917,7 +919,17 @@ const CreateInvoice = ({
             <section>
               <div className="flex items-center justify-between mb-4 pb-3 border-b border-theme-border-soft relative after:content-[''] after:absolute after:bottom-[-1px] after:left-0 after:w-10 after:h-[2px] after:bg-theme-accent">
                 <h3 className="text-xs font-black text-theme-muted uppercase tracking-wider">2. Line Items</h3>
-                <span className="text-2xs text-theme-muted font-semibold">Type item name to auto-fill from catalog</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-2xs text-theme-muted font-semibold hidden sm:inline">Type item name to auto-fill from catalog</span>
+                  <button
+                    type="button"
+                    onClick={() => setIsScannerOpen(true)}
+                    className="flex items-center gap-1.5 text-2xs font-bold px-2.5 py-1.5 rounded-xl bg-theme-surface border border-theme-border-soft text-theme-accent hover:bg-theme-card transition-all"
+                    title="Scan a barcode to add the product to this bill"
+                  >
+                    <Scan className="w-3.5 h-3.5" /> Scan
+                  </button>
+                </div>
               </div>
               <div className="overflow-x-auto -mx-6 px-6">
                 <table className="w-full text-left border-collapse min-w-[600px]">
@@ -1450,6 +1462,31 @@ const CreateInvoice = ({
           </option>
         ))}
       </datalist>
+
+      <BarcodeScannerModal
+        isOpen={isScannerOpen}
+        onClose={() => setIsScannerOpen(false)}
+        products={products}
+        currencySymbol={businessSettings?.currency || '₹'}
+        onProductScanned={(prod) => {
+          setItems(prev => {
+            const clean = prev.filter(r => r && typeof r === 'object');
+            const idx = clean.findIndex(r => !String(r.name || '').trim());
+            const row = {
+              id: `item_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+              sNo: String(clean.length + 1),
+              name: prod.name || '',
+              qty: 1,
+              price: parseFloat(prod.price) || 0,
+              customFields: {}
+            };
+            if (idx >= 0) clean[idx] = row; else clean.push(row);
+            return clean.map((r, i) => ({ ...r, sNo: String(i + 1) }));
+          });
+          setIsScannerOpen(false);
+          toast.success(`${prod.name} added (price auto-filled)`);
+        }}
+      />
     </motion.div>
   );
 };

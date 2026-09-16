@@ -28,6 +28,7 @@ import { settingsEngine } from './services/settingsEngine';
 import { adminEngine } from './services/adminEngine';
 
 import { invoiceEngine } from './services/invoiceEngine';
+import { stockEngine } from './services/stockEngine';
 import { customerEngine } from './services/customerEngine';
 import { staffEngine } from './services/staffEngine';
 import { productEngine } from './services/productEngine';
@@ -978,6 +979,7 @@ function App() {
     let productsUpdated = false;
     const currentProducts = [...products];
     const updatedProductIds = new Set();
+    const stockBeforeSave = new Map(currentProducts.map(p => [p.id, p.stockQty]));
 
     // 1. If editing an existing invoice, reverse previous stock deduction
     const oldInvoice = payload.id ? targetInvoices.find(inv => inv.id === payload.id) : null;
@@ -1024,6 +1026,20 @@ function App() {
       for (const p of currentProducts) {
         if (updatedProductIds.has(p.id)) {
           savePromises.push(productEngine.saveProduct(p));
+          // Audit trail: one net movement per product for this save
+          const before = stockBeforeSave.get(p.id);
+          if (before !== undefined && Number(p.stockQty) !== Number(before)) {
+            stockEngine.recordMovement({
+              productId: p.id,
+              productName: p.name,
+              delta: Number(p.stockQty) - Number(before),
+              type: 'sale',
+              qtyAfter: p.stockQty,
+              refId: payload.id || '',
+              refNumber: payload.invoiceNumber || '',
+              reason: isEditing ? 'Invoice edited (stock rebalanced)' : 'Invoice sale'
+            });
+          }
         }
       }
       Promise.all(savePromises).catch(e => console.error("Error saving products:", e));
@@ -1356,6 +1372,22 @@ function App() {
 
   // Products
   const handleSaveProduct = async (payload) => {
+    // Audit trail: log manual stock changes made from the product form
+    try {
+      const sourceList = isDemoSessionActive ? demoProducts : products;
+      const existing = (sourceList || []).find(p => p.id === payload.id);
+      if (existing && existing.stockQty !== undefined && payload.stockQty !== undefined
+          && Number(payload.stockQty) !== Number(existing.stockQty)) {
+        stockEngine.recordMovement({
+          productId: payload.id,
+          productName: payload.name || existing.name,
+          delta: Number(payload.stockQty) - Number(existing.stockQty),
+          type: 'adjustment',
+          qtyAfter: Number(payload.stockQty),
+          reason: payload.stockAdjustmentReason || 'Stock edited in catalog'
+        });
+      }
+    } catch (e) { /* audit log is best-effort */ }
     if (isDemoSessionActive) {
       if (!payload.id) {
         payload.id = 'demo-prod-' + Date.now();
@@ -1938,6 +1970,7 @@ function App() {
             products={activeProducts}
             onSaveProduct={handleSaveProduct}
             onDeleteProduct={handleDeleteProduct}
+            onSaveExpense={handleSaveExpense}
             businessSettings={activeSettings}
             setCurrentTab={setCurrentTab}
           />

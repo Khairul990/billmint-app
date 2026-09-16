@@ -66,14 +66,26 @@ export const generateDemoWorkspace = () => {
   });
 
   // 2. Products / Services (full catalog)
-  const generatedProducts = DEMO_PRODUCTS.map((p, i) => ({
-    id: `demo-prod-${now}-${i}`,
-    name: p.name,
-    price: p.price,
-    description: 'Sample catalog item',
-    stock: rand(4, 60),
-    createdAt: new Date(now - rand(5, 120) * DAY).toISOString()
-  }));
+  const DEMO_CATEGORIES = ['Tailoring', 'Apparel', 'Services', 'Electronics', 'Printing', 'Accessories'];
+  const generatedProducts = DEMO_PRODUCTS.map((p, i) => {
+    // Every 5th item is deliberately low/out of stock so the Stock Center has something to show
+    const lowStock = i % 5 === 0;
+    const qty = lowStock ? rand(0, 4) : rand(8, 60);
+    return {
+      id: `demo-prod-${now}-${i}`,
+      name: p.name,
+      price: p.price,
+      description: 'Sample catalog item',
+      category: pick(DEMO_CATEGORIES, i),
+      sku: `SKU-${1000 + i}`,
+      barcode: `890${String(1000000 + i * 733).slice(0, 7)}`,
+      unit: 'pcs',
+      stock: qty,
+      stockQty: qty,
+      lowStockThreshold: 5,
+      createdAt: new Date(now - rand(5, 120) * DAY).toISOString()
+    };
+  });
 
   // 3. Invoices (24, spread over the last 90 days)
   const statuses = ['Paid', 'Paid', 'Paid', 'Pending', 'Unpaid', 'Overdue'];
