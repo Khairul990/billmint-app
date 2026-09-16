@@ -4,7 +4,7 @@ export const initialNodes = [
   { id: 'ui-invoices', type: 'uiNode', position: { x: 350, y: 100 }, data: { label: 'Invoices List', file: 'Invoices.jsx', type: 'UI Component' } },
   { id: 'ui-create-invoice', type: 'uiNode', position: { x: 600, y: 100 }, data: { label: 'Create Invoice', file: 'CreateInvoice.jsx', type: 'UI Component' } },
   { id: 'ui-customers', type: 'uiNode', position: { x: 850, y: 100 }, data: { label: 'Customers', file: 'Customers.jsx', type: 'UI Component' } },
-  { id: 'ui-settings', type: 'uiNode', position: { x: 1100, y: 100 }, data: { label: 'Settings Studio', file: 'SettingsStudioV2.jsx', type: 'UI Component' } },
+  { id: 'ui-settings', type: 'uiNode', position: { x: 1100, y: 100 }, data: { label: 'Settings Studio', file: 'studios/StudioLayout.jsx', type: 'UI Component' } },
 
   // --- HTML REFERENCE LAYER ---
   { id: 'html-ref', type: 'referenceNode', position: { x: -200, y: 100 }, data: { label: 'HTML Design Map', file: 'billqyro-redesign.html', type: 'Reference Design' } },
