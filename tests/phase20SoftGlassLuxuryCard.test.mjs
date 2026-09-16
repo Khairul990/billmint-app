@@ -73,7 +73,7 @@ await test('2.2 Dashboard background uses soft theme atmosphere without heavy co
 
 await test('3.1 Financial Semantic Colors remain strictly standard (Green/Amber/Rose/Indigo)', () => {
   // Collections = Green
-  assert.ok(dashboardCode.includes('text-emerald-600') || dashboardCode.includes('bg-emerald-500'), 'Collections must remain Emerald');
+  assert.ok(dashboardCode.includes('text-theme-accent') || dashboardCode.includes('bg-theme-accent'), 'Collections must follow the active theme (dynamic accent, no hardcoded emerald)');
   // Overdue & Expenses = Rose
   assert.ok(dashboardCode.includes('text-rose-600') || dashboardCode.includes('text-rose-500'), 'Expenses/Overdue must remain Rose');
   // Dues = Amber

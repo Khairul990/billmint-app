@@ -111,7 +111,7 @@ await test('TEST I: No Dashboard financial calculation or metric math changed', 
 });
 
 await test('TEST J: Semantic financial colors remain 100% intact (Green/Amber/Rose/Indigo)', () => {
-  assert.ok(dashboardCode.includes('text-emerald-600') || dashboardCode.includes('bg-emerald-500'), 'Collections must remain Emerald Green');
+  assert.ok(dashboardCode.includes('text-theme-accent') || dashboardCode.includes('bg-theme-accent'), 'Collections must follow the active theme (dynamic accent, no hardcoded emerald)');
   assert.ok(dashboardCode.includes('text-amber-600') || dashboardCode.includes('bg-amber-500'), 'Dues must remain Amber');
   assert.ok(dashboardCode.includes('text-rose-600') || dashboardCode.includes('bg-rose-500'), 'Expenses/Overdue must remain Rose');
   assert.ok(dashboardCode.includes('text-indigo-600') || dashboardCode.includes('bg-indigo-500'), 'Liquid/Digital funds must remain Indigo');

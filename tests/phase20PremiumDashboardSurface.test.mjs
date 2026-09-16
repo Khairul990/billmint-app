@@ -63,7 +63,7 @@ await test('1.3 Tooltip and Chart elements consume theme variables with backdrop
 
 await test('2.1 Financial Semantic Colors remain strictly preserved', () => {
   // Success / Money In = Emerald
-  assert.ok(dashboardCode.includes('text-emerald-600') || dashboardCode.includes('bg-emerald-500'), 'Collections must remain Emerald Green');
+  assert.ok(dashboardCode.includes('text-theme-accent') || dashboardCode.includes('bg-theme-accent'), 'Collections must follow the active theme (dynamic accent, no hardcoded emerald)');
   // Danger / Expenses = Rose
   assert.ok(dashboardCode.includes('text-rose-600') || dashboardCode.includes('text-rose-500'), 'Expenses/Overdue must remain Rose Red');
   // Warning / Due = Amber
