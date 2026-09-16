@@ -148,15 +148,23 @@ export const generateDemoWorkspace = () => {
   const expenseCategories = ['Rent', 'Electricity', 'Raw Materials', 'Transport', 'Staff Salary', 'Marketing', 'Maintenance'];
   const generatedExpenses = Array.from({ length: 12 }, (_, i) => {
     const d = new Date(now - rand(0, 75) * DAY);
+    const cat = pick(expenseCategories, i);
+    // Rent and Electricity are monthly recurring series; keep their latest
+    // instance in an older month so the "post this month" banner shows in demo.
+    const isRecurring = cat === 'Rent' || cat === 'Electricity';
+    const recurringDate = new Date(now - rand(35, 55) * DAY);
     return {
       id: `demo-exp-${now}-${i}`,
-      title: pick(expenseCategories, i),
-      category: pick(expenseCategories, i),
+      title: cat,
+      category: cat,
       amount: round50(rand(300, 9000)),
-      date: d.toISOString().split('T')[0],
+      date: (isRecurring ? recurringDate : d).toISOString().split('T')[0],
       createdAt: d.toISOString(),
       paymentMethod: pick(DEMO_PAYMENT_METHODS, i + 1),
       notes: 'Sample expense entry',
+      vendor: pick(['Mega Wholesale', 'CESC Power', 'Green Grocers', 'Ad vert Media', 'ToolBox Rentals'], i),
+      recurring: isRecurring,
+      seriesId: isRecurring ? `${cat.toLowerCase()}|${cat}` : undefined,
       syncStatus: 'synced'
     };
   });

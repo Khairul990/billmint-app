@@ -221,7 +221,7 @@ function App() {
   const [demoCustomers, setDemoCustomers] = useState([]);
   const [demoStaffs, setDemoStaffs] = useState([]);
   const [demoProducts, setDemoProducts] = useState([]);
-  const [demoExpenses] = useState([]);
+  const [demoExpenses, setDemoExpenses] = useState([]);
   const [demoSettings, setDemoSettings] = useState(null);
 
   useEffect(() => {
@@ -236,6 +236,7 @@ function App() {
         setDemoInvoices(getDemoInvoices());
         setDemoCustomers(getDemoCustomers());
         setDemoProducts(getDemoProducts());
+        try { setDemoExpenses(JSON.parse(localStorage.getItem('billqyro_demo_expenses') || '[]')); } catch (e) { setDemoExpenses([]); }
         
         // Reports / settings
         const s = JSON.parse(localStorage.getItem('billqyro_demo_settings') || 'null');
@@ -1473,6 +1474,9 @@ function App() {
     try {
       const { updatedExpenses, firebaseStatus } = await expenseEngine.saveExpense(payload);
       setExpenses(updatedExpenses);
+      if (isDemoSessionActive) {
+        try { setDemoExpenses(JSON.parse(localStorage.getItem('billqyro_demo_expenses') || '[]')); } catch (e) {}
+      }
       if (firebaseStatus === 'failed') {
         toast.success('Expense saved locally. Will sync with cloud when online.');
       } else {
@@ -1487,6 +1491,9 @@ function App() {
   const handleDeleteExpense = async (id) => {
     const { updatedExpenses, firebaseStatus } = await expenseEngine.deleteExpense(id);
     setExpenses(updatedExpenses);
+    if (isDemoSessionActive) {
+      try { setDemoExpenses(JSON.parse(localStorage.getItem('billqyro_demo_expenses') || '[]')); } catch (e) {}
+    }
     if (firebaseStatus === 'failed') {
       toast.success('Expense deleted locally. Will sync with cloud when online.', { id: 'delete-expense-toast' });
     }
