@@ -1,5 +1,5 @@
-﻿import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useI18n } from '../utils/i18n';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useI18n, t } from '../utils/i18n';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import AnimatedPage from '../components/AnimatedPage';

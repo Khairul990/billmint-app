@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useI18n } from '../utils/i18n';
+import { useI18n, t } from '../utils/i18n';
 import { motion, AnimatePresence } from 'framer-motion';
 import AnimatedPage from '../components/AnimatedPage';
 import {
@@ -133,6 +133,7 @@ const getLocalCalendarDate = (dateInput = new Date()) => {
 
 // Premium Custom Chart Tooltip
 const PremiumChartTooltip = ({ active, payload, label, currencySymbol }) => {
+  const { t } = useI18n();
   if (!active || !payload || !payload.length) return null;
 
   const data = payload[0]?.payload || {};
@@ -211,6 +212,7 @@ const Dashboard = ({
   isLoading = false,
   revenueStatus = {}
 }) => {
+  const { t } = useI18n();
   const activeWsId = businessSettings?.activeWorkspaceId || 'default';
   const { isFeatureEnabled } = useFeatureControl(activeWsId);
 

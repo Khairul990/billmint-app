@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { useI18n, getLanguage } from '../utils/i18n';
+import { useI18n, getLanguage, t } from '../utils/i18n';
 import { createPortal } from 'react-dom';
 import { 
   ArrowLeft, Save, LayoutTemplate, Plus, Trash2, Copy, FileText, 
