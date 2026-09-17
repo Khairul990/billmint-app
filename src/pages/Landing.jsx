@@ -11,6 +11,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import Logo from '../components/Logo';
 import { lazyWithRetry } from '../utils/lazyWithRetry';
 import AdBanner from '../components/AdBanner';
+import PwaInstallPrompt from '../components/PwaInstallPrompt';
 
 // Auth/portal forms are only needed when the visitor opens the login modal —
 // lazy keeps their whole subtree (incl. dbEngine/portalEngine) off the boot path.
@@ -1178,6 +1179,9 @@ const Landing = ({ onLoginSuccess }) => {
           </div>
         </ScrollReveal>
       </motion.section>
+
+      {/* ===== PWA INSTALL NUDGE (Android native prompt / iOS guide) ===== */}
+      <PwaInstallPrompt />
 
       {/* ===== FLOATING CONTACT CTAs (WhatsApp + direct call) ===== */}
       <div className="fixed bottom-6 right-6 z-40 flex flex-col items-center gap-3">

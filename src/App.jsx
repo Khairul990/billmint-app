@@ -14,6 +14,7 @@ import {
   SIGNUP_HINT_KEY
 } from './services/demoConversionService';
 import { runDataHealthCheck, evaluateBackupReminder, markBackupReminderDismissed } from './services/dataHealthService';
+import { getOnboardingTip } from './services/onboardingTipsService';
 import { useThemeEngine } from './hooks/useThemeEngine';
 import { 
   isDemoModeActive, 
@@ -833,6 +834,34 @@ function App() {
         }
       } catch (e) { console.warn('Health check failed', e); }
     }, 2500);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, isDemoSessionActive, isDataHydrating]);
+
+  // --- Phase 25: first-7-days onboarding check-in tip (real accounts) ---
+  useEffect(() => {
+    if (!isAuthenticated || isDemoSessionActive || isDataHydrating) return;
+    const t = setTimeout(() => {
+      try {
+        const tip = getOnboardingTip({ invoices, customers, products });
+        if (!tip) return;
+        toast((tt) => (
+          <div className="max-w-xs">
+            <p className="text-sm font-bold">{tip.title}</p>
+            <p className="text-xs font-medium opacity-80 mt-0.5 leading-relaxed">{tip.body}</p>
+            <div className="flex gap-2 mt-2">
+              {tip.action && (
+                <button
+                  onClick={() => { toast.dismiss(tt.id); setCurrentTab(tip.action.tab); }}
+                  className="px-3 py-1.5 bg-[image:var(--accent-gradient)] text-white text-xs font-bold rounded-lg"
+                >{tip.action.label}</button>
+              )}
+              <button onClick={() => toast.dismiss(tt.id)} className="px-3 py-1.5 text-xs font-bold opacity-70">পরে</button>
+            </div>
+          </div>
+        ), { duration: 14000, id: 'onboarding-tip' });
+      } catch (e) { console.warn('Onboarding tip failed', e); }
+    }, 6500);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, isDemoSessionActive, isDataHydrating]);

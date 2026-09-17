@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { IndianRupee, CreditCard, TrendingUp, DollarSign, Settings, Save, RefreshCw, AlertCircle } from 'lucide-react';
+import { IndianRupee, CreditCard, TrendingUp, DollarSign, Settings, Save, RefreshCw, AlertCircle, QrCode, Download } from 'lucide-react';
 import { adminEngine } from '../../services/adminEngine.js';
 import { toast } from 'react-hot-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
@@ -49,6 +49,45 @@ const RevenueCenter = () => {
   const totalPending = revenueStates.reduce((acc, r) => acc + (parseFloat(r.platformPendingAmount) || 0), 0);
   const verifiedProofsCount = proofs.filter(p => p.status === 'Approved' || p.status === 'Verified').length;
   const pendingProofsCount = proofs.filter(p => p.status === 'Pending').length;
+
+  // ── Live UPI QR (Phase 25) ─────────────────────────────────────────────
+  // Renders a scannable UPI intent QR straight from the configured UPI ID —
+  // no external image URL needed. The QR updates live as the admin edits.
+  const qrCanvasRef = useRef(null);
+  const upiId = (revenueConfig.platformUpiId || '').trim();
+  const upiIntent = upiId
+    ? `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent('BillQyro Platform')}&cu=INR`
+    : null;
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      if (!upiIntent || !qrCanvasRef.current) return;
+      try {
+        const QRCode = (await import('qrcode')).default;
+        if (cancelled || !qrCanvasRef.current) return;
+        await QRCode.toCanvas(qrCanvasRef.current, upiIntent, {
+          width: 224,
+          margin: 2,
+          color: { dark: '#04100C', light: '#FFFFFF' }
+        });
+      } catch (e) {
+        console.warn('QR render failed', e);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [upiIntent]);
+
+  const downloadQr = () => {
+    const canvas = qrCanvasRef.current;
+    if (!canvas) return;
+    const a = document.createElement('a');
+    a.href = canvas.toDataURL('image/png');
+    a.download = `billqyro-upi-qr-${(upiId || 'id').replace(/[^a-z0-9]/gi, '_')}.png`;
+    a.click();
+    toast.success('UPI QR ডাউনলোড হয়েছে — যেকোনো জায়গায় প্রিন্ট করে লাগাতে পারবেন');
+  };
+
 
   const handleSaveConfig = async () => {
     setSaving(true);
@@ -191,6 +230,46 @@ const RevenueCenter = () => {
                 placeholder="https://..."
               />
               <span className="text-[10px] text-theme-muted">Static QR graphic displayed to tenants</span>
+            </div>
+          </div>
+
+          {/* Live UPI QR — generated from the UPI ID above (Phase 25) */}
+          <div className="mt-4 flex flex-col sm:flex-row items-center gap-5 rounded-2xl bg-theme-surface/40 border border-theme-border-soft p-4">
+            <div className="w-[224px] h-[224px] rounded-2xl bg-white border border-theme-border-soft flex items-center justify-center overflow-hidden shrink-0">
+              {upiIntent ? (
+                <canvas ref={qrCanvasRef} className="w-[224px] h-[224px]" aria-label="UPI QR" />
+              ) : (
+                <div className="flex flex-col items-center gap-2 text-theme-muted">
+                  <QrCode className="w-8 h-8 opacity-40" />
+                  <span className="text-[10px] font-bold text-center px-4">উপরে UPI ID দিলে এখানে লাইভ QR তৈরি হবে</span>
+                </div>
+              )}
+            </div>
+            <div className="flex-1 min-w-0 space-y-2">
+              <div className="flex items-center gap-2">
+                <QrCode className="w-4 h-4 text-theme-accent" />
+                <p className="text-sm font-black text-theme-primary">লাইভ UPI QR</p>
+              </div>
+              <p className="text-xs text-theme-muted font-semibold leading-relaxed">
+                এই QR UPI ID থেকে সরাসরি তৈরি হয় (<span className="font-numbers">{upiId || '—'}</span>) — যেকোনো UPI অ্যাপ (GPay/PhonePe/Paytm) দিয়ে স্ক্যান করলেই আপনার এই অ্যাকাউন্টে টাকা যাবে।
+                ডাউনলোড করে দোকানে প্রিন্ট করে লাগাতে পারবেন, বা পেমেন্ট-স্ক্রিনের জন্য ব্যবহার করতে পারবেন।
+              </p>
+              <div className="flex flex-wrap gap-2 pt-1">
+                <Button onClick={downloadQr} disabled={!upiIntent} variant="primary" leftIcon={Download}>
+                  QR ডাউনলোড করুন
+                </Button>
+                <Button
+                  onClick={() => {
+                    if (navigator.clipboard && upiIntent) {
+                      navigator.clipboard.writeText(upiIntent).then(() => toast.success('UPI intent লিংক কপি হয়েছে'));
+                    }
+                  }}
+                  disabled={!upiIntent}
+                  variant="outline"
+                >
+                  UPI লিংক কপি
+                </Button>
+              </div>
             </div>
           </div>
 
