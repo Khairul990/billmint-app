@@ -53,62 +53,64 @@ import CommandPalette from './components/CommandPalette';
 import { pageVariants } from './utils/animations';
 import Landing from './pages/Landing';
 
-const DemoLogin = React.lazy(() => import('./pages/DemoLogin'));
-const OnboardingWizard = React.lazy(() => import('./pages/onboarding/OnboardingWizard'));
-const Dashboard = React.lazy(() => import('./pages/Dashboard'));
-const Invoices = React.lazy(() => import('./pages/Invoices'));
-const Estimates = React.lazy(() => import('./pages/Estimates'));
-const PdfTemplateStudio = React.lazy(() => import('./pages/PdfTemplateStudio'));
-const LiveLinkTemplateStudio = React.lazy(() => import('./pages/LiveLinkTemplateStudio'));
-const CreateInvoice = React.lazy(() => import('./pages/CreateInvoice'));
-const HelpCenter = React.lazy(() => import('./pages/HelpCenter'));
-const Customers = React.lazy(() => import('./pages/Customers'));
-const Products = React.lazy(() => import('./pages/Products'));
-const StudioLayout = React.lazy(() => import('./pages/studios/StudioLayout'));
-const Expenses = React.lazy(() => import('./pages/Expenses'));
-const MoreMenu = React.lazy(() => import('./pages/MoreMenu'));
-const PublicInvoice = React.lazy(() => import('./pages/PublicInvoice'));
-const PendingPayments = React.lazy(() => import('./pages/PendingPayments'));
-const CollectionCenter = React.lazy(() => import('./pages/CollectionCenter'));
-const DueLedger = React.lazy(() => import('./pages/DueLedger'));
-const StaffLedger = React.lazy(() => import('./pages/StaffLedger'));
-const TemplateMarketplace = React.lazy(() => import('./pages/TemplateMarketplace'));
-const DesignStudio = React.lazy(() => import('./pages/DesignStudio'));
-const BackupRestore = React.lazy(() => import('./pages/BackupRestore'));
-const Reports = React.lazy(() => import('./pages/Reports'));
-const PrivacyPolicy = React.lazy(() => import('./pages/PrivacyPolicy'));
-const TermsOfService = React.lazy(() => import('./pages/TermsOfService'));
-const RefundPolicy = React.lazy(() => import('./pages/RefundPolicy'));
-const DataDeletion = React.lazy(() => import('./pages/DataDeletion'));
-const Support = React.lazy(() => import('./pages/Support'));
-const SystemHealth = React.lazy(() => import('./pages/SystemHealth'));
-const AuditLogs = React.lazy(() => import('./pages/AuditLogs'));
-const InternalBank = React.lazy(() => import('./pages/InternalBank'));
-const WorkspaceManager = React.lazy(() => import('./pages/WorkspaceManager'));
-const Appointments = React.lazy(() => import('./pages/Appointments'));
-const Orders = React.lazy(() => import('./pages/Orders'));
-const Patients = React.lazy(() => import('./pages/business/Patients'));
-const Students = React.lazy(() => import('./pages/business/Students'));
-const Clients = React.lazy(() => import('./pages/business/Clients'));
-const Measurements = React.lazy(() => import('./pages/business/Measurements'));
-const DesignBook = React.lazy(() => import('./pages/business/DesignBook'));
-const Devices = React.lazy(() => import('./pages/business/Devices'));
-const ServiceJobs = React.lazy(() => import('./pages/business/ServiceJobs'));
-const Projects = React.lazy(() => import('./pages/business/Projects'));
-const Delivery = React.lazy(() => import('./pages/business/Delivery'));
-const OutsourceVendors = React.lazy(() => import('./pages/business/OutsourceVendors'));
-const AdminPanel = React.lazy(() => import('./pages/admin/AdminPanel'));
-const CyberDashboard = React.lazy(() => import('./pages/cybercafe/CyberDashboard'));
-const PortalHub = React.lazy(() => import('./pages/cybercafe/PortalHub'));
-const QuickToolsCenter = React.lazy(() => import('./pages/cybercafe/QuickToolsCenter'));
-const CustomerRegister = React.lazy(() => import('./pages/cybercafe/CustomerRegister'));
-const CashManagement = React.lazy(() => import('./pages/cybercafe/CashManagement'));
-const PaymentDueScreen = React.lazy(() => import('./pages/PaymentDueScreen'));
-const SandboxAdmin = React.lazy(() => import('./pages/admin/SandboxAdmin'));
-const StudentPortal = React.lazy(() => import('./pages/StudentPortal'));
-const UpgradeCenter = React.lazy(() => import('./pages/UpgradeCenter'));
-const CustomerWorkspace = React.lazy(() => import('./pages/CustomerWorkspace'));
-const CustomerPortalConfig = React.lazy(() => import('./pages/CustomerPortalConfig'));
+import { lazyWithRetry } from './utils/lazyWithRetry';
+
+const DemoLogin = lazyWithRetry(() => import('./pages/DemoLogin'));
+const OnboardingWizard = lazyWithRetry(() => import('./pages/onboarding/OnboardingWizard'));
+const Dashboard = lazyWithRetry(() => import('./pages/Dashboard'));
+const Invoices = lazyWithRetry(() => import('./pages/Invoices'));
+const Estimates = lazyWithRetry(() => import('./pages/Estimates'));
+const PdfTemplateStudio = lazyWithRetry(() => import('./pages/PdfTemplateStudio'));
+const LiveLinkTemplateStudio = lazyWithRetry(() => import('./pages/LiveLinkTemplateStudio'));
+const CreateInvoice = lazyWithRetry(() => import('./pages/CreateInvoice'));
+const HelpCenter = lazyWithRetry(() => import('./pages/HelpCenter'));
+const Customers = lazyWithRetry(() => import('./pages/Customers'));
+const Products = lazyWithRetry(() => import('./pages/Products'));
+const StudioLayout = lazyWithRetry(() => import('./pages/studios/StudioLayout'));
+const Expenses = lazyWithRetry(() => import('./pages/Expenses'));
+const MoreMenu = lazyWithRetry(() => import('./pages/MoreMenu'));
+const PublicInvoice = lazyWithRetry(() => import('./pages/PublicInvoice'));
+const PendingPayments = lazyWithRetry(() => import('./pages/PendingPayments'));
+const CollectionCenter = lazyWithRetry(() => import('./pages/CollectionCenter'));
+const DueLedger = lazyWithRetry(() => import('./pages/DueLedger'));
+const StaffLedger = lazyWithRetry(() => import('./pages/StaffLedger'));
+const TemplateMarketplace = lazyWithRetry(() => import('./pages/TemplateMarketplace'));
+const DesignStudio = lazyWithRetry(() => import('./pages/DesignStudio'));
+const BackupRestore = lazyWithRetry(() => import('./pages/BackupRestore'));
+const Reports = lazyWithRetry(() => import('./pages/Reports'));
+const PrivacyPolicy = lazyWithRetry(() => import('./pages/PrivacyPolicy'));
+const TermsOfService = lazyWithRetry(() => import('./pages/TermsOfService'));
+const RefundPolicy = lazyWithRetry(() => import('./pages/RefundPolicy'));
+const DataDeletion = lazyWithRetry(() => import('./pages/DataDeletion'));
+const Support = lazyWithRetry(() => import('./pages/Support'));
+const SystemHealth = lazyWithRetry(() => import('./pages/SystemHealth'));
+const AuditLogs = lazyWithRetry(() => import('./pages/AuditLogs'));
+const InternalBank = lazyWithRetry(() => import('./pages/InternalBank'));
+const WorkspaceManager = lazyWithRetry(() => import('./pages/WorkspaceManager'));
+const Appointments = lazyWithRetry(() => import('./pages/Appointments'));
+const Orders = lazyWithRetry(() => import('./pages/Orders'));
+const Patients = lazyWithRetry(() => import('./pages/business/Patients'));
+const Students = lazyWithRetry(() => import('./pages/business/Students'));
+const Clients = lazyWithRetry(() => import('./pages/business/Clients'));
+const Measurements = lazyWithRetry(() => import('./pages/business/Measurements'));
+const DesignBook = lazyWithRetry(() => import('./pages/business/DesignBook'));
+const Devices = lazyWithRetry(() => import('./pages/business/Devices'));
+const ServiceJobs = lazyWithRetry(() => import('./pages/business/ServiceJobs'));
+const Projects = lazyWithRetry(() => import('./pages/business/Projects'));
+const Delivery = lazyWithRetry(() => import('./pages/business/Delivery'));
+const OutsourceVendors = lazyWithRetry(() => import('./pages/business/OutsourceVendors'));
+const AdminPanel = lazyWithRetry(() => import('./pages/admin/AdminPanel'));
+const CyberDashboard = lazyWithRetry(() => import('./pages/cybercafe/CyberDashboard'));
+const PortalHub = lazyWithRetry(() => import('./pages/cybercafe/PortalHub'));
+const QuickToolsCenter = lazyWithRetry(() => import('./pages/cybercafe/QuickToolsCenter'));
+const CustomerRegister = lazyWithRetry(() => import('./pages/cybercafe/CustomerRegister'));
+const CashManagement = lazyWithRetry(() => import('./pages/cybercafe/CashManagement'));
+const PaymentDueScreen = lazyWithRetry(() => import('./pages/PaymentDueScreen'));
+const SandboxAdmin = lazyWithRetry(() => import('./pages/admin/SandboxAdmin'));
+const StudentPortal = lazyWithRetry(() => import('./pages/StudentPortal'));
+const UpgradeCenter = lazyWithRetry(() => import('./pages/UpgradeCenter'));
+const CustomerWorkspace = lazyWithRetry(() => import('./pages/CustomerWorkspace'));
+const CustomerPortalConfig = lazyWithRetry(() => import('./pages/CustomerPortalConfig'));
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
@@ -122,11 +124,18 @@ class ErrorBoundary extends React.Component {
   componentDidCatch(error, errorInfo) {
     console.error("ErrorBoundary caught an error", error, errorInfo);
     
+    const isChunkError =
+      error?.message?.includes('Failed to fetch dynamically imported module') ||
+      error?.message?.includes('Loading chunk') ||
+      error?.message?.includes('Importing a module script failed');
+
     // Automatically reload on Vite dynamic import failure (new deployment pushed)
-    if (error && error.message && error.message.includes('Failed to fetch dynamically imported module')) {
-      if (!sessionStorage.getItem('billqyro_chunk_failed_reload')) {
-        sessionStorage.setItem('billqyro_chunk_failed_reload', 'true');
-        window.location.reload();
+    if (isChunkError) {
+      const lastReload = parseInt(sessionStorage.getItem('billqyro_chunk_last_reload') || '0', 10);
+      const now = Date.now();
+      if (now - lastReload > 15000) {
+        sessionStorage.setItem('billqyro_chunk_last_reload', String(now));
+        window.location.replace(window.location.origin + window.location.pathname + '?_r=' + now);
         return;
       }
     }
@@ -141,18 +150,74 @@ class ErrorBoundary extends React.Component {
     this.setState({ errorInfo });
   }
 
+  handleHardUpdate = async () => {
+    sessionStorage.removeItem('billqyro_chunk_last_reload');
+    if ('serviceWorker' in navigator) {
+      try {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (const reg of registrations) {
+          await reg.unregister();
+        }
+      } catch (_) {}
+    }
+    if ('caches' in window) {
+      try {
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map((name) => caches.delete(name)));
+      } catch (_) {}
+    }
+    window.location.replace(window.location.origin + window.location.pathname + '?_update=' + Date.now());
+  };
+
   render() {
     if (this.state.hasError) {
+      const isChunkError =
+        this.state.error?.message?.includes('Failed to fetch dynamically imported module') ||
+        this.state.error?.message?.includes('Loading chunk') ||
+        this.state.error?.message?.includes('Importing a module script failed');
+
+      if (isChunkError) {
+        return (
+          <div className="flex flex-col items-center justify-center min-h-screen p-6 text-center bg-slate-950 text-slate-100 font-sans relative overflow-hidden">
+            <div className="absolute inset-0 bg-radial from-emerald-500/10 via-transparent to-transparent pointer-events-none" />
+            <div className="p-8 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-2xl max-w-md w-full relative z-10 backdrop-blur-xl">
+              <div className="w-14 h-14 mx-auto mb-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                <svg className="w-7 h-7 animate-spin" style={{ animationDuration: '4s' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              </div>
+              <h2 className="text-xl font-bold tracking-tight text-white mb-2">New Update Available</h2>
+              <p className="text-sm text-slate-400 mb-6 leading-relaxed">
+                A newer version of BillQyro has been published. Tap below to refresh and load the latest updates.
+              </p>
+              <button
+                onClick={this.handleHardUpdate}
+                className="w-full py-3 px-4 rounded-xl font-bold text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer text-sm"
+              >
+                Update & Refresh App
+              </button>
+            </div>
+          </div>
+        );
+      }
+
       return (
-        <div style={{ padding: '20px', backgroundColor: '#fee2e2', color: '#991b1b', minHeight: '100vh', fontFamily: 'system-ui' }}>
-          <h1 style={{ fontSize: '24px', fontWeight: 'bold' }}>Something went wrong.</h1>
-          <p style={{ marginTop: '10px', fontWeight: 'bold' }}>Error: {this.state.error?.toString()}</p>
-          <pre style={{ marginTop: '20px', padding: '10px', backgroundColor: '#fecaca', overflowX: 'auto', fontSize: '12px' }}>
-            {this.state.errorInfo?.componentStack}
-          </pre>
-          <button onClick={() => window.location.reload()} style={{ marginTop: '20px', padding: '10px 20px', backgroundColor: '#dc2626', color: 'white', borderRadius: '5px', cursor: 'pointer' }}>
-            Reload Page
-          </button>
+        <div className="flex flex-col items-center justify-center min-h-screen p-6 text-center bg-slate-950 text-slate-100 font-sans relative overflow-hidden">
+          <div className="p-8 rounded-3xl bg-slate-900/90 border border-rose-500/20 shadow-2xl max-w-lg w-full text-left relative z-10 backdrop-blur-xl">
+            <h2 className="text-xl font-bold text-rose-400 mb-2">Something went wrong</h2>
+            <p className="text-xs text-slate-400 mb-4">
+              An unexpected application error occurred. Reloading will restore your workspace.
+            </p>
+            <pre className="p-3 bg-black/60 rounded-xl text-[11px] font-mono text-rose-300/80 overflow-x-auto mb-6 max-h-48 border border-white/5 whitespace-pre-wrap">
+              {this.state.error?.toString()}
+            </pre>
+            <button
+              onClick={() => window.location.reload()}
+              className="w-full py-3 px-4 rounded-xl font-bold text-white bg-rose-600 hover:bg-rose-700 shadow-md transition-all cursor-pointer text-sm"
+            >
+              Reload Page
+            </button>
+          </div>
         </div>
       );
     }

@@ -17,22 +17,24 @@ import { SignatureSurface, Badge } from '../../components/ui';
 import { getStudioHeaderTarget } from '../../utils/portalTargets';
 import { useI18n } from '../../utils/i18n';
 
-// Lazy-loaded studio modules
-const BusinessStudio = React.lazy(() => import('./BusinessStudio'));
-const ThemeStudio = React.lazy(() => import('./ThemeStudio'));
-const InvoiceStudio = React.lazy(() => import('./InvoiceStudio'));
-const FormBuilder = React.lazy(() => import('./FormBuilder'));
-const PortalStudio = React.lazy(() => import('./PortalStudio'));
-const DashboardStudio = React.lazy(() => import('./DashboardStudio'));
-const AutomationStudio = React.lazy(() => import('./AutomationStudio'));
-const RoleStudio = React.lazy(() => import('./RoleStudio'));
-const DatabaseStudio = React.lazy(() => import('./DatabaseStudio'));
-const SubscriptionStudio = React.lazy(() => import('./SubscriptionStudio'));
-const SecurityStudio = React.lazy(() => import('./SecurityStudio'));
-const BackupStudio = React.lazy(() => import('./BackupStudio'));
-const LocalizationStudio = React.lazy(() => import('./LocalizationStudio'));
-const NotificationStudio = React.lazy(() => import('./NotificationStudio'));
-const FeatureControlStudio = React.lazy(() => import('./FeatureControlStudio'));
+import { lazyWithRetry } from '../../utils/lazyWithRetry';
+
+// Lazy-loaded studio modules with auto-retry
+const BusinessStudio = lazyWithRetry(() => import('./BusinessStudio'));
+const ThemeStudio = lazyWithRetry(() => import('./ThemeStudio'));
+const InvoiceStudio = lazyWithRetry(() => import('./InvoiceStudio'));
+const FormBuilder = lazyWithRetry(() => import('./FormBuilder'));
+const PortalStudio = lazyWithRetry(() => import('./PortalStudio'));
+const DashboardStudio = lazyWithRetry(() => import('./DashboardStudio'));
+const AutomationStudio = lazyWithRetry(() => import('./AutomationStudio'));
+const RoleStudio = lazyWithRetry(() => import('./RoleStudio'));
+const DatabaseStudio = lazyWithRetry(() => import('./DatabaseStudio'));
+const SubscriptionStudio = lazyWithRetry(() => import('./SubscriptionStudio'));
+const SecurityStudio = lazyWithRetry(() => import('./SecurityStudio'));
+const BackupStudio = lazyWithRetry(() => import('./BackupStudio'));
+const LocalizationStudio = lazyWithRetry(() => import('./LocalizationStudio'));
+const NotificationStudio = lazyWithRetry(() => import('./NotificationStudio'));
+const FeatureControlStudio = lazyWithRetry(() => import('./FeatureControlStudio'));
 
 const STUDIO_ROUTES = [
   { type: 'label', label: 'Command Center', tier: 'simple' },
