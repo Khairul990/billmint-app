@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useI18n } from '../utils/i18n';
 import { motion } from 'framer-motion';
 import { 
   Database, 
@@ -26,6 +27,7 @@ import { CardSkeleton } from '../components/PremiumSkeleton';
 import PremiumEmptyState from '../components/PremiumEmptyState';
 
 const BackupRestore = ({ settings, invoices, customers, products, expenses, onImportBackup }) => {
+  const { t } = useI18n();
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -179,7 +181,7 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
           <Database className="w-6 h-6" />
         </div>
         <div>
-          <h1 className="text-2xl font-black text-theme-primary tracking-tight">Backup & Restore</h1>
+          <h1 className="text-2xl font-black text-theme-primary tracking-tight">{t('bk.title', 'Backup & Restore')}</h1>
           <p className="text-xs text-theme-muted font-bold mt-1">Keep your business data safe or migrate it to another device.</p>
         </div>
       </motion.div>
@@ -195,7 +197,7 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
         </div>
         <div className="stat-premium p-4 rounded-2xl border border-theme-border-soft bg-theme-card">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-[10px] uppercase font-black tracking-widest text-theme-muted">Backup Health</p>
+            <p className="text-[10px] uppercase font-black tracking-widest text-theme-muted">{t('bk.health', 'Backup Health')}</p>
             <ShieldCheck className="w-4 h-4 text-theme-accent" />
           </div>
           <div className="flex items-center gap-2">
@@ -232,7 +234,7 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
           <div>
             <div className="flex items-center gap-3 mb-4">
               <DownloadCloud className="w-6 h-6 text-theme-accent" />
-              <h2 className="text-lg font-black text-theme-primary">Export Center</h2>
+              <h2 className="text-lg font-black text-theme-primary">{t('bk.export', 'Export Center')}</h2>
             </div>
             <p className="text-xs font-semibold text-theme-muted leading-relaxed mb-4">
               Select the data types to include in your export.
@@ -271,7 +273,7 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
           {isExporting && (
             <div className="mb-3">
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[10px] font-bold text-theme-muted">Exporting...</span>
+                <span className="text-[10px] font-bold text-theme-muted">{t('bk.exporting', 'Exporting...')}</span>
                 <span className="text-[10px] font-black text-theme-accent">{progressPercent}%</span>
               </div>
               <div className="w-full h-2 rounded-full bg-theme-app dark:bg-theme-surface overflow-hidden">
@@ -302,7 +304,7 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
           <div>
             <div className="flex items-center gap-3 mb-4">
               <UploadCloud className="w-6 h-6 text-indigo-500" />
-              <h2 className="text-lg font-black text-theme-primary">Restore Center</h2>
+              <h2 className="text-lg font-black text-theme-primary">{t('bk.restore', 'Restore Center')}</h2>
             </div>
             <p className="text-xs font-semibold text-theme-muted leading-relaxed mb-4">
               Drag & drop a backup file or click to browse.
@@ -373,7 +375,7 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
             <RefreshCw className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-sm font-black text-theme-primary">Auto Backup Recommendation</h3>
+            <h3 className="text-sm font-black text-theme-primary">{t('bk.auto_rec', 'Auto Backup Recommendation')}</h3>
             <p className="text-[10px] font-semibold text-theme-muted">Set up automatic backups to keep your data safe</p>
           </div>
         </div>
@@ -411,7 +413,7 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
             <AlertTriangle className="w-6 h-6" />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-black text-theme-primary mb-1">Keep Multiple Backup Copies</h3>
+            <h3 className="text-sm font-black text-theme-primary mb-1">{t('bk.multiple', 'Keep Multiple Backup Copies')}</h3>
             <p className="text-[11px] font-semibold text-theme-muted leading-relaxed">
               Store your backup files in at least <strong className="font-black text-amber-600 dark:text-amber-400">two different locations</strong> (e.g., local download + cloud storage). A single backup creates a single point of failure — protect your business with redundancy.
             </p>
@@ -441,7 +443,7 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
             <Shield className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-sm font-black text-theme-primary">Safety Information</h3>
+            <h3 className="text-sm font-black text-theme-primary">{t('bk.safety', 'Safety Information')}</h3>
             <p className="text-[10px] font-semibold text-theme-muted">Best practices for keeping your data secure</p>
           </div>
         </div>
@@ -466,7 +468,7 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
             <ArrowRight className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-sm font-black text-theme-primary">Migration Guide</h3>
+            <h3 className="text-sm font-black text-theme-primary">{t('bk.migration', 'Migration Guide')}</h3>
             <p className="text-[10px] font-semibold text-theme-muted">Moving to a new device?</p>
           </div>
         </div>
@@ -521,7 +523,7 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
               <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-4">
                 <AlertTriangle className="w-8 h-8 text-white" />
               </div>
-              <h2 className="text-xl font-black text-white">Overwrite Warning</h2>
+              <h2 className="text-xl font-black text-white">{t('bk.overwrite', 'Overwrite Warning')}</h2>
             </div>
             
             <div className="p-6 space-y-4">

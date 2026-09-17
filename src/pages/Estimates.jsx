@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useI18n } from '../utils/i18n';
 import { motion, AnimatePresence } from 'framer-motion';
 import AnimatedPage from '../components/AnimatedPage';
 import InvoiceCard from '../components/InvoiceCard';
@@ -51,6 +52,7 @@ const Estimates = ({
   businessSettings,
   onSaveInvoice
 }) => {
+  const { t } = useI18n();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [viewingEstimate, setViewingEstimate] = useState(null);
@@ -201,9 +203,9 @@ const Estimates = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-base font-extrabold text-theme-primary dark:text-theme-primary tracking-tight">
-            Estimates & Quotations
+            {t('est.title', 'Estimates & Quotations')}
           </h2>
-          <p className="text-[10px] text-theme-muted font-bold uppercase tracking-wider mt-0.5">MANAGE QUOTES AND PROPOSALS</p>
+          <p className="text-[10px] text-theme-muted font-bold uppercase tracking-wider mt-0.5">{t('est.subtitle', 'MANAGE QUOTES AND PROPOSALS')}</p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -219,7 +221,7 @@ const Estimates = ({
             className="flex items-center justify-center gap-2 bg-gradient-to-tr from-theme-accent to-theme-accent-dark text-white font-extrabold text-xs px-5 py-3.5 rounded-2xl shadow-premium transition-shadow cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            <span>Create Estimate</span>
+            <span>{t('est.create', 'Create Estimate')}</span>
           </motion.button>
         </div>
       </div>
@@ -227,19 +229,19 @@ const Estimates = ({
       {/* KPI CARDS */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-theme-card p-4 rounded-2xl border border-theme-border-soft shadow-premium">
-          <h3 className="text-[10px] text-theme-muted font-bold uppercase tracking-wider mb-1">Total Estimates</h3>
+          <h3 className="text-[10px] text-theme-muted font-bold uppercase tracking-wider mb-1">{t('est.total', 'Total Estimates')}</h3>
           <p className="text-2xl font-black text-theme-primary">{totalEstimates}</p>
         </div>
         <div className="bg-theme-card p-4 rounded-2xl border border-theme-border-soft shadow-premium">
-          <h3 className="text-[10px] text-theme-muted font-bold uppercase tracking-wider mb-1">Pending</h3>
+          <h3 className="text-[10px] text-theme-muted font-bold uppercase tracking-wider mb-1">{t('est.pending', 'Pending')}</h3>
           <p className="text-2xl font-black text-theme-warning">{pendingCount}</p>
         </div>
         <div className="bg-theme-card p-4 rounded-2xl border border-theme-border-soft shadow-premium">
-          <h3 className="text-[10px] text-theme-muted font-bold uppercase tracking-wider mb-1">Accepted</h3>
+          <h3 className="text-[10px] text-theme-muted font-bold uppercase tracking-wider mb-1">{t('est.accepted', 'Accepted')}</h3>
           <p className="text-2xl font-black text-theme-success">{acceptedCount}</p>
         </div>
         <div className="bg-theme-card p-4 rounded-2xl border border-theme-border-soft shadow-premium">
-          <h3 className="text-[10px] text-theme-muted font-bold uppercase tracking-wider mb-1">Converted</h3>
+          <h3 className="text-[10px] text-theme-muted font-bold uppercase tracking-wider mb-1">{t('est.converted', 'Converted')}</h3>
           <p className="text-2xl font-black text-theme-primary">{convertedCount}</p>
         </div>
       </div>
@@ -259,7 +261,7 @@ const Estimates = ({
                   : 'text-theme-muted hover:text-theme-muted'
               }`}
             >
-              {status}
+              {t('est.tab_' + status.toLowerCase().replace(' ', '_'), status)}
             </button>
           ))}
         </div>
@@ -273,7 +275,7 @@ const Estimates = ({
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search estimate number, client..."
+            placeholder={t('est.search_ph', 'Search estimate number, client...')}
             className="w-full pl-10 pr-4 py-2.5 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft/50 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent focus:bg-theme-card dark:bg-theme-card transition-all text-theme-primary dark:text-theme-primary"
           />
         </div>
@@ -308,9 +310,9 @@ const Estimates = ({
               </div>
               <div className="relative z-10">
                 <img src="/brand/billqyro-icon.png" alt="Empty" className="w-12 h-12 object-contain mx-auto mb-3 opacity-40 grayscale drop-shadow-sm" />
-                <h4 className="font-extrabold text-theme-primary dark:text-theme-muted">No estimates yet</h4>
+                <h4 className="font-extrabold text-theme-primary dark:text-theme-muted">{t('est.empty', 'No estimates yet')}</h4>
                 <p className="text-xs text-theme-muted font-semibold mt-1 max-w-xs mx-auto">
-                  Create your first estimate to see it here!
+                  {t('est.empty_sub', 'Create your first estimate to see it here!')}
                 </p>
               </div>
             </div>

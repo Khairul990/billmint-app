@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { useI18n } from '../utils/i18n';
 import { motion, AnimatePresence } from 'framer-motion';
 import AnimatedPage from '../components/AnimatedPage';
 import { 
@@ -612,7 +613,7 @@ const CommandSearchPalette = ({ isOpen, onClose, onSelectResult, isDocActive }) 
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search active guides, workflows, troubleshooting, FAQs..."
+              placeholder={t('hc.search_ph', 'Search active guides, workflows, troubleshooting, FAQs...')}
               className="w-full bg-transparent border-none text-xs sm:text-sm font-semibold text-theme-primary placeholder-theme-muted focus:outline-none"
             />
             <kbd className="px-1.5 py-0.5 rounded text-[10px] font-black bg-theme-surface text-theme-muted border border-theme-border-soft">
@@ -682,6 +683,7 @@ const CommandSearchPalette = ({ isOpen, onClose, onSelectResult, isDocActive }) 
  * Help Center 5.0 — BillQyro Product Education & Academy Hub
  */
 const HelpCenter = ({ setCurrentTab, activeWorkspaceId, businessSettings }) => {
+  const { t } = useI18n();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [activeTutorial, setActiveTutorial] = useState(null);
@@ -820,10 +822,10 @@ const HelpCenter = ({ setCurrentTab, activeWorkspaceId, businessSettings }) => {
             </div>
             <div>
               <h2 className="text-sm font-black text-theme-primary tracking-tight">
-                BillQyro Product Academy
+                {t('hc.academy', 'BillQyro Product Academy')}
               </h2>
               <p className="text-[10px] font-bold text-theme-muted uppercase tracking-wider">
-                Learn, Explore & Master Your Workspace
+                {t('hc.academy_sub', 'Learn, Explore & Master Your Workspace')}
               </p>
             </div>
           </div>
@@ -860,11 +862,11 @@ const HelpCenter = ({ setCurrentTab, activeWorkspaceId, businessSettings }) => {
             </div>
             
             <h1 className="text-3xl sm:text-4xl font-black text-theme-primary tracking-tight">
-              Everything you need to master BillQyro.
+              {t('hc.title', 'Everything you need to master BillQyro.')}
             </h1>
             
             <p className="text-xs sm:text-sm font-semibold text-theme-muted leading-relaxed max-w-xl mx-auto">
-              Learn your workspace, explore every active feature, follow visual walkthroughs, and get answers without leaving BillQyro.
+              {t('hc.subtitle', 'Learn your workspace, explore every active feature, follow visual walkthroughs, and get answers without leaving BillQyro.')}
             </p>
           </div>
 
@@ -880,7 +882,7 @@ const HelpCenter = ({ setCurrentTab, activeWorkspaceId, businessSettings }) => {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search active guides, workflows, invoices, payments, customers..."
+                placeholder={t('hc.search_ph', 'Search active guides, workflows, invoices, payments, customers...')}
                 className="w-full pl-11 pr-24 py-3.5 bg-theme-surface border border-theme-border-soft hover:border-theme-border-strong focus:border-theme-accent rounded-2xl text-xs sm:text-sm font-semibold text-theme-primary placeholder-theme-muted focus:outline-none focus:ring-2 focus:ring-theme-accent/20 shadow-inner transition-all"
               />
 

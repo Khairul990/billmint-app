@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useI18n } from '../utils/i18n';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { Landmark, ArrowUpRight, ArrowDownRight, Plus, Download, RotateCcw, Pencil, Wallet, Scale, TrendingUp, Ban, Search, X } from 'lucide-react';
@@ -26,6 +27,7 @@ const emptyForm = {
 };
 
 const InternalBank = ({ customers = [], invoices = [] }) => {
+  const { t } = useI18n();
   const [tab, setTab] = useState('overview');
   const [state, setState] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -271,7 +273,7 @@ const InternalBank = ({ customers = [], invoices = [] }) => {
             <Landmark className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-xl font-black text-theme-primary">{settings.label || 'Internal Bank'}</h1>
+            <h1 className="text-xl font-black text-theme-primary">{settings.label || t('ib.title', 'Internal Bank')}</h1>
             <p className="text-xs text-theme-muted">{settings.account ? settings.account : 'Money in, money out & your running balance'} · {settings.currencySymbol || 'Rs.'}</p>
           </div>
         </div>
@@ -307,7 +309,7 @@ const InternalBank = ({ customers = [], invoices = [] }) => {
         <motion.div key="ov" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="rounded-2xl border border-theme-accent/30 bg-gradient-to-br from-theme-card to-theme-accent/5 p-5 shadow-premium-sm">
-              <p className="text-xs font-bold text-theme-muted uppercase tracking-wider">Current Balance</p>
+              <p className="text-xs font-bold text-theme-muted uppercase tracking-wider">{t('ib.balance', 'Current Balance')}</p>
               <p className={`text-3xl font-black mt-2 ${balance < 0 ? 'text-theme-danger' : 'text-theme-primary'}`}>{formatCurrency(paiseToRupees(balance), settings.currencySymbol || 'Rs.')}</p>
             </div>
             <div className="rounded-2xl border border-theme-success/30 bg-gradient-to-br from-theme-card to-theme-success/5 p-5 shadow-premium-sm">
@@ -338,7 +340,7 @@ const InternalBank = ({ customers = [], invoices = [] }) => {
 
           <div className="grid md:grid-cols-2 gap-3">
             <div className="rounded-2xl border border-theme-card bg-theme-card p-4">
-              <h3 className="text-sm font-black text-theme-primary mb-3">Money In by Category</h3>
+              <h3 className="text-sm font-black text-theme-primary mb-3">{t('ib.money_in', 'Money In by Category')}</h3>
               {state.totals.totalIn === 0 && <p className="text-sm text-theme-muted">No money-in recorded yet.</p>}
               <div className="space-y-2">
                 {(state.ledger || []).filter((t) => t.type === 'moneyIn' && !t.reversed).reduce((map, t) => {
@@ -358,7 +360,7 @@ const InternalBank = ({ customers = [], invoices = [] }) => {
               </div>
             </div>
             <div className="rounded-2xl border border-theme-card bg-theme-card p-5 shadow-premium-sm">
-              <h3 className="text-sm font-black text-theme-primary mb-3">Withdrawals by Category</h3>
+              <h3 className="text-sm font-black text-theme-primary mb-3">{t('ib.money_out', 'Withdrawals by Category')}</h3>
               {(state.ledger || []).filter((t) => t.type === 'moneyOut' && !t.reversed).reduce((map, t) => {
                 map.set(t.category, (map.get(t.category) || 0) + t.amountPaise);
                 return map;
@@ -389,14 +391,14 @@ const InternalBank = ({ customers = [], invoices = [] }) => {
               <input
                 value={filters.search}
                 onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value }))}
-                placeholder="Search ledger…"
+                placeholder={t('ib.search_ph', 'Search ledger…')}
                 className="pl-9 pr-3 py-2 rounded-xl bg-theme-card border border-theme-card text-theme-primary text-sm focus:outline-none focus:border-theme-accent"
               />
             </div>
             <select value={filters.type} onChange={(e) => setFilters((f) => ({ ...f, type: e.target.value }))} className="px-3 py-2 rounded-xl bg-theme-card border border-theme-card text-theme-primary text-sm">
               <option value="all">All Types</option>
-              <option value="moneyIn">Deposit (Income)</option>
-              <option value="moneyOut">Withdraw (Expense)</option>
+              <option value="moneyIn">{t('ib.deposit', 'Deposit (Income)')}</option>
+              <option value="moneyOut">{t('ib.withdraw', 'Withdraw (Expense)')}</option>
             </select>
             <select value={filters.category} onChange={(e) => setFilters((f) => ({ ...f, category: e.target.value }))} className="px-3 py-2 rounded-xl bg-theme-card border border-theme-card text-theme-primary text-sm">
               <option value="all">All Categories</option>
@@ -408,7 +410,7 @@ const InternalBank = ({ customers = [], invoices = [] }) => {
             </label>
           </div>
 
-          {filtered.length === 0 && <p className="text-sm text-theme-muted text-center py-8">No transactions to show.</p>}
+          {filtered.length === 0 && <p className="text-sm text-theme-muted text-center py-8">{t('ib.no_tx', 'No transactions to show.')}</p>}
 
           <div className="space-y-2">
             {filtered.slice(0, 200).map((tx) => (
@@ -428,7 +430,7 @@ const InternalBank = ({ customers = [], invoices = [] }) => {
                   <p className={`font-black text-base ${tx.reversed ? 'text-theme-muted' : tx.type === 'moneyIn' ? 'text-theme-success' : 'text-theme-danger'}`}>
                     {tx.type === 'moneyIn' ? '+' : '- '}{formatCurrency(paiseToRupees(tx.amountPaise), settings.currencySymbol || 'Rs.')}
                   </p>
-                  {tx.type === 'moneyOut' && !tx.reversed && <p className="text-[9px] font-bold text-theme-danger uppercase tracking-wider">Withdraw</p>}
+                  {tx.type === 'moneyOut' && !tx.reversed && <p className="text-[9px] font-bold text-theme-danger uppercase tracking-wider">{t('ib.withdraw_badge', 'Withdraw')}</p>}
                 </div>
                 <div className="flex items-center gap-1">
                   {!tx.reversed && (
@@ -496,7 +498,7 @@ const InternalBank = ({ customers = [], invoices = [] }) => {
       {tab === 'settings' && settingsDraft && (
         <motion.div key="st" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="max-w-xl space-y-4">
           <div className="rounded-2xl border border-theme-card bg-theme-card p-4 space-y-3">
-            <h3 className="text-sm font-black text-theme-primary">Bank Settings</h3>
+            <h3 className="text-sm font-black text-theme-primary">{t('ib.settings', 'Bank Settings')}</h3>
             <Field label="Name / Label">
               <input value={settingsDraft.label || ''} onChange={(e) => setDraft('label', e.target.value)} className="w-full px-3 py-2 rounded-xl bg-theme-main border border-theme-card text-theme-primary text-sm focus:outline-none focus:border-theme-accent" />
             </Field>
@@ -506,7 +508,7 @@ const InternalBank = ({ customers = [], invoices = [] }) => {
             <Field label="Currency Symbol">
               <input value={settingsDraft.currencySymbol || ''} onChange={(e) => setDraft('currencySymbol', e.target.value)} className="w-full px-3 py-2 rounded-xl bg-theme-main border border-theme-card text-theme-primary text-sm focus:outline-none focus:border-theme-accent" />
             </Field>
-            <Field label="Opening Balance (Rs.)">
+            <Field label={t('ib.opening', 'Opening Balance (Rs.)')}>
               <input type="number" value={settingsDraft.startingBalanceRupees} onChange={(e) => setDraft('startingBalanceRupees', e.target.value)} className="w-full px-3 py-2 rounded-xl bg-theme-main border border-theme-card text-theme-primary text-sm focus:outline-none focus:border-theme-accent" />
             </Field>
             <div className="flex items-center justify-between pt-1">

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useI18n } from '../utils/i18n';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ShoppingBag, Plus, Search, X, CheckCircle2, Clock, Truck, Ban,
@@ -50,6 +51,7 @@ const StatusBadge = ({ status }) => {
 };
 
 const Orders = ({ invoices = [], customers = [], businessSettings, setCurrentTab }) => {
+  const { t } = useI18n();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -177,22 +179,22 @@ const Orders = ({ invoices = [], customers = [], businessSettings, setCurrentTab
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="section-header text-xl font-extrabold text-theme-primary tracking-tight">Orders</h2>
-          <p className="text-[10px] text-theme-muted font-bold uppercase tracking-wider mt-0.5">MANAGE ORDER FULFILLMENT</p>
+          <h2 className="section-header text-xl font-extrabold text-theme-primary tracking-tight">{t('ord.title', 'Orders')}</h2>
+          <p className="text-[10px] text-theme-muted font-bold uppercase tracking-wider mt-0.5">{t('ord.subtitle', 'MANAGE ORDER FULFILLMENT')}</p>
         </div>
         <button onClick={() => setShowCreateModal(true)}
           className="btn-premium flex items-center justify-center gap-2 bg-gradient-to-tr from-theme-accent to-theme-accent-dark text-white font-extrabold text-xs px-5 py-3.5 rounded-2xl shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all">
-          <Plus className="w-4 h-4" /><span>Create Order</span>
+          <Plus className="w-4 h-4" /><span>{t('ord.create', 'Create Order')}</span>
         </button>
       </div>
 
       {/* STAT CARDS */}
       <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Total Orders', value: stats.total, icon: ShoppingBag, color: 'text-theme-accent', bg: 'bg-theme-accent-light' },
-          { label: 'Pending', value: stats.pending, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-100' },
-          { label: 'In Progress', value: stats.inProgress, icon: TrendingUp, color: 'text-blue-600', bg: 'bg-blue-100' },
-          { label: 'Completed (Month)', value: stats.thisMonth, icon: CheckCircle2, color: 'text-theme-accent', bg: 'bg-theme-tint-bg' },
+          { label: t('ord.stat_total', 'Total Orders'), value: stats.total, icon: ShoppingBag, color: 'text-theme-accent', bg: 'bg-theme-accent-light' },
+          { label: t('ord.stat_pending', 'Pending'), value: stats.pending, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-100' },
+          { label: t('ord.stat_progress', 'In Progress'), value: stats.inProgress, icon: TrendingUp, color: 'text-blue-600', bg: 'bg-blue-100' },
+          { label: t('ord.stat_completed', 'Completed (Month)'), value: stats.thisMonth, icon: CheckCircle2, color: 'text-theme-accent', bg: 'bg-theme-tint-bg' },
         ].map(stat => (
           <motion.div key={stat.label} variants={staggerItem}
             className="stat-premium bg-theme-card rounded-3xl p-5 border border-theme-border-soft shadow-premium">
@@ -217,7 +219,7 @@ const Orders = ({ invoices = [], customers = [], businessSettings, setCurrentTab
             <Search className="w-4 h-4" />
           </span>
           <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by order ID or customer name..."
+            placeholder={t('ord.search_ph', 'Search by order ID or customer name...')}
             className="input-premium w-full pl-10 pr-4 py-2.5 bg-theme-app border border-theme-border-soft/50 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent focus:bg-theme-card transition-all text-theme-primary" />
         </div>
         <div className="flex flex-wrap gap-2">
@@ -227,7 +229,7 @@ const Orders = ({ invoices = [], customers = [], businessSettings, setCurrentTab
                 statusFilter === status
                   ? 'bg-theme-accent text-white shadow-md'
                   : 'bg-theme-surface text-theme-muted border border-theme-border-soft hover:bg-theme-accent/10'
-              }`}>{status}</button>
+              }`}>{t('ord.status_' + status.toLowerCase().replace(' ', '_'), status)}</button>
           ))}
         </div>
       </div>
@@ -235,7 +237,7 @@ const Orders = ({ invoices = [], customers = [], businessSettings, setCurrentTab
       {/* ORDERS LIST */}
       <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-extrabold text-theme-primary tracking-tight">Order Registry</h3>
+          <h3 className="text-sm font-extrabold text-theme-primary tracking-tight">{t('ord.registry', 'Order Registry')}</h3>
           <span className="chip-premium text-[10px] text-theme-muted font-bold uppercase tracking-wider bg-theme-surface px-2 py-0.5 rounded-full">
             {filteredOrders.length} {filteredOrders.length === 1 ? 'Order' : 'Orders'}
           </span>
@@ -249,10 +251,10 @@ const Orders = ({ invoices = [], customers = [], businessSettings, setCurrentTab
                 <Package className="w-10 h-10 text-theme-accent" />
               </div>
               <h4 className="font-extrabold text-theme-primary text-lg">
-                {searchQuery || statusFilter !== 'All' ? 'No Orders Found' : 'No Orders Yet'}
+                {searchQuery || statusFilter !== 'All' ? t('ord.none_found', 'No Orders Found') : t('ord.none_yet', 'No Orders Yet')}
               </h4>
               <p className="text-xs text-theme-muted font-semibold mt-1 max-w-xs mx-auto">
-                {searchQuery || statusFilter !== 'All' ? 'Try adjusting your search or filter.' : 'Create your first order to start tracking fulfillment.'}
+                {searchQuery || statusFilter !== 'All' ? t('ord.none_found_sub', 'Try adjusting your search or filter.') : t('ord.none_yet_sub', 'Create your first order to start tracking fulfillment.')}
               </p>
               {!searchQuery && statusFilter === 'All' && (
                 <button onClick={() => setShowCreateModal(true)}

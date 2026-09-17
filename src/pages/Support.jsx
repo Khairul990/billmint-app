@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useI18n } from '../utils/i18n';
 import AnimatedPage from '../components/AnimatedPage';
 import { LifeBuoy, ArrowLeft, Mail, MessageCircle, FileText, Check, AlertCircle, Plus, Send, Upload, Inbox, CheckCircle } from 'lucide-react';
 import { authEngine } from '../services/authEngine';
@@ -7,6 +8,7 @@ import { supportEngine } from '../services/supportEngine';
 import { toast } from 'react-hot-toast';
 
 export default function Support({ onBack }) {
+  const { t } = useI18n();
   const [activeTab, setActiveTab] = useState('faq'); // 'faq' | 'tickets' | 'features' | 'changelog'
   
   // Support ticket form state
@@ -144,7 +146,7 @@ export default function Support({ onBack }) {
               <ArrowLeft className="w-5 h-5" />
             </button>
             <h1 className="text-lg font-black tracking-tight flex items-center gap-2">
-              <LifeBuoy className="w-5 h-5 text-theme-accent" /> Help & Support Center
+              <LifeBuoy className="w-5 h-5 text-theme-accent" /> {t('sup.title', 'Help & Support Center')}
             </h1>
           </div>
         </div>
@@ -182,7 +184,7 @@ export default function Support({ onBack }) {
             </div>
 
             <div className="text-center py-4">
-              <h2 className="text-xl font-black mb-1">How can we help you?</h2>
+              <h2 className="text-xl font-black mb-1">{t('sup.how', 'How can we help you?')}</h2>
               <p className="text-theme-muted text-xs font-semibold">Our support team is here to assist you with any questions or issues.</p>
             </div>
 
@@ -191,8 +193,8 @@ export default function Support({ onBack }) {
                 <div className="w-12 h-12 bg-theme-accent/10 text-theme-accent rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <Mail className="w-6 h-6" />
                 </div>
-                <h3 className="text-lg font-bold mb-2">Email Support</h3>
-                <p className="text-sm text-theme-muted mb-4">Send us an email and we'll get back to you within 24 hours.</p>
+                <h3 className="text-lg font-bold mb-2">{t('sup.email', 'Email Support')}</h3>
+                <p className="text-sm text-theme-muted mb-4">{t('sup.email_sub', "Send us an email and we'll get back to you within 24 hours.")}</p>
                 <span className="text-theme-accent font-bold text-sm">support@billqyro.com &rarr;</span>
               </a>
 
@@ -200,7 +202,7 @@ export default function Support({ onBack }) {
                 <div className="w-12 h-12 bg-theme-success/10 text-theme-success rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <MessageCircle className="w-6 h-6" />
                 </div>
-                <h3 className="text-lg font-bold mb-2">Live Chat</h3>
+                <h3 className="text-lg font-bold mb-2">{t('sup.chat', 'Live Chat')}</h3>
                 <p className="text-sm text-theme-muted mb-4">Chat with our support agents directly via WhatsApp.</p>
                 <span className="text-theme-success font-bold text-sm">Chat Now &rarr;</span>
               </a>
@@ -209,7 +211,7 @@ export default function Support({ onBack }) {
             <section className="bg-theme-card rounded-3xl p-6 border border-theme-border-soft shadow-premium">
               <div className="flex items-center gap-3 mb-4">
                 <FileText className="w-5 h-5 text-theme-accent" />
-                <h2 className="text-lg font-black">Frequently Asked Questions</h2>
+                <h2 className="text-lg font-black">{t('sup.faq', 'Frequently Asked Questions')}</h2>
               </div>
               
               <div className="space-y-4">
@@ -235,7 +237,7 @@ export default function Support({ onBack }) {
           <div className="space-y-6">
             {/* Create Ticket Form */}
             <div className="bg-theme-card rounded-3xl p-6 border border-theme-border-soft shadow-premium">
-              <h3 className="text-lg font-black text-theme-primary mb-4">Submit a Support Ticket</h3>
+              <h3 className="text-lg font-black text-theme-primary mb-4">{t('sup.ticket', 'Submit a Support Ticket')}</h3>
               <form onSubmit={handleTicketSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
@@ -267,7 +269,7 @@ export default function Support({ onBack }) {
                   <label className="block text-xs font-bold text-theme-muted uppercase tracking-wider mb-2">Message / Issue Details</label>
                   <textarea 
                     rows="4"
-                    placeholder="Describe your issue in detail so our support team can help..."
+                    placeholder={t('sup.desc_ph', 'Describe your issue in detail so our support team can help...')}
                     value={ticketMsg}
                     onChange={(e) => setTicketMsg(e.target.value)}
                     className="w-full bg-theme-surface border border-theme-border-soft text-theme-primary px-4 py-3 rounded-xl focus:outline-none focus:border-theme-accent text-sm font-semibold resize-none"
