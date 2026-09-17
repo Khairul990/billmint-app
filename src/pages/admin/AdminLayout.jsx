@@ -4,7 +4,8 @@ import {
   Activity, Users, Building2, ListPlus, CreditCard, IndianRupee,
   Settings, Megaphone, ToggleRight, Power, ShieldCheck, Database,
   HardDrive, RefreshCw, ShieldAlert, ArrowLeft, Menu, X, Crown,
-  ChevronLeft, ChevronRight, Sliders, Search, Zap, LayoutDashboard
+  ChevronLeft, ChevronRight, Sliders, Search, Zap, LayoutDashboard,
+  BarChart3, LifeBuoy, History, Beaker
 } from 'lucide-react';
 
 /**
@@ -23,32 +24,41 @@ const AdminLayout = ({ setCurrentTab, children, activeAdminTab, setActiveAdminTa
     {
       group: 'OVERVIEW',
       items: [
-        { id: 'dashboard', label: 'Command Center', icon: LayoutDashboard, hint: 'KPIs & live activity' }
+        { id: 'dashboard', label: 'Command Center', icon: LayoutDashboard, hint: 'KPIs & live activity' },
+        { id: 'analytics', label: 'Analytics', icon: BarChart3, hint: 'Growth & revenue charts' }
       ]
     },
     {
       group: 'USERS & WORKSPACES',
       items: [
         { id: 'users', label: 'Users', icon: Users, hint: 'Accounts & access' },
-        { id: 'workspaces', label: 'Workspaces', icon: Building2, hint: 'Tenant management' },
-        { id: 'subscriptions', label: 'Plans & Subscriptions', icon: ListPlus, hint: 'Premium lifecycle' }
+        { id: 'workspaces', label: 'Workspaces', icon: Building2, hint: 'Tenant management' }
       ]
     },
     {
       group: 'FINANCIAL',
       items: [
         { id: 'payments', label: 'Payment Proofs', icon: CreditCard, hint: 'Approve UPI proofs' },
+        { id: 'subscriptions', label: 'Premium Control', icon: Crown, hint: 'Plans, pricing & overrides' },
         { id: 'revenue', label: 'Platform Revenue', icon: IndianRupee, hint: 'Earnings & dues' },
-        { id: 'billing', label: 'Billing Configuration', icon: Settings, hint: 'Plans & pricing' }
+        { id: 'billing', label: 'Billing Configuration', icon: Settings, hint: 'UPI, limits & charges' }
+      ]
+    },
+    {
+      group: 'ENGAGEMENT',
+      items: [
+        { id: 'support', label: 'Support Inbox', icon: LifeBuoy, hint: 'Tickets & feature requests' },
+        { id: 'changelog', label: 'Changelog', icon: History, hint: 'Publish release notes' },
+        { id: 'announcements', label: 'Announcements', icon: Megaphone, hint: 'Broadcast messages' }
       ]
     },
     {
       group: 'PLATFORM',
       items: [
-        { id: 'announcements', label: 'Announcements', icon: Megaphone, hint: 'Broadcast messages' },
         { id: 'modules', label: 'Modules & Features', icon: ToggleRight, hint: 'Feature switches' },
         { id: 'maintenance', label: 'Maintenance Mode', icon: Power, hint: 'Global lock' },
-        { id: 'health', label: 'System Health', icon: Activity, hint: 'Telemetry' }
+        { id: 'health', label: 'System Health', icon: Activity, hint: 'Telemetry' },
+        { id: 'test-lab', label: 'Owner Test Lab', icon: Beaker, hint: 'Demo data & sandbox' }
       ]
     },
     {

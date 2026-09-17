@@ -4,7 +4,7 @@ import {
   Users, CreditCard, Activity, Crown, Cloud, IndianRupee,
   CheckCircle2, TrendingUp, AlertTriangle, Layers, Building2,
   UserPlus, FileWarning, Database, Zap, RefreshCw, Power, ServerCrash,
-  Megaphone, ToggleRight, ShieldCheck, HardDrive, ArrowRight, Clock
+  Megaphone, ToggleRight, ShieldCheck, HardDrive, ArrowRight, Clock, LifeBuoy
 } from 'lucide-react';
 import { adminEngine } from '../../services/adminEngine.js';
 import { pageVariants } from '../../utils/animations';
@@ -213,9 +213,9 @@ const AdminDashboard = ({ onNavigate }) => {
 
   const quickActions = [
     { label: 'Approve Payments', desc: 'Verify UPI proofs', icon: CreditCard, tab: 'payments', tone: 'amber' },
+    { label: 'Support Inbox', desc: 'Tickets & requests', icon: LifeBuoy, tab: 'support', tone: 'amber' },
     { label: 'Announcement', desc: 'Broadcast to tenants', icon: Megaphone, tab: 'announcements', tone: 'accent' },
-    { label: 'Feature Flags', desc: 'Toggle modules', icon: ToggleRight, tab: 'modules', tone: 'accent' },
-    { label: 'Backup', desc: 'Snapshot & restore', icon: HardDrive, tab: 'backup', tone: 'accent' }
+    { label: 'Premium Control', desc: 'Plans, pricing, overrides', icon: Crown, tab: 'subscriptions', tone: 'accent' }
   ];
 
   return (
