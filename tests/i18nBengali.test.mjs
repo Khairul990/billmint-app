@@ -94,6 +94,8 @@ it('1.1: English ↔ Bengali dictionary parity (every key translates)', () => {
     ...['cc.title', 'cc.subtitle', 'cc.pending', 'cc.select_invoice', 'cc.search_ph'],
     ...['voice.bill', 'voice.stop', 'voice.listening', 'voice.title', 'voice.unsupported',
         'voice.filled', 'voice.no_items'],
+    ...['setup.step_of', 'setup.title_1', 'setup.title_4', 'setup.sub_2', 'setup.back',
+        'setup.continue', 'setup.launch', 'setup.initializing', 'setup.dot_1', 'setup.dot_4'],
     ...['dashboard', 'invoices', 'customers', 'products', 'expenses', 'settings',
         'create_invoice', 'view_all', 'recent_invoices', 'welcome', 'upgrade'],
     ...['nav.dashboard', 'nav.home', 'nav.due', 'nav.bills', 'nav.more', 'nav.reports',

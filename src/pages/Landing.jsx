@@ -290,7 +290,7 @@ const Landing = ({ onLoginSuccess }) => {
             >
               <span className="w-1.5 h-1.5 rounded-full bg-[#34D399] animate-pulse" />
               <span className="text-[10px] font-extrabold uppercase tracking-[0.22em] text-[var(--bq26-emerald-bright)]">
-                {tr('BILLQYRO SIGNATURE · EMERALD STANDARD', 'BILLQYRO সিগনেচার · এমারল্ড স্ট্যান্ডার্ড')}
+                {tr('OFFLINE-FIRST BILLING PLATFORM', 'অফলাইন-ফার্স্ট বিলিং প্ল্যাটফর্ম')}
               </span>
             </motion.div>
 
@@ -310,7 +310,7 @@ const Landing = ({ onLoginSuccess }) => {
               transition={{ delay: 0.16 }}
               className="text-base sm:text-lg text-[var(--bq26-text-soft)] max-w-xl mx-auto lg:mx-0 font-medium leading-relaxed"
             >
-              {tr('A premium billing command center for modern businesses. Create beautiful invoices, collect faster, manage customer dues, and keep working even when the network disappears.', 'আধুনিক ব্যবসার জন্য প্রিমিয়াম বিলিং কমান্ড সেন্টার। সুন্দর ইনভয়েস তৈরি করুন, দ্রুত টাকা আদায় করুন, কাস্টমারের বাকি ম্যানেজ করুন — নেটওয়ার্ক চলে গেলেও কাজ থেমে থাকবে না।')}
+              {tr('Professional invoices, faster collections and full customer dues control — now with voice billing in Bengali. Built for clinics, tuition centres, shops and studios; works even when the network disappears.', 'প্রফেশনাল ইনভয়েস, দ্রুত আদায় আর বকেয়ার পূর্ণ নিয়ন্ত্রণ — এখন বাংলায় ভয়েস বিলিং সহ। ক্লিনিক, টিউশন, দোকান ও স্টুডিওর জন্য তৈরি; নেটওয়ার্ক চলে গেলেও কাজ থামবে না।')}
             </motion.p>
 
             <motion.div
@@ -353,6 +353,25 @@ const Landing = ({ onLoginSuccess }) => {
               <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-[#34D399]" /> {tr('Free forever plan', 'চিরকাল ফ্রি প্ল্যান')}</span>
               <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-[#34D399]" /> {tr('No credit card', 'ক্রেডিট কার্ড লাগবে না')}</span>
               <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-[#34D399]" /> {tr('Works offline', 'অফলাইনেও চলে')}</span>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.42 }}
+              className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-[var(--bq26-line-soft)]"
+            >
+              {[
+                { v: '6+', en: 'Business categories', bn: 'ব্যবসার ক্যাটাগরি' },
+                { v: '40+', en: 'Pro pages & studios', bn: 'প্রো পেজ ও স্টুডিও' },
+                { v: '🎙️', en: 'Voice billing (BN/EN)', bn: 'ভয়েস বিলিং (বাংলা/EN)' },
+                { v: '100%', en: 'Offline-first & secure', bn: 'অফলাইন-ফার্স্ট ও সুরক্ষিত' }
+              ].map((st, i) => (
+                <div key={i} className="text-center lg:text-left">
+                  <div className="text-xl sm:text-2xl font-black bq26-display text-[var(--bq26-emerald-bright)] tabular-nums">{st.v}</div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--bq26-muted)] mt-0.5">{tr(st.en, st.bn)}</div>
+                </div>
+              ))}
             </motion.div>
           </div>
 

@@ -365,7 +365,25 @@ const dictionary = {
     'voice.title': "Voice to Bill — speak customer, items & amounts (e.g. 'Rahim's bill, rice 5 kg 200 rupees')",
     'voice.unsupported': "Voice input is not supported in this browser. Try Chrome.",
     'voice.filled': "item(s) added to bill",
-    'voice.no_items': "No items detected in speech"
+    'voice.no_items': "No items detected in speech",
+    // ── setup wizard (post-login form) ──
+    'setup.step_of': "Step {n} of 4",
+    'setup.title_1': "Configure Local Region",
+    'setup.title_2': "Business Information",
+    'setup.title_3': "Payment Gateway Setup",
+    'setup.title_4': "Complete Setup & Launch",
+    'setup.sub_1': "Select your country to set localization defaults.",
+    'setup.sub_2': "Personalize invoices with your company details.",
+    'setup.sub_3': "Enable Scan-to-Pay code options for your clients.",
+    'setup.sub_4': "Double check your workspace profile and language.",
+    'setup.back': "Back",
+    'setup.continue': "Continue",
+    'setup.launch': "Launch Workspace",
+    'setup.initializing': "Initializing...",
+    'setup.dot_1': "Region",
+    'setup.dot_2': "Business",
+    'setup.dot_3': "Payments",
+    'setup.dot_4': "Launch"
   },
 
   bn: {
@@ -720,7 +738,25 @@ const dictionary = {
     'voice.title': "ভয়েস টু বিল — গ্রাহক, আইটেম ও টাকা বলুন (যেমন: 'রহিমের বিল, চাল ৫ কেজি ২০০ টাকা')",
     'voice.unsupported': "এই ব্রাউজারে ভয়েস ইনপুট নেই — Chrome ব্যবহার করুন।",
     'voice.filled': "টি আইটেম বিলে যোগ হয়েছে",
-    'voice.no_items': "কথায় কোনো আইটেম ধরা পড়েনি"
+    'voice.no_items': "কথায় কোনো আইটেম ধরা পড়েনি",
+    // ── setup wizard (post-login form) ──
+    'setup.step_of': "ধাপ {n} / ৪",
+    'setup.title_1': "অঞ্চল নির্বাচন",
+    'setup.title_2': "ব্যবসার তথ্য",
+    'setup.title_3': "পেমেন্ট সেটআপ",
+    'setup.title_4': "শেষ ধাপ ও লঞ্চ",
+    'setup.sub_1': "লোকালাইজেশন-ডিফল্টের জন্য দেশ বেছে নিন।",
+    'setup.sub_2': "আপনার কোম্পানির তথ্য দিয়ে ইনভয়েস নিজের করে নিন।",
+    'setup.sub_3': "ক্লায়েন্টদের জন্য স্ক্যান-টু-পে কোড চালু করুন।",
+    'setup.sub_4': "ওয়ার্কস্পেস-প্রোফাইল আর ভাষা একবার দেখে নিন।",
+    'setup.back': "পেছনে",
+    'setup.continue': "এগিয়ে যান",
+    'setup.launch': "ওয়ার্কস্পেস লঞ্চ করুন",
+    'setup.initializing': "শুরু হচ্ছে...",
+    'setup.dot_1': "অঞ্চল",
+    'setup.dot_2': "ব্যবসা",
+    'setup.dot_3': "পেমেন্ট",
+    'setup.dot_4': "লঞ্চ"
   },
 
   hi: {

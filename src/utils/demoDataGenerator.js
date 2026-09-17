@@ -195,7 +195,7 @@ export const generateSmartDemoData = (personaName) => {
 
     invoices.push({
       id: `demo-inv-${Date.now()}-${i}`,
-      invoiceNumber: `DEMO-INV-2026-${(i + 1).toString().padStart(3, '0')}`,
+      invoiceNumber: `DEMO-INV-${new Date().getFullYear()}-${(i + 1).toString().padStart(3, '0')}`,
       customerId: customer.id,
       customerName: customer.name,
       grandTotal: totalAmount,
@@ -248,8 +248,8 @@ export const getDemoInvoice = (category) => {
   return {
     id: 'demo-123',
     invoiceNumber: 'INV-1001',
-    date: '01/01/2024',
-    dueDate: '15/01/2024',
+    date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toLocaleDateString('en-GB'),
+    dueDate: new Date(Date.now() + 12 * 24 * 60 * 60 * 1000).toLocaleDateString('en-GB'),
     customerName: getRandomName(config.customerPrefix),
     customerAddress: '123, Demo Street, City',
     customerPhone: '+91 98765 43210',

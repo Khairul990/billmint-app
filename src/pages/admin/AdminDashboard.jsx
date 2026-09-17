@@ -10,6 +10,7 @@ import { adminEngine } from '../../services/adminEngine.js';
 import { pageVariants } from '../../utils/animations';
 import { KPISkeleton } from '../../components/PremiumSkeleton';
 import { Button } from '../../components/ui/Button.jsx';
+import { toast } from 'react-hot-toast';
 
 const timeAgo = (date) => {
   if (!date) return '';
@@ -26,6 +27,7 @@ const AdminDashboard = ({ onNavigate }) => {
   const [loading, setLoading] = useState(true);
   const [errorState, setErrorState] = useState(null);
   const [lastRefreshed, setLastRefreshed] = useState(null);
+  const [maintenance, setMaintenance] = useState({ loading: true, enabled: false });
   const [stats, setStats] = useState({
     totalUsers: null,
     activeUsers: null,
@@ -140,6 +142,33 @@ const AdminDashboard = ({ onNavigate }) => {
     fetchStats();
   }, []);
 
+  useEffect(() => {
+    let alive = true;
+    adminEngine.getMaintenanceMode()
+      .then((st) => { if (alive) setMaintenance({ loading: false, enabled: !!st?.enabled }); })
+      .catch(() => { if (alive) setMaintenance({ loading: false, enabled: false }); });
+    return () => { alive = false; };
+  }, []);
+
+  const toggleMaintenance = async () => {
+    const next = !maintenance.enabled;
+    const ok = window.confirm(
+      next
+        ? 'Enable GLOBAL MAINTENANCE MODE? All tenants will see a maintenance screen until disabled.'
+        : 'Disable maintenance mode and bring the platform back online?'
+    );
+    if (!ok) return;
+    setMaintenance((m) => ({ ...m, loading: true }));
+    try {
+      await adminEngine.setMaintenanceMode(next);
+      setMaintenance({ loading: false, enabled: next });
+      toast.success(next ? 'Maintenance mode ENABLED platform-wide' : 'Maintenance mode disabled — platform live');
+    } catch (e) {
+      setMaintenance({ loading: false, enabled: !next });
+      toast.error('Failed to update maintenance mode');
+    }
+  };
+
   const formatValue = (val, prefix = '') => {
     if (val === null || val === undefined) return '—';
     if (typeof val === 'number') return `${prefix}${val.toLocaleString()}`;
@@ -252,6 +281,44 @@ const AdminDashboard = ({ onNavigate }) => {
                 <Clock className="w-3 h-3" /> Updated {timeAgo(lastRefreshed)}
               </span>
             )}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Master Control ── */}
+      <div className="rounded-2xl border border-theme-border-soft bg-theme-card p-4 sm:p-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className={`p-2.5 rounded-xl border shrink-0 ${maintenance.enabled ? 'bg-rose-500/10 border-rose-500/30 text-rose-500' : 'bg-theme-tint-bg border-theme-tint-border text-theme-accent'}`}>
+              <Power className="w-5 h-5" />
+            </div>
+            <div className="min-w-0">
+              <h3 className="text-sm font-black text-theme-primary tracking-tight">Master Control</h3>
+              <p className="text-[11px] font-semibold text-theme-muted truncate">
+                {maintenance.loading
+                  ? 'Reading platform state…'
+                  : maintenance.enabled
+                    ? 'MAINTENANCE MODE ACTIVE — platform locked for all tenants'
+                    : 'Platform live — all systems operational for tenants'}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${maintenance.enabled
+              ? 'bg-rose-500/10 text-rose-500 border-rose-500/30'
+              : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'}`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${maintenance.enabled ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'}`} />
+              {maintenance.loading ? '…' : maintenance.enabled ? 'Locked' : 'Live'}
+            </span>
+            <Button
+              size="sm"
+              variant={maintenance.enabled ? 'primary' : 'outline'}
+              onClick={toggleMaintenance}
+              disabled={maintenance.loading}
+              leftIcon={Power}
+            >
+              {maintenance.loading ? 'Syncing…' : maintenance.enabled ? 'Bring Platform Online' : 'Lock Platform'}
+            </Button>
           </div>
         </div>
       </div>

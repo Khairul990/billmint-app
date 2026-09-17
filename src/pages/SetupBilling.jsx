@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useI18n } from '../utils/i18n';
 import { 
   Scissors, 
   ShoppingBasket, 
@@ -26,6 +27,7 @@ import {
 import { toast } from 'react-hot-toast';
 
 const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
+  const { t } = useI18n();
   const [step, setStep] = useState(1);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -252,6 +254,29 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
           ></div>
         </div>
 
+        {/* Step Dots */}
+        <div className="flex items-center justify-center gap-2 sm:gap-3 py-3 bg-theme-surface/60 dark:bg-theme-card border-b border-theme-border-soft/60">
+          {[1, 2, 3, 4].map((n) => (
+            <button
+              key={n}
+              onClick={() => { if (n < step) setStep(n); }}
+              disabled={n >= step}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider transition-all ${
+                n === step
+                  ? 'bg-[image:var(--accent-gradient)] text-theme-button-text shadow-sm'
+                  : n < step
+                    ? 'text-theme-accent hover:bg-theme-accent/10 cursor-pointer'
+                    : 'text-theme-muted'
+              }`}
+            >
+              <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black ${
+                n === step ? 'bg-white/25' : n < step ? 'bg-theme-accent/15' : 'bg-theme-surface border border-theme-border-soft'
+              }`}>{n < step ? '✓' : n}</span>
+              <span className="hidden sm:inline">{t('setup.dot_' + n, ['Region', 'Business', 'Payments', 'Launch'][n - 1])}</span>
+            </button>
+          ))}
+        </div>
+
         {/* Dynamic Step Header */}
         <div className="bg-[#071B3A] p-6 md:p-8 text-white relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-theme-accent-light rounded-full blur-2xl pointer-events-none"></div>
@@ -260,19 +285,19 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
           <div className="relative z-10 flex items-center justify-between">
             <div>
               <span className="text-[10px] bg-theme-accent-light text-theme-accent border border-theme-border-soft px-2.5 py-1 rounded-full uppercase tracking-wider font-extrabold">
-                Step {step} of 4
+                {t('setup.step_of', 'Step {n} of 4').replace('{n}', step)}
               </span>
               <h1 className="text-xl md:text-2xl font-black mt-2 tracking-tight">
-                {step === 1 && 'Configure Local Region'}
-                {step === 2 && 'Business Information'}
-                {step === 3 && 'Payment Gateway Setup'}
-                {step === 4 && 'Complete Setup & Launch'}
+                {step === 1 && t('setup.title_1', 'Configure Local Region')}
+                {step === 2 && t('setup.title_2', 'Business Information')}
+                {step === 3 && t('setup.title_3', 'Payment Gateway Setup')}
+                {step === 4 && t('setup.title_4', 'Complete Setup & Launch')}
               </h1>
               <p className="text-xs text-theme-muted font-medium mt-1">
-                {step === 1 && 'Select your country to set localization defaults.'}
-                {step === 2 && 'Personalize invoices with your company details.'}
-                {step === 3 && 'Enable Scan-to-Pay code options for your clients.'}
-                {step === 4 && 'Double check your workspace profile and language.'}
+                {step === 1 && t('setup.sub_1', 'Select your country to set localization defaults.')}
+                {step === 2 && t('setup.sub_2', 'Personalize invoices with your company details.')}
+                {step === 3 && t('setup.sub_3', 'Enable Scan-to-Pay code options for your clients.')}
+                {step === 4 && t('setup.sub_4', 'Double check your workspace profile and language.')}
               </p>
             </div>
             
@@ -725,7 +750,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
               }`}
             >
               <ChevronLeft className="w-4 h-4" />
-              <span>Back</span>
+              <span>{t('setup.back', 'Back')}</span>
             </button>
 
             {step < 4 ? (
@@ -733,7 +758,7 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                 onClick={handleNext}
                 className="flex items-center gap-1.5 px-6 py-2.5 bg-[image:var(--accent-gradient)] text-theme-button-text border-0 hover:opacity-90 rounded-xl text-xs font-black tracking-wider uppercase active:scale-98 transition-all cursor-pointer shadow-md"
               >
-                <span>Continue</span>
+                <span>{t('setup.continue', 'Continue')}</span>
                 <ChevronRight className="w-4 h-4" />
               </button>
             ) : (
@@ -745,12 +770,12 @@ const SetupBilling = ({ businessSettings, onSaveSettings, setCurrentTab }) => {
                 {isSaving ? (
                   <>
                     <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                    <span>Initializing...</span>
+                    <span>{t('setup.initializing', 'Initializing...')}</span>
                   </>
                 ) : (
                   <>
                     <Check className="w-4 h-4" />
-                    <span>Launch Workspace</span>
+                    <span>{t('setup.launch', 'Launch Workspace')}</span>
                   </>
                 )}
               </button>
