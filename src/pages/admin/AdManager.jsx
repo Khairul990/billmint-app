@@ -60,7 +60,7 @@ const AdManager = () => {
         <div>
           <h1 className="text-xl font-black text-theme-primary flex items-center gap-2.5">
             <span className="w-9 h-9 rounded-xl bg-theme-accent/10 border border-theme-accent/20 flex items-center justify-center">
-              <Megaphone className="w-4.5 h-4.5 w-5 h-5 text-theme-accent" />
+              <Megaphone className="w-5 h-5 text-theme-accent" />
             </span>
             Advertising
           </h1>
