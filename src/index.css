@@ -1565,17 +1565,25 @@ button:active {
 
 
 @media print {
-  body * {
+  /* .no-print now works on every page (was a dead class before Phase 18) */
+  .no-print, .no-print * {
+    display: none !important;
+  }
+  /* When an invoice preview (.print-only-preview) is on screen, print ONLY it.
+     Otherwise (Reports, Invoices, Estimates, PublicInvoice, Ctrl+P anywhere)
+     print the page normally with .no-print chrome hidden — never a blank page. */
+  body:has(.print-only-preview) * {
     visibility: hidden;
   }
-  .print-only-preview, .print-only-preview * {
-    visibility: visible;
+  body:has(.print-only-preview) .print-only-preview,
+  body:has(.print-only-preview) .print-only-preview * {
+    visibility: visible !important;
   }
-  .print-only-preview {
+  body:has(.print-only-preview) .print-only-preview {
     position: absolute;
     left: 0;
     top: 0;
-    transform: scale(1) !important;
+    transform: none !important;
     width: 100% !important;
     max-width: 100% !important;
     box-shadow: none !important;

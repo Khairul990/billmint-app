@@ -4,7 +4,21 @@ import { Bell, Mail, MessageSquare, Send } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import MessageTemplateStudio from './MessageTemplateStudio';
 
-const NotificationStudio = ({ settings, onUpdate }) => {
+const NotificationStudio = ({ settings, onUpdate, setCurrentTab }) => {
+
+  const scrollToTemplateEditor = () => {
+    const el = document.getElementById('bq-template-editor');
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.classList.add('bq-editor-highlight');
+    setTimeout(() => el.classList.remove('bq-editor-highlight'), 1600);
+  };
+
+  const openSubscription = () => {
+    if (setCurrentTab) setCurrentTab('subscription');
+    toast('Upgrade to Pro to unlock gateway automation!', { icon: '👑' });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4 mb-6 border-b border-theme-border-soft pb-6">
@@ -33,21 +47,21 @@ const NotificationStudio = ({ settings, onUpdate }) => {
                 <p className="text-xs font-bold text-theme-primary">Invoice Sent</p>
                 <p className="text-[10px] text-theme-secondary mt-1">When you email an invoice</p>
               </div>
-              <button onClick={() => toast('Premium feature locked', { icon: '🔒' })} className="text-[10px] font-bold text-theme-accent hover:text-white transition-colors bg-theme-accent/10 px-3 py-1.5 rounded-lg border border-theme-accent/20">Edit Template</button>
+              <button onClick={scrollToTemplateEditor} className="text-[10px] font-bold text-theme-accent hover:text-white transition-colors bg-theme-accent/10 px-3 py-1.5 rounded-lg border border-theme-accent/20">Edit Template</button>
             </div>
             <div className="flex items-center justify-between p-3 bg-theme-surface-elevated rounded-xl border border-theme-border-soft">
               <div>
                 <p className="text-xs font-bold text-theme-primary">Payment Reminder</p>
                 <p className="text-[10px] text-theme-secondary mt-1">3 days before due date</p>
               </div>
-              <button onClick={() => toast('Premium feature locked', { icon: '🔒' })} className="text-[10px] font-bold text-theme-accent hover:text-white transition-colors bg-theme-accent/10 px-3 py-1.5 rounded-lg border border-theme-accent/20">Edit Template</button>
+              <button onClick={scrollToTemplateEditor} className="text-[10px] font-bold text-theme-accent hover:text-white transition-colors bg-theme-accent/10 px-3 py-1.5 rounded-lg border border-theme-accent/20">Edit Template</button>
             </div>
             <div className="flex items-center justify-between p-3 bg-theme-surface-elevated rounded-xl border border-theme-border-soft">
               <div>
                 <p className="text-xs font-bold text-theme-primary">Thank You Note</p>
                 <p className="text-[10px] text-theme-secondary mt-1">After payment received</p>
               </div>
-              <button onClick={() => toast('Premium feature locked', { icon: '🔒' })} className="text-[10px] font-bold text-theme-accent hover:text-white transition-colors bg-theme-accent/10 px-3 py-1.5 rounded-lg border border-theme-accent/20">Edit Template</button>
+              <button onClick={scrollToTemplateEditor} className="text-[10px] font-bold text-theme-accent hover:text-white transition-colors bg-theme-accent/10 px-3 py-1.5 rounded-lg border border-theme-accent/20">Edit Template</button>
             </div>
           </div>
         </div>
@@ -83,13 +97,13 @@ const NotificationStudio = ({ settings, onUpdate }) => {
             </div>
           </div>
           
-          <Button onClick={() => toast('Premium feature locked', { icon: '🔒' })} variant="secondary" className="w-full" leftIcon={Send}>
+          <Button onClick={openSubscription} variant="secondary" className="w-full" leftIcon={Send}>
             Configure Gateways
           </Button>
         </div>
       </div>
       
-      <div className="mt-8">
+      <div id="bq-template-editor" className="mt-8 rounded-2xl transition-shadow">
         <MessageTemplateStudio 
           settings={settings}
           whatsappMessageTemplate={settings?.whatsappMessageTemplate || ''}
@@ -101,3 +115,10 @@ const NotificationStudio = ({ settings, onUpdate }) => {
 };
 
 export default NotificationStudio;
+
+<style>{`
+  .bq-editor-highlight {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, #10b981) 35%, transparent) !important;
+    border-radius: 1rem;
+  }
+`}</style>
