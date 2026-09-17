@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useI18n } from '../utils/i18n';
 import { createPortal } from 'react-dom';
 import { 
   ArrowLeft, Save, LayoutTemplate, Plus, Trash2, Copy, FileText, 
@@ -50,6 +51,7 @@ const CreateInvoice = ({
   billPrefill = null,
   onPrefillConsumed = null
 }) => {
+  const { t } = useI18n();
   const [selectedTemplate, setSelectedTemplate] = useState(businessSettings?.selectedPdfTemplate || defaultTemplate);
   const [viewMode, setViewMode] = useState('pdf');
   const [activeTab, setActiveTab] = useState('listing');
@@ -824,7 +826,7 @@ const CreateInvoice = ({
               </div>
               <form onSubmit={handleQuickAddCustomer} className="space-y-3">
                 <div>
-                  <label className="text-xs font-bold text-theme-muted uppercase block mb-1">Customer Name *</label>
+                  <label className="text-xs font-bold text-theme-muted uppercase block mb-1">{t('ci.customer_name', 'Customer Name *')}</label>
                   <input 
                     type="text" 
                     required 
@@ -836,7 +838,7 @@ const CreateInvoice = ({
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-theme-muted uppercase block mb-1">Phone Number</label>
+                  <label className="text-xs font-bold text-theme-muted uppercase block mb-1">{t('ci.phone', 'Phone Number')}</label>
                   <input 
                     type="tel" 
                     placeholder="e.g. +91 9876543210"
@@ -846,7 +848,7 @@ const CreateInvoice = ({
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-theme-muted uppercase block mb-1">Address / City</label>
+                  <label className="text-xs font-bold text-theme-muted uppercase block mb-1">{t('ci.address_city', 'Address / City')}</label>
                   <input 
                     type="text" 
                     placeholder="e.g. Downtown Street"
@@ -999,62 +1001,62 @@ const CreateInvoice = ({
                       onClick={() => setBillingTarget('customer')}
                       className={`flex-1 py-1.5 text-xs font-bold rounded ${billingTarget === 'customer' ? 'bg-theme-surface text-theme-text shadow-sm' : 'text-theme-muted hover:text-theme-text'}`}
                     >
-                      Customer
+                      {t('ci.customer', 'Customer')}
                     </button>
                     <button 
                       onClick={() => setBillingTarget('staff')}
                       className={`flex-1 py-1.5 text-xs font-bold rounded ${billingTarget === 'staff' ? 'bg-theme-surface text-theme-text shadow-sm' : 'text-theme-muted hover:text-theme-text'}`}
                     >
-                      Staff
+                      {t('ci.staff', 'Staff')}
                     </button>
                   </div>
 
                   {billingTarget === 'customer' ? (
                     <>
                       <div className="flex items-center justify-between mb-1.5">
-                        <label className="text-[10px] font-bold text-theme-muted uppercase">Select Customer</label>
+                        <label className="text-[10px] font-bold text-theme-muted uppercase">{t('ci.select_customer', 'Select Customer')}</label>
                         <button 
                           type="button"
                           onClick={() => setShowQuickAddCustomer(true)} 
                           className="text-[10px] font-bold text-theme-accent hover:underline flex items-center gap-1"
                         >
-                          <UserPlus className="w-3 h-3" /> + New Customer
+                          <UserPlus className="w-3 h-3" /> {t('ci.new_customer', '+ New Customer')}
                         </button>
                         <button
                           type="button"
                           onClick={openAiAssistant}
                           className="text-[10px] font-black px-2 py-0.5 rounded-full bg-[image:var(--accent-gradient)] text-white flex items-center gap-1 hover:opacity-90 transition-all"
-                          title="AI Bill Creator — analyse this customer's history and prefill the bill"
+                          title={t('ci.ai_bill_title', "AI Bill Creator — analyse this customer's history and prefill the bill")}
                         >
-                          <Sparkles className="w-3 h-3" /> AI Bill
+                          <Sparkles className="w-3 h-3" /> {t('ci.ai_bill', 'AI Bill')}
                         </button>
                       </div>
                       <select className="input-premium bg-theme-surface" value={selectedCustomerId} onChange={(e) => setSelectedCustomerId(e.target.value)}>
-                        <option value="">Walk-in Customer</option>
+                        <option value="">{t('ci.walk_in', 'Walk-in Customer')}</option>
                         {customers.map(c => <option key={c.id} value={c.id}>{c.name} {c.phone ? `(${c.phone})` : ''}</option>)}
                       </select>
                     </>
                   ) : (
                     <>
-                      <label className="text-[10px] font-bold text-theme-muted uppercase mb-1.5 block">Select Staff</label>
+                      <label className="text-[10px] font-bold text-theme-muted uppercase mb-1.5 block">{t('ci.select_staff', 'Select Staff')}</label>
                       <select className="input-premium bg-theme-surface" value={selectedStaffId} onChange={(e) => setSelectedStaffId(e.target.value)}>
-                        <option value="">Select Staff...</option>
+                        <option value="">{t('ci.select_staff_ph', 'Select Staff...')}</option>
                         {staffs.map(s => <option key={s.id} value={s.id}>{s.name} {s.phone ? `(${s.phone})` : ''}</option>)}
                       </select>
                     </>
                   )}
                 </div>
                 <div className="form-group">
-                  <label className="text-[10px] font-bold text-theme-muted uppercase mb-1.5 block">Invoice Number</label>
+                  <label className="text-[10px] font-bold text-theme-muted uppercase mb-1.5 block">{t('ci.invoice_number', 'Invoice Number')}</label>
                   <input type="text" className="input-premium bg-theme-surface/50 font-mono" value={invoiceNumber} readOnly />
                 </div>
                 <div className="form-group">
-                  <label className="text-[10px] font-bold text-theme-muted uppercase mb-1.5 block">Date</label>
+                  <label className="text-[10px] font-bold text-theme-muted uppercase mb-1.5 block">{t('ci.date', 'Date')}</label>
                   <input type="date" className="input-premium bg-theme-surface" value={date} onChange={(e) => setDate(e.target.value)} />
                 </div>
                 {flagShowDueDate && (
                 <div className="form-group">
-                  <label className="text-[10px] font-bold text-theme-muted uppercase mb-1.5 block">Due Date</label>
+                  <label className="text-[10px] font-bold text-theme-muted uppercase mb-1.5 block">{t('ci.due_date', 'Due Date')}</label>
                   <input type="date" className="input-premium bg-theme-surface" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
                 </div>
                 )}
@@ -1123,7 +1125,7 @@ const CreateInvoice = ({
                                   <input 
                                     type="text" 
                                     className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" 
-                                    placeholder="Item or service description" 
+                                    placeholder={t('ci.item_ph', 'Item or service description')} 
                                     value={item.name} 
                                     onChange={(e) => handleUpdateItem(item.id, 'name', e.target.value)} 
                                     list="products-list" 
@@ -1321,7 +1323,7 @@ const CreateInvoice = ({
                 <div className="space-y-3">
                   <div>
                     <div className="flex justify-between items-center mb-1">
-                      <label className="text-xs font-bold text-theme-muted uppercase">Amount Paid Now</label>
+                      <label className="text-xs font-bold text-theme-muted uppercase">{t('ci.amount_paid_now', 'Amount Paid Now')}</label>
                       <div className="flex gap-1.5">
                         <button 
                           type="button" 
@@ -1351,7 +1353,7 @@ const CreateInvoice = ({
                   </div>
 
                   <div>
-                    <label className="text-xs font-bold text-theme-muted uppercase block mb-1">Payment Method</label>
+                    <label className="text-xs font-bold text-theme-muted uppercase block mb-1">{t('ci.payment_method', 'Payment Method')}</label>
                     <select 
                       value={paymentMethod}
                       onChange={(e) => setPaymentMethod(e.target.value)}
@@ -1387,13 +1389,13 @@ const CreateInvoice = ({
               {/* Notes & Terms */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-[10px] font-bold text-theme-muted uppercase mb-1.5 block">Notes (shown on invoice)</label>
+                  <label className="text-[10px] font-bold text-theme-muted uppercase mb-1.5 block">{t('ci.notes', 'Notes (shown on invoice)')}</label>
                   <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} className="input-premium w-full resize-none" placeholder="Thank you for your business!" />
                 </div>
                 {flagShowTerms && (
                 <div>
-                  <label className="text-[10px] font-bold text-theme-muted uppercase mb-1.5 block">Terms &amp; Conditions</label>
-                  <textarea value={terms} onChange={(e) => setTerms(e.target.value)} rows={3} className="input-premium w-full resize-none" placeholder="e.g. Payment due within 7 days. Goods once sold will not be taken back." />
+                  <label className="text-[10px] font-bold text-theme-muted uppercase mb-1.5 block">{t('ci.terms', 'Terms & Conditions')}</label>
+                  <textarea value={terms} onChange={(e) => setTerms(e.target.value)} rows={3} className="input-premium w-full resize-none" placeholder={t('ci.terms_ph', 'e.g. Payment due within 7 days. Goods once sold will not be taken back.')} />
                 </div>
                 )}
               </div>
@@ -1401,21 +1403,21 @@ const CreateInvoice = ({
               {/* Invariant Totals Box */}
               <div className="space-y-3 bg-white dark:bg-theme-card p-6 rounded-2xl border border-theme-border-soft shadow-sm">
                 <div className="flex justify-between items-center text-sm font-semibold text-theme-muted">
-                  <span>Subtotal</span>
+                  <span>{t('ci.subtotal', 'Subtotal')}</span>
                   <span className="text-theme-primary font-bold tabular-nums">{formatCurrency(totals.subtotal)}</span>
                 </div>
 
                 {draftBusinessSettings?.invoiceBuilderSettings?.showDiscount !== false && (
                   <div className="flex justify-between items-center text-sm font-semibold text-theme-muted gap-4">
                     <div className="flex gap-2 items-center">
-                      <span>Discount</span>
+                      <span>{t('ci.discount', 'Discount')}</span>
                       <select 
                         className="px-2 py-1 bg-theme-surface border border-theme-border-soft rounded-lg text-[10px] font-bold uppercase tracking-wider text-theme-primary focus:outline-none focus:border-theme-accent transition-colors"
                         value={discountType} 
                         onChange={(e) => setDiscountType(e.target.value)}
                       >
-                        <option value="none">None</option>
-                        <option value="flat">Flat</option>
+                        <option value="none">{t('ci.none', 'None')}</option>
+                        <option value="flat">{t('ci.flat', 'Flat')}</option>
                         <option value="percent">%</option>
                       </select>
                     </div>
@@ -1434,7 +1436,7 @@ const CreateInvoice = ({
 
                 {draftBusinessSettings?.invoiceBuilderSettings?.showTax !== false && (
                   <div className="flex justify-between items-center text-sm font-semibold text-theme-muted gap-4">
-                    <span>{draftBusinessSettings?.invoiceBuilderSettings?.taxLabel || draftBusinessSettings?.taxLabel || 'Tax'} (%)</span>
+                    <span>{draftBusinessSettings?.invoiceBuilderSettings?.taxLabel || draftBusinessSettings?.taxLabel || t('ci.tax', 'Tax')} (%)</span>
                     <input 
                       type="number" min="0" 
                       className="w-24 px-3 py-1 bg-theme-surface border border-theme-border-soft rounded-lg text-sm text-right font-semibold text-theme-primary focus:outline-none focus:border-theme-accent transition-colors"
@@ -1446,7 +1448,7 @@ const CreateInvoice = ({
 
                 {draftBusinessSettings?.invoiceBuilderSettings?.showShipping && (
                   <div className="flex justify-between items-center text-sm font-semibold text-theme-muted gap-4">
-                    <span>Shipping</span>
+                    <span>{t('ci.shipping', 'Shipping')}</span>
                     <input 
                       type="number" min="0" 
                       className="w-24 px-3 py-1 bg-theme-surface border border-theme-border-soft rounded-lg text-sm text-right font-semibold text-theme-primary focus:outline-none focus:border-theme-accent transition-colors"
@@ -1459,7 +1461,7 @@ const CreateInvoice = ({
                 <div className="pt-3 border-t border-theme-border-soft/60 space-y-2.5">
                   <div className="flex justify-between items-center text-sm font-semibold text-theme-muted">
                     <span className="text-amber-600 dark:text-amber-400 font-bold flex items-center gap-1">
-                      <span>Old Due</span>
+                      <span>{t('ci.old_due', 'Old Due')}</span>
                     </span>
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-theme-muted font-mono font-bold">+</span>
@@ -1467,7 +1469,7 @@ const CreateInvoice = ({
                         type="number" min="0" 
                         className="w-24 px-2.5 py-1 bg-theme-surface border border-amber-500/30 rounded-lg text-sm text-right font-black text-amber-600 dark:text-amber-400 focus:outline-none focus:border-theme-accent transition-colors tabular-nums bq-financial-number"
                         value={oldDue} readOnly 
-                        title="Customer prior unpaid balance"
+                        title={t('ci.old_due_title', 'Customer prior unpaid balance')}
                       />
                     </div>
                   </div>
@@ -1481,17 +1483,17 @@ const CreateInvoice = ({
                       currency={draftBusinessSettings?.currency || '₹'}
                     />
                   </div>
-                  {flagShowWords && <p className="text-[10px] italic text-theme-muted text-center pt-1" title="Amount in words">{amountInWords}</p>}
+                  {flagShowWords && <p className="text-[10px] italic text-theme-muted text-center pt-1" title={t('ci.amount_words', 'Amount in words')}>{amountInWords}</p>}
                   
                   {totals.oldDue > 0 && totals.paidVal > 0 && (
                     <div className="mt-4 p-2.5 rounded-xl bg-theme-surface/70 border border-theme-border-soft space-y-1 text-2xs font-semibold">
                       <div className="flex justify-between text-amber-700 dark:text-amber-300">
-                        <span>Old Due Paid:</span>
-                        <span className="font-bold">{formatCurrency(totals.allocatedToOldDue)} {totals.remainingOldDue > 0 ? `(${formatCurrency(totals.remainingOldDue)} left)` : '(Cleared)'}</span>
+                        <span>{t('ci.old_due_paid', 'Old Due Paid:')}</span>
+                        <span className="font-bold">{formatCurrency(totals.allocatedToOldDue)} {totals.remainingOldDue > 0 ? `(${formatCurrency(totals.remainingOldDue)} ${t('ci.left', 'left')})` : t('ci.cleared', '(Cleared)')}</span>
                       </div>
                       <div className="flex justify-between text-theme-primary">
-                        <span>Current Bill Paid:</span>
-                        <span className="font-bold">{formatCurrency(totals.allocatedToCurrentInvoice)} {totals.currentBillDue > 0 ? `(${formatCurrency(totals.currentBillDue)} left)` : '(Cleared)'}</span>
+                        <span>{t('ci.current_bill_paid', 'Current Bill Paid:')}</span>
+                        <span className="font-bold">{formatCurrency(totals.allocatedToCurrentInvoice)} {totals.currentBillDue > 0 ? `(${formatCurrency(totals.currentBillDue)} ${t('ci.left', 'left')})` : t('ci.cleared', '(Cleared)')}</span>
                       </div>
                     </div>
                   )}
@@ -1571,7 +1573,7 @@ const CreateInvoice = ({
             <div className="flex space-x-2 ml-4">
               <button onClick={() => setViewMode('pdf')} className={`px-3 py-1 text-[10px] font-bold rounded-md transition-colors ${viewMode === 'pdf' ? 'bg-slate-200 text-slate-800' : 'text-slate-400 hover:text-slate-600'}`}>PDF Preview</button>
               <button onClick={() => setViewMode('livelink')} className={`px-3 py-1 text-[10px] font-bold rounded-md transition-colors ${viewMode === 'livelink' ? 'bg-slate-200 text-slate-800' : 'text-slate-400 hover:text-slate-600'}`}>Live Link Preview</button>
-              <button onClick={() => { window.print(); }} className="px-3 py-1 text-[10px] font-bold rounded-md transition-colors text-slate-400 hover:text-slate-600 flex items-center gap-1">Print Bill</button>
+              <button onClick={() => { window.print(); }} className="px-3 py-1 text-[10px] font-bold rounded-md transition-colors text-slate-400 hover:text-slate-600 flex items-center gap-1">{t('ci.print_bill', 'Print Bill')}</button>
             </div>
           </div>
           

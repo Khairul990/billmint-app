@@ -271,6 +271,10 @@ const Landing = ({ onLoginSuccess }) => {
               <button key={id} onClick={() => scrollTo(id)} className="block w-full text-left text-sm font-bold text-[var(--bq26-text)] py-2.5 border-b border-[var(--bq26-line-soft)]">{label}</button>
             ))}
             <button onClick={() => scrollTo('login')} className="w-full mt-2 py-3 rounded-xl bg-gradient-to-r from-[#0DA678] to-[#0B8F78] text-white text-sm font-black">{tr('Sign In / Register', 'সাইন ইন / রেজিস্টার')}</button>
+              <a href="/downloads/BillQyro-Android.apk" download className="block w-full mt-2 py-3 rounded-xl border border-[rgba(52,211,153,0.35)] text-[var(--bq26-emerald-bright)] text-sm font-black flex items-center justify-center gap-2">
+                <Smartphone className="w-4 h-4" />
+                {tr('Download Android App', 'অ্যান্ড্রয়েড অ্যাপ ডাউনলোড')}
+              </a>
           </motion.div>
         )}
       </nav>
@@ -329,6 +333,15 @@ const Landing = ({ onLoginSuccess }) => {
                 <Zap className="w-4 h-4" />
                 {tr('Try Live Demo', 'লাইভ ডেমো দেখুন')}
               </button>
+              <a
+                href="/downloads/BillQyro-Android.apk"
+                download
+                className="w-full sm:w-auto px-6 py-3.5 text-base font-bold flex items-center justify-center gap-2 rounded-full border border-[rgba(52,211,153,0.35)] text-[var(--bq26-emerald-bright)] hover:bg-[rgba(16,185,129,0.1)] transition-all"
+                title={tr('Install the BillQyro Android app on your phone', 'BillQyro অ্যান্ড্রয়েড অ্যাপ ফোনে ইনস্টল করুন')}
+              >
+                <Smartphone className="w-4 h-4" />
+                {tr('Android App (APK)', 'অ্যান্ড্রয়েড অ্যাপ (APK)')}
+              </a>
             </motion.div>
 
             <motion.div

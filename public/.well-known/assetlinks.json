@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.billqyro.app",
+      "sha256_cert_fingerprints": [
+        "3B:13:8B:1C:4C:2B:4C:8B:ED:86:CA:BF:49:21:CE:9A:E1:C8:55:98:17:55:17:9E:2A:43:83:F7:37:43:41:4B"
+      ]
+    }
+  }
+]

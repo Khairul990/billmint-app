@@ -56,6 +56,25 @@ it('1.1: English ↔ Bengali dictionary parity (every key translates)', () => {
   // key used by the app's translated surfaces.
   setLanguage('en');
   const probeKeys = [
+    // ── phase 2: dashboard / create-invoice / invoices ──
+    ...['dash.greeting_morning', 'dash.greeting_afternoon', 'dash.greeting_evening',
+        'dash.command_center', 'dash.header_sub', 'dash.health', 'dash.health_optimal',
+        'dash.health_attention', 'dash.health_moderate', 'dash.empty_title', 'dash.empty_sub',
+        'dash.step1', 'dash.step2', 'dash.step3', 'dash.customer', 'dash.invoice',
+        'dash.total_revenue_month', 'dash.month_revenue', 'dash.today_inflow', 'dash.today_outflow',
+        'dash.total_collected', 'dash.still_to_collect', 'dash.operating_capital',
+        'dash.collection_realized', 'dash.settled_pct', 'dash.sales_title', 'dash.recent_activity',
+        'dash.recent_invoices', 'dash.money_to_collect', 'dash.paid', 'dash.partial',
+        'dash.unpaid', 'dash.overdue', 'dash.record_payment', 'dash.pro_tip'],
+    ...['ci.customer', 'ci.staff', 'ci.select_customer', 'ci.new_customer', 'ci.ai_bill',
+        'ci.walk_in', 'ci.select_staff', 'ci.invoice_number', 'ci.date', 'ci.due_date',
+        'ci.customer_name', 'ci.phone', 'ci.address_city', 'ci.item_ph', 'ci.amount_paid_now',
+        'ci.payment_method', 'ci.notes', 'ci.terms', 'ci.subtotal', 'ci.discount', 'ci.tax',
+        'ci.shipping', 'ci.old_due', 'ci.print_bill'],
+    ...['inv.title', 'inv.trash_title', 'inv.trash_sub', 'inv.view_trash', 'inv.active',
+        'inv.import', 'inv.export_json', 'inv.create_invoice', 'inv.total_collected',
+        'inv.tab_all', 'inv.tab_paid', 'inv.tab_partial', 'inv.tab_pending', 'inv.tab_overdue',
+        'inv.search_ph', 'inv.cloud_synced', 'inv.delete_ph'],
     ...['dashboard', 'invoices', 'customers', 'products', 'expenses', 'settings',
         'create_invoice', 'view_all', 'recent_invoices', 'welcome', 'upgrade'],
     ...['nav.dashboard', 'nav.home', 'nav.due', 'nav.bills', 'nav.more', 'nav.reports',

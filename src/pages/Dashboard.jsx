@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useI18n } from '../utils/i18n';
 import { motion, AnimatePresence } from 'framer-motion';
 import AnimatedPage from '../components/AnimatedPage';
 import {
@@ -59,6 +60,7 @@ import { Button, ActionButton } from '../components/ui/Button';
 // ANIMATED NUMBER WITH SMOOTH EASING & CLEAN SIGN/SUFFIX PRESERVATION
 // ============================================================================
 const AnimatedNumber = ({ value }) => {
+  const { t } = useI18n();
   const [displayValue, setDisplayValue] = useState(null);
   const strValue = String(value ?? '0');
 
@@ -158,7 +160,7 @@ const PremiumChartTooltip = ({ active, payload, label, currencySymbol }) => {
         </div>
         <div className="flex items-center justify-between">
           <span className="flex items-center gap-1 text-theme-accent font-semibold">
-            <span className="w-2 h-2 rounded-full bg-theme-accent" /> Total Collected:
+            <span className="w-2 h-2 rounded-full bg-theme-accent" /> {t('dash.total_collected', 'Total Collected')}:
           </span>
           <span className="font-black text-theme-accent font-numbers">
             {formatCurrency(collected, currencySymbol)}
@@ -301,9 +303,9 @@ const Dashboard = ({
 
   const getDynamicGreeting = () => {
     const hour = timeNow.getHours();
-    if (hour < 12) return { text: 'Good Morning', icon: '☀️' };
-    if (hour < 18) return { text: 'Good Afternoon', icon: '🌤️' };
-    return { text: 'Good Evening', icon: '🌙' };
+    if (hour < 12) return { text: t('dash.greeting_morning', 'Good Morning'), icon: '☀️' };
+    if (hour < 18) return { text: t('dash.greeting_afternoon', 'Good Afternoon'), icon: '🌤️' };
+    return { text: t('dash.greeting_evening', 'Good Evening'), icon: '🌙' };
   };
   const greeting = getDynamicGreeting();
 
@@ -698,11 +700,11 @@ const Dashboard = ({
     const aging = calculateAgingDistribution(scopedInvoices);
 
     // Business Health Resolver
-    let businessHealth = { label: 'Optimal Health', color: 'emerald', status: 'Healthy', note: 'Strong collection and balanced cash flow' };
+    let businessHealth = { label: t('dash.health_optimal', 'Optimal Health'), color: 'emerald', status: 'Healthy', note: t('dash.health_note_optimal', 'Strong collection and balanced cash flow') };
     if (overdueCount > 3 || (totalOutstanding > 0 && overdueAmount / totalOutstanding > 0.4)) {
-      businessHealth = { label: 'Needs Attention', color: 'rose', status: 'Attention', note: 'High overdue balance requires customer follow-up' };
+      businessHealth = { label: t('dash.health_attention', 'Needs Attention'), color: 'rose', status: 'Attention', note: t('dash.health_note_attention', 'High overdue balance requires customer follow-up') };
     } else if (overdueCount > 0 || pendingPaymentsCount > 0) {
-      businessHealth = { label: 'Moderate Flow', color: 'amber', status: 'Moderate', note: 'A few pending dues or payment proofs require action' };
+      businessHealth = { label: t('dash.health_moderate', 'Moderate Flow'), color: 'amber', status: 'Moderate', note: t('dash.health_note_moderate', 'A few pending dues or payment proofs require action') };
     }
 
     return {
@@ -1013,7 +1015,7 @@ const Dashboard = ({
                       {workspaceName}
                     </span>
                     <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-theme-surface-elevated text-theme-muted border border-theme-border-soft">
-                      {categoryExp.labels?.invoice ? `${businessCategory} • ${categoryExp.labels.invoice}s` : 'Business Command Center'}
+                      {categoryExp.labels?.invoice ? `${businessCategory} • ${categoryExp.labels.invoice}s` : t('dash.command_center', 'Business Command Center')}
                     </span>
                     <span className="text-2xs text-theme-muted font-bold flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-theme-accent animate-pulse" />
@@ -1027,7 +1029,7 @@ const Dashboard = ({
                     <span>👋</span>
                   </h1>
                   <p className="text-xs sm:text-sm text-theme-muted font-medium mt-1">
-                    Your business at a glance — Real-time revenue intelligence, collection flow, and customer ledger.
+                    {t('dash.header_sub', 'Your business at a glance — Real-time revenue intelligence, collection flow, and customer ledger.')}
                   </p>
                 </div>
 
@@ -1044,7 +1046,7 @@ const Dashboard = ({
                     <span className={`w-2 h-2 rounded-full animate-pulse ${
                       metrics.businessHealth.color === 'emerald' ? 'bg-theme-accent' : metrics.businessHealth.color === 'rose' ? 'bg-rose-500' : 'bg-amber-500'
                     }`} />
-                    <span>Business Health: {metrics.businessHealth.label}</span>
+                    <span>{t('dash.health', 'Business Health:')} {metrics.businessHealth.label}</span>
                   </div>
 
                   <div className="flex items-center gap-2.5">
@@ -1056,7 +1058,7 @@ const Dashboard = ({
                       leftIcon={Plus}
                       className="shadow-sm"
                     >
-                      {categoryExp.labels?.invoice ? `Create ${categoryExp.labels.invoice}` : 'Create Invoice'}
+                      {categoryExp.labels?.invoice ? `Create ${categoryExp.labels.invoice}` : t('create_invoice', 'Create Invoice')}
                     </Button>
 
                     {/* Quick Collect Action */}
@@ -1066,7 +1068,7 @@ const Dashboard = ({
                       onClick={onOpenCollection}
                       leftIcon={CreditCard}
                     >
-                      Record Payment
+                      {t('dash.record_payment', 'Record Payment')}
                     </Button>
 
                     {/* Refresh Button */}
@@ -1090,10 +1092,10 @@ const Dashboard = ({
                       <Sparkles className="w-8 h-8" />
                     </div>
                     <h2 className="text-xl sm:text-2xl font-bold bq-font-display text-theme-primary">
-                      Your business starts here
+                      {t('dash.empty_title', 'Your business starts here')}
                     </h2>
                     <p className="text-sm text-theme-muted leading-relaxed">
-                      Welcome to your BillQyro Business Command Center. Create your first customer, record an invoice, and watch your financial ledger come to life.
+                      {t('dash.empty_sub', 'Welcome to your BillQyro Business Command Center. Create your first customer, record an invoice, and watch your financial ledger come to life.')}
                     </p>
                   </div>
 
@@ -1106,10 +1108,10 @@ const Dashboard = ({
                         <UserPlus className="w-5 h-5" />
                       </div>
                       <h3 className="font-bold text-sm text-theme-primary mb-1">
-                        1. Add First {categoryExp.labels?.customer || 'Customer'}
+                        1. {t('dash.step1', 'Add First')} {categoryExp.labels?.customer || t('dash.customer', 'Customer')}
                       </h3>
                       <p className="text-xs text-theme-muted">
-                        Save client contacts and track their balance from day one.
+                        {t('dash.step1_desc', 'Save client contacts and track their balance from day one.')}
                       </p>
                     </div>
 
@@ -1121,10 +1123,10 @@ const Dashboard = ({
                         <FileText className="w-5 h-5" />
                       </div>
                       <h3 className="font-bold text-sm text-theme-primary mb-1">
-                        2. Create First {categoryExp.labels?.invoice || 'Invoice'}
+                        2. {t('dash.step2', 'Create First')} {categoryExp.labels?.invoice || t('dash.invoice', 'Invoice')}
                       </h3>
                       <p className="text-xs text-theme-muted">
-                        Generate professional bills with automatic Earlier Due tracking.
+                        {t('dash.step2_desc', 'Generate professional bills with automatic Earlier Due tracking.')}
                       </p>
                     </div>
 
@@ -1136,10 +1138,10 @@ const Dashboard = ({
                         <CreditCard className="w-5 h-5" />
                       </div>
                       <h3 className="font-bold text-sm text-theme-primary mb-1">
-                        3. Collection Center
+                        3. {t('dash.step3', 'Collection Center')}
                       </h3>
                       <p className="text-xs text-theme-muted">
-                        Accept payments, record cash or UPI, and settle customer accounts.
+                        {t('dash.step3_desc', 'Accept payments, record cash or UPI, and settle customer accounts.')}
                       </p>
                     </div>
                   </div>
@@ -1148,7 +1150,7 @@ const Dashboard = ({
                     <div className="max-w-xl mx-auto p-4 rounded-2xl bg-theme-surface-elevated border border-theme-border-soft flex items-center gap-3 text-left">
                       <Lightbulb className="w-5 h-5 text-amber-500 shrink-0" />
                       <div className="text-xs text-theme-muted">
-                        <span className="font-bold text-theme-primary">Pro Tip for {businessCategory}:</span> {categoryExp.quickTips[0]}
+                        <span className="font-bold text-theme-primary">{t('dash.pro_tip', 'Pro Tip for {cat}:').replace('{cat}', businessCategory)}</span> {categoryExp.quickTips[0]}
                       </div>
                     </div>
                   )}
@@ -1172,7 +1174,7 @@ const Dashboard = ({
                         <div className="flex items-center gap-2">
                           <Calendar className="w-4 h-4 text-theme-accent" />
                           <span className="text-xs font-bold uppercase tracking-wider text-theme-muted">
-                            TOTAL REVENUE (THIS MONTH)
+                            {t('dash.total_revenue_month', 'TOTAL REVENUE (THIS MONTH)')}
                           </span>
                         </div>
                         <span className="text-2xs font-bold text-theme-muted flex items-center gap-1.5">
@@ -1184,7 +1186,7 @@ const Dashboard = ({
                       <div className="py-5 relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                         <div className="flex-1">
                           <FinancialValue
-                            label="Month Revenue"
+                            label={t('dash.month_revenue', 'Month Revenue')}
                             value={metrics.thisMonthRevenue > 0 ? metrics.thisMonthRevenue : metrics.totalRevenue}
                             currency={currencySymbol}
                             intent="sales"
@@ -1228,19 +1230,19 @@ const Dashboard = ({
 
                       <div className="pt-4 border-t border-theme-border-soft/60 grid grid-cols-2 sm:grid-cols-3 gap-3">
                         <div className="luxury-glass-subcard p-3 rounded-2xl border border-theme-border-soft">
-                          <span className="text-[10px] uppercase font-bold text-theme-muted block">Today's Inflow</span>
+                          <span className="text-[10px] uppercase font-bold text-theme-muted block">{t('dash.today_inflow', "Today's Inflow")}</span>
                           <span className="text-sm sm:text-base font-bold text-theme-accent bq-financial-number">
                             <AnimatedNumber value={formatCurrency(metrics.todaysCollected, currencySymbol)} />
                           </span>
                         </div>
                         <div className="luxury-glass-subcard p-3 rounded-2xl border border-theme-border-soft">
-                          <span className="text-[10px] uppercase font-bold text-theme-muted block">Today's Outflow</span>
+                          <span className="text-[10px] uppercase font-bold text-theme-muted block">{t('dash.today_outflow', "Today's Outflow")}</span>
                           <span className="text-sm sm:text-base font-bold text-rose-600 dark:text-rose-400 bq-financial-number">
                             <AnimatedNumber value={formatCurrency(metrics.todaysExpenses, currencySymbol)} />
                           </span>
                         </div>
                         <div className="luxury-glass-subcard p-3 rounded-2xl border border-theme-border-soft col-span-2 sm:col-span-1">
-                          <span className="text-[10px] uppercase font-bold text-theme-muted block">Collection Realized</span>
+                          <span className="text-[10px] uppercase font-bold text-theme-muted block">{t('dash.collection_realized', 'Collection Realized')}</span>
                           <span className="text-sm sm:text-base font-bold text-theme-primary bq-financial-number">
                             {metrics.collectionRate}%
                           </span>
@@ -1255,19 +1257,19 @@ const Dashboard = ({
                       <SignatureSurface variant="success" className="p-4 rounded-2xl flex items-center justify-between">
                         <div>
                           <FinancialValue
-                            label="Total Collected"
+                            label={t('dash.total_collected', 'Total Collected')}
                             value={metrics.totalCollected}
                             currency={currencySymbol}
                             intent="collection"
                             size="md"
                           />
                           <span className="text-[10px] text-theme-muted mt-0.5 block">
-                            {metrics.totalPaymentsCount} confirmed payments received
+                            {metrics.totalPaymentsCount} {t('dash.confirmed_payments', 'confirmed payments received')}
                           </span>
                         </div>
                         <div className="text-right">
                           <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-theme-tint-bg text-theme-accent border border-theme-tint-border">
-                            {metrics.collectionRate}% Settled
+                            {metrics.collectionRate}% {t('dash.settled_pct', 'Settled')}
                           </span>
                         </div>
                       </SignatureSurface>
@@ -1276,14 +1278,14 @@ const Dashboard = ({
                       <SignatureSurface variant="warning" className="p-4 rounded-2xl flex items-center justify-between">
                         <div>
                           <FinancialValue
-                            label="Still to Collect"
+                            label={t('dash.still_to_collect', 'Still to Collect')}
                             value={metrics.totalOutstanding}
                             currency={currencySymbol}
                             intent="balanceDue"
                             size="md"
                           />
                           <span className="text-[10px] text-theme-muted mt-0.5 block">
-                            {metrics.overdueCount > 0 ? `${metrics.overdueCount} overdue bills requiring action` : 'All invoices within payment terms'}
+                            {metrics.overdueCount > 0 ? `${metrics.overdueCount} ${t('dash.overdue_bills_action', 'overdue bills requiring action')}` : t('dash.all_within_terms', 'All invoices within payment terms')}
                           </span>
                         </div>
                         <div className="text-right">
@@ -1293,7 +1295,7 @@ const Dashboard = ({
                             onClick={onOpenCollection}
                             className="!text-xs"
                           >
-                            Collect →
+                            {t('dash.collect_arrow', 'Collect →')}
                           </Button>
                         </div>
                       </SignatureSurface>
@@ -1302,14 +1304,14 @@ const Dashboard = ({
                       <SignatureSurface variant="financial" className="p-4 rounded-2xl flex items-center justify-between">
                         <div>
                           <FinancialValue
-                            label="Operating Capital"
+                            label={t('dash.operating_capital', 'Operating Capital')}
                             value={businessAvailableMoney}
                             currency={currencySymbol}
                             intent="money"
                             size="md"
                           />
                           <span className="text-[10px] text-theme-muted mt-0.5 block">
-                            Liquid operating funds
+                            {t('dash.liquid_funds', 'Liquid operating funds')}
                           </span>
                         </div>
                         <div className="p-2 rounded-xl bg-theme-tint-bg text-theme-accent border border-theme-tint-border">
@@ -1498,10 +1500,10 @@ const Dashboard = ({
                       <div>
                         <h2 className="text-sm sm:text-base font-bold bq-font-display text-theme-primary flex items-center gap-2">
                           <CreditCard className="w-4 h-4 text-theme-accent" />
-                          Money Still to Collect
+                          {t('dash.money_to_collect', 'Money Still to Collect')}
                         </h2>
                         <p className="text-xs text-theme-muted">
-                          Old Due + Current Bill = Total Payable liability relationship.
+                          {t('dash.money_to_collect_sub', 'Old Due + Current Bill = Total Payable liability relationship.')}
                         </p>
                       </div>
                       <Button variant="financial" size="sm" onClick={onOpenCollection}>
@@ -1657,19 +1659,19 @@ const Dashboard = ({
                       <div>
                         <h2 className="text-sm sm:text-base font-bold bq-font-display text-theme-primary flex items-center gap-2">
                           <Receipt className="w-4 h-4 text-theme-accent" />
-                          Sales & Invoice Intelligence
+                          {t('dash.sales_title', 'Sales & Invoice Intelligence')}
                         </h2>
-                        <p className="text-xs text-theme-muted">Invoice status distribution and settlement breakdown.</p>
+                        <p className="text-xs text-theme-muted">{t('dash.sales_sub', 'Invoice status distribution and settlement breakdown.')}</p>
                       </div>
                       <Button variant="ghost" size="sm" onClick={() => setCurrentTab('invoices')}>
-                        Recent Invoices →
+                        {t('dash.recent_invoices', 'Recent Invoices →')}
                       </Button>
                     </div>
 
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                       <div className="luxury-glass-subcard p-3.5 rounded-2xl border border-theme-border-soft">
                         <div className="flex items-center justify-between mb-1">
-                          <span className="text-2xs font-bold text-theme-muted uppercase">Paid</span>
+                          <span className="text-2xs font-bold text-theme-muted uppercase">{t('dash.paid', 'Paid')}</span>
                           <StatusBadge status="paid" size="sm" showIcon={false} />
                         </div>
                         <span className="text-xl font-bold bq-financial-number text-theme-accent">
@@ -1680,7 +1682,7 @@ const Dashboard = ({
 
                       <div className="luxury-glass-subcard p-3.5 rounded-2xl border border-theme-border-soft">
                         <div className="flex items-center justify-between mb-1">
-                          <span className="text-2xs font-bold text-theme-muted uppercase">Partial</span>
+                          <span className="text-2xs font-bold text-theme-muted uppercase">{t('dash.partial', 'Partial')}</span>
                           <StatusBadge status="partial" size="sm" showIcon={false} />
                         </div>
                         <span className="text-xl font-bold bq-financial-number text-amber-600 dark:text-amber-400">
@@ -1691,7 +1693,7 @@ const Dashboard = ({
 
                       <div className="luxury-glass-subcard p-3.5 rounded-2xl border border-theme-border-soft">
                         <div className="flex items-center justify-between mb-1">
-                          <span className="text-2xs font-bold text-theme-muted uppercase">Unpaid</span>
+                          <span className="text-2xs font-bold text-theme-muted uppercase">{t('dash.unpaid', 'Unpaid')}</span>
                           <StatusBadge status="unpaid" size="sm" showIcon={false} />
                         </div>
                         <span className="text-xl font-bold bq-financial-number text-rose-600 dark:text-rose-400">
@@ -1879,12 +1881,12 @@ const Dashboard = ({
                       <div>
                         <h2 className="text-sm sm:text-base font-bold bq-font-display text-theme-primary flex items-center gap-2">
                           <Activity className="w-4 h-4 text-theme-accent" />
-                          Recent Financial Activity
+                          {t('dash.recent_activity', 'Recent Financial Activity')}
                         </h2>
-                        <p className="text-xs text-theme-muted">Latest verified invoices, payments, and settlements.</p>
+                        <p className="text-xs text-theme-muted">{t('dash.recent_activity_sub', 'Latest verified invoices, payments, and settlements.')}</p>
                       </div>
                       <Button variant="ghost" size="sm" onClick={() => setCurrentTab('invoices')}>
-                        Recent Invoices →
+                        {t('dash.recent_invoices', 'Recent Invoices →')}
                       </Button>
                     </div>
 
