@@ -149,7 +149,7 @@ export const clearStaffs = async () => {
 ;
 import { toast } from 'react-hot-toast';
 import JSZip from 'jszip';
-import { doc, setDoc, deleteDoc, getDoc, collection, getDocs, onSnapshot, getDocFromServer, getDocsFromServer, query, where, getCountFromServer } from 'firebase/firestore';
+import { doc, setDoc, deleteDoc, getDoc, collection, getDocs, onSnapshot, getDocFromServer, getDocsFromServer, query, where, getCountFromServer } from './fsHelpers.js';
 import { getAdminEmail, isAdminUser } from '../utils/adminAccess.js';
 import { BillQyroDB } from './localDb.js';
 import { generateVerificationCode } from './verificationCodeService.js';

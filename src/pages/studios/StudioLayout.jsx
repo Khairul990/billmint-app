@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import { 
   Building2, Palette, Globe, LayoutDashboard, 
   LayoutTemplate, Zap, Blocks, Shield, Save, Database, Undo, Redo, RotateCcw,
-  Crown, Lock, HardDrive, Globe2, Bell, ArrowLeft, PanelLeftClose, PanelLeftOpen,
+  Crown, Lock, HardDrive, Globe2, Bell, ArrowLeft, PanelLeftClose, PanelLeftOpen, FilePlus2, BellRing,
   CheckCircle2, Menu, X, ChevronDown, ChevronRight, Search, Sparkles, ArrowRight,
   SlidersHorizontal, RefreshCw, AlertTriangle, Store, ShieldCheck, User, Phone
 } from 'lucide-react';
@@ -88,6 +88,20 @@ const StudioLayout = ({
   } = useSettingsHistory(settings);
 
   const [isSaving, setIsSaving] = useState(false);
+
+  // ── Workspace Readiness — setup completeness engine ──
+  const readinessChecks = useMemo(() => ([
+    { id: 'name', ok: !!draftSettings?.businessName, label: t('studio.chk_name', 'Business name'), studio: 'business' },
+    { id: 'owner', ok: !!draftSettings?.ownerName, label: t('studio.chk_owner', 'Owner name'), studio: 'business' },
+    { id: 'phone', ok: !!draftSettings?.phone, label: t('studio.chk_phone', 'Phone number'), studio: 'business' },
+    { id: 'email', ok: !!draftSettings?.email, label: t('studio.chk_email', 'Email'), studio: 'business' },
+    { id: 'currency', ok: !!draftSettings?.currency, label: t('studio.chk_currency', 'Currency'), studio: 'localization' },
+    { id: 'address', ok: !!draftSettings?.address, label: t('studio.chk_address', 'Business address'), studio: 'business' },
+    { id: 'prefix', ok: !!draftSettings?.invoicePrefix, label: t('studio.chk_prefix', 'Invoice prefix'), studio: 'invoice' },
+    { id: 'backup', ok: draftSettings?.autoBackup !== false, label: t('studio.chk_backup', 'Auto backup'), studio: 'backup' },
+  ]), [draftSettings?.businessName, draftSettings?.ownerName, draftSettings?.phone, draftSettings?.email, draftSettings?.currency, draftSettings?.address, draftSettings?.invoicePrefix, draftSettings?.autoBackup]);
+  const readinessPct = Math.round((readinessChecks.filter((c) => c.ok).length / readinessChecks.length) * 100);
+  const missingItems = readinessChecks.filter((c) => !c.ok);
 
   // Latest draft snapshot for immediate theme publishing.
   const draftRef = useRef(draftSettings);
@@ -531,6 +545,87 @@ const StudioLayout = ({
                     >
                       <Store className="w-4 h-4 text-theme-accent" />
                       <span className="whitespace-nowrap">{t('studio.switch_workspace', 'Switch Workspace')}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* 1.5 Workspace Readiness — completeness ring + quick actions */}
+              <div className="p-6 sm:p-7 rounded-3xl bg-theme-surface-elevated border border-theme-border-soft backdrop-blur-xl shadow-premium relative overflow-hidden">
+                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-theme-accent/40 to-transparent" />
+                <div className="flex flex-col lg:flex-row gap-6 lg:items-center">
+                  {/* Completeness ring */}
+                  <div className="flex items-center gap-5 shrink-0">
+                    <div className="relative w-24 h-24 shrink-0">
+                      <svg viewBox="0 0 96 96" className="w-24 h-24 -rotate-90">
+        <circle cx="48" cy="48" r="40" fill="none" strokeWidth="9" className="stroke-black/10 dark:stroke-white/10" />
+                        <circle
+                          cx="48" cy="48" r="40" fill="none" strokeWidth="9" strokeLinecap="round"
+                          className="stroke-theme-accent transition-all duration-700 ease-out"
+                          strokeDasharray={`${readinessPct * 2.513} 251.3`}
+                        />
+                      </svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <span className="text-xl font-black text-theme-primary leading-none">{readinessPct}%</span>
+                        <span className="text-[8px] font-black uppercase tracking-widest text-theme-muted mt-1">{t('studio.ready', 'Ready')}</span>
+                      </div>
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="text-sm font-black text-theme-primary tracking-tight">
+                        {t('studio.readiness', 'Workspace Readiness')}
+                      </h3>
+                      <p className="text-xs text-theme-muted font-medium mt-1 leading-snug">
+                        {missingItems.length
+                          ? t('studio.readiness_hint', 'Complete these to unlock the full experience:')
+                          : t('studio.readiness_done', 'Everything is configured — you are all set!')}
+                      </p>
+                      {missingItems.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mt-2.5">
+                          {missingItems.slice(0, 3).map((m) => (
+                            <button
+                              key={m.id}
+                              onClick={() => setActiveStudio(m.studio)}
+                              className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-theme-accent/10 text-theme-accent border border-theme-accent/25 hover:bg-theme-accent/20 transition-colors cursor-pointer"
+                            >
+                              {m.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="hidden lg:block w-px self-stretch bg-theme-border-soft" />
+
+                  {/* Quick actions */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 flex-1">
+                    <button
+                      onClick={() => setCurrentTab('create-invoice')}
+                      className="p-3.5 rounded-2xl bg-theme-card hover:bg-theme-surface border border-theme-border-soft hover:border-theme-accent/30 transition-all group shadow-2xs cursor-pointer text-center sm:text-left"
+                    >
+                      <FilePlus2 className="w-5 h-5 text-theme-accent mx-auto sm:mx-0 group-hover:scale-110 transition-transform" />
+                      <p className="text-[11px] font-black text-theme-primary mt-2 leading-tight">{t('studio.qa_invoice', 'New Invoice')}</p>
+                    </button>
+                    <button
+                      onClick={() => setCurrentTab('due-ledger')}
+                      className="p-3.5 rounded-2xl bg-theme-card hover:bg-theme-surface border border-theme-border-soft hover:border-theme-accent/30 transition-all group shadow-2xs cursor-pointer text-center sm:text-left"
+                    >
+                      <BellRing className="w-5 h-5 text-theme-accent mx-auto sm:mx-0 group-hover:scale-110 transition-transform" />
+                      <p className="text-[11px] font-black text-theme-primary mt-2 leading-tight">{t('studio.qa_remind', 'Send Reminders')}</p>
+                    </button>
+                    <button
+                      onClick={() => setActiveStudio('theme')}
+                      className="p-3.5 rounded-2xl bg-theme-card hover:bg-theme-surface border border-theme-border-soft hover:border-theme-accent/30 transition-all group shadow-2xs cursor-pointer text-center sm:text-left"
+                    >
+                      <Palette className="w-5 h-5 text-theme-accent mx-auto sm:mx-0 group-hover:scale-110 transition-transform" />
+                      <p className="text-[11px] font-black text-theme-primary mt-2 leading-tight">{t('studio.qa_theme', 'Appearance')}</p>
+                    </button>
+                    <button
+                      onClick={() => setActiveStudio('backup')}
+                      className="p-3.5 rounded-2xl bg-theme-card hover:bg-theme-surface border border-theme-border-soft hover:border-theme-accent/30 transition-all group shadow-2xs cursor-pointer text-center sm:text-left"
+                    >
+                      <HardDrive className="w-5 h-5 text-theme-accent mx-auto sm:mx-0 group-hover:scale-110 transition-transform" />
+                      <p className="text-[11px] font-black text-theme-primary mt-2 leading-tight">{t('studio.qa_backup', 'Backup Data')}</p>
                     </button>
                   </div>
                 </div>

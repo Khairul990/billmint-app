@@ -1,13 +1,6 @@
 import { auth, db } from './firebaseConfig.js';
-import {
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  GoogleAuthProvider,
-  signInWithPopup,
-  sendPasswordResetEmail,
-  signOut
-} from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail, signOut } from './fbAuthHelpers.js';
+import { doc, setDoc, getDoc } from './fsHelpers.js';
 import { getAuthSession as dbGetAuthSession, getRealUserId as dbGetRealUserId, logout as dbLogout } from './dbEngine.js';
 import { deviceSessionEngine } from './deviceSessionEngine.js';
 

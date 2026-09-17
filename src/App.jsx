@@ -20,7 +20,7 @@ import {
 import { validatePayload, invoiceSchema, customerSchema } from './utils/validation';
 import { calculateTotals } from './utils/invoiceUtils';
 import { isEducationBusiness } from './config/businessPresets';
-import { initializeStorage, getSettings as dbGetSettings } from './services/dbEngine';
+import { getBootstrapSettings } from './services/settingsBootstrap';
 import { useFeatureControl } from './hooks/useFeatureControl';
 
 import { authEngine } from './services/authEngine';
@@ -37,12 +37,10 @@ import { backupEngine } from './services/backupEngine';
 import { subscriptionEngine } from './services/subscriptionEngine';
 import { paymentEngine } from './services/paymentEngine';
 
-import { auth, firebaseReady } from './services/firebaseConfig';
-import { onAuthStateChanged } from 'firebase/auth';
+// firebase auth/firestore load lazily in the auth effects below — keeps
+// vendor-firebase (~690KB) off the critical boot path.
 import { triggerSuccessFeedback, triggerPaymentSuccessFeedback, triggerPopFeedback, triggerDeleteFeedback, triggerVoiceFeedback } from './utils/feedback';
 import { sendEmpireEvent, sendEmpireError, sendEmpireHealth } from './services/empireAgent';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
-import { db } from './services/firebaseConfig';
 import { workspaceEngine } from './services/workspaceEngine';
 import { securityEngine } from './services/securityEngine';
 import QuickBillModal from './components/QuickBillModal';
@@ -325,6 +323,14 @@ function App() {
     if (window.location.pathname === '/km-admin') {
       return 'admin-panel';
     }
+    // PWA app-shortcut deep links (e.g. /?qy=create-invoice from the
+    // installed app's long-press / launcher shortcuts)
+    const qyShortcut = new URLSearchParams(window.location.search).get('qy');
+    const QY_TABS = ['create-invoice', 'invoices', 'estimates', 'customers', 'products', 'due-ledger', 'reports', 'expenses', 'orders'];
+    if (qyShortcut && QY_TABS.includes(qyShortcut)) {
+      const isAuthQy = !!authEngine.getAuthSession() || (localStorage.getItem('billqyro_demo_session_active') === 'true' && localStorage.getItem('billqyro_demo_journey_mode') === 'true' && localStorage.getItem('billqyro_demo_logged_in') === 'true');
+      if (isAuthQy) return qyShortcut;
+    }
     const saved = localStorage.getItem('billqyro_last_route');
     const isAuth = !!authEngine.getAuthSession() || (localStorage.getItem('billqyro_demo_session_active') === 'true' && localStorage.getItem('billqyro_demo_journey_mode') === 'true' && localStorage.getItem('billqyro_demo_logged_in') === 'true');
     if (isAuth && saved && saved !== 'admin-panel') {
@@ -586,7 +592,7 @@ function App() {
   const [products, setProducts] = useState([]);
   // Settings with workspace support
   const [settings, setSettings] = useState(() => {
-    const s = dbGetSettings() || {};
+    const s = getBootstrapSettings();
     if (!s.businessWorkspaces) {
       // Initialize default workspace
       const defaultWs = {
@@ -719,31 +725,52 @@ function App() {
   const [pendingPayments, setPendingPayments] = useState([]);
   
   useEffect(() => {
-    if (!isAuthenticated || !db || !auth) return;
-    
-    let unsubscribe = () => {};
-    
-    // Listen for auth state changes to get current user UID
-    const authUnsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        const q = query(
-          collection(db, 'payment_proofs'),
-          where('ownerId', '==', user.uid),
-          where('status', '==', 'pending')
-        );
-        
-        unsubscribe = onSnapshot(q, (snapshot) => {
-          const proofs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          setPendingPayments(proofs);
+    if (!isAuthenticated) return;
+
+    let stopSnapshot = () => {};
+    let stopAuth = () => {};
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const [fbConfig, fbAuthMod, fbFs] = await Promise.all([
+          import('./services/firebaseConfig'),
+          import('firebase/auth'),
+          import('firebase/firestore'),
+        ]);
+        if (cancelled) return;
+        await fbConfig.firebaseInitPromise; // live bindings (auth/db) populate inside init
+        const { auth, db } = fbConfig;
+        if (!db || !auth) return;
+        const { onAuthStateChanged } = fbAuthMod;
+        const { collection, query, where, onSnapshot } = fbFs;
+
+        // Listen for auth state changes to get current user UID
+        stopAuth = onAuthStateChanged(auth, (user) => {
+          if (user) {
+            const q = query(
+              collection(db, 'payment_proofs'),
+              where('ownerId', '==', user.uid),
+              where('status', '==', 'pending')
+            );
+
+            stopSnapshot = onSnapshot(q, (snapshot) => {
+              const proofs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+              setPendingPayments(proofs);
+            });
+          } else {
+            setPendingPayments([]);
+          }
         });
-      } else {
-        setPendingPayments([]);
+      } catch (e) {
+        console.warn('[PendingPayments] realtime listener skipped:', e);
       }
-    });
-    
+    })();
+
     return () => {
-      authUnsubscribe();
-      unsubscribe();
+      cancelled = true;
+      stopSnapshot();
+      stopAuth();
     };
   }, [isAuthenticated]);
   
@@ -937,15 +964,48 @@ function App() {
 
   // --- EFFECTS ---
 
-  // Initialize Database on App mount
+  // Initialize Database on App mount (dbEngine loads lazily — it carries the
+  // firebase edge and must stay off the boot path). The canonical settings
+  // (with schema migrations) merge over the bootstrap snapshot right after.
   useEffect(() => {
-    initializeStorage();
+    let cancelled = false;
+    (async () => {
+      try {
+        const dbEngine = await import('./services/dbEngine');
+        if (cancelled) return;
+        dbEngine.initializeStorage();
+        const canonical = dbEngine.getSettings();
+        if (canonical) setSettings((prev) => ({ ...prev, ...canonical }));
+      } catch (e) {
+        console.warn('[BOOT] dbEngine bootstrap failed:', e);
+      }
+    })();
+    return () => { cancelled = true; };
   }, []);
 
-  // Listen to Firebase Auth state
+  // Listen to Firebase Auth state (lazy firebase — see note at imports)
   useEffect(() => {
-    if (firebaseReady && auth) {
-      const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    let unsubscribe = () => {};
+    let cancelled = false;
+    (async () => {
+      let fbAuth = null;
+      let fbReady = false;
+      let onAuthStateChanged = null;
+      try {
+        const [fbConfig, fbAuthMod] = await Promise.all([
+          import('./services/firebaseConfig'),
+          import('firebase/auth'),
+        ]);
+        await fbConfig.firebaseInitPromise; // live bindings (auth/db) populate inside init
+        fbAuth = fbConfig.auth;
+        fbReady = fbConfig.firebaseReady;
+        onAuthStateChanged = fbAuthMod.onAuthStateChanged;
+      } catch (e) {
+        console.warn('[AuthFlow] Firebase could not load:', e);
+      }
+      if (cancelled) return;
+      if (fbReady && fbAuth && onAuthStateChanged) {
+        unsubscribe = onAuthStateChanged(fbAuth, async (user) => {
         // Firebase auth state updated
         if (user) {
           const tokenResult = await user.getIdTokenResult();
@@ -985,12 +1045,13 @@ function App() {
           setIsAppBooting(false);
           setIsDataHydrating(false);
         }
-      });
-      return () => unsubscribe();
-    } else {
-      setIsAppBooting(false);
-      setIsDataHydrating(false);
-    }
+        });
+      } else {
+        setIsAppBooting(false);
+        setIsDataHydrating(false);
+      }
+    })();
+    return () => { cancelled = true; try { unsubscribe(); } catch (e) {} };
   }, []);
 
   // Sync from Firebase Firestore when authenticated
@@ -1051,7 +1112,7 @@ function App() {
 
           // Enable real-time multi-device sync via new Sync Engine
           import('./services/syncEngine').then(({ startRealTimeSync }) => {
-            const userId = auth?.currentUser?.uid;
+            const userId = authEngine.getAuthSession()?.uid;
             if (userId) {
               startRealTimeSync(userId, (newSettings) => {
                 setSettings(newSettings);

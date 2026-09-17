@@ -8,7 +8,7 @@ import {
 } from './dbEngine.js';
 import { BillQyroDB } from './localDb.js';
 import { firebaseReady, db } from './firebaseConfig.js';
-import { doc, setDoc, getDoc, collection, getDocs } from 'firebase/firestore';
+import { doc, setDoc, getDoc, collection, getDocs } from './fsHelpers.js';
 
 export const backupEngine = {
   async exportLocal() {

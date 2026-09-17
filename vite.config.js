@@ -34,7 +34,7 @@ export default defineConfig(({ mode }) => ({
       injectRegister: 'auto',
       includeAssets: ['favicon.svg', 'app-icon.svg'],
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,json,webmanifest,ttf}'],
         maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
         navigateFallback: 'index.html',
         navigateFallbackDenylist: [/^\/__/, /^\/api\//, /^\/publicInvoices\//, /\.html$/],
@@ -64,19 +64,33 @@ export default defineConfig(({ mode }) => ({
         ]
       },
       manifest: {
-        name: 'BillQyro',
+        name: 'BillQyro — Smart Billing & Invoices',
         short_name: 'BillQyro',
-        description: 'Modern Billing & Invoicing Platform',
-        theme_color: '#C81E5C',
-        background_color: '#1F1B1D',
-        display: 'standalone',
+        description: 'Smart billing, premium invoices, customer & payment management for growing businesses.',
+        id: '/',
         start_url: '/',
         scope: '/',
+        display: 'standalone',
+        orientation: 'portrait-primary',
+        theme_color: '#04100C',
+        background_color: '#04100C',
+        lang: 'en',
+        dir: 'ltr',
+        categories: ['business', 'finance', 'productivity'],
         icons: [
           { src: 'icon-192x192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
           { src: 'icon-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
           { src: 'icon-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
           { src: 'app-icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' }
+        ],
+        shortcuts: [
+          { name: 'New Invoice', short_name: 'Invoice', url: '/?qy=create-invoice', icons: [{ src: 'icon-192x192.png', sizes: '192x192', type: 'image/png' }] },
+          { name: 'Customers', url: '/?qy=customers', icons: [{ src: 'icon-192x192.png', sizes: '192x192', type: 'image/png' }] },
+          { name: 'Due Ledger', url: '/?qy=due-ledger', icons: [{ src: 'icon-192x192.png', sizes: '192x192', type: 'image/png' }] },
+          { name: 'Reports', url: '/?qy=reports', icons: [{ src: 'icon-192x192.png', sizes: '192x192', type: 'image/png' }] }
+        ],
+        screenshots: [
+          { src: 'dashboard-preview.png', sizes: '1024x640', type: 'image/png', form_factor: 'wide', label: 'BillQyro Dashboard' }
         ]
       },
       devOptions: {

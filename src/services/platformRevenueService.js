@@ -1,5 +1,5 @@
 import { db, firebaseReady } from './firebaseConfig.js';
-import { doc, setDoc, getDoc, collection, getDocs, query, where } from 'firebase/firestore';
+import { doc, setDoc, getDoc, collection, getDocs, query, where } from './fsHelpers.js';
 
 const DEFAULT_GLOBAL_SETTINGS = {
   premiumModeEnabled: true,

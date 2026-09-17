@@ -1,5 +1,5 @@
 import { firebaseReady, auth, db } from './firebaseConfig.js';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from './fsHelpers.js';
 import { logAudit, getAuthSession, getRealUserId } from './dbEngine.js';
 import { BillQyroDB } from './localDb.js';
 import { deviceSessionEngine } from './deviceSessionEngine.js';

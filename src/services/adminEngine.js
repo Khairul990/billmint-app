@@ -1,5 +1,5 @@
 import { db, firebaseReady } from './firebaseConfig.js';
-import { collection, getDocs, doc, getDoc, setDoc, deleteDoc, query, where, orderBy, limit } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, setDoc, deleteDoc, query, where, orderBy, limit } from './fsHelpers.js';
 import {
   getInvoices as dbGetInvoices,
   getCustomers as dbGetCustomers,

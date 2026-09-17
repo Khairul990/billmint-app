@@ -58,7 +58,7 @@ export default function StudentPortal({ studentId }) {
   };
 
   if (loadingAuth) {
-    return <div className="min-h-screen bg-slate-50 flex items-center justify-center"><ClassicLoader /></div>;
+    return <div className="min-h-screen bg-theme-app flex items-center justify-center"><ClassicLoader /></div>;
   }
 
   if (!user) {
@@ -66,7 +66,7 @@ export default function StudentPortal({ studentId }) {
   }
 
   if (loadingData) {
-    return <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center"><ClassicLoader /><p className="text-slate-600 mt-4 font-bold animate-pulse">Loading Student Records...</p></div>;
+    return <div className="min-h-screen bg-theme-app flex flex-col items-center justify-center"><ClassicLoader /><p className="text-theme-muted mt-4 font-bold animate-pulse">Loading Student Records...</p></div>;
   }
 
   // Calculate Dashboard Metrics
@@ -84,19 +84,19 @@ export default function StudentPortal({ studentId }) {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans p-4 md:p-8">
+    <div className="min-h-screen bg-theme-app text-theme-primary font-sans p-4 md:p-8">
       <div className="w-full max-w-full space-y-6">
         
         {/* Header */}
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-6 rounded-3xl border border-slate-200 shadow-sm gap-4 relative overflow-hidden">
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-center bg-theme-card p-6 rounded-3xl border border-theme-border-soft shadow-sm gap-4 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
           <div className="flex items-center gap-4 relative z-10">
             <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-600/30">
               <GraduationCap className="w-8 h-8" />
             </div>
             <div>
-              <h1 className="text-2xl font-black text-slate-900">{profile?.name || 'Student Portal'}</h1>
-              <p className="text-slate-500 text-sm flex items-center gap-2 font-medium mt-1">
+              <h1 className="text-2xl font-black text-theme-primary">{profile?.name || 'Student Portal'}</h1>
+              <p className="text-theme-muted text-sm flex items-center gap-2 font-medium mt-1">
                 <ShieldCheck className="w-4 h-4 text-theme-accent" /> ID: {studentId} • {profile?.email}
               </p>
             </div>
@@ -110,7 +110,7 @@ export default function StudentPortal({ studentId }) {
         </header>
 
         {/* Tab Navigation */}
-        <div className="flex overflow-x-auto hide-scrollbar gap-2 p-1 bg-white rounded-2xl border border-slate-200 shadow-sm">
+        <div className="flex overflow-x-auto hide-scrollbar gap-2 p-1 bg-theme-card rounded-2xl border border-theme-border-soft shadow-sm">
           {tabs.map(tab => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -118,7 +118,7 @@ export default function StudentPortal({ studentId }) {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all whitespace-nowrap ${isActive ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' : 'text-slate-500 hover:bg-slate-100'}`}
+                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all whitespace-nowrap ${isActive ? 'bg-theme-accent text-white shadow-md' : 'text-theme-muted hover:bg-theme-surface'}`}
               >
                 <Icon className="w-4 h-4" /> {tab.label}
               </button>
@@ -139,28 +139,28 @@ export default function StudentPortal({ studentId }) {
               <div className="space-y-6">
                 {/* Metrics */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden">
-                    <h3 className="text-slate-500 text-xs font-bold uppercase mb-2 flex items-center gap-2"><Wallet className="w-4 h-4" /> Total Due Fees</h3>
+                  <div className="bg-theme-card p-6 rounded-3xl border border-theme-border-soft shadow-sm relative overflow-hidden">
+                    <h3 className="text-theme-muted text-xs font-bold uppercase mb-2 flex items-center gap-2"><Wallet className="w-4 h-4" /> Total Due Fees</h3>
                     <p className="text-4xl font-black text-rose-500">{formatCurrency(totalDue, activeSymbol)}</p>
                   </div>
-                  <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden">
-                    <h3 className="text-slate-500 text-xs font-bold uppercase mb-2 flex items-center gap-2"><CheckCircle className="w-4 h-4" /> Fees Paid</h3>
+                  <div className="bg-theme-card p-6 rounded-3xl border border-theme-border-soft shadow-sm relative overflow-hidden">
+                    <h3 className="text-theme-muted text-xs font-bold uppercase mb-2 flex items-center gap-2"><CheckCircle className="w-4 h-4" /> Fees Paid</h3>
                     <p className="text-4xl font-black text-theme-accent">{formatCurrency(totalPaid, activeSymbol)}</p>
                   </div>
-                  <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden">
-                    <h3 className="text-slate-500 text-xs font-bold uppercase mb-2 flex items-center gap-2"><Calendar className="w-4 h-4" /> Overdue Invoices</h3>
+                  <div className="bg-theme-card p-6 rounded-3xl border border-theme-border-soft shadow-sm relative overflow-hidden">
+                    <h3 className="text-theme-muted text-xs font-bold uppercase mb-2 flex items-center gap-2"><Calendar className="w-4 h-4" /> Overdue Invoices</h3>
                     <p className="text-4xl font-black text-amber-500">{overdueInvoices.length}</p>
                   </div>
                 </div>
 
                 {/* Fee History */}
-                <div className="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
+                <div className="bg-theme-card border border-theme-border-soft rounded-3xl shadow-sm overflow-hidden">
                   <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-                    <h2 className="text-xl font-black text-slate-900 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" /> Fee Receipts & Invoices</h2>
+                    <h2 className="text-xl font-black text-theme-primary flex items-center gap-2"><FileText className="w-5 h-5 text-theme-accent" /> Fee Receipts & Invoices</h2>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm">
-                      <thead className="bg-slate-50 text-slate-500 text-xs uppercase font-bold">
+                      <thead className="bg-theme-surface text-theme-muted text-xs uppercase font-bold">
                         <tr>
                           <th className="px-6 py-4 rounded-tl-lg">Invoice No</th>
                           <th className="px-6 py-4">Date</th>
@@ -172,7 +172,7 @@ export default function StudentPortal({ studentId }) {
                       <tbody className="divide-y divide-slate-100">
                         {invoices.length === 0 ? (
                           <tr>
-                            <td colSpan="5" className="px-6 py-12 text-center text-slate-500">
+                            <td colSpan="5" className="px-6 py-12 text-center text-theme-muted">
                               <div className="flex flex-col items-center justify-center">
                                 <FileText className="w-12 h-12 text-slate-300 mb-3" />
                                 <span className="font-bold">No fee records found.</span>
@@ -181,10 +181,10 @@ export default function StudentPortal({ studentId }) {
                           </tr>
                         ) : (
                           invoices.map((inv) => (
-                            <tr key={inv.id} className="hover:bg-slate-50/80 transition-colors">
-                              <td className="px-6 py-4 font-bold text-slate-900">{inv.invoiceNumber}</td>
-                              <td className="px-6 py-4 text-slate-500 font-medium">{new Date(inv.date).toLocaleDateString()}</td>
-                              <td className="px-6 py-4 font-bold text-slate-900">{formatCurrency(inv.grandTotal, activeSymbol)}</td>
+                            <tr key={inv.id} className="hover:bg-theme-surface transition-colors">
+                              <td className="px-6 py-4 font-bold text-theme-primary">{inv.invoiceNumber}</td>
+                              <td className="px-6 py-4 text-theme-muted font-medium">{new Date(inv.date).toLocaleDateString()}</td>
+                              <td className="px-6 py-4 font-bold text-theme-primary">{formatCurrency(inv.grandTotal, activeSymbol)}</td>
                               <td className="px-6 py-4">
                                 <span className={`px-2.5 py-1 rounded-lg text-[11px] font-black uppercase tracking-wider ${
                                   inv.paymentStatus === 'Paid' ? 'bg-theme-tint-bg text-theme-accent' :
@@ -214,26 +214,26 @@ export default function StudentPortal({ studentId }) {
             )}
 
             {activeTab === 'notices' && (
-              <div className="bg-white border border-slate-200 rounded-3xl p-12 text-center shadow-sm">
+              <div className="bg-theme-card border border-theme-border-soft rounded-3xl p-12 text-center shadow-sm">
                 <Bell className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-slate-900 mb-2">No active notices</h3>
-                <p className="text-slate-500">You're all caught up! New announcements will appear here.</p>
+                <h3 className="text-xl font-bold text-theme-primary mb-2">No active notices</h3>
+                <p className="text-theme-muted">You're all caught up! New announcements will appear here.</p>
               </div>
             )}
 
             {activeTab === 'attendance' && (
-              <div className="bg-white border border-slate-200 rounded-3xl p-12 text-center shadow-sm">
+              <div className="bg-theme-card border border-theme-border-soft rounded-3xl p-12 text-center shadow-sm">
                 <Calendar className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-slate-900 mb-2">Attendance Tracking</h3>
-                <p className="text-slate-500">Coming soon in the next update.</p>
+                <h3 className="text-xl font-bold text-theme-primary mb-2">Attendance Tracking</h3>
+                <p className="text-theme-muted">Coming soon in the next update.</p>
               </div>
             )}
 
             {activeTab === 'results' && (
-              <div className="bg-white border border-slate-200 rounded-3xl p-12 text-center shadow-sm">
+              <div className="bg-theme-card border border-theme-border-soft rounded-3xl p-12 text-center shadow-sm">
                 <BookOpen className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-slate-900 mb-2">Academic Results</h3>
-                <p className="text-slate-500">Your examination results and report cards will be visible here.</p>
+                <h3 className="text-xl font-bold text-theme-primary mb-2">Academic Results</h3>
+                <p className="text-theme-muted">Your examination results and report cards will be visible here.</p>
               </div>
             )}
           </motion.div>

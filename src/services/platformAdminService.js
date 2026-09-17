@@ -1,5 +1,5 @@
 import { db, firebaseReady } from './firebaseConfig.js';
-import { doc, setDoc, collection, getDocs } from 'firebase/firestore';
+import { doc, setDoc, collection, getDocs } from './fsHelpers.js';
 
 // --- SUPPORT TICKETS ---
 export const submitSupportTicket = async (userId, userEmail, userPhone, issueType, message, screenshotBase64 = '') => {

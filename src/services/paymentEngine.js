@@ -6,7 +6,7 @@ import {
   roundTo2 
 } from '../utils/invoiceMath.js';
 import { db, firebaseReady } from './firebaseConfig.js';
-import { doc, runTransaction } from 'firebase/firestore';
+import { doc, runTransaction } from './fsHelpers.js';
 import { 
   submitPlatformPaymentProof as dbSubmitPlatformPaymentProof, 
   getUserPaymentProofs as dbGetUserPaymentProofs, 

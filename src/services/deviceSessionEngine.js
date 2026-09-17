@@ -1,19 +1,6 @@
 import { auth, db, app, firebaseReady } from './firebaseConfig.js';
-import { getFunctions, httpsCallable } from 'firebase/functions';
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  where,
-  orderBy,
-  limit,
-  serverTimestamp,
-  setDoc,
-  updateDoc,
-  onSnapshot
-} from 'firebase/firestore';
+import { getFunctions, httpsCallable } from './fbFunctionsHelpers.js';
+import { collection, doc, getDoc, getDocs, query, where, orderBy, limit, serverTimestamp, setDoc, updateDoc, onSnapshot } from './fsHelpers.js';
 import { logAudit } from './dbEngine.js';
 
 const DEVICE_ID_KEY = 'billqyro_device_id_v1';

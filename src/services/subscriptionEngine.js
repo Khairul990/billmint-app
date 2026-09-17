@@ -1,6 +1,6 @@
 import * as dbEngine from './dbEngine.js';
 import { submitPremiumRequest as dbSubmitPremiumRequest } from './dbEngine.js';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc } from './fsHelpers.js';
 import { db, firebaseReady } from './firebaseConfig.js';
 
 const SUBSCRIPTION_PLANS = {

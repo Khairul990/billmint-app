@@ -1,4 +1,4 @@
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc } from './fsHelpers.js';
 import { db } from './firebaseConfig.js';
 
 /**

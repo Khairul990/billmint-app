@@ -24,7 +24,7 @@ import {
 } from '../utils/invoiceMath.js';
 
 import { db, firebaseReady } from './firebaseConfig.js';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc } from './fsHelpers.js';
 
 export const invoiceEngine = {
   async getInvoices(includeDeleted = false) {
