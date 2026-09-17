@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Download, Share, PlusSquare, Smartphone } from 'lucide-react';
+import { isAppMode } from '../utils/appMode';
 
 /**
  * PWA install nudge (Phase 25).
@@ -42,7 +43,8 @@ const PwaInstallPrompt = () => {
   const [installing, setInstalling] = useState(false);
 
   useEffect(() => {
-    if (isStandalone() || recentlyDismissed()) return undefined;
+    // Never inside the APK / installed app shell — there's nothing to install.
+    if (isAppMode() || isStandalone() || recentlyDismissed()) return undefined;
 
     const onBeforeInstall = (e) => {
       e.preventDefault();

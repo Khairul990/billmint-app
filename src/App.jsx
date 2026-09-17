@@ -60,6 +60,8 @@ import Confetti from 'react-confetti';
 import CommandPalette from './components/CommandPalette';
 import { pageVariants } from './utils/animations';
 import Landing from './pages/Landing';
+import AppEntry from './pages/AppEntry';
+import { isAppMode } from './utils/appMode';
 
 import { lazyWithRetry } from './utils/lazyWithRetry';
 
@@ -284,6 +286,10 @@ function App() {
       window.removeEventListener('open-command-palette', handleCommandPalette);
     };
   }, []);
+
+  // Phase 26: inside the APK / installed PWA the marketing landing is
+  // replaced by the native-style AppEntry screen.
+  const appMode = isAppMode();
 
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     const realAuth = !!authEngine.getAuthSession();
@@ -2068,7 +2074,9 @@ function App() {
           setTimeout(() => setCurrentTab('dashboard'), 0);
           return <div className="flex flex-col items-center justify-center h-full text-center p-10"><ClassicLoader /></div>;
         }
-        return <Landing onLoginSuccess={handleLoginSuccess} />;
+        return appMode
+          ? <AppEntry onLoginSuccess={handleLoginSuccess} />
+          : <Landing onLoginSuccess={handleLoginSuccess} />;
       case 'cyber-dashboard':
         return <CyberDashboard setCurrentTab={setCurrentTab} />;
       case 'portal-hub':
@@ -2647,7 +2655,9 @@ function App() {
           <ClassicLoader />
         </div>
       }>
-        <Landing onLoginSuccess={handleLoginSuccess} />
+        {appMode
+          ? <AppEntry onLoginSuccess={handleLoginSuccess} />
+          : <Landing onLoginSuccess={handleLoginSuccess} />}
       </React.Suspense>
     );
   }
@@ -2819,7 +2829,9 @@ function App() {
         ) : (!isAuthenticated && !isDemoSessionActive) ? (
           <motion.div key="landing-unauth" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full min-h-screen">
             <React.Suspense fallback={<div className="flex h-screen items-center justify-center"><ClassicLoader /></div>}>
-              <Landing onLoginSuccess={handleLoginSuccess} />
+              {appMode
+                ? <AppEntry onLoginSuccess={handleLoginSuccess} />
+                : <Landing onLoginSuccess={handleLoginSuccess} />}
             </React.Suspense>
           </motion.div>
         ) : (
