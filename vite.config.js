@@ -118,6 +118,19 @@ export default defineConfig(({ mode }) => ({
         manualChunks(id) {
           const normalized = id.replace(/\\/g, '/');
           if (normalized.includes('node_modules')) {
+            // Node polyfills (buffer/global/process shims) are tiny but shared
+            // by BOTH the entry graph (Capacitor, jszip) and the firebase SDK.
+            // Without this rule Rollup folds them into vendor-firebase, which
+            // drags the whole ~780KB SDK onto the boot path through a
+            // two-symbol static import (observed live: `import{j as D0,B as ba}`).
+            if (
+              normalized.includes('vite-plugin-node-polyfills') ||
+              normalized.includes('node_modules/buffer/') ||
+              normalized.includes('node_modules/global/') ||
+              normalized.includes('node_modules/process/')
+            ) {
+              return 'vendor-node-polyfills';
+            }
             if (normalized.includes('tesseract')) {
               return 'vendor-ocr';
             }
