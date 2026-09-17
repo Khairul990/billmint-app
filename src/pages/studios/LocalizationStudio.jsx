@@ -1,8 +1,10 @@
 import React from 'react';
-import { Globe2, Clock, DollarSign, Percent } from 'lucide-react';
+import { Globe2, Clock, DollarSign, Percent, Languages } from 'lucide-react';
 import { Input, Select, Label } from '../../components/ui/Input';
+import { useI18n } from '../../utils/i18n';
 
 const LocalizationStudio = ({ settings, onUpdate }) => {
+  const { t, lang, setLanguage } = useI18n();
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4 mb-6 border-b border-theme-border-soft pb-6">
@@ -10,12 +12,30 @@ const LocalizationStudio = ({ settings, onUpdate }) => {
           <Globe2 className="w-6 h-6 text-theme-accent drop-shadow-md" />
         </div>
         <div>
-          <h2 className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-theme-primary to-theme-accent">Localization Studio</h2>
-          <p className="text-xs text-theme-secondary font-medium">Configure regional formats, currency, and tax terminologies</p>
+          <h2 className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-theme-primary to-theme-accent">{t('loc.title', 'Localization Studio')}</h2>
+          <p className="text-xs text-theme-secondary font-medium">{t('loc.subtitle', 'Configure regional formats, currency, and tax terminologies')}</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Language */}
+        <div className="md:col-span-2 p-6 bg-theme-surface border border-theme-accent/20 rounded-3xl backdrop-blur-md shadow-premium-sm">
+          <div className="flex items-center gap-3 mb-4">
+            <Languages className="w-5 h-5 text-theme-accent" />
+            <h3 className="text-sm font-black text-theme-primary">{t('loc.language_card', 'Language')}</h3>
+          </div>
+          <p className="text-xs text-theme-secondary font-medium mb-4">
+            {t('loc.language_desc', 'Choose the interface language for the whole app — menus, settings and navigation.')}
+          </p>
+          <div className="max-w-xs">
+            <Label>{t('loc.interface_language', 'Interface Language')}</Label>
+            <Select value={lang} onChange={(e) => setLanguage(e.target.value)}>
+              <option value="en">English</option>
+              <option value="bn">বাংলা (Bengali)</option>
+            </Select>
+          </div>
+        </div>
+
         {/* Currency & Numbers */}
         <div className="p-6 bg-theme-surface border border-theme-border-soft rounded-3xl backdrop-blur-md shadow-premium-sm">
           <div className="flex items-center gap-3 mb-6">

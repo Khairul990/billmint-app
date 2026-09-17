@@ -34,7 +34,7 @@ import {
   GraduationCap
 } from 'lucide-react';
 import { authEngine } from '../services/authEngine';
-import { t } from '../utils/i18n';
+import { useI18n } from '../utils/i18n';
 import { triggerLightHaptic } from '../utils/feedback';
 import { getCustomerLabelByType, getInvoiceLabelByType, getPortalLabelByType } from '../config/businessPresets';
 import Logo from './Logo';
@@ -86,6 +86,7 @@ const Sidebar = ({
   };
 
   const { isFeatureEnabled, loading: featuresLoading } = useFeatureControl(activeWsId);
+  const { t, lang, setLanguage } = useI18n();
 
   const toggleCollapsed = () => {
     setIsCollapsed(prev => {
@@ -102,56 +103,56 @@ const Sidebar = ({
   const sections = [
     {
       id: 'main',
-      label: 'MAIN',
+      label: t('sec.main', 'MAIN'),
       items: [
-        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+        { id: 'dashboard', label: t('nav.dashboard', 'Dashboard'), icon: LayoutDashboard },
       ]
     },
     {
       id: 'billing',
-      label: 'BILLING',
+      label: t('sec.billing', 'BILLING'),
       items: [
-        { id: 'invoices', label: getInvoiceLabel(), icon: FileSpreadsheet, featureId: 'invoice' },
-        ...(enabledModules.includes('orders') ? [{ id: 'orders', label: 'Order Slips', icon: ShoppingBag, featureId: 'operations' }] : []),
-        { id: 'estimates', label: 'Estimates & Quotes', icon: FileSpreadsheet, featureId: 'invoice.estimates' },
+        { id: 'invoices', label: t('nav.invoices', getInvoiceLabel()), icon: FileSpreadsheet, featureId: 'invoice' },
+        ...(enabledModules.includes('orders') ? [{ id: 'orders', label: t('nav.orders', 'Order Slips'), icon: ShoppingBag, featureId: 'operations' }] : []),
+        { id: 'estimates', label: t('nav.estimates', 'Estimates & Quotes'), icon: FileSpreadsheet, featureId: 'invoice.estimates' },
       ]
     },
     {
       id: 'customers',
-      label: 'CUSTOMERS',
+      label: t('sec.customers', 'CUSTOMERS'),
       items: [
-        { id: 'customers', label: getCustomerLabel(), icon: Users, featureId: 'customer' },
+        { id: 'customers', label: t('nav.customers', getCustomerLabel()), icon: Users, featureId: 'customer' },
         ...(enabledModules.includes('patients') ? [{ id: 'patients', label: 'Patient Records', icon: Users, featureId: 'customer' }] : []),
         ...(enabledModules.includes('students') ? [{ id: 'students', label: 'Student Directory', icon: Users, featureId: 'customer' }] : []),
         ...(enabledModules.includes('clients') ? [{ id: 'clients', label: 'Client Roster', icon: Users, featureId: 'customer' }] : []),
-        { id: 'products', label: 'Products & Services', icon: Layers, featureId: 'product' },
+        { id: 'products', label: t('nav.products', 'Products & Services'), icon: Layers, featureId: 'product' },
       ]
     },
     {
       id: 'finance',
-      label: 'FINANCE',
+      label: t('sec.finance', 'FINANCE'),
       items: [
-        { id: 'collection-center', label: 'Payments', icon: CreditCard, featureId: 'payment', badge: pendingPaymentsCount },
-        { id: 'due-ledger', label: 'Collections', icon: BookOpen, featureId: 'treasury' },
-        { id: 'expenses', label: t('expenses') || 'Expenses', icon: TrendingDown, featureId: 'treasury.moneyOut' },
-        { id: 'outsource', label: 'Outsource & Vendors', icon: Briefcase, featureId: 'outsource' },
-        { id: 'bank', label: 'Bank & Cash', icon: Landmark, featureId: 'treasury' },
+        { id: 'collection-center', label: t('nav.payments', 'Payments'), icon: CreditCard, featureId: 'payment', badge: pendingPaymentsCount },
+        { id: 'due-ledger', label: t('nav.collections', 'Collections'), icon: BookOpen, featureId: 'treasury' },
+        { id: 'expenses', label: t('nav.expenses', 'Expenses'), icon: TrendingDown, featureId: 'treasury.moneyOut' },
+        { id: 'outsource', label: t('nav.outsource', 'Outsource & Vendors'), icon: Briefcase, featureId: 'outsource' },
+        { id: 'bank', label: t('nav.bank', 'Bank & Cash'), icon: Landmark, featureId: 'treasury' },
       ]
     },
     {
       id: 'insights',
-      label: 'INSIGHTS',
+      label: t('sec.insights', 'INSIGHTS'),
       items: [
-        { id: 'reports', label: 'Reports & Analytics', icon: BarChart3, featureId: 'reports' },
+        { id: 'reports', label: t('nav.reports', 'Reports & Analytics'), icon: BarChart3, featureId: 'reports' },
       ]
     },
     {
       id: 'system',
-      label: 'SYSTEM',
+      label: t('sec.system', 'SYSTEM'),
       items: [
-        { id: 'settings', label: 'Settings', icon: SettingsIcon },
-        { id: 'staff-ledger', label: 'Users & Roles', icon: Users, featureId: 'staff.ledger' },
-        { id: 'help-center', label: 'Help Center', icon: HelpCircle },
+        { id: 'settings', label: t('nav.settings', 'Settings'), icon: SettingsIcon },
+        { id: 'staff-ledger', label: t('nav.users_roles', 'Users & Roles'), icon: Users, featureId: 'staff.ledger' },
+        { id: 'help-center', label: t('nav.help_center', 'Help Center'), icon: HelpCircle },
       ]
     }
   ];
@@ -193,7 +194,7 @@ const Sidebar = ({
               <div className="min-w-0">
                 <Logo type="horizontal" forceWhiteText={false} />
                 <p className="text-[9px] font-semibold text-theme-muted tracking-tight mt-0.5 uppercase">
-                  Smart Billing Platform
+                  {t('sidebar.smart_billing', 'Smart Billing Platform')}
                 </p>
               </div>
               <button
@@ -326,7 +327,7 @@ const Sidebar = ({
           <button 
             onClick={() => setCurrentTab('settings')}
             className={`flex items-center gap-2.5 min-w-0 text-left rounded-xl p-1.5 hover:bg-theme-surface transition-colors flex-1 cursor-pointer ${isCollapsed ? 'justify-center' : ''}`}
-            title="Business Settings"
+            title={t('sidebar.business_settings', 'Business Settings')}
           >
             <div className="w-9 h-9 rounded-xl p-[1.5px] bg-[image:var(--accent-gradient)] shrink-0 shadow-sm">
               <div className="w-full h-full rounded-[10.5px] bg-theme-surface flex items-center justify-center text-theme-accent font-black text-xs overflow-hidden">
@@ -340,11 +341,11 @@ const Sidebar = ({
             {!isCollapsed && (
               <div className="min-w-0 flex-1">
                 <p className="text-xs font-bold text-theme-primary truncate leading-tight flex items-center gap-1">
-                  <span className="truncate">{businessSettings?.businessName || 'My Business'}</span>
+                  <span className="truncate">{businessSettings?.businessName || t('sidebar.my_business', 'My Business')}</span>
                   {isPremium && <Crown className="w-3 h-3 text-amber-500 shrink-0" />}
                 </p>
                 <p className="text-[10px] text-theme-muted font-medium truncate mt-0.5">
-                  {businessSettings?.email || userEmail || 'Workspace Settings'}
+                  {businessSettings?.email || userEmail || t('sidebar.workspace_settings', 'Workspace Settings')}
                 </p>
               </div>
             )}
@@ -352,10 +353,20 @@ const Sidebar = ({
 
           {!isCollapsed && (
             <button
+              onClick={() => setLanguage(lang === 'bn' ? 'en' : 'bn')}
+              className="px-2 py-1.5 rounded-xl border border-theme-border-soft text-[10px] font-black text-theme-muted hover:text-theme-accent hover:border-theme-accent/40 transition-all cursor-pointer shrink-0"
+              title={t('sidebar.toggle_lang', 'Switch language')}
+              aria-label={t('sidebar.toggle_lang', 'Switch language')}
+            >
+              {lang === 'bn' ? 'EN' : 'বাং'}
+            </button>
+          )}
+          {!isCollapsed && (
+            <button
               onClick={handleLogout}
               className="p-1.5 rounded-xl text-theme-muted hover:text-rose-500 hover:bg-theme-surface transition-colors cursor-pointer"
-              title="Sign Out"
-              aria-label="Sign Out"
+              title={t('sidebar.sign_out', 'Sign Out')}
+              aria-label={t('sidebar.sign_out', 'Sign Out')}
             >
               <LogOut className="w-4 h-4" />
             </button>

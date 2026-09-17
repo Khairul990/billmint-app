@@ -15,6 +15,7 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { SignatureSurface, Badge } from '../../components/ui';
 import { getStudioHeaderTarget } from '../../utils/portalTargets';
+import { useI18n } from '../../utils/i18n';
 
 // Lazy-loaded studio modules
 const BusinessStudio = React.lazy(() => import('./BusinessStudio'));
@@ -65,6 +66,13 @@ const StudioLayout = ({
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [viewMode, setViewMode] = useState('all'); // 'all', 'simple', 'advanced'
+  const { t, lang } = useI18n();
+
+  // Route label/desc translation (falls back to the built-in English string)
+  const routeLabel = (route) => route?.type === 'label'
+    ? t('studio.group.' + route.label, route.label)
+    : t('studio.label.' + route.id, route.label);
+  const routeDesc = (route) => (route?.desc ? t('studio.desc.' + route.id, route.desc) : '');
   
   const {
     draftSettings,
@@ -128,7 +136,8 @@ const StudioLayout = ({
       routes = routes.filter(r => 
         r.type === 'label' ||
         r.label.toLowerCase().includes(q) || 
-        (r.desc && r.desc.toLowerCase().includes(q))
+        (r.desc && r.desc.toLowerCase().includes(q)) ||
+        (r.id && t('studio.label.' + r.id, '').toLowerCase().includes(q))
       );
     }
 
@@ -141,7 +150,7 @@ const StudioLayout = ({
       }
       return true;
     });
-  }, [searchQuery, viewMode]);
+  }, [searchQuery, viewMode, lang]);
 
   const activeRouteObj = STUDIO_ROUTES.find(r => r.id === activeStudio) || STUDIO_ROUTES[1];
 
@@ -163,8 +172,8 @@ const StudioLayout = ({
           <div className="flex items-center justify-between">
             {!isSidebarCollapsed && (
               <div>
-                <h2 className="text-sm font-black text-theme-primary">Settings Studio</h2>
-                <p className="text-[10px] font-bold text-theme-muted uppercase tracking-wider font-mono">Control Center</p>
+                <h2 className="text-sm font-black text-theme-primary">{t('studio.settings_studio', 'Settings Studio')}</h2>
+                <p className="text-[10px] font-bold text-theme-muted uppercase tracking-wider font-mono">{t('studio.control_center', 'Control Center')}</p>
               </div>
             )}
             <button 
@@ -183,7 +192,7 @@ const StudioLayout = ({
                 <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-theme-muted" />
                 <input 
                   type="text"
-                  placeholder="Search settings..." 
+                  placeholder={t('studio.search', 'Search settings...')} 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-8 pr-3 py-1.5 bg-theme-surface border border-theme-border-soft rounded-xl text-xs font-semibold text-theme-primary placeholder-theme-muted focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent/20 transition-all"
@@ -196,19 +205,19 @@ const StudioLayout = ({
                     onClick={() => setViewMode('all')}
                     className={`flex-1 py-1 rounded-lg transition-all cursor-pointer ${viewMode === 'all' ? 'bg-theme-card text-theme-primary shadow-xs font-extrabold' : 'hover:text-theme-primary'}`}
                   >
-                    All
+                    {t('studio.all', 'All')}
                   </button>
                   <button
                     onClick={() => setViewMode('simple')}
                     className={`flex-1 py-1 rounded-lg transition-all cursor-pointer ${viewMode === 'simple' ? 'bg-theme-card text-theme-accent shadow-xs font-extrabold' : 'hover:text-theme-primary'}`}
                   >
-                    Core
+                    {t('studio.core', 'Core')}
                   </button>
                   <button
                     onClick={() => setViewMode('advanced')}
                     className={`flex-1 py-1 rounded-lg transition-all cursor-pointer ${viewMode === 'advanced' ? 'bg-theme-card text-theme-accent shadow-xs font-extrabold' : 'hover:text-theme-primary'}`}
                   >
-                    Advanced
+                    {t('studio.advanced', 'Advanced')}
                   </button>
                 </div>
               )}
@@ -225,7 +234,7 @@ const StudioLayout = ({
               }
               return (
                 <div key={`label-${idx}`} className="pt-3 pb-1 px-2.5">
-                  <p className="text-[9px] font-black uppercase tracking-widest text-theme-muted/70">{route.label}</p>
+                  <p className="text-[9px] font-black uppercase tracking-widest text-theme-muted/70">{routeLabel(route)}</p>
                 </div>
               );
             }
@@ -235,7 +244,7 @@ const StudioLayout = ({
               <button
                 key={route.id}
                 onClick={() => handleSelectRoute(route.id)}
-                title={isSidebarCollapsed ? `${route.label} — ${route.desc}` : undefined}
+                title={isSidebarCollapsed ? `${route.label} — ${routeDesc(route)}` : undefined}
                 className={`w-full flex items-center p-2 rounded-xl transition-all duration-150 relative overflow-hidden group cursor-pointer ${isSidebarCollapsed ? 'justify-center' : ''} ${
                   isActive 
                     ? 'bg-theme-accent/10 text-theme-accent border-l-2 border-theme-accent font-extrabold shadow-2xs' 
@@ -245,8 +254,8 @@ const StudioLayout = ({
                 <Icon className={`w-3.5 h-3.5 shrink-0 transition-colors ${isSidebarCollapsed ? '' : 'mr-2.5'} ${isActive ? 'text-theme-accent' : 'text-theme-muted group-hover:text-theme-primary'}`} />
                 {!isSidebarCollapsed && (
                   <div className="text-left min-w-0 flex-1">
-                    <div className="text-xs truncate font-bold leading-tight">{route.label}</div>
-                    <div className="text-[10px] text-theme-muted truncate leading-tight mt-0.5">{route.desc}</div>
+                    <div className="text-xs truncate font-bold leading-tight">{routeLabel(route)}</div>
+                    <div className="text-[10px] text-theme-muted truncate leading-tight mt-0.5">{routeDesc(route)}</div>
                   </div>
                 )}
               </button>
@@ -266,8 +275,8 @@ const StudioLayout = ({
               {React.createElement(activeRouteObj.icon || Building2, { className: 'w-3.5 h-3.5' })}
             </div>
             <div className="min-w-0">
-              <span className="text-xs font-bold text-theme-primary block truncate">{activeRouteObj.label}</span>
-              <span className="text-[9px] text-theme-muted block truncate">Tap to switch section</span>
+              <span className="text-xs font-bold text-theme-primary block truncate">{routeLabel(activeRouteObj)}</span>
+              <span className="text-[9px] text-theme-muted block truncate">{t('studio.tap_to_switch', 'Tap to switch section')}</span>
             </div>
           </div>
           <ChevronDown className="w-3.5 h-3.5 text-theme-muted shrink-0 ml-1.5" />
@@ -293,7 +302,7 @@ const StudioLayout = ({
           }`}
         >
           <Save className="w-3.5 h-3.5" />
-          <span>{isSaving ? 'Saving' : 'Save'}</span>
+          <span>{isSaving ? t('studio.saving', 'Saving') : t('studio.save', 'Save')}</span>
         </button>
       </div>
 
@@ -317,8 +326,8 @@ const StudioLayout = ({
             >
               <div className="flex items-center justify-between pb-3 border-b border-theme-border-soft">
                 <div>
-                  <h3 className="text-sm font-black text-theme-primary">Settings Menu</h3>
-                  <p className="text-[10px] text-theme-muted">Select a studio section to configure</p>
+                  <h3 className="text-sm font-black text-theme-primary">{t('studio.settings_menu', 'Settings Menu')}</h3>
+                  <p className="text-[10px] text-theme-muted">{t('studio.select_section', 'Select a studio section to configure')}</p>
                 </div>
                 <button
                   onClick={() => setMobileDrawerOpen(false)}
@@ -331,7 +340,7 @@ const StudioLayout = ({
               <div className="py-2.5">
                 <input 
                   type="text"
-                  placeholder="Search settings..." 
+                  placeholder={t('studio.search', 'Search settings...')} 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full px-3 py-2 bg-theme-surface border border-theme-border-soft rounded-xl text-xs font-semibold text-theme-primary placeholder-theme-muted focus:outline-none focus:border-theme-accent"
@@ -343,7 +352,7 @@ const StudioLayout = ({
                   if (route.type === 'label') {
                     return (
                       <div key={`mob-label-${idx}`} className="pt-2.5 pb-1 px-2">
-                        <p className="text-[9px] font-black uppercase tracking-widest text-theme-muted">{route.label}</p>
+                        <p className="text-[9px] font-black uppercase tracking-widest text-theme-muted">{routeLabel(route)}</p>
                       </div>
                     );
                   }
@@ -361,8 +370,8 @@ const StudioLayout = ({
                     >
                       <Icon className={`w-4 h-4 mr-2.5 shrink-0 ${isActive ? 'text-theme-accent' : 'text-theme-muted'}`} />
                       <div className="min-w-0 flex-1">
-                        <span className="text-xs font-bold block truncate">{route.label}</span>
-                        <span className="text-[9px] text-theme-muted block truncate">{route.desc}</span>
+                        <span className="text-xs font-bold block truncate">{routeLabel(route)}</span>
+                        <span className="text-[9px] text-theme-muted block truncate">{routeDesc(route)}</span>
                       </div>
                     </button>
                   );
@@ -382,7 +391,7 @@ const StudioLayout = ({
             <button 
               onClick={() => setCurrentTab('dashboard')} 
               className="p-1.5 rounded-xl hover:bg-theme-surface-hover text-theme-muted hover:text-theme-primary transition-colors bg-theme-surface border border-theme-border-soft shadow-2xs cursor-pointer"
-              title="Back to Dashboard"
+              title={t('studio.back', 'Back to Dashboard')}
             >
               <ArrowLeft className="w-4 h-4" />
             </button>
@@ -391,13 +400,13 @@ const StudioLayout = ({
             </div>
             <div>
               <div className="text-xs font-black text-theme-primary truncate max-w-[160px] sm:max-w-none">
-                {STUDIO_ROUTES.find(r => r.id === activeStudio)?.label || 'Settings'}
+                {routeLabel(STUDIO_ROUTES.find(r => r.id === activeStudio)) || 'Settings'}
               </div>
               <div className="text-[10px] text-theme-secondary font-bold flex items-center gap-1.5">
                 {isDirty ? (
-                  <span className="flex items-center gap-1 text-amber-500"><span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" /> Unsaved Changes</span>
+                  <span className="flex items-center gap-1 text-amber-500"><span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" /> {t('studio.unsaved', 'Unsaved Changes')}</span>
                 ) : (
-                  <span className="flex items-center gap-1 text-theme-accent"><CheckCircle2 className="w-3 h-3 text-theme-accent" /> Auto-Synced</span>
+                  <span className="flex items-center gap-1 text-theme-accent"><CheckCircle2 className="w-3 h-3 text-theme-accent" /> {t('studio.synced', 'Auto-Synced')}</span>
                 )}
               </div>
             </div>
@@ -429,7 +438,7 @@ const StudioLayout = ({
                 className="h-8 px-2.5 rounded-xl border border-theme-border-soft text-theme-muted hover:text-theme-primary bg-theme-surface hover:bg-theme-card text-xs font-bold transition-all hidden sm:inline-flex items-center gap-1.5 cursor-pointer"
               >
                 <RotateCcw className="w-3 h-3" />
-                <span>Discard</span>
+                <span>{t('studio.discard', 'Discard')}</span>
               </button>
             )}
 
@@ -443,7 +452,7 @@ const StudioLayout = ({
               }`}
             >
               <Save className="w-3.5 h-3.5" />
-              <span>{isSaving ? 'Publishing...' : 'Publish Changes'}</span>
+              <span>{isSaving ? t('studio.publishing', 'Publishing...') : t('studio.publish', 'Publish Changes')}</span>
             </button>
           </div>,
           document.getElementById('studio-header-actions-portal')
@@ -468,7 +477,7 @@ const StudioLayout = ({
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-theme-accent/10 text-theme-accent border border-theme-accent/20">
                         <Sparkles className="w-3 h-3" />
-                        Active Workspace
+                        {t('studio.active_workspace', 'Active Workspace')}
                       </span>
                       <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-theme-surface border border-theme-border-soft text-theme-muted uppercase">
                         {draftSettings?.businessType || settings?.businessType || 'Retail'}
@@ -501,16 +510,16 @@ const StudioLayout = ({
                     <div className="p-3 rounded-2xl bg-theme-surface border border-theme-border-soft flex items-center gap-2.5 shadow-2xs">
                       <div className="w-2.5 h-2.5 rounded-full bg-theme-accent animate-pulse"></div>
                       <div className="text-left">
-                        <p className="text-[9px] font-black uppercase text-theme-muted tracking-wider">Cloud State</p>
-                        <p className="text-xs font-black text-theme-primary">Synchronized</p>
+                        <p className="text-[9px] font-black uppercase text-theme-muted tracking-wider">{t('studio.cloud_state', 'Cloud State')}</p>
+                        <p className="text-xs font-black text-theme-primary">{t('studio.synchronized', 'Synchronized')}</p>
                       </div>
                     </div>
 
                     <div className="p-3 rounded-2xl bg-theme-surface border border-theme-border-soft flex items-center gap-2.5 shadow-2xs">
                       <div className="w-2.5 h-2.5 rounded-full bg-blue-500"></div>
                       <div className="text-left">
-                        <p className="text-[9px] font-black uppercase text-theme-muted tracking-wider">Storage Guard</p>
-                        <p className="text-xs font-black text-theme-primary">Encrypted</p>
+                        <p className="text-[9px] font-black uppercase text-theme-muted tracking-wider">{t('studio.storage_guard', 'Storage Guard')}</p>
+                        <p className="text-xs font-black text-theme-primary">{t('studio.encrypted', 'Encrypted')}</p>
                       </div>
                     </div>
 
@@ -519,7 +528,7 @@ const StudioLayout = ({
                       className="px-3.5 py-3 rounded-2xl bg-theme-surface hover:bg-theme-card border border-theme-border-soft hover:border-theme-accent/30 text-xs font-bold text-theme-primary transition-all flex items-center gap-2 cursor-pointer shadow-2xs"
                     >
                       <Store className="w-4 h-4 text-theme-accent" />
-                      <span className="whitespace-nowrap">Switch Workspace</span>
+                      <span className="whitespace-nowrap">{t('studio.switch_workspace', 'Switch Workspace')}</span>
                     </button>
                   </div>
                 </div>
@@ -529,9 +538,9 @@ const StudioLayout = ({
               <div>
                 <div className="flex items-center justify-between mb-3 px-1">
                   <h2 className="text-xs font-black uppercase tracking-widest text-theme-muted font-mono">
-                    Core Business Configuration
+                    {t('studio.core_config', 'Core Business Configuration')}
                   </h2>
-                  <span className="text-[10px] text-theme-muted font-bold">Immediate Studio Essentials</span>
+                  <span className="text-[10px] text-theme-muted font-bold">{t('studio.studio_essentials', 'Immediate Studio Essentials')}</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
@@ -554,11 +563,11 @@ const StudioLayout = ({
 
                         <div>
                           <h3 className="text-xs font-bold text-theme-primary group-hover:text-theme-accent transition-colors flex items-center gap-1.5">
-                            <span>{route.label}</span>
+                            <span>{routeLabel(route)}</span>
                             <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all text-theme-accent" />
                           </h3>
                           <p className="text-[11px] text-theme-muted font-medium mt-1 leading-snug line-clamp-2">
-                            {route.desc}
+                            {routeDesc(route)}
                           </p>
                         </div>
                       </button>
@@ -571,9 +580,9 @@ const StudioLayout = ({
               <div>
                 <div className="flex items-center justify-between mb-3 px-1 mt-6">
                   <h2 className="text-xs font-black uppercase tracking-widest text-theme-muted font-mono">
-                    Advanced Operations & Security
+                    {t('studio.advanced_config', 'Advanced Operations & Security')}
                   </h2>
-                  <span className="text-[10px] text-theme-muted font-bold">Deep Controls & Automation</span>
+                  <span className="text-[10px] text-theme-muted font-bold">{t('studio.deep_controls', 'Deep Controls & Automation')}</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
@@ -596,11 +605,11 @@ const StudioLayout = ({
 
                         <div>
                           <h3 className="text-xs font-bold text-theme-primary group-hover:text-theme-accent transition-colors flex items-center gap-1.5">
-                            <span>{route.label}</span>
+                            <span>{routeLabel(route)}</span>
                             <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all text-theme-accent" />
                           </h3>
                           <p className="text-[11px] text-theme-muted font-medium mt-1 leading-snug line-clamp-2">
-                            {route.desc}
+                            {routeDesc(route)}
                           </p>
                         </div>
                       </button>
@@ -626,7 +635,7 @@ const StudioLayout = ({
                 <Suspense fallback={
                   <div className="p-12 text-center text-theme-muted">
                     <div className="animate-spin w-8 h-8 border-2 border-theme-accent border-t-transparent rounded-full mx-auto mb-4"></div>
-                    <p className="text-xs font-bold">Loading Studio Component...</p>
+                    <p className="text-xs font-bold">{t('studio.loading', 'Loading Studio Component...')}</p>
                   </div>
                 }>
                   {activeStudio === 'business' && <BusinessStudio settings={draftSettings} onUpdate={handleUpdateDraft} />}

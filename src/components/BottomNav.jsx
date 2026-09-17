@@ -3,12 +3,14 @@ import { LayoutDashboard, CreditCard, Users, MoreHorizontal, FileSpreadsheet, Pi
 import { triggerLightHaptic } from '../utils/feedback';
 import { getCustomerLabelByType } from '../config/businessPresets';
 import { useFeatureControl } from '../hooks/useFeatureControl';
+import { useI18n } from '../utils/i18n';
 
 const BottomNav = ({ currentTab, setCurrentTab, pendingPaymentsCount = 0, businessSettings }) => {
   const activeWsId = businessSettings?.activeWorkspaceId || 'default';
   const activeWorkspace = businessSettings?.businessWorkspaces?.find(ws => ws.id === activeWsId) || {};
   const wsType = activeWorkspace.type || 'retail';
   const { isFeatureEnabled } = useFeatureControl(activeWsId);
+  const { t } = useI18n();
 
   const getCustomerLabel = () => getCustomerLabelByType(wsType);
 
@@ -17,25 +19,25 @@ const BottomNav = ({ currentTab, setCurrentTab, pendingPaymentsCount = 0, busine
   const isReportsEnabled = isFeatureEnabled('reports');
 
   let tabs = [
-    { id: 'dashboard', label: 'Home', icon: LayoutDashboard },
-    ...(isDueEnabled ? [{ id: 'due', label: 'Due', icon: CreditCard, badge: pendingPaymentsCount }] : [{ id: 'invoices', label: 'Bills', icon: FileSpreadsheet }]),
+    { id: 'dashboard', label: t('nav.home', 'Home'), icon: LayoutDashboard },
+    ...(isDueEnabled ? [{ id: 'due', label: t('nav.due', 'Due'), icon: CreditCard, badge: pendingPaymentsCount }] : [{ id: 'invoices', label: t('nav.bills', 'Bills'), icon: FileSpreadsheet }]),
     { id: 'create', isAction: true },
     ...(isCustomerEnabled 
-      ? [{ id: 'customers', label: getCustomerLabel(), icon: Users }] 
+      ? [{ id: 'customers', label: t('nav.customers', getCustomerLabel()), icon: Users }] 
       : isReportsEnabled 
-        ? [{ id: 'reports', label: 'Reports', icon: PieChart }] 
-        : [{ id: 'invoices', label: 'Invoices', icon: FileSpreadsheet }]
+        ? [{ id: 'reports', label: t('nav.reports', 'Reports'), icon: PieChart }] 
+        : [{ id: 'invoices', label: t('nav.invoices', 'Invoices'), icon: FileSpreadsheet }]
     ),
-    { id: 'more', label: 'More', icon: MoreHorizontal },
+    { id: 'more', label: t('nav.more', 'More'), icon: MoreHorizontal },
   ];
 
   if (wsType === 'cybercafe' || wsType === 'cyber_cafe') {
     tabs = [
-      { id: 'dashboard', label: 'Home', icon: LayoutDashboard },
-      { id: 'customer-register', label: 'Register', icon: Users },
+      { id: 'dashboard', label: t('nav.home', 'Home'), icon: LayoutDashboard },
+      { id: 'customer-register', label: t('nav.register', 'Register'), icon: Users },
       { id: 'create', isAction: true },
-      { id: 'portal-hub', label: 'Portals', icon: CreditCard },
-      { id: 'more', label: 'More', icon: MoreHorizontal },
+      { id: 'portal-hub', label: t('nav.portals', 'Portals'), icon: CreditCard },
+      { id: 'more', label: t('nav.more', 'More'), icon: MoreHorizontal },
     ];
   }
 
