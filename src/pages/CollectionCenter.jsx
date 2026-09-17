@@ -1,4 +1,5 @@
 ﻿import React, { useState, useMemo, useEffect } from 'react';
+import { useI18n } from '../utils/i18n';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   CreditCard, 
@@ -95,6 +96,7 @@ const CollectionCenter = ({
   onPaymentSuccess = null,
   setCurrentTab = null
 }) => {
+  const { t } = useI18n();
   const [activeTab, setActiveTab] = useState(['history', 'requests', 'daybook'].includes(initialTab) ? initialTab : 'record');
   const [dayBookDate, setDayBookDate] = useState(todayStr());
   const [selectedTxType, setSelectedTxType] = useState('customer_payment');
@@ -802,10 +804,10 @@ const CollectionCenter = ({
                 </div>
                 <div>
                   <h1 className="text-2xl font-black text-theme-primary flex items-center gap-2">
-                    Money & Payment Center
+                    {t('cc.title', 'Money & Payment Center')}
                   </h1>
                   <p className="text-xs text-theme-muted">
-                    Authoritative financial ledger for all money in & out across BillQyro
+                    {t('cc.subtitle', 'Authoritative financial ledger for all money in & out across BillQyro')}
                   </p>
                 </div>
               </div>
@@ -858,7 +860,7 @@ const CollectionCenter = ({
                 }`}
               >
                 <ShieldCheck className="w-4 h-4" />
-                <span>Pending Approvals</span>
+                <span>{t('cc.pending', 'Pending Approvals')}</span>
                 {pendingPayments.length > 0 && (
                   <span className="ml-1 px-1.5 py-0.5 text-2xs font-black bg-rose-500 text-white rounded-full animate-pulse">
                     {pendingPayments.length}
@@ -1136,7 +1138,7 @@ const CollectionCenter = ({
                             <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-theme-muted" />
                             <input
                               type="text"
-                              placeholder="Search customer by name, phone or ID..."
+                              placeholder={t('cc.search_ph', 'Search customer by name, phone or ID...')}
                               value={searchQuery}
                               onChange={(e) => setSearchQuery(e.target.value)}
                               className="input-premium pl-10 w-full text-xs"
@@ -1185,7 +1187,7 @@ const CollectionCenter = ({
                         <div className="card-premium p-5 space-y-4">
                           <h3 className="text-xs uppercase tracking-wider font-black text-theme-muted flex items-center gap-2">
                             <Receipt className="w-4 h-4 text-theme-accent" />
-                            2. Select Invoice for Collection
+                            {t('cc.select_invoice', '2. Select Invoice for Collection')}
                           </h3>
 
                           {customerUnpaidInvoices.length === 0 ? (

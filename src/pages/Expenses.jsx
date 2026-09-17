@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useI18n } from '../utils/i18n';
 import { motion, AnimatePresence } from 'framer-motion';
 import AnimatedPage from '../components/AnimatedPage';
 import { 
@@ -36,6 +37,8 @@ const CATEGORIES = [
 ];
 
 const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSettings, setCurrentTab }) => {
+  const { t } = useI18n();
+  const catLabel = (n) => ({ 'Supplies': t('exp.cat_supplies', 'Supplies'), 'Utilities': t('exp.cat_utilities', 'Utilities'), 'Salaries & Wages': t('exp.cat_salaries', 'Salaries & Wages'), 'Rent & Maintenance': t('exp.cat_rent', 'Rent & Maintenance'), 'Marketing': t('exp.cat_marketing', 'Marketing'), 'Other': t('exp.cat_other', 'Other') })[n] || n;
   const [showAddForm, setShowAddForm] = useState(false);
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('Supplies');
@@ -184,8 +187,8 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
             </button>
           )}
           <div>
-            <h2 className="text-xl font-extrabold text-theme-primary dark:text-theme-primary tracking-tight">Expense Tracker</h2>
-            <p className="text-[10px] text-theme-muted font-bold uppercase tracking-wider mt-0.5">MANAGE OPERATING COSTS</p>
+            <h2 className="text-xl font-extrabold text-theme-primary dark:text-theme-primary tracking-tight">{t('exp.title', 'Expense Tracker')}</h2>
+            <p className="text-[10px] text-theme-muted font-bold uppercase tracking-wider mt-0.5">{t('exp.subtitle', 'MANAGE OPERATING COSTS')}</p>
           </div>
         </div>
 
@@ -194,7 +197,7 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
           className="btn-premium flex items-center justify-center gap-2 text-xs px-5 py-2.5 shadow-sm"
         >
           <Plus className="w-4 h-4" />
-          <span>Log Expense</span>
+          <span>{t('exp.log', 'Log Expense')}</span>
         </button>
       </div>
 
@@ -251,7 +254,7 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
         
         {/* TOTAL BOX */}
         <div className="bg-theme-card rounded-2xl p-5 border border-theme-border-soft shadow-xs">
-          <p className="text-[10px] font-bold text-theme-muted uppercase tracking-wider">Total Monthly Cost</p>
+          <p className="text-[10px] font-bold text-theme-muted uppercase tracking-wider">{t('exp.monthly_cost', 'Total Monthly Cost')}</p>
           <h3 className="text-3xl font-black mt-1 text-theme-primary tracking-tight font-numbers">
             {formatCurrency(totalExpenses, currencySymbol)}
           </h3>
@@ -264,7 +267,7 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
         {/* TOP CATEGORIES PANEL */}
         <div className="bg-theme-card rounded-2xl p-5 border border-theme-border-soft shadow-xs md:col-span-2 space-y-3">
           <h3 className="text-[10px] font-bold text-theme-muted uppercase tracking-wider pb-1 border-b border-theme-border-soft">
-            Cost By Category
+            {t('exp.by_category', 'Cost By Category')}
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
             {CATEGORIES.slice(0, 6).map((cat) => {
@@ -295,7 +298,7 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
         >
           <form onSubmit={handleAddExpense} className="space-y-4 text-xs font-semibold text-theme-muted pb-2">
             <div>
-              <label className="block mb-1 text-theme-primary text-xs font-bold">Expense Title / Description</label>
+              <label className="block mb-1 text-theme-primary text-xs font-bold">{t('exp.name_label', 'Expense Title / Description')}</label>
               <input
                 type="text"
                 required
@@ -307,21 +310,21 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
             </div>
 
             <div>
-              <label className="block mb-1 text-theme-primary text-xs font-bold">Category</label>
+              <label className="block mb-1 text-theme-primary text-xs font-bold">{t('exp.category_label', 'Category')}</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
                 className="w-full px-3.5 py-2.5 bg-theme-surface border border-theme-border-soft rounded-xl focus:outline-none focus:border-theme-accent text-theme-primary font-bold text-xs"
               >
                 {CATEGORIES.map(c => (
-                  <option key={c.name} value={c.name}>{c.name}</option>
+                  <option key={c.name} value={c.name}>{catLabel(c.name)}</option>
                 ))}
               </select>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block mb-1 text-theme-primary text-xs font-bold">Amount ({currencySymbol})</label>
+                <label className="block mb-1 text-theme-primary text-xs font-bold">{t('exp.amount_label', 'Amount')} ({currencySymbol})</label>
                 <input
                   type="number"
                   required
@@ -335,7 +338,7 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
               </div>
 
               <div>
-                <label className="block mb-1 text-theme-primary text-xs font-bold">Date</label>
+                <label className="block mb-1 text-theme-primary text-xs font-bold">{t('exp.date_label', 'Date')}</label>
                 <input
                   type="date"
                   required
@@ -347,7 +350,7 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
             </div>
 
             <div>
-              <label className="block mb-1 text-theme-primary text-xs font-bold">Vendor / Paid To (optional)</label>
+              <label className="block mb-1 text-theme-primary text-xs font-bold">{t('exp.vendor_label', 'Vendor / Paid To (optional)')}</label>
               <input
                 type="text"
                 list="vendor-options-list"
@@ -443,7 +446,7 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
                         <button
                           onClick={() => onDeleteExpense(exp.id)}
                           className="p-1.5 text-theme-muted hover:text-theme-danger hover:bg-theme-danger/10 rounded-xl transition-all"
-                          title="Delete Expense"
+                          title={t('exp.delete', 'Delete Expense')}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -451,7 +454,7 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
 
                       <div className="mt-3 flex items-center gap-2 flex-wrap">
                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold ${catInfo.color} ${catInfo.border}`}>
-                          {exp.category}
+                          {catLabel(exp.category)}
                         </span>
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-theme-surface text-theme-muted border border-theme-border-soft">
                           <Calendar className="w-3 h-3" />
@@ -480,7 +483,7 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
                     </div>
 
                     <div className="border-t border-theme-border-soft pt-3 mt-4 flex justify-between items-center">
-                      <span className="text-[9px] text-theme-muted font-bold uppercase tracking-wider">Amount</span>
+                      <span className="text-[9px] text-theme-muted font-bold uppercase tracking-wider">{t('exp.amount_label', 'Amount')}</span>
                       <span className="text-sm font-black text-theme-primary font-numbers">
                         {formatCurrency(exp.amount, currencySymbol)}
                       </span>
@@ -493,9 +496,9 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
             {expenses.length === 0 && (
               <div className="md:col-span-2 lg:col-span-3 bg-theme-card rounded-2xl p-10 border border-theme-border-soft text-center shadow-xs">
                 <Receipt className="w-10 h-10 text-theme-muted mx-auto mb-2 opacity-60" />
-                <h4 className="font-bold text-sm text-theme-primary">No Operating Costs Logged</h4>
+                <h4 className="font-bold text-sm text-theme-primary">{t('exp.empty_title', 'No Operating Costs Logged')}</h4>
                 <p className="text-xs text-theme-muted font-medium mt-1 max-w-xs mx-auto">
-                  Keep overhead clean. Click Log Expense to add business expenses!
+                  {t('exp.empty_sub', 'Keep overhead clean. Click Log Expense to add business expenses!')}
                 </p>
               </div>
             )}
@@ -503,7 +506,7 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
         </div>
 
       </div>
-      <CenteredModal isOpen={!!viewingReceipt} onClose={() => setViewingReceipt(null)} title={viewingReceipt ? `Receipt — ${viewingReceipt.title}` : 'Receipt'}>
+      <CenteredModal isOpen={!!viewingReceipt} onClose={() => setViewingReceipt(null)} title={viewingReceipt ? `${t('exp.receipt', 'Receipt')} — ${viewingReceipt.title}` : t('exp.receipt', 'Receipt')}>
         {viewingReceipt?.receiptDataUrl && (
           <img src={viewingReceipt.receiptDataUrl} alt="Receipt" className="w-full rounded-xl border border-theme-border-soft" />
         )}

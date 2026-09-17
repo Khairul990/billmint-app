@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useI18n } from '../utils/i18n';
 import AnimatedPage from '../components/AnimatedPage';
 import { 
   Layers, 
@@ -38,6 +39,7 @@ import QRCode from 'qrcode';
  * @param {Object} businessSettings - currency details
  */
 const Products = ({ products = [], onSaveProduct, onDeleteProduct, onSaveExpense, businessSettings, setCurrentTab }) => {
+  const { t } = useI18n();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('products');
   const [modalTab, setModalTab] = useState('basic');
@@ -170,7 +172,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, onSaveExpense
   const handleDelete = (id) => {
     toast((t) => (
       <div>
-        <p className="font-bold mb-2">Delete this product/service? This is permanent.</p>
+        <p className="font-bold mb-2">{t('prod.delete_confirm', 'Delete this product/service? This is permanent.')}</p>
         <div className="flex gap-2">
           <button onClick={() => { onDeleteProduct(id); toast.dismiss(t.id); }} className="bg-theme-danger text-white px-3 py-1 rounded-lg text-xs font-bold">Delete</button>
           <button onClick={() => toast.dismiss(t.id)} className="bg-theme-surface px-3 py-1 rounded-lg text-xs font-bold">Cancel</button>
@@ -327,7 +329,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, onSaveExpense
               </button>
             )}
             <div>
-              <h2 className="text-base font-extrabold text-theme-primary tracking-tight">Inventory Hub</h2>
+              <h2 className="text-base font-extrabold text-theme-primary tracking-tight">{t('prod.hub', 'Inventory Hub')}</h2>
               <p className="text-[10px] text-theme-muted font-bold uppercase tracking-wider mt-0.5">CATALOG OF ASSETS & SERVICES</p>
             </div>
           </div>
@@ -378,7 +380,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, onSaveExpense
               className="flex items-center justify-center gap-2 bg-gradient-to-tr from-theme-accent to-theme-accent-dark text-white font-extrabold text-xs px-5 py-3.5 rounded-2xl shadow-premium hover:scale-[1.02] active:scale-[0.98] transition-all"
             >
               <Plus className="w-4 h-4" />
-              <span className="hidden sm:inline">Add Product</span>
+              <span className="hidden sm:inline">{t('prod.add', 'Add Product')}</span>
             </button>
           </div>
         </div>
@@ -395,7 +397,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, onSaveExpense
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search catalog items by description, code name..."
+              placeholder={t('prod.search_ph', 'Search catalog items by description, code name...')}
               className="w-full pl-10 pr-4 py-2.5 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft/50 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent focus:bg-theme-card dark:bg-theme-card transition-all text-theme-primary dark:text-theme-primary"
             />
           </div>
@@ -447,7 +449,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, onSaveExpense
                         : 'bg-theme-accent-light text-theme-accent border border-theme-border-soft'
                     }`}>
                       {prod.stockQty <= (prod.lowStockThreshold || 5) && <BadgeAlert className="w-3 h-3" />}
-                      Stock: {prod.stockQty} {prod.stockQty <= (prod.lowStockThreshold || 5) && '(Low)'}
+                      {t('prod.stock', 'Stock')}: {prod.stockQty} {prod.stockQty <= (prod.lowStockThreshold || 5) && t('prod.low', '(Low)')}
                     </span>
                     {prod.category && (
                       <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-theme-accent-light text-theme-accent border border-theme-border-soft">
@@ -494,9 +496,9 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, onSaveExpense
           {filteredProducts.length === 0 && (
             <div className="md:col-span-2 lg:col-span-3 bg-theme-card dark:bg-theme-card rounded-3xl p-12 border border-theme-border-soft dark:border-theme-border-soft text-center shadow-premium">
               <Layers className="w-12 h-12 text-theme-primary mx-auto mb-3 animate-pulse" />
-              <h4 className="font-extrabold text-theme-primary dark:text-theme-muted">Inventory Empty</h4>
+              <h4 className="font-extrabold text-theme-primary dark:text-theme-muted">{t('prod.empty_title', 'Inventory Empty')}</h4>
               <p className="text-xs text-theme-muted font-semibold mt-1 max-w-xs mx-auto">
-                Populate items, packages, or services inside the catalog to make selecting products during invoice generation immediate.
+                {t('prod.empty_sub', 'Populate items, packages, or services inside the catalog to make selecting products during invoice generation immediate.')}
               </p>
             </div>
           )}
@@ -512,15 +514,15 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, onSaveExpense
         <CenteredModal 
           isOpen={isModalOpen} 
           onClose={() => setIsModalOpen(false)} 
-          title={editingProduct ? 'Update Catalog Item' : 'Add Catalog Item'}
+          title={editingProduct ? t('prod.update_item', 'Update Catalog Item') : t('prod.add_item', 'Add Catalog Item')}
         >
           <form onSubmit={handleSave} className="space-y-4 text-xs font-semibold text-theme-muted pb-4">
             
             <div className="flex overflow-x-auto no-scrollbar gap-2 mb-4 p-1 bg-theme-surface/50 border border-theme-border-soft rounded-xl shadow-inner max-w-full">
               {[
-                { id: 'basic', label: 'Basic Info' },
-                { id: 'stock', label: 'Pricing & Stock' },
-                { id: 'advanced', label: 'Advanced Settings' },
+                { id: 'basic', label: t('prod.tab_basic', 'Basic Info') },
+                { id: 'stock', label: t('prod.tab_stock', 'Pricing & Stock') },
+                { id: 'advanced', label: t('prod.tab_advanced', 'Advanced Settings') },
               ].map(tab => (
                 <button
                   key={tab.id}
@@ -540,7 +542,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, onSaveExpense
             {modalTab === 'basic' && (
               <div className="space-y-4 animate-fadeIn">
                 <div>
-                  <label className="block mb-1 text-theme-muted">Product/Service Title</label>
+                  <label className="block mb-1 text-theme-muted">{t('prod.title_label', 'Product/Service Title')}</label>
                   <input
                     type="text"
                     required
@@ -553,7 +555,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, onSaveExpense
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block mb-1 text-theme-muted">Category Tag</label>
+                    <label className="block mb-1 text-theme-muted">{t('prod.category_label', 'Category Tag')}</label>
                     <input
                       type="text"
                       list="category-options-list"
@@ -564,7 +566,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, onSaveExpense
                     />
                   </div>
                   <div>
-                    <label className="block mb-1 text-theme-muted">Brand (Optional)</label>
+                    <label className="block mb-1 text-theme-muted">{t('prod.brand_label', 'Brand (Optional)')}</label>
                     <input
                       type="text"
                       value={brand}
@@ -576,7 +578,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, onSaveExpense
                 </div>
 
                 <div>
-                  <label className="block mb-1 text-theme-muted">Detailed Description (Optional)</label>
+                  <label className="block mb-1 text-theme-muted">{t('prod.desc_label', 'Detailed Description (Optional)')}</label>
                   <textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
@@ -592,7 +594,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, onSaveExpense
               <div className="space-y-4 animate-fadeIn">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block mb-1 text-theme-muted">Unit Price ({currencySymbol})</label>
+                    <label className="block mb-1 text-theme-muted">{t('prod.price_label', 'Unit Price')} ({currencySymbol})</label>
                     <input
                       type="number"
                       step="0.01"
@@ -605,7 +607,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, onSaveExpense
                     />
                   </div>
                   <div>
-                    <label className="block mb-1 text-theme-muted">Unit Measure</label>
+                    <label className="block mb-1 text-theme-muted">{t('prod.unit_label', 'Unit Measure')}</label>
                     <select
                       value={unit}
                       onChange={(e) => setUnit(e.target.value)}
@@ -620,7 +622,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, onSaveExpense
 
                 <div className="grid grid-cols-2 gap-4 pt-2 border-t border-theme-border-soft dark:border-theme-border-soft/60 mt-4">
                   <div>
-                    <label className="block mb-1 text-theme-muted font-bold">Current Stock Qty</label>
+                    <label className="block mb-1 text-theme-muted font-bold">{t('prod.stock_label', 'Current Stock Qty')}</label>
                     <input
                       type="number"
                       step="1"
@@ -633,7 +635,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, onSaveExpense
                   </div>
                   <div>
                     <label className="block mb-1 text-theme-muted font-bold flex items-center gap-1">
-                      Low Stock Alert At
+                      {t('prod.low_stock_label', 'Low Stock Alert At')}
                       <BadgeAlert className="w-3 h-3 text-theme-danger" />
                     </label>
                     <input
@@ -655,7 +657,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, onSaveExpense
                 {invSettings.enableBarcodeSku !== false && (
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block mb-1 text-theme-muted">SKU (Stock Keeping Unit)</label>
+                      <label className="block mb-1 text-theme-muted">{t('prod.sku_label', 'SKU (Stock Keeping Unit)')}</label>
                       <input
                         type="text"
                         value={sku}
@@ -665,7 +667,7 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, onSaveExpense
                       />
                     </div>
                     <div>
-                      <label className="block mb-1 text-theme-muted">Barcode (EAN/UPC)</label>
+                      <label className="block mb-1 text-theme-muted">{t('prod.barcode_label', 'Barcode (EAN/UPC)')}</label>
                       <input
                         type="text"
                         value={barcode}

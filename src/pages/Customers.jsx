@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
+import { useI18n } from '../utils/i18n';
 import { motion } from 'framer-motion';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import AnimatedPage from '../components/AnimatedPage';
@@ -54,6 +55,7 @@ const Customers = ({
   onOpenCollection, 
   setCurrentTab 
 }) => {
+  const { t } = useI18n();
   const wsType = useMemo(() => 
     businessSettings?.businessWorkspaces?.find(ws => ws.id === businessSettings.activeWorkspaceId)?.type || 
     businessSettings?.type || 
@@ -275,10 +277,10 @@ const Customers = ({
               )}
               <div>
                 <h1 className="text-xl sm:text-2xl font-black text-theme-primary tracking-tight">
-                  {customerLabel} Command Center
+                  {customerLabel} {t('cust.command_center', 'Command Center')}
                 </h1>
                 <p className="text-xs font-semibold text-theme-muted mt-0.5">
-                  Financial relationships, credit health, and real-time outstanding balances
+                  {t('cust.subtitle', 'Financial relationships, credit health, and real-time outstanding balances')}
                 </p>
               </div>
             </div>
@@ -288,7 +290,7 @@ const Customers = ({
               className="hidden md:flex items-center justify-center gap-2 px-5 py-2.5 bg-[image:var(--accent-gradient)] text-white rounded-2xl text-xs font-black shadow-md shadow-theme-accent/20 hover:opacity-95 transition-all cursor-pointer"
             >
               <UserPlus className="w-4 h-4" />
-              <span>+ Add {customerLabel}</span>
+              <span>{t('cust.add', '+ Add')} {customerLabel}</span>
             </button>
 
             {/* Mobile floating add button */}
@@ -296,7 +298,7 @@ const Customers = ({
               whileTap={{ scale: 0.95 }}
               onClick={openAddModal}
               className="fixed bottom-20 right-4 md:hidden z-40 flex items-center justify-center gap-2 bg-[image:var(--accent-gradient)] text-white rounded-full p-4 shadow-xl shadow-theme-accent/30"
-              aria-label={'Add ' + customerLabel}
+              aria-label={t('cust.add', '+ Add') + ' ' + customerLabel}
             >
               <UserPlus className="w-5 h-5" />
             </motion.button>
@@ -307,7 +309,7 @@ const Customers = ({
             <SignatureSurface variant="neutral" className="p-4 sm:p-5">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[10px] font-black uppercase tracking-wider text-theme-muted">
-                  Total {customerLabel}
+                  {t('cust.total', 'Total')} {customerLabel}
                 </span>
                 <span className="w-6 h-6 rounded-lg bg-theme-surface border border-theme-border-soft flex items-center justify-center text-theme-muted text-xs font-bold">
                   <Users className="w-3.5 h-3.5" />
@@ -321,10 +323,10 @@ const Customers = ({
             <SignatureSurface variant="neutral" className="p-4 sm:p-5">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[10px] font-black uppercase tracking-wider text-theme-muted">
-                  Owing Money
+                  {t('cust.owing', 'Owing Money')}
                 </span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
-                  {portfolioSnapshot.customersWithDue} accounts
+                  {portfolioSnapshot.customersWithDue} {t('cust.accounts', 'accounts')}
                 </span>
               </div>
               <p className="text-xl sm:text-2xl font-black text-rose-600 dark:text-rose-400 font-numbers">
@@ -335,7 +337,7 @@ const Customers = ({
             <SignatureSurface variant="neutral" className="p-4 sm:p-5">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[10px] font-black uppercase tracking-wider text-theme-muted">
-                  Total Outstanding
+                  {t('cust.total_outstanding', 'Total Outstanding')}
                 </span>
                 <span className="w-6 h-6 rounded-lg bg-rose-500/10 text-rose-600 flex items-center justify-center text-xs font-bold">
                   <Banknote className="w-3.5 h-3.5" />
@@ -374,7 +376,7 @@ const Customers = ({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={`Search ${customerLabel.toLowerCase()} by name, contact phone, ID, email, or city...`}
+                placeholder={t('cust.search_ph', 'Search {c} by name, contact phone, ID, email, or city...').replace('{c}', customerLabel.toLowerCase())}
                 className="w-full pl-10 pr-10 py-3 bg-theme-card border border-theme-border-soft rounded-2xl text-xs sm:text-sm font-semibold text-theme-primary placeholder-theme-muted focus:outline-none focus:border-theme-accent focus:ring-2 focus:ring-theme-accent/20 transition-all shadow-xs"
               />
               {searchQuery && (
@@ -489,7 +491,7 @@ const Customers = ({
                     <div className="p-3 rounded-2xl bg-theme-surface/70 border border-theme-border-soft/60 space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] font-black uppercase tracking-wider text-theme-muted">
-                          Outstanding
+                          {t('cust.outstanding', 'Outstanding')}
                         </span>
                         <FinancialValue 
                           value={stats.totalDue} 
@@ -502,7 +504,7 @@ const Customers = ({
                       <div className="grid grid-cols-2 gap-2 pt-2 border-t border-theme-border-soft/50 text-[11px]">
                         <div>
                           <span className="text-[9px] font-extrabold uppercase text-theme-muted block">
-                            Total Billed ({stats.count})
+                            {t('cust.total_billed', 'Total Billed')} ({stats.count})
                           </span>
                           <span className="font-bold text-theme-primary tabular-nums">
                             {formatCurrency(stats.totalBilled, currencySymbol)}
@@ -513,7 +515,7 @@ const Customers = ({
                           {hasOldDue ? (
                             <div>
                               <span className="text-[9px] font-extrabold uppercase text-amber-600 dark:text-amber-400 block">
-                                Old Due
+                                {t('cust.old_due', 'Old Due')}
                               </span>
                               <span className="font-bold text-amber-600 dark:text-amber-400 tabular-nums">
                                 +{formatCurrency(stats.openingDue, currencySymbol)}
@@ -522,7 +524,7 @@ const Customers = ({
                           ) : (
                             <div>
                               <span className="text-[9px] font-extrabold uppercase text-theme-accent block">
-                                Total Paid
+                                {t('cust.total_paid', 'Total Paid')}
                               </span>
                               <span className="font-bold text-theme-accent tabular-nums">
                                 {formatCurrency(stats.totalPaid, currencySymbol)}
@@ -637,7 +639,7 @@ const Customers = ({
           >
             <form onSubmit={handleSave} className="space-y-4 text-xs font-semibold text-theme-muted pb-4">
               <div>
-                <label className="block mb-1 text-theme-muted">{customerLabel} / Business Name</label>
+                <label className="block mb-1 text-theme-muted">{t('cust.name_label', '{c} / Business Name').replace('{c}', customerLabel)}</label>
                 <input
                   type="text"
                   required
@@ -650,7 +652,7 @@ const Customers = ({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block mb-1 text-theme-muted">Contact Phone Number</label>
+                  <label className="block mb-1 text-theme-muted">{t('cust.phone_label', 'Contact Phone Number')}</label>
                   <input
                     type="tel"
                     value={phone}
@@ -661,7 +663,7 @@ const Customers = ({
                 </div>
 
                 <div>
-                  <label className="block mb-1 text-theme-muted">Old Due (Opening Balance)</label>
+                  <label className="block mb-1 text-theme-muted">{t('cust.old_due_label', 'Old Due (Opening Balance)')}</label>
                   <input
                     type="number"
                     step="0.01"
@@ -674,7 +676,7 @@ const Customers = ({
               </div>
 
               <div>
-                <label className="block mb-1 text-theme-muted">Email Address</label>
+                <label className="block mb-1 text-theme-muted">{t('cust.email_label', 'Email Address')}</label>
                 <input
                   type="email"
                   value={email}
@@ -685,7 +687,7 @@ const Customers = ({
               </div>
 
               <div>
-                <label className="block mb-1 text-theme-muted">Billing Address</label>
+                <label className="block mb-1 text-theme-muted">{t('cust.address_label', 'Billing Address')}</label>
                 <textarea
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}

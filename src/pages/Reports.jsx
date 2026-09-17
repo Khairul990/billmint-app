@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { useI18n } from '../utils/i18n';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   AreaChart, Area, PieChart, Pie, Cell, BarChart, Bar,
@@ -65,6 +66,7 @@ const Reports = ({
   businessSettings,
   setCurrentTab = null
 }) => {
+  const { t } = useI18n();
   const currencySymbol = businessSettings?.currencySymbol || businessSettings?.currency || '₹';
   const activeWorkspaceId = businessSettings?.activeWorkspaceId || 'default';
   const wsType = businessSettings?.businessWorkspaces?.find(ws => ws.id === activeWorkspaceId)?.type || businessSettings?.type || 'retail';
@@ -292,10 +294,10 @@ const Reports = ({
             )}
             <div>
               <h1 className="text-2xl sm:text-3xl font-black text-theme-primary tracking-tight">
-                Financial Intelligence
+                {t('rep.title', 'Financial Intelligence')}
               </h1>
               <p className="text-xs font-semibold text-theme-muted mt-0.5">
-                See where your money came from, where it went, and what is still to collect
+                {t('rep.subtitle', 'See where your money came from, where it went, and what is still to collect')}
               </p>
             </div>
           </div>
@@ -307,7 +309,7 @@ const Reports = ({
             onClick={handleExportCSV}
             className="px-4 py-2.5 rounded-2xl bg-theme-card border border-theme-border-soft text-theme-primary font-extrabold text-xs flex items-center gap-2 shadow-2xs hover:bg-theme-surface transition-all cursor-pointer"
           >
-            <Download className="w-4 h-4 text-theme-accent" /> Export CSV
+            <Download className="w-4 h-4 text-theme-accent" /> {t('rep.export_csv', 'Export CSV')}
           </button>
           <button
             onClick={handlePrint}
@@ -345,7 +347,7 @@ const Reports = ({
                     : 'bg-theme-surface hover:bg-theme-card border border-theme-border-soft text-theme-muted'
                 }`}
               >
-                {opt}
+                {t('rep.' + opt.toLowerCase().replace(/\s+/g, '_'), opt)}
               </button>
             ))}
           </div>
@@ -397,7 +399,7 @@ const Reports = ({
               : 'bg-theme-card hover:bg-theme-surface border border-theme-border-soft text-theme-muted'
           }`}
         >
-          <TrendingUp className="w-3.5 h-3.5" /> Billed Revenue
+          <TrendingUp className="w-3.5 h-3.5" /> {t('rep.tab_sales', 'Billed Revenue')}
         </button>
 
         <button
@@ -480,7 +482,7 @@ const Reports = ({
             <SignatureSurface variant="neutral" className="p-4 sm:p-5">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[10px] font-black uppercase tracking-wider text-theme-muted">
-                  Billed Revenue
+                  {t('rep.tab_sales', 'Billed Revenue')}
                 </span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-theme-surface border border-theme-border-soft text-theme-primary font-numbers">
                   {salesSummary.invoiceCount} bills
@@ -501,7 +503,7 @@ const Reports = ({
             <SignatureSurface variant="neutral" className="p-4 sm:p-5">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[10px] font-black uppercase tracking-wider text-theme-muted">
-                  Collected Cash
+                  {t('rep.collected_cash', 'Collected Cash')}
                 </span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-theme-tint-bg text-theme-accent border border-theme-tint-border font-numbers">
                   {collectionsSummary.collectionRate}% Rate
@@ -614,7 +616,7 @@ const Reports = ({
                     <span className="w-2.5 h-2.5 rounded-full bg-theme-accent"></span> Billed
                   </span>
                   <span className="flex items-center gap-1 text-theme-accent">
-                    <span className="w-2.5 h-2.5 rounded-full bg-theme-accent"></span> Collected
+                    <span className="w-2.5 h-2.5 rounded-full bg-theme-accent"></span> {t('rep.collected', 'Collected')}
                   </span>
                 </div>
               </div>
@@ -803,7 +805,7 @@ const Reports = ({
           <SignatureSurface variant="neutral" className="p-5 flex flex-col min-h-[320px]">
             <div className="section-header mb-4 border-b border-theme-border-soft/60 pb-3">
               <div>
-                <h3 className="text-sm font-black text-theme-primary">Daily Billed Revenue Trend</h3>
+                <h3 className="text-sm font-black text-theme-primary">Daily {t('rep.tab_sales', 'Billed Revenue')} Trend</h3>
                 <p className="text-xs text-theme-muted font-medium">Billed revenue across {salesSummary.invoiceCount} invoices in {dateRange}</p>
               </div>
             </div>
