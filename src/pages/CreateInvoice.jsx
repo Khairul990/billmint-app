@@ -1,13 +1,14 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { useI18n } from '../utils/i18n';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { useI18n, getLanguage } from '../utils/i18n';
 import { createPortal } from 'react-dom';
 import { 
   ArrowLeft, Save, LayoutTemplate, Plus, Trash2, Copy, FileText, 
   Eye, EyeOff, Maximize, X, Check, ChevronDown, Palette, Columns, 
-  DollarSign, UserPlus, CreditCard, Layers, Tag, ChevronUp, AlertCircle, Scan, Sparkles, Wand2, Loader2
+  DollarSign, UserPlus, CreditCard, Layers, Tag, ChevronUp, AlertCircle, Scan, Sparkles, Wand2, Loader2, Mic
 } from 'lucide-react';
 import BarcodeScannerModal from '../components/BarcodeScannerModal';
 import { analyzeCustomerHistory, buildSmartBillDraft, generateLocalInsight, generateGeminiInsight } from '../utils/aiBillCreator';
+import { parseVoiceBill } from '../utils/voiceBillParser';
 import { Button } from '../components/ui/Button';
 import { formatCurrency, formatAmountInWords } from '../utils/invoiceUtils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -52,6 +53,76 @@ const CreateInvoice = ({
   onPrefillConsumed = null
 }) => {
   const { t } = useI18n();
+
+  // ── Voice-to-Bill (Web Speech API → parser → prefill) ──
+  const [voiceState, setVoiceState] = useState({ listening: false, transcript: '' });
+  const voiceTranscriptRef = useRef('');
+  const recognitionRef = useRef(null);
+
+  const applyVoiceBill = (transcript) => {
+    const parsed = parseVoiceBill(transcript);
+    if (!parsed.items.length) {
+      toast.error(t('voice.no_items', 'No items detected in speech'));
+      return;
+    }
+    if (parsed.customerName && billingTarget === 'customer') {
+      const q = parsed.customerName.toLowerCase();
+      const match = customers.find(c => (c.name || '').toLowerCase() === q) ||
+        customers.find(c => (c.name || '').toLowerCase().startsWith(q));
+      if (match) {
+        setSelectedCustomerId(match.id);
+      } else {
+        setNewCustName(parsed.customerName);
+        setShowQuickAddCustomer(true);
+      }
+    }
+    const existing = items.filter(it => (it.name || '').trim() !== '' || (parseFloat(it.price) || 0) !== 0);
+    const added = parsed.items.map((it, idx) => ({
+      id: `voice_${Date.now()}_${idx}`,
+      sNo: String(existing.length + idx + 1),
+      name: it.name,
+      qty: it.qty,
+      price: it.price,
+      customFields: {}
+    }));
+    setItems([...existing, ...added]);
+    toast.success(`${parsed.items.length} ${t('voice.filled', 'item(s) added to bill')}`);
+  };
+
+  const stopVoiceBill = () => {
+    try { recognitionRef.current?.stop(); } catch { /* ignore */ }
+  };
+
+  const startVoiceBill = () => {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+      toast.error(t('voice.unsupported', 'Voice input is not supported in this browser. Try Chrome.'));
+      return;
+    }
+    try { recognitionRef.current?.abort(); } catch { /* ignore */ }
+    const rec = new SR();
+    rec.lang = getLanguage() === 'bn' ? 'bn-IN' : 'en-IN';
+    rec.interimResults = true;
+    rec.continuous = false;
+    rec.maxAlternatives = 1;
+    rec.onresult = (e) => {
+      let txt = '';
+      for (let i = 0; i < e.results.length; i++) txt += e.results[i][0].transcript + ' ';
+      voiceTranscriptRef.current = txt.trim();
+      setVoiceState({ listening: true, transcript: voiceTranscriptRef.current });
+    };
+    rec.onerror = () => setVoiceState({ listening: false, transcript: '' });
+    rec.onend = () => {
+      const txt = voiceTranscriptRef.current;
+      voiceTranscriptRef.current = '';
+      setVoiceState({ listening: false, transcript: '' });
+      if (txt) applyVoiceBill(txt);
+    };
+    recognitionRef.current = rec;
+    voiceTranscriptRef.current = '';
+    setVoiceState({ listening: true, transcript: '' });
+    try { rec.start(); } catch { /* already started */ }
+  };
   const [selectedTemplate, setSelectedTemplate] = useState(businessSettings?.selectedPdfTemplate || defaultTemplate);
   const [viewMode, setViewMode] = useState('pdf');
   const [activeTab, setActiveTab] = useState('listing');
@@ -1030,6 +1101,18 @@ const CreateInvoice = ({
                         >
                           <Sparkles className="w-3 h-3" /> {t('ci.ai_bill', 'AI Bill')}
                         </button>
+                        <button
+                          type="button"
+                          onClick={voiceState.listening ? stopVoiceBill : startVoiceBill}
+                          className={`text-[10px] font-black px-2 py-0.5 rounded-full flex items-center gap-1 transition-all cursor-pointer ${
+                            voiceState.listening
+                              ? 'bg-rose-500 text-white animate-pulse'
+                              : 'bg-theme-surface text-rose-600 dark:text-rose-400 border border-rose-500/30 hover:bg-rose-500/10'
+                          }`}
+                          title={t('voice.title', 'Voice to Bill — speak customer, items & amounts (e.g. Rahims bill, rice 5 kg 200 rupees)')}
+                        >
+                          <Mic className="w-3 h-3" /> {voiceState.listening ? t('voice.stop', 'Stop') : t('voice.bill', 'Voice Bill')}
+                        </button>
                       </div>
                       <select className="input-premium bg-theme-surface" value={selectedCustomerId} onChange={(e) => setSelectedCustomerId(e.target.value)}>
                         <option value="">{t('ci.walk_in', 'Walk-in Customer')}</option>
@@ -1046,6 +1129,15 @@ const CreateInvoice = ({
                     </>
                   )}
                 </div>
+                {voiceState.listening && (
+                  <div className="p-2 rounded-xl bg-rose-500/10 border border-rose-500/30 text-[10px] font-bold text-rose-600 dark:text-rose-300 flex items-start gap-2">
+                    <span className="w-2 h-2 mt-0.5 rounded-full bg-rose-500 animate-pulse shrink-0" />
+                    <span className="min-w-0">
+                      {t('voice.listening', 'Listening… speak your bill')}
+                      {voiceState.transcript ? ` — “${voiceState.transcript}”` : ''}
+                    </span>
+                  </div>
+                )}
                 <div className="form-group">
                   <label className="text-[10px] font-bold text-theme-muted uppercase mb-1.5 block">{t('ci.invoice_number', 'Invoice Number')}</label>
                   <input type="text" className="input-premium bg-theme-surface/50 font-mono" value={invoiceNumber} readOnly />
