@@ -4,7 +4,16 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Trash2, AlertTriangle, Lock, ServerCrash } from 'lucide-react';
 import ClassicLoader from './components/ClassicLoader';
 import PostLoginWelcome from './components/PostLoginWelcome';
+import DemoImportOffer from './components/DemoImportOffer';
 import Layout from './components/Layout';
+import {
+  stageDemoForConversion,
+  getStagedConversion,
+  importStagedDemoIntoAccount,
+  discardStagedConversion,
+  SIGNUP_HINT_KEY
+} from './services/demoConversionService';
+import { runDataHealthCheck, evaluateBackupReminder, markBackupReminderDismissed } from './services/dataHealthService';
 import { useThemeEngine } from './hooks/useThemeEngine';
 import { 
   isDemoModeActive, 
@@ -252,6 +261,11 @@ function App() {
   // --- STATE SYSTEM (must be declared before any useEffect that references them) ---
   const [showWelcomeAnimation, setShowWelcomeAnimation] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  // Demo → account conversion: 'offer' shows the import modal, 'later' hides
+  // it for this browser session (the stash survives for the next visit).
+  const [demoImportDecision, setDemoImportDecision] = useState(() => {
+    try { return sessionStorage.getItem('billqyro_demo_import_later') === '1' ? 'later' : 'offer'; } catch { return 'offer'; }
+  });
   const [showCommandPalette, setShowCommandPalette] = useState(false);
 
   useEffect(() => {
@@ -785,6 +799,43 @@ function App() {
   const [isAppBooting, setIsAppBooting] = useState(true);
   const [isDataHydrating, setIsDataHydrating] = useState(true);
   const [cloudSyncDone, setCloudSyncDone] = useState(false);
+
+  // --- Phase 24: monthly data-health check + backup nudge (real accounts) ---
+  useEffect(() => {
+    if (!isAuthenticated || isDemoSessionActive || isDataHydrating) return;
+    // Give freshly-imported / just-loaded state a beat to settle.
+    const t = setTimeout(() => {
+      try {
+        const health = runDataHealthCheck({ invoices, customers, products, expenses });
+        if (health.status !== 'healthy' && health.counts.totalRecords > 0) {
+          const total = health.issues.reduce((s, i) => s + i.count, 0);
+          toast((tt) => (
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-semibold">⚠️ ডেটা-হেলথ: {total}টি সমস্যা (স্কোর {health.score})</span>
+              <button
+                onClick={() => { toast.dismiss(tt.id); setCurrentTab('backup-restore'); }}
+                className="px-3 py-1.5 bg-[image:var(--accent-gradient)] text-white text-xs font-bold rounded-lg"
+              >দেখুন</button>
+            </div>
+          ), { duration: 9000 });
+        }
+        const backupNudge = evaluateBackupReminder({ invoices, customers, products });
+        if (backupNudge) {
+          toast((tt) => (
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-semibold">🛡️ {backupNudge.daysSince === null ? 'এখনো কোনো ব্যাকআপ নেননি' : `শেষ ব্যাকআপ ${backupNudge.daysSince} দিন আগে`} — আজ ব্যাকআপ নিয়ে রাখুন</span>
+              <button
+                onClick={() => { toast.dismiss(tt.id); markBackupReminderDismissed(); setCurrentTab('backup-restore'); }}
+                className="px-3 py-1.5 bg-[image:var(--accent-gradient)] text-white text-xs font-bold rounded-lg"
+              >ব্যাকআপ</button>
+            </div>
+          ), { duration: 12000, id: 'monthly-backup-nudge' });
+        }
+      } catch (e) { console.warn('Health check failed', e); }
+    }, 2500);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, isDemoSessionActive, isDataHydrating]);
 
   // Safety timeout to ensure app never gets stuck on boot screen
   useEffect(() => {
@@ -2745,11 +2796,30 @@ function App() {
         ) : (
           <motion.div key="main-app" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }} className="w-full h-full flex flex-col">
             {isDemoSessionActive && (
-              <div className="bg-amber-500 text-amber-950 px-4 py-2 flex items-center justify-between font-bold text-sm z-[999999] relative shadow-md">
-                <span className="flex items-center">
-                  <AlertTriangle className="w-4 h-4 mr-2"/> DEMO MODE ACTIVE — Real data is safe. {isVideoCreatorMode && " | Video Creator Masking ON"}
+              <div className="bg-amber-500 text-amber-950 px-3 sm:px-4 py-2 flex items-center justify-between gap-2 font-bold text-[11px] sm:text-sm z-[999999] relative shadow-md">
+                <span className="flex items-center min-w-0">
+                  <AlertTriangle className="w-4 h-4 mr-2 shrink-0"/> <span className="truncate">DEMO MODE ACTIVE — Real data is safe.</span>
                 </span>
-                <button onClick={() => {
+                <span className="flex items-center gap-2 shrink-0">
+                  {/* Demo → signup conversion: stash the sandbox and walk the
+                      visitor to the landing signup form. */}
+                  <button
+                    onClick={() => {
+                      const staged = stageDemoForConversion();
+                      localStorage.setItem(SIGNUP_HINT_KEY, '1');
+                      if (staged) {
+                        toast.success(staged.invoices + ' ডেমো-ইনভয়েস সেভ হয়ে রাখা হলো — অ্যাকাউন্ট খুললে ইমপোর্ট করতে পারবেন!', { duration: 6000 });
+                      }
+                      localStorage.removeItem('billqyro_demo_session_active');
+                      localStorage.removeItem('billqyro_demo_journey_mode');
+                      localStorage.removeItem('billqyro_demo_logged_in');
+                      window.location.href = '/#login';
+                    }}
+                    className="bg-emerald-950 hover:bg-emerald-900 text-emerald-300 px-3 py-1 rounded-md text-[11px] sm:text-xs transition-colors whitespace-nowrap"
+                  >
+                    ★ ফ্রি অ্যাকাউন্ট খুলুন
+                  </button>
+                  <button onClick={() => {
                   if (window.confirm("Exit Demo Mode and return to Owner Test Lab?")) {
                     if (window.confirm("Do you want to clear the Demo Sandbox data as well?")) {
                       localStorage.removeItem('billqyro_demo_customers');
@@ -2767,14 +2837,51 @@ function App() {
                     const backToAdmin = (() => { try { return !!authEngine.getAuthSession() && adminEngine.isAdminUser(authEngine.getAuthSession()); } catch { return false; } })();
                     window.location.href = backToAdmin ? '/km-admin' : '/';
                   }
-                }} className="bg-amber-950 hover:bg-amber-900 text-amber-500 px-3 py-1 rounded-md text-xs transition-colors">Exit Demo</button>
+                }} className="bg-amber-950 hover:bg-amber-900 text-amber-500 px-3 py-1 rounded-md text-xs transition-colors whitespace-nowrap">Exit Demo</button>
+                </span>
               </div>
             )}
-            <PostLoginWelcome 
-              show={showWelcomeAnimation} 
-              userName={settings?.businessName || ''} 
-              onComplete={() => setShowWelcomeAnimation(false)} 
+            <PostLoginWelcome
+              show={showWelcomeAnimation}
+              userName={settings?.businessName || ''}
+              onComplete={() => setShowWelcomeAnimation(false)}
             />
+            {/* Demo → account conversion: offer to import the visitor's
+                sandbox into their new real account (once authenticated). */}
+            {(() => {
+              const staged = isAuthenticated && !isDemoSessionActive && !isSetupIncomplete ? getStagedConversion() : null;
+              if (!staged || demoImportDecision !== 'offer') return null;
+              return (
+                <DemoImportOffer
+                  summary={staged.summary || {}}
+                  onImport={async () => {
+                    try {
+                      const payload = await importStagedDemoIntoAccount();
+                      setSettings(payload.settings);
+                      setCustomers(payload.customers || []);
+                      setProducts(payload.products || []);
+                      setInvoices(payload.invoices || []);
+                      setExpenses(payload.expenses || []);
+                      setDemoImportDecision('later');
+                      toast.success('ডেমো-ওয়ার্কস্পেস আপনার অ্যাকাউন্টে ইমপোর্ট হয়ে গেছে! 🎉');
+                      window.dispatchEvent(new Event('billqyro_sync'));
+                    } catch (e) {
+                      console.error('Demo import failed', e);
+                      toast.error('ইমপোর্ট করতে সমস্যা হলো — আবার চেষ্টা করুন।');
+                    }
+                  }}
+                  onDiscard={() => {
+                    discardStagedConversion();
+                    setDemoImportDecision('later');
+                    toast('নতুন অ্যাকাউন্টে স্বাগতম — শূন্য থেকে শুরু করুন!');
+                  }}
+                  onLater={() => {
+                    try { sessionStorage.setItem('billqyro_demo_import_later', '1'); } catch { /* ignore */ }
+                    setDemoImportDecision('later');
+                  }}
+                />
+              );
+            })()}
             {isSetupIncomplete ? (
               <OnboardingWizard 
                 onComplete={handleOnboardingComplete}

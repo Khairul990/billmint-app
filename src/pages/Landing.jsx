@@ -87,6 +87,24 @@ const Landing = ({ onLoginSuccess }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Demo → signup conversion: when a demo visitor taps "Create free account"
+  // we land here with the hint flag set — jump to the signup form. The Login
+  // panel is lazy-loaded, so it reads the flag itself on mount (see Login.jsx).
+  useEffect(() => {
+    try {
+      if (localStorage.getItem('billqyro_open_signup') === '1') {
+        const t = setTimeout(() => {
+          const el = document.getElementById('login');
+          if (el) {
+            const y = window.pageYOffset + el.getBoundingClientRect().top - 84;
+            window.scrollTo({ top: y, behavior: 'smooth' });
+          }
+        }, 600);
+        return () => clearTimeout(t);
+      }
+    } catch { /* ignore */ }
+  }, []);
+
   // Auto-cycle the hero cockpit preview until the visitor interacts with it.
   useEffect(() => {
     const cycle = ['dashboard', 'invoice', 'qr'];

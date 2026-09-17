@@ -811,6 +811,19 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
 
   const [isLoginMode, setIsLoginMode] = useState(true);
 
+  // Demo → signup conversion: the landing page sets this flag when a demo
+  // visitor taps "Create free account". This panel is lazy-loaded, so it
+  // consumes the flag on mount instead of listening for a one-shot event
+  // that fires before this chunk is even downloaded.
+  useEffect(() => {
+    try {
+      if (localStorage.getItem('billqyro_open_signup') === '1') {
+        localStorage.removeItem('billqyro_open_signup');
+        setIsLoginMode(false);
+      }
+    } catch { /* ignore */ }
+  }, []);
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setIsSigningIn(true);

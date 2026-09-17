@@ -300,6 +300,14 @@ const InteractiveProductTourModal = ({ isOpen, onClose, setCurrentTab }) => {
 // 3-Column Premium Tutorial Reader Modal
 const TutorialReaderModal = ({ guide, onClose, setCurrentTab, onSelectGuide, isDocActive }) => {
   const [activeStepIndex, setActiveStepIndex] = useState(0);
+  const [imgOk, setImgOk] = useState(true);
+  // Bengali-first: the app language decides whether a step shows its Bengali
+  // or English title/description (older build was English-only here).
+  const { lang } = useI18n();
+  const isBn = lang === 'bn';
+  const pick = (bn, en) => (isBn ? (bn || en) : (en || bn));
+
+  useEffect(() => { setActiveStepIndex(0); setImgOk(true); }, [guide?.id]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -398,25 +406,25 @@ const TutorialReaderModal = ({ guide, onClose, setCurrentTab, onSelectGuide, isD
                 return (
                   <button
                     key={idx}
-                    onClick={() => setActiveStepIndex(idx)}
+                    onClick={() => { setActiveStepIndex(idx); setImgOk(true); }}
                     className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left text-xs font-bold transition-all cursor-pointer ${
                       isActive 
-                        ? 'bg-theme-card text-theme-primary border border-theme-border-soft shadow-xs' 
-                        : isPassed 
-                        ? 'text-theme-secondary hover:bg-theme-surface/70' 
-                        : 'text-theme-muted hover:text-theme-primary hover:bg-theme-surface/40'
+                      ? 'bg-theme-card text-theme-primary border border-theme-border-soft shadow-xs' 
+                      : isPassed 
+                      ? 'text-theme-secondary hover:bg-theme-surface/70' 
+                      : 'text-theme-muted hover:text-theme-primary hover:bg-theme-surface/40'
                     }`}
                   >
                     <span className={`w-5 h-5 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0 ${
                       isActive 
-                        ? 'bg-theme-accent text-white' 
-                        : isPassed 
-                        ? 'bg-theme-tint-bg text-theme-accent' 
-                        : 'bg-theme-surface text-theme-muted border border-theme-border-soft'
+                      ? 'bg-theme-accent text-white' 
+                      : isPassed 
+                      ? 'bg-theme-tint-bg text-theme-accent' 
+                      : 'bg-theme-surface text-theme-muted border border-theme-border-soft'
                     }`}>
                       {isPassed ? <Check className="w-3 h-3" /> : idx + 1}
                     </span>
-                    <span className="truncate flex-1">{step.titleEn || step.title}</span>
+                    <span className="truncate flex-1">{pick(step.title, step.titleEn)}</span>
                   </button>
                 );
               })}
@@ -424,6 +432,22 @@ const TutorialReaderModal = ({ guide, onClose, setCurrentTab, onSelectGuide, isD
 
             {/* CENTER: Step Content */}
             <div className="flex-1 overflow-y-auto p-5 sm:p-7 space-y-5">
+              {/* Real app screenshot for this step */}
+              {currentStep.image && imgOk && (
+                <div className="rounded-2xl overflow-hidden border border-theme-border-soft bg-theme-surface shadow-sm">
+                  <img
+                    src={currentStep.image}
+                    alt={pick(currentStep.title, currentStep.titleEn)}
+                    loading="lazy"
+                    className="w-full object-cover"
+                    onError={() => setImgOk(false)}
+                  />
+                  <div className="px-3 py-1.5 flex items-center gap-1.5 border-t border-theme-border-soft">
+                    <Eye className="w-3 h-3 text-theme-muted" />
+                    <span className="text-[10px] font-bold text-theme-muted">BillQyro অ্যাপের আসল স্ক্রিন</span>
+                  </div>
+                </div>
+              )}
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-theme-accent/10 text-theme-accent border border-theme-accent/20">
@@ -434,10 +458,10 @@ const TutorialReaderModal = ({ guide, onClose, setCurrentTab, onSelectGuide, isD
                   </span>
                 </div>
                 <h4 className="text-xl font-black text-theme-primary tracking-tight">
-                  {currentStep.titleEn || currentStep.title}
+                  {pick(currentStep.title, currentStep.titleEn)}
                 </h4>
                 <p className="text-sm font-medium text-theme-secondary leading-relaxed pt-1">
-                  {currentStep.descriptionEn || currentStep.description}
+                  {pick(currentStep.description, currentStep.descriptionEn)}
                 </p>
               </div>
 

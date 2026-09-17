@@ -21,6 +21,8 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { backupEngine } from '../services/backupEngine';
+import { runDataHealthCheck, getLastHealthCheck } from '../services/dataHealthService';
+import { HeartPulse } from 'lucide-react';
 
 import { pageVariants, staggerContainer, staggerItem, modalOverlayVariants, modalContentVariants } from '../utils/animations';
 import { CardSkeleton } from '../components/PremiumSkeleton';
@@ -40,6 +42,7 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
   const [autoBackupFrequency, setAutoBackupFrequency] = useState('weekly');
   const [isAutoBackupEnabled, setIsAutoBackupEnabled] = useState(false);
   const [progressPercent, setProgressPercent] = useState(0);
+  const [health, setHealth] = useState(() => getLastHealthCheck());
 
   const lastBackupDate = localStorage.getItem('last_backup_date') || 'Never';
   const totalRecords = (invoices?.length || 0) + (customers?.length || 0) + (products?.length || 0) + (expenses?.length || 0);
@@ -184,6 +187,43 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
           <h1 className="text-2xl font-black text-theme-primary tracking-tight">{t('bk.title', 'Backup & Restore')}</h1>
           <p className="text-xs text-theme-muted font-bold mt-1">Keep your business data safe or migrate it to another device.</p>
         </div>
+      </motion.div>
+
+      {/* Data Health (Phase 24) — monthly integrity scan */}
+      <motion.div variants={staggerItem} className="rounded-2xl border border-theme-border-soft bg-theme-card p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+        <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0"
+          style={{ background: health?.status === 'critical' ? 'rgba(239,68,68,0.12)' : health?.status === 'attention' ? 'rgba(245,158,11,0.12)' : 'rgba(16,185,129,0.12)' }}>
+          <HeartPulse className="w-5 h-5" style={{ color: health?.status === 'critical' ? '#ef4444' : health?.status === 'attention' ? '#f59e0b' : '#10b981' }} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="text-sm font-black text-theme-primary">ডেটা হেলথ চেক</p>
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider"
+              style={{
+                background: health?.status === 'critical' ? 'rgba(239,68,68,0.12)' : health?.status === 'attention' ? 'rgba(245,158,11,0.12)' : 'rgba(16,185,129,0.12)',
+                color: health?.status === 'critical' ? '#ef4444' : health?.status === 'attention' ? '#f59e0b' : '#10b981'
+              }}>
+              {health ? `${health.score}/100 · ${health.status}` : 'চেক এখনো হয়নি'}
+            </span>
+          </div>
+          <p className="text-xs text-theme-muted font-semibold mt-1 leading-relaxed">
+            {health && health.status === 'healthy'
+              ? `সব ঠিক আছে — ${health.counts.totalRecords}টি রেকর্ড যাচাই হয়েছে${health.ranAt ? ` (${new Date(health.ranAt).toLocaleDateString()})` : ''}।`
+              : health
+                ? health.issues.map((i) => i.message).join(' · ')
+                : 'ইনভয়েস-ম্যাথ, কাস্টমার-রেফারেন্স, ডুপ্লিকেট নম্বর আর স্টক স্ক্যান করে ডেটার সততা যাচাই হয়।'}
+          </p>
+        </div>
+        <button
+          onClick={() => {
+            const result = runDataHealthCheck({ invoices, customers, products, expenses });
+            setHealth(result);
+            toast.success(result.status === 'healthy' ? 'ডেটা সম্পূর্ণ সুস্থ ✓' : `${result.issues.reduce((s, i) => s + i.count, 0)}টি সমস্যা পাওয়া গেছে`);
+          }}
+          className="px-4 py-2.5 rounded-xl bg-theme-surface border border-theme-border-soft text-theme-secondary hover:text-theme-primary hover:border-theme-border-strong font-bold text-xs transition-all flex items-center gap-2 shrink-0"
+        >
+          <RefreshCw className="w-3.5 h-3.5" /> এখন চেক করুন
+        </button>
       </motion.div>
 
       {/* Backup Overview */}
