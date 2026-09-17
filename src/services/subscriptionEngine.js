@@ -2,6 +2,7 @@ import * as dbEngine from './dbEngine.js';
 import { submitPremiumRequest as dbSubmitPremiumRequest } from './dbEngine.js';
 import { doc, getDoc } from './fsHelpers.js';
 import { db, firebaseReady } from './firebaseConfig.js';
+import { getAuthSession } from './dbEngine.js';
 
 const SUBSCRIPTION_PLANS = {
   FREE: {
@@ -40,6 +41,20 @@ const SUBSCRIPTION_PLANS = {
 };
 
 class SubscriptionEngine {
+  // In-memory plan-doc cache: { [planId]: { details, at } }. Successes and
+  // failures both cache for 5 minutes, so no caller pattern can hot-loop
+  // Firestore reads (this once caused a permission-denied error storm).
+  _planCache = {};
+
+  _setPlanCache(planId, details, at) { this._planCache[planId] = { details, at }; }
+
+  _hasAuthSession() {
+    try {
+      const session = getAuthSession();
+      return !!(session && (session.uid || session.email));
+    } catch { return false; }
+  }
+
   getSubscriptionDetailsSync(settings) {
     const planId = settings?.subscriptionPlan || settings?.plan || (settings?.isPremium ? 'pro' : 'free');
     const isPremium = settings?.isPremium || (planId !== 'free' && planId !== 'Free');
@@ -59,33 +74,46 @@ class SubscriptionEngine {
     const settings = await dbEngine.getSettings(workspaceId);
     const planId = settings?.subscriptionPlan || settings?.plan || (settings?.isPremium ? 'pro' : 'free');
     const isPremium = settings?.isPremium || (planId !== 'free' && planId !== 'Free');
-    
+
     let planDetails = SUBSCRIPTION_PLANS[planId.toUpperCase()] || SUBSCRIPTION_PLANS.FREE;
 
     // Guard: only fetch the dynamic plan document when Firebase is actually
-    // configured. Otherwise `doc(undefined, ...)` throws and floods the
-    // console with errors on local/offline builds.
-    if (firebaseReady) {
-      try {
-        const planDoc = await getDoc(doc(db, 'subscriptionPlans', planId.toLowerCase()));
-        if (planDoc.exists()) {
-          const data = planDoc.data();
-          planDetails = {
-            id: data.id || data.slug || planId,
-            name: data.name,
-            limits: {
-              invoices: data.limits.maxInvoices === -1 ? Infinity : data.limits.maxInvoices,
-              maxInvoices: data.limits.maxInvoices,
-              customers: data.limits.maxCustomers === -1 ? Infinity : data.limits.maxCustomers,
-              products: data.limits.maxProducts === -1 ? Infinity : data.limits.maxProducts,
-              users: data.limits.maxTeamMembers === -1 ? Infinity : data.limits.maxTeamMembers
-            },
-            features: Object.keys(data.toggles).filter(k => data.toggles[k]),
-            ...data
-          };
+    // configured AND someone is signed in. The doc lives behind auth rules, so
+    // anonymous calls (public landing) always fail with permission-denied.
+    if (firebaseReady && this._hasAuthSession()) {
+      const cacheKey = planId.toLowerCase();
+      const now = Date.now();
+      const cached = this._planCache?.[cacheKey];
+      // Serve from cache while fresh, or while a recent failure is backing off
+      // (prevents hot retry loops from ever hammering Firestore again).
+      if (cached && (now - cached.at) < 5 * 60 * 1000) {
+        planDetails = cached.details;
+      } else {
+        try {
+          const planDoc = await getDoc(doc(db, 'subscriptionPlans', cacheKey));
+          if (planDoc.exists()) {
+            const data = planDoc.data();
+            planDetails = {
+              id: data.id || data.slug || planId,
+              name: data.name,
+              limits: {
+                invoices: data.limits.maxInvoices === -1 ? Infinity : data.limits.maxInvoices,
+                maxInvoices: data.limits.maxInvoices,
+                customers: data.limits.maxCustomers === -1 ? Infinity : data.limits.maxCustomers,
+                products: data.limits.maxProducts === -1 ? Infinity : data.limits.maxProducts,
+                users: data.limits.maxTeamMembers === -1 ? Infinity : data.limits.maxTeamMembers
+              },
+              features: Object.keys(data.toggles).filter(k => data.toggles[k]),
+              ...data
+            };
+            this._setPlanCache(cacheKey, planDetails, now);
+          }
+        } catch (e) {
+          // Remember the failure for 60s so callers in a loop back off instead
+          // of spamming Firestore (this once flooded the console ~7x/second).
+          this._setPlanCache(cacheKey, planDetails, now);
+          console.warn('Dynamic plan fetch unavailable, using built-in plan limits');
         }
-      } catch (e) {
-        console.error('Failed to fetch dynamic plan', e);
       }
     }
 

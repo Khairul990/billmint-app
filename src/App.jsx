@@ -633,19 +633,26 @@ function App() {
 
   useEffect(() => {
     const fetchRevenue = async () => {
+      // Public landing / signed-out visitors never hit Firestore plan docs —
+      // the old code fetched on every render cycle and flooded the console
+      // with permission-denied errors (hot loop on the live landing page).
+      if (!isAuthenticated && !isDemoSessionActive) return;
       const session = authEngine.getAuthSession();
       const userId = session?.uid || authEngine.getRealUserId() || 'local-user';
       try {
         const subDetails = await subscriptionEngine.getSubscriptionDetails();
         setSubscription(subDetails);
-        const status = await paymentEngine.getUserRevenueState(userId, invoices, subDetails);
+        const status = await paymentEngine.getUserRevenueState(userId, isDemoSessionActive ? [] : invoices, subDetails);
         setRevenueStatus(status);
       } catch (e) {
         console.error('Failed to load user revenue status:', e);
       }
     };
     fetchRevenue();
-  }, [invoices, subscription, isAuthenticated]);
+    // NOTE: `subscription` is intentionally NOT a dependency — this effect
+    // calls setSubscription, so including it caused an infinite fetch loop
+    // (new object identity every cycle → effect re-ran forever).
+  }, [invoices, isAuthenticated, isDemoSessionActive]);
   // HARD DEMO MODE ISOLATION SWITCH
   const activeInvoices = isDemoSessionActive ? demoInvoices : invoices;
   const activeCustomers = isDemoSessionActive ? demoCustomers : customers;
@@ -1204,7 +1211,8 @@ function App() {
     }
 
     const isNew = !payload.id || !targetInvoices.some(inv => inv.id === payload.id);
-    if (isNew && revenueStatus.lockStatus === 'locked') {
+    // Demo sandbox visitors can never be locked out — the demo showcases the full product.
+    if (isNew && !isDemoSessionActive && revenueStatus.lockStatus === 'locked') {
       toast.error('New invoice creation is locked. Please clear your platform dues.');
       return;
     }
@@ -2604,6 +2612,9 @@ function App() {
   }
 
   // --- Account Soft Lock Interceptor (Due Limit) ---
+  // Demo sandbox sessions are exempt: a live-demo visitor must never hit a
+  // payment wall while exploring the product.
+  if (!isDemoSessionActive) {
   const freeLimit = settings?.freeInvoiceLimit || 15;
   const pendingAmountLimit = settings?.maximumPendingDue || 100;
   const chargePerBill = settings?.chargePerBill || 5;
@@ -2630,6 +2641,7 @@ function App() {
       }
     }
   }
+  } // end demo-session exemption
 
   // Root level maintenance mode interceptor removed to allow access to dashboard, invoices view, and backups.
   // Wait, the owner requested global maintenance block for NON-admins!

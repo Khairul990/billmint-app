@@ -188,7 +188,7 @@ const AuditLogs = ({ setCurrentTab }) => {
                     </thead>
                     <tbody className="divide-y divide-theme-border-soft/50">
                       {paginated.map(log => (
-                        <motion.tr key={log.id} variants={staggerItem} className="hover:bg-theme-bg-soft/50 transition-colors cursor-default">
+                        <motion.tr key={log.id} variants={staggerItem} className="hover:bg-theme-app-soft/50 transition-colors cursor-default">
                           <td className="text-xs text-theme-secondary whitespace-nowrap">
                             <div className="flex items-center gap-1.5">
                               <Clock className="w-3 h-3 opacity-50 shrink-0" />

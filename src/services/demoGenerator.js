@@ -91,7 +91,13 @@ export const generateDemoWorkspace = (persona = 'retail') => {
     businessPhone: '+91 98300 00000',
     businessEmail: 'demo@billqyro.app',
     currency: 'INR',
-    themeColor: settings.themeColor || 'brand-premium'
+    themeColor: settings.themeColor || 'brand-premium',
+    // The demo showcases the FULL product — premium plan so visitors are never
+    // stopped by free-tier / platform-due gates while exploring the sandbox.
+    isPremium: true,
+    subscriptionPlan: 'pro',
+    plan: 'pro',
+    subscriptionStatus: 'active'
   });
   localStorage.setItem('billqyro_demo_settings', JSON.stringify(settings));
 

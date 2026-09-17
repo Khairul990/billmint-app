@@ -479,6 +479,10 @@ export const adminEngine = {
 
   async getRevenueSettings() { return getGlobalRevenueSettings(); },
   async saveRevenueSettings(settings) { return saveGlobalRevenueSettings(settings); },
+  // Public alias used by PaymentDueScreen / UpgradeCenter — these pages call
+  // adminEngine.getGlobalRevenueSettings() directly.
+  async getGlobalRevenueSettings() { return getGlobalRevenueSettings(); },
+  async saveGlobalRevenueSettings(settings) { return saveGlobalRevenueSettings(settings); },
 
   // --- User Lifecycle ---
   async getPremiumRequests() { return dbGetAdminPremiumRequests(); },

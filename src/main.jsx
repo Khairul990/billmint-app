@@ -4,6 +4,8 @@ import './index.css'
 import './legacy-modernization.css'
 import './styles/androidPerformance.css'
 import './styles/dashboard-reference.css'
+import './styles/alphaUtilities.css'
+import './styles/appFeel.css'
 import { initAndroidPerformance } from './services/androidPerformance.js'
 import App from './App.jsx'
 import AnnouncementSurface from './components/AnnouncementSurface.jsx'
@@ -26,13 +28,20 @@ const updateSW = registerSW({
   onOfflineReady() { console.log("App ready to work offline") },
 })
 
-let swRefreshing = false;
+// A new service worker taking over must NEVER hard-reload the page on its own:
+// the old behaviour reloaded ~2s after a visitor arrived (resetting their
+// scroll and swallowing taps) and again mid-session on every deploy. Instead,
+// show a non-blocking toast — the next natural reload picks up the new build.
 if ('serviceWorker' in navigator) {
+  let wasControlled = false;
+  navigator.serviceWorker.ready.then(() => {
+    wasControlled = !!navigator.serviceWorker.controller;
+  }).catch(() => {});
   navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (!swRefreshing) {
-      swRefreshing = true;
-      window.location.reload();
-    }
+    if (!wasControlled) return; // first install — stay quiet, nothing changed
+    try {
+      toast('একটি নতুন সংস্করণ এসেছে — রিফ্রেশ করে নিন', { icon: '✨', duration: 8000 });
+    } catch { /* toast not ready yet — ignore */ }
   });
 }
 

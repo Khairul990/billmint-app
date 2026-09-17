@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
@@ -433,9 +433,20 @@ export default function PostLoginWelcome({ show = true, userName = "", onComplet
   const [showBoard, setShowBoard] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [activeStep, setActiveStep] = useState(-1);
+  // Keep the latest callback without restarting the timers on parent re-renders.
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
+  const dismissedRef = useRef(false);
 
   useEffect(() => {
     if (!show) return undefined;
+    dismissedRef.current = false;
+
+    const dismiss = () => {
+      if (dismissedRef.current) return;
+      dismissedRef.current = true;
+      onCompleteRef.current && onCompleteRef.current();
+    };
 
     const timers = reduceMotion
       ? [
@@ -450,6 +461,12 @@ export default function PostLoginWelcome({ show = true, userName = "", onComplet
           window.setTimeout(() => setActiveStep(2), 2450),
         ];
 
+    // FAILSAFE: a welcome overlay must never permanently block the app.
+    // (Old build: the bg class rendered transparent + the Get Started button
+    // sat below the fold on 360px phones — visitors were trapped behind an
+    // invisible full-screen wall.) Auto-dismiss no matter what.
+    timers.push(window.setTimeout(dismiss, reduceMotion ? 4500 : 8500));
+
     return () => {
       timers.forEach((timerId) => window.clearTimeout(timerId));
     };
@@ -463,7 +480,8 @@ export default function PostLoginWelcome({ show = true, userName = "", onComplet
           animate={{ opacity: 1 }}
           exit={{ opacity: 0, scale: reduceMotion ? 1 : 1.01, filter: reduceMotion ? "blur(0px)" : "blur(8px)" }}
           transition={{ duration: reduceMotion ? 0.15 : 0.45 }}
-          className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden bg-theme-app/95 px-4 py-6 text-theme-primary backdrop-blur-2xl"
+          className="fixed inset-0 z-[9999] flex items-center justify-center overflow-y-auto overscroll-contain bg-[var(--app-bg)] px-4 py-6 text-theme-primary"
+          style={{ backgroundColor: 'var(--app-bg, #030712)' }}
         >
           <DashboardRevealBackdrop show={showBoard} reduceMotion={reduceMotion} />
           <FloatingOrbs reduceMotion={reduceMotion} />

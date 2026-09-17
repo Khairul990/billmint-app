@@ -30,7 +30,7 @@ export default defineConfig(({ mode }) => ({
       },
     }),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt', // never force-reload visitors mid-session; the onNeedRefresh toast offers the update
       injectRegister: 'auto',
       includeAssets: ['favicon.svg', 'app-icon.svg'],
       workbox: {

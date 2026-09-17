@@ -1,0 +1,41 @@
+/*
+ * Native app-feel polish for touch devices.
+ * Applies on phones/tablets (coarse pointers) — desktop mouse UX untouched.
+ *
+ * - No blue tap highlight flashes (biggest "website" tell-tale on Android)
+ * - No long-press callout / text selection on chrome (nav, buttons, labels);
+ *   inputs and invoice content stay fully selectable/copyable.
+ * - Overscroll containment on the app shell: no rubber-band page bounce
+ *   behind fixed bars; pull-to-refresh stays available on the landing page.
+ */
+
+/* 1. Kill the tap highlight on interactive chrome everywhere (it also
+      flickers on desktop touchscreens) */
+html, body {
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (pointer: coarse) {
+  /* 2. Long-press on nav/buttons shouldn't open text-selection callouts */
+  button, nav, header, aside, .select-none-app, [role="tablist"], [role="tab"], [role="menuitem"] {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* 3. Editing and reading surfaces remain selectable */
+  input, textarea, select, [contenteditable="true"], [contenteditable=""] {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
+  /* 4. Contain overscroll inside the app shell (installed PWA / APK feel) */
+  html, body {
+    overscroll-behavior-y: contain;
+  }
+
+  /* 5. Momentum + no hover-stick on taps */
+  a, button, [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+  }
+}

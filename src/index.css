@@ -82,7 +82,11 @@ html, body, #root {
   width: 100%;
   max-width: 100%;
   min-height: 100vh;
-  overflow-x: hidden;
+  /* `clip` (not `hidden`): hidden turned html/body/#root each into its own
+     scroll container, so touch/wheel scrolled #root while window.scrollY
+     stayed frozen — the page felt unscrollable on phones. clip prevents
+     horizontal overflow WITHOUT creating scroll containers. */
+  overflow-x: clip;
   margin: 0;
   padding: 0;
 }
@@ -793,9 +797,11 @@ button.icon-only {
 }
 
 body {
-  /* Prevent horizontal scroll while allowing normal vertical scrolling */
-  overflow-x: hidden;
-  overflow-y: auto;
+  /* Prevent horizontal scroll while keeping the VIEWPORT the only scroller:
+     overflow-x: clip + overflow-y: visible does not turn body into a scroll
+     container (hidden/auto did — breaking touch scrolling on mobile). */
+  overflow-x: clip;
+  overflow-y: visible;
   overscroll-behavior: auto;
   touch-action: auto;
   -webkit-overflow-scrolling: touch;
