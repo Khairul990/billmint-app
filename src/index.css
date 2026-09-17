@@ -1764,3 +1764,254 @@ button:active {
   --theme-tint-hover: var(--sidebar-active);
 }
 
+
+/* =========================================================================
+   AURORA EMERALD 2026 — Signature landing design system (scoped, always-dark)
+   Used by the public landing page. Independent of the app theme engine so
+   the brand presentation is identical for every visitor.
+   ========================================================================= */
+.bq26-root {
+  --bq26-bg: #04100c;
+  --bq26-bg-deep: #020a07;
+  --bq26-panel: rgba(8, 24, 19, 0.55);
+  --bq26-panel-strong: rgba(5, 17, 13, 0.9);
+  --bq26-card: rgba(7, 22, 17, 0.6);
+  --bq26-line: rgba(52, 211, 153, 0.13);
+  --bq26-line-soft: rgba(52, 211, 153, 0.08);
+  --bq26-text: #E8F5EF;
+  --bq26-text-soft: #B7CEC6;
+  --bq26-muted: #7E998F;
+  --bq26-emerald: #10B981;
+  --bq26-emerald-bright: #34D399;
+  --bq26-teal: #2DD4BF;
+  --bq26-gold: #E3C98F;
+  --bq26-rose: #FB7185;
+  --bq26-display-font: 'Space Grotesk', 'Hind Siliguri', 'Noto Sans Bengali', sans-serif;
+  --bq26-body-font: 'Inter', 'Hind Siliguri', 'Noto Sans Bengali', sans-serif;
+  background-color: var(--bq26-bg);
+  color: var(--bq26-text);
+  font-family: var(--bq26-body-font);
+  position: relative;
+  overflow-x: clip;
+}
+
+/* ---- Animated aurora backdrop ------------------------------------------ */
+.bq26-aurora {
+  position: absolute;
+  inset: -20% -10% auto -10%;
+  height: 130%;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(42% 34% at 18% 12%, rgba(16, 185, 129, 0.16), transparent 70%),
+    radial-gradient(38% 30% at 85% 8%, rgba(45, 212, 191, 0.11), transparent 70%),
+    radial-gradient(50% 42% at 70% 62%, rgba(4, 120, 87, 0.14), transparent 72%),
+    radial-gradient(30% 26% at 30% 78%, rgba(227, 201, 143, 0.05), transparent 70%);
+  filter: blur(2px);
+  animation: bq26-aurora-drift 26s ease-in-out infinite alternate;
+}
+@keyframes bq26-aurora-drift {
+  0%   { transform: translate3d(-2%, -1%, 0) scale(1); }
+  50%  { transform: translate3d(2%, 2%, 0) scale(1.06); }
+  100% { transform: translate3d(-1%, 1%, 0) scale(1.02); }
+}
+
+/* Perspective grid with radial fade */
+.bq26-grid {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, var(--bq26-line-soft) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--bq26-line-soft) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, black 25%, transparent 78%);
+  mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, black 25%, transparent 78%);
+}
+
+/* Film grain */
+.bq26-noise {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+}
+
+/* ---- Glass surfaces ------------------------------------------------------ */
+.bq26-glass {
+  background: var(--bq26-panel);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid var(--bq26-line);
+}
+.bq26-glass-strong {
+  background: var(--bq26-panel-strong);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  border: 1px solid var(--bq26-line);
+}
+
+/* Top edge light on cards */
+.bq26-edge-light { position: relative; }
+.bq26-edge-light::before {
+  content: "";
+  position: absolute;
+  inset-inline: 12%;
+  top: -1px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(52, 211, 153, 0.55), transparent);
+  pointer-events: none;
+}
+
+/* ---- Display typography --------------------------------------------------- */
+.bq26-display {
+  font-family: var(--bq26-display-font);
+  letter-spacing: -0.035em;
+  line-height: 1.04;
+}
+.bq26-grad-text {
+  background: linear-gradient(92deg, #34D399 0%, #2DD4BF 45%, #6EE7B7 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.bq26-kicker {
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--bq26-emerald-bright);
+}
+
+/* ---- Beam CTA (rotating gradient border) ---------------------------------- */
+.bq26-beam {
+  position: relative;
+  border-radius: 999px;
+  padding: 1.5px;
+  background: conic-gradient(from var(--bq26-beam-angle, 0deg),
+    rgba(52, 211, 153, 0.9), rgba(45, 212, 191, 0.15) 12%,
+    rgba(227, 201, 143, 0.55) 22%, rgba(52, 211, 153, 0.12) 36%,
+    rgba(52, 211, 153, 0.9) 50%, rgba(45, 212, 191, 0.15) 62%,
+    rgba(227, 201, 143, 0.55) 72%, rgba(52, 211, 153, 0.12) 86%,
+    rgba(52, 211, 153, 0.9) 100%);
+  animation: bq26-beam-spin 5s linear infinite;
+}
+.bq26-beam > * {
+  border-radius: 999px;
+  width: 100%;
+  height: 100%;
+}
+@property --bq26-beam-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes bq26-beam-spin {
+  to { --bq26-beam-angle: 360deg; }
+}
+
+/* ---- Spotlight bento tiles ------------------------------------------------- */
+.bq26-tile {
+  position: relative;
+  overflow: hidden;
+  background: var(--bq26-card);
+  border: 1px solid var(--bq26-line-soft);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.4s ease;
+}
+.bq26-tile::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  background: radial-gradient(340px circle at var(--bq26-mx, 50%) var(--bq26-my, 50%),
+    rgba(52, 211, 153, 0.12), transparent 65%);
+}
+.bq26-tile:hover {
+  transform: translateY(-3px);
+  border-color: rgba(52, 211, 153, 0.3);
+  box-shadow: 0 24px 60px -24px rgba(4, 120, 87, 0.45);
+}
+.bq26-tile:hover::after { opacity: 1; }
+
+/* ---- Cockpit (hero product mock) ------------------------------------------- */
+.bq26-cockpit {
+  background: linear-gradient(160deg, rgba(10, 30, 24, 0.92), rgba(4, 16, 12, 0.96));
+  border: 1px solid rgba(52, 211, 153, 0.18);
+  box-shadow:
+    0 40px 100px -30px rgba(0, 0, 0, 0.75),
+    0 0 90px -30px rgba(16, 185, 129, 0.35),
+    inset 0 1px 0 rgba(52, 211, 153, 0.14);
+  transform: perspective(1600px) rotateY(-4deg) rotateX(1.5deg);
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.bq26-cockpit:hover { transform: perspective(1600px) rotateY(-1deg) rotateX(0.5deg); }
+@media (max-width: 1024px) { .bq26-cockpit { transform: none; } }
+
+.bq26-chip {
+  position: absolute;
+  z-index: 20;
+  background: rgba(5, 18, 13, 0.92);
+  border: 1px solid rgba(52, 211, 153, 0.22);
+  box-shadow: 0 18px 44px -14px rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(12px);
+}
+
+/* ---- Timeline connector ------------------------------------------------------ */
+.bq26-rail {
+  position: absolute;
+  left: 19px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: linear-gradient(180deg, rgba(52, 211, 153, 0.55), rgba(45, 212, 191, 0.18), transparent);
+}
+@media (min-width: 1024px) {
+  .bq26-rail {
+    left: 32px;
+    right: 32px;
+    top: 37px;
+    bottom: auto;
+    width: auto;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(52, 211, 153, 0.55), rgba(45, 212, 191, 0.18), transparent);
+  }
+}
+
+/* ---- Nav ------------------------------------------------------------------------ */
+.bq26-nav {
+  background: rgba(4, 14, 10, 0.55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(52, 211, 153, 0.1);
+  box-shadow: 0 18px 50px -22px rgba(0, 0, 0, 0.8);
+}
+.bq26-nav-link {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--bq26-muted);
+  transition: color 0.2s ease;
+}
+.bq26-nav-link:hover { color: var(--bq26-text); }
+
+/* ---- Marquee restyle (uses .bq-marquee mechanics from premium-design.css) ------ */
+.bq26-marquee-shell {
+  border: 1px solid var(--bq26-line-soft);
+  background: rgba(6, 20, 15, 0.45);
+  backdrop-filter: blur(10px);
+}
+
+/* ---- QR art ------------------------------------------------------------------------ */
+.bq26-qr-cell { background: #05130d; }
+.bq26-qr-cell > rect { fill: rgba(52, 211, 153, 0.85); }
+.bq26-qr-cell > circle { fill: rgba(227, 201, 143, 0.9); }
+
+/* ---- Reduced motion ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  .bq26-aurora, .bq26-beam, .bq26-float, .bq26-float-slow { animation: none !important; }
+  .bq26-cockpit { transform: none !important; }
+}

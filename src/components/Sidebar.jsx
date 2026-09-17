@@ -250,10 +250,11 @@ const Sidebar = ({
               triggerLightHaptic();
               setCurrentTab('create-invoice');
             }}
-            className="w-full py-2 px-3 rounded-xl bg-theme-accent text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs hover:opacity-95 active:scale-98 transition-all cursor-pointer"
+            className="relative overflow-hidden w-full py-2.5 px-3 rounded-xl bg-[image:var(--accent-gradient)] text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-md hover:shadow-lg hover:brightness-110 active:scale-95 transition-all cursor-pointer group/cta"
           >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Create Invoice</span>
+            <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full group-hover/cta:translate-x-full transition-transform duration-700" />
+            <Plus className="w-3.5 h-3.5 relative" />
+            <span className="relative">Create Invoice</span>
           </button>
         )}
       </div>
@@ -263,8 +264,12 @@ const Sidebar = ({
         {filteredSections.map((section) => (
           <div key={section.id} className="space-y-0.5">
             {!isCollapsed && (
-              <div className="px-3 pt-1 pb-0.5 text-[9px] font-black tracking-widest text-theme-muted/70 uppercase">
-                {section.label}
+              <div className="flex items-center gap-1.5 px-3 pt-2 pb-1">
+                <span className="w-1 h-1 rounded-full bg-theme-accent/60" aria-hidden="true" />
+                <span className="text-[9px] font-black tracking-widest text-theme-muted/80 uppercase">
+                  {section.label}
+                </span>
+                <span className="flex-1 h-px bg-theme-border-soft/50" aria-hidden="true" />
               </div>
             )}
             {section.items.map((item) => {
@@ -280,21 +285,29 @@ const Sidebar = ({
                     triggerLightHaptic();
                     setCurrentTab(item.id);
                   }}
-                  className={`w-full flex items-center rounded-xl text-xs transition-all text-left cursor-pointer ${
-                    isCollapsed ? 'p-2 justify-center' : 'px-3 py-1.5 gap-2.5'
-                  } ${
-                    isActive
-                      ? 'bg-theme-accent/10 text-theme-accent border-l-2 border-theme-accent font-black shadow-2xs'
-                      : 'text-theme-secondary hover:text-theme-primary hover:bg-theme-surface/70 font-semibold'
+                  className={`relative w-full flex items-center rounded-xl text-xs transition-colors text-left cursor-pointer group ${
+                    isCollapsed ? 'p-2 justify-center' : 'px-2.5 py-1.5 gap-2'
+                  } ${isActive
+                    ? 'text-theme-accent'
+                    : 'text-theme-secondary hover:text-theme-primary font-semibold'
                   }`}
                   title={isCollapsed ? item.label : undefined}
                 >
-                  <Icon className={`w-3.5 h-3.5 shrink-0 transition-colors ${isActive ? 'text-theme-accent' : 'text-theme-muted'}`} />
+                  {isActive && (
+                    <motion.span
+                      layoutId="sb-active-pill"
+                      className="absolute inset-0 rounded-xl bg-theme-accent/10 ring-1 ring-inset ring-theme-accent/20 shadow-xs"
+                      transition={{ type: 'spring', damping: 30, stiffness: 380 }}
+                    />
+                  )}
+                  <span className={`relative z-10 flex items-center justify-center w-6 h-6 rounded-lg shrink-0 transition-colors ${isActive ? 'bg-theme-accent/15 text-theme-accent' : 'text-theme-muted group-hover:text-theme-primary group-hover:bg-theme-surface/80'}`}>
+                    <Icon className="w-3.5 h-3.5" />
+                  </span>
                   {!isCollapsed && (
-                    <div className="flex-1 flex items-center justify-between truncate">
-                      <span className="truncate">{item.label}</span>
+                    <div className="relative z-10 flex-1 flex items-center justify-between truncate">
+                      <span className={`truncate ${isActive ? 'font-black' : ''}`}>{item.label}</span>
                       {item.badge > 0 && (
-                        <span className="px-1.5 py-0.2 rounded-full text-[9px] font-black bg-rose-500 text-white font-numbers">
+                        <span className="px-1.5 min-w-[18px] h-[18px] flex items-center justify-center rounded-full text-[9px] font-black bg-rose-500 text-white font-numbers shadow-sm">
                           {item.badge}
                         </span>
                       )}
@@ -315,12 +328,14 @@ const Sidebar = ({
             className={`flex items-center gap-2.5 min-w-0 text-left rounded-xl p-1.5 hover:bg-theme-surface transition-colors flex-1 cursor-pointer ${isCollapsed ? 'justify-center' : ''}`}
             title="Business Settings"
           >
-            <div className="w-8 h-8 rounded-xl bg-theme-accent/10 border border-theme-border-soft flex items-center justify-center text-theme-accent font-black text-xs shrink-0 overflow-hidden">
-              {businessSettings?.logoUrl ? (
-                <img src={businessSettings.logoUrl} alt="Logo" className="w-full h-full object-cover" />
-              ) : (
-                <span>{(businessSettings?.businessName || 'B').charAt(0).toUpperCase()}</span>
-              )}
+            <div className="w-9 h-9 rounded-xl p-[1.5px] bg-[image:var(--accent-gradient)] shrink-0 shadow-sm">
+              <div className="w-full h-full rounded-[10.5px] bg-theme-surface flex items-center justify-center text-theme-accent font-black text-xs overflow-hidden">
+                {businessSettings?.logoUrl ? (
+                  <img src={businessSettings.logoUrl} alt="Logo" className="w-full h-full object-cover" />
+                ) : (
+                  <span>{(businessSettings?.businessName || 'B').charAt(0).toUpperCase()}</span>
+                )}
+              </div>
             </div>
             {!isCollapsed && (
               <div className="min-w-0 flex-1">

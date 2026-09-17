@@ -454,6 +454,28 @@ function App() {
   const [portalId, setPortalId] = useState(null);
   const [eduPortalId, setEduPortalId] = useState(null);
 
+  // Boot Interceptor for Public Legal / Support pages
+  // (/terms, /privacy, /refund, /data-deletion, /support)
+  const [publicRoute, setPublicRoute] = useState(null);
+  useEffect(() => {
+    const PUBLIC_PAGES = {
+      '/terms': 'terms',
+      '/privacy': 'privacy',
+      '/refund': 'refund',
+      '/data-deletion': 'data-deletion',
+      '/support': 'support'
+    };
+    const clean = (window.location.pathname || '/').replace(/\/+$/, '') || '/';
+    if (PUBLIC_PAGES[clean]) setPublicRoute(PUBLIC_PAGES[clean]);
+  }, []);
+
+  // Signed-in visitors landing on a public page see it inside the app shell.
+  useEffect(() => {
+    if (publicRoute && (isAuthenticated || isDemoSessionActive)) {
+      setCurrentTab(publicRoute);
+    }
+  }, [publicRoute, isAuthenticated, isDemoSessionActive]);
+
   useEffect(() => {
     const path = window.location.pathname;
     
@@ -2389,7 +2411,7 @@ function App() {
   // Admin routes (/km-admin) must stay reachable for unauthenticated owners —
   // the AdminRouteGuard below handles the PIN gate itself.
   const isAdminPathEarly = window.location.pathname === '/km-admin' || currentTab === 'admin-panel';
-  if (!isAdminPathEarly && !isAuthenticated && (!isDemoSessionActive || !isDemoJourneyActive)) {
+  if (!isAdminPathEarly && !publicRoute && !isAuthenticated && (!isDemoSessionActive || !isDemoJourneyActive)) {
     return (
       <React.Suspense fallback={
         <div className="flex h-screen items-center justify-center">
@@ -2535,6 +2557,28 @@ function App() {
                   }} 
                 />
               </AdminRouteGuard>
+            </React.Suspense>
+          </motion.div>
+        ) : (publicRoute && !isAuthenticated && !isDemoSessionActive) ? (
+          <motion.div key="public-page" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full min-h-screen">
+            <React.Suspense fallback={<div className="flex h-screen items-center justify-center"><ClassicLoader /></div>}>
+              <div className="dark min-h-screen" data-theme="emerald-royal" style={{ background: 'var(--app-bg)' }}>
+                <div className="max-w-4xl mx-auto px-4 pt-6">
+                  <button
+                    onClick={() => { window.location.href = '/'; }}
+                    className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-theme-muted hover:text-theme-primary transition-colors px-4 py-2.5 rounded-xl bg-theme-surface border border-theme-border-soft"
+                  >
+                    ← BillQyro
+                  </button>
+                </div>
+                <div className="px-4 pb-16">
+                  {publicRoute === 'terms' && <TermsOfService setCurrentTab={() => { window.location.href = '/'; }} />}
+                  {publicRoute === 'privacy' && <PrivacyPolicy setCurrentTab={() => { window.location.href = '/'; }} />}
+                  {publicRoute === 'refund' && <RefundPolicy setCurrentTab={() => { window.location.href = '/'; }} />}
+                  {publicRoute === 'data-deletion' && <DataDeletion onBack={() => { window.location.href = '/'; }} />}
+                  {publicRoute === 'support' && <Support onBack={() => { window.location.href = '/'; }} />}
+                </div>
+              </div>
             </React.Suspense>
           </motion.div>
         ) : (!isAuthenticated && !isDemoSessionActive) ? (

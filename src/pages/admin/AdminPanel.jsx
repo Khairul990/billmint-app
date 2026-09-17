@@ -30,7 +30,7 @@ const AdminPanel = ({ currentTab, setCurrentTab }) => {
       exit="exit"
     >
       <AdminLayout setCurrentTab={setCurrentTab} activeAdminTab={activeAdminTab} setActiveAdminTab={setActiveAdminTab}>
-        {activeAdminTab === 'dashboard' && <AdminDashboard />}
+        {activeAdminTab === 'dashboard' && <AdminDashboard onNavigate={setActiveAdminTab} />}
         {activeAdminTab === 'users' && <UserManager />}
         {activeAdminTab === 'workspaces' && <WorkspaceAdmin />}
         {activeAdminTab === 'subscriptions' && <SubscriptionStudio />}
