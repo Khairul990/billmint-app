@@ -305,22 +305,27 @@ export const getUserPaymentProofs = async (userId) => {
 };
 
 export const getAdminAllPaymentProofs = async () => {
+  let list = [];
   if (firebaseReady) {
     try {
       const snap = await getDocs(collection(db, 'platformPaymentProofs'));
-      const list = [];
       snap.forEach(doc => list.push(doc.data()));
-      return list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     } catch (e) {
       console.error('Failed to fetch admin proofs', e);
     }
   }
 
   try {
-    return JSON.parse(localStorage.getItem('billqyro_platform_payment_proofs') || '[]');
-  } catch {
-    return [];
-  }
+    const localProofs = JSON.parse(localStorage.getItem('billqyro_platform_payment_proofs') || '[]');
+    const existingIds = new Set(list.map(p => p.id));
+    localProofs.forEach(p => {
+      if (!existingIds.has(p.id)) {
+        list.push(p);
+      }
+    });
+  } catch (e) { console.warn('Failed to parse local payment proofs', e); }
+
+  return list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 };
 
 export const getAdminPlatformRevenueStates = async () => {

@@ -1,4 +1,4 @@
-﻿import { db, firebaseReady, auth } from './firebaseConfig.js';
+import { db, firebaseReady, auth } from './firebaseConfig.js';
 
 
 // ==========================================
@@ -1973,37 +1973,90 @@ export const resetEnterpriseWorkspace = async (targetUserId) => {
 };
 
 export const getAdminPremiumRequests = async () => {
-  if (!firebaseReady) return [];
-  try {
-    const snap = await getDocs(collection(db, 'premiumRequests'));
-    const list = [];
-    snap.forEach(d => list.push({ id: d.id, ...d.data() }));
-    return list;
-  } catch (e) {
-    console.error('Failed to getAdminPremiumRequests:', e);
-    return [];
+  let list = [];
+  const isSandbox = localStorage.getItem('billqyro_demo_session_active') === 'true';
+
+  if (firebaseReady) {
+    try {
+      const snap = await getDocs(collection(db, 'premiumRequests'));
+      snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+    } catch (e) {
+      console.error('Failed to getAdminPremiumRequests:', e);
+    }
   }
+  
+  if (isSandbox || list.length === 0) {
+    try {
+      const sandboxReqs = JSON.parse(localStorage.getItem('billqyro_sandbox_premium_requests') || '[]');
+      const formattedSandbox = sandboxReqs.map(r => ({ ...r, id: r.requestId || r.id }));
+      // Combine and deduplicate
+      const existingIds = new Set(list.map(r => r.id));
+      formattedSandbox.forEach(r => {
+        if (!existingIds.has(r.id)) {
+          list.push(r);
+        }
+      });
+    } catch (e) { console.warn('Sandbox read error', e); }
+  }
+  
+  return list;
 };
 
 export const updatePremiumRequestStatus = async (requestId, status, targetUserId, plan, rejectionReason = '') => {
-  if (!firebaseReady) return false;
-  try {
-    const reqRef = doc(db, 'premiumRequests', requestId);
-    const reqSnap = await getDoc(reqRef);
-    if (!reqSnap.exists()) {
-      throw new Error('Premium request not found.');
-    }
-    const reqData = reqSnap.data();
-    if (reqData.status !== 'Pending') {
-      throw new Error(`This request has already been ${reqData.status.toLowerCase()}.`);
-    }
+  const isSandbox = localStorage.getItem('billqyro_demo_session_active') === 'true';
 
-    await setDoc(reqRef, {
-      status,
-      rejectionReason,
-      approvedAt: status === 'Approved' ? Date.now() : null,
-      updatedAt: Date.now()
-    }, { merge: true });
+  let reqData = null;
+  const reqRef = doc(db, 'premiumRequests', requestId);
+
+  if (firebaseReady) {
+    try {
+      const reqSnap = await getDoc(reqRef);
+      if (reqSnap.exists()) {
+        reqData = reqSnap.data();
+      }
+    } catch (e) {
+      console.warn('Failed to fetch request from Firebase', e);
+    }
+  }
+
+  // Fallback to sandbox if not found in Firebase (or offline)
+  if (!reqData && isSandbox) {
+    try {
+      const sandboxReqs = JSON.parse(localStorage.getItem('billqyro_sandbox_premium_requests') || '[]');
+      reqData = sandboxReqs.find(r => r.requestId === requestId || r.id === requestId);
+    } catch (e) { console.warn('Sandbox read error', e); }
+  }
+
+  if (!reqData) {
+    throw new Error('Premium request not found.');
+  }
+
+  if (reqData.status !== 'Pending') {
+    throw new Error(`This request has already been ${reqData.status.toLowerCase()}.`);
+  }
+
+  const updatePayload = {
+    status,
+    rejectionReason,
+    approvedAt: status === 'Approved' ? Date.now() : null,
+    updatedAt: Date.now()
+  };
+
+  if (firebaseReady) {
+    try {
+      await setDoc(reqRef, updatePayload, { merge: true });
+    } catch (e) { console.warn('Firebase setDoc failed', e); }
+  }
+
+  if (isSandbox) {
+    try {
+      const sandboxReqs = JSON.parse(localStorage.getItem('billqyro_sandbox_premium_requests') || '[]');
+      const updatedReqs = sandboxReqs.map(r => 
+        (r.requestId === requestId || r.id === requestId) ? { ...r, ...updatePayload } : r
+      );
+      localStorage.setItem('billqyro_sandbox_premium_requests', JSON.stringify(updatedReqs));
+    } catch (e) { console.warn('Sandbox write error', e); }
+  }
 
     if (status === 'Approved') {
       const activatedAt = Date.now();
@@ -2039,10 +2092,6 @@ export const updatePremiumRequestStatus = async (requestId, status, targetUserId
       await setDoc(doc(db, 'settings', targetUserId), { planStatus: 'free' }, { merge: true });
     }
     return true;
-  } catch (e) {
-    console.error('Failed to updatePremiumRequestStatus:', e);
-    throw e;
-  }
 };
 
 export const updateUserBlockStatus = async (targetUserId, blocked) => {

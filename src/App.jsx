@@ -47,6 +47,7 @@ import { workspaceEngine } from './services/workspaceEngine';
 import { securityEngine } from './services/securityEngine';
 import QuickBillModal from './components/QuickBillModal';
 import AdminPINLogin from './pages/admin/AdminPINLogin';
+import AdminErrorBoundary from './components/AdminErrorBoundary';
 import Confetti from 'react-confetti';
 import CommandPalette from './components/CommandPalette';
 import { pageVariants } from './utils/animations';
@@ -1081,7 +1082,7 @@ function App() {
       toast.error('New invoice creation is locked. Please clear your platform dues.');
       return;
     }
-    const freeLimit = settings?.freeInvoiceLimit !== undefined ? settings.freeInvoiceLimit : 15;
+    const freeLimit = subscription?.limits?.invoices !== undefined ? subscription.limits.invoices : 10;
     const isPPBActive = revenueStatus.lockStatus !== 'none' || revenueStatus.platformDueAmount > 0;
     if (isNew && subscription.status !== 'premium' && invoices.length >= freeLimit && !isSilent && !isPPBActive) {
       setShowPaywallModal(true);
@@ -1407,6 +1408,13 @@ function App() {
 
   // Customers
   const handleSaveCustomer = async (payload) => {
+    const isNew = !payload.id || !customers.some(c => c.id === payload.id);
+    const custLimit = subscription?.limits?.customers !== undefined ? subscription.limits.customers : 5;
+    if (isNew && subscription.status !== 'premium' && customers.length >= custLimit) {
+      setShowPaywallModal(true);
+      return;
+    }
+
     // Validate Customer Payload
     const validationResult = validatePayload(customerSchema, payload);
     if (!validationResult.success) {
@@ -1486,6 +1494,13 @@ function App() {
 
   // Products
   const handleSaveProduct = async (payload) => {
+    const isNew = !payload.id || !products.some(p => p.id === payload.id);
+    const prodLimit = subscription?.limits?.products !== undefined ? subscription.limits.products : 10;
+    if (isNew && subscription.status !== 'premium' && products.length >= prodLimit) {
+      setShowPaywallModal(true);
+      return;
+    }
+
     // Audit trail: log manual stock changes made from the product form
     try {
       const sourceList = isDemoSessionActive ? demoProducts : products;
@@ -2547,15 +2562,17 @@ function App() {
                   window.history.replaceState({}, '', '/');
                 }
               }}>
-                <AdminPanel 
-                  currentTab={resolvedTab} 
-                  setCurrentTab={(tab) => {
-                    setCurrentTab(tab);
-                    if (window.location.pathname === '/km-admin') {
-                      window.history.replaceState({}, '', '/');
-                    }
-                  }} 
-                />
+                <AdminErrorBoundary>
+                  <AdminPanel 
+                    currentTab={resolvedTab} 
+                    setCurrentTab={(tab) => {
+                      setCurrentTab(tab);
+                      if (window.location.pathname === '/km-admin') {
+                        window.history.replaceState({}, '', '/');
+                      }
+                    }} 
+                  />
+                </AdminErrorBoundary>
               </AdminRouteGuard>
             </React.Suspense>
           </motion.div>

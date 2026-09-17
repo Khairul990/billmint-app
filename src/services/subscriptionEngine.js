@@ -41,12 +41,14 @@ const SUBSCRIPTION_PLANS = {
 
 class SubscriptionEngine {
   getSubscriptionDetailsSync(settings) {
-    const planId = settings?.plan || 'free';
+    const planId = settings?.subscriptionPlan || settings?.plan || (settings?.isPremium ? 'pro' : 'free');
+    const isPremium = settings?.isPremium || (planId !== 'free' && planId !== 'Free');
     const planDetails = SUBSCRIPTION_PLANS[planId.toUpperCase()] || SUBSCRIPTION_PLANS.FREE;
+    
     return {
       planId: planDetails.id,
       name: planDetails.name,
-      status: settings?.subscriptionStatus || 'active',
+      status: isPremium ? 'premium' : (settings?.subscriptionStatus || 'active'),
       renewalDate: settings?.renewalDate || null,
       limits: planDetails.limits,
       features: planDetails.features
@@ -55,7 +57,8 @@ class SubscriptionEngine {
 
   async getSubscriptionDetails(workspaceId) {
     const settings = await dbEngine.getSettings(workspaceId);
-    const planId = settings?.plan || 'free';
+    const planId = settings?.subscriptionPlan || settings?.plan || (settings?.isPremium ? 'pro' : 'free');
+    const isPremium = settings?.isPremium || (planId !== 'free' && planId !== 'Free');
     
     let planDetails = SUBSCRIPTION_PLANS[planId.toUpperCase()] || SUBSCRIPTION_PLANS.FREE;
 
@@ -89,7 +92,7 @@ class SubscriptionEngine {
     return {
       planId: planDetails.id,
       name: planDetails.name,
-      status: settings?.subscriptionStatus || 'active',
+      status: isPremium ? 'premium' : (settings?.subscriptionStatus || 'active'),
       renewalDate: settings?.renewalDate || null,
       limits: planDetails.limits,
       features: planDetails.features,

@@ -90,7 +90,7 @@ const AdminLayout = ({ setCurrentTab, children, activeAdminTab, setActiveAdminTa
         )
       }))
       .filter((grp) => grp.items.length > 0);
-  }, [query]);
+  }, [query, adminMenuGroups]);
 
   const handleNavClick = (id) => {
     setActiveAdminTab(id);
