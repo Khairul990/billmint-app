@@ -104,9 +104,6 @@ export default defineConfig(({ mode }) => ({
         manualChunks(id) {
           const normalized = id.replace(/\\/g, '/');
           if (normalized.includes('node_modules')) {
-            if (normalized.includes('@react-pdf') || normalized.includes('pdfjs-dist')) {
-              return 'vendor-pdf';
-            }
             if (normalized.includes('tesseract')) {
               return 'vendor-ocr';
             }
@@ -116,6 +113,11 @@ export default defineConfig(({ mode }) => ({
             if (normalized.includes('qrcode')) {
               return 'vendor-qr';
             }
+            // NOTE: '@react-pdf' and 'pdfjs-dist' previously mapped to a
+            // forced 'vendor-pdf' chunk. That forced grouping created a
+            // static edge from the entry bundle to the 2.7MB chunk even
+            // though the PDF renderer is only loaded dynamically. Letting
+            // Rollup place them naturally keeps them off the boot path.
           }
         }
       }
