@@ -326,15 +326,15 @@ const Estimates = ({
             setViewingEstimate(null);
             onEditInvoice(null);
           }}
-          className="fixed inset-0 z-[9999] overflow-y-auto bg-black/60 dark:bg-black/80 backdrop-blur-sm p-4 sm:p-6 md:p-10 no-print"
+          className="fixed inset-0 z-[9999] overflow-y-auto bg-black/60 dark:bg-black/80 backdrop-blur-sm p-4 sm:p-6 md:p-10 bq-print-portal"
         >
           <div 
             onClick={(e) => e.stopPropagation()}
-            className="bg-theme-app dark:bg-theme-surface w-full max-w-4xl mx-auto rounded-3xl overflow-hidden shadow-2xl relative animate-scaleUp border border-white/10 flex flex-col my-10"
+            className="bg-theme-app dark:bg-theme-surface w-full max-w-4xl mx-auto rounded-3xl overflow-hidden shadow-2xl relative animate-scaleUp border border-white/10 flex flex-col my-10 bq-print-card"
           >
             
             {/* Modal Top Actions Header Bar */}
-            <div className="bg-theme-card dark:bg-theme-card border-b border-theme-border-soft dark:border-theme-border-soft px-6 py-4 flex items-center justify-between shrink-0 flex-wrap gap-4">
+            <div className="bg-theme-card dark:bg-theme-card border-b border-theme-border-soft dark:border-theme-border-soft px-6 py-4 flex items-center justify-between shrink-0 flex-wrap gap-4 no-print">
               <div className="flex items-center gap-2">
                 <FileSpreadsheet className="w-5 h-5 text-theme-accent" />
                 <span className="font-extrabold text-theme-primary dark:text-theme-primary text-sm">{viewingEstimate.invoiceNumber} - Preview</span>
@@ -427,20 +427,14 @@ const Estimates = ({
               </div>
             </div>
 
-            {/* Preview Wrapper */}
+            {/* Preview Wrapper — this document is what prints */}
             <div className="p-4 md:p-6 bg-theme-app dark:bg-theme-surface">
-              <InvoicePreview 
-                invoice={viewingEstimate}
-                businessSettings={businessSettings}
-              />
-            </div>
-            
-            {/* Print Only Embedded Capture Zone */}
-            <div className="hidden print:block print:absolute print:inset-0 bg-theme-card dark:bg-theme-card">
-              <InvoicePreview 
-                invoice={viewingEstimate}
-                businessSettings={businessSettings}
-              />
+              <div className="print-only-preview">
+                <InvoicePreview 
+                  invoice={viewingEstimate}
+                  businessSettings={businessSettings}
+                />
+              </div>
             </div>
           </div>
         </div>,

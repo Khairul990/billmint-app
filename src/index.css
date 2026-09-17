@@ -2071,3 +2071,27 @@ button:active {
 /* Long-page paint optimization (5000-user readiness) */
 .page-premium { content-visibility: auto; contain-intrinsic-size: auto 900px; }
 .dark .luxury-glass-card:hover { transform: translateY(-2px); }
+
+/* ═══ Phase 19 · View-modal print flow ═══
+   Invoices/Estimates view modals print ONLY the document:
+   backdrop & card flatten, action bars/timeline hidden via .no-print,
+   document (.print-only-preview) is lifted out by the :has() rule above. */
+@media print {
+  .bq-print-portal {
+    position: static !important;
+    overflow: visible !important;
+    background: none !important;
+    backdrop-filter: none !important;
+    padding: 0 !important;
+  }
+  .bq-print-card {
+    box-shadow: none !important;
+    border: none !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    background: none !important;
+    overflow: visible !important;
+    animation: none !important;
+  }
+}

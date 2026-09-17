@@ -1089,15 +1089,15 @@ const Invoices = ({
             setViewingInvoice(null);
             onEditInvoice(null);
           }}
-          className="fixed inset-0 z-[9999] overflow-y-auto bg-black/60 dark:bg-black/80 backdrop-blur-sm p-4 sm:p-6 md:p-10 no-print"
+          className="fixed inset-0 z-[9999] overflow-y-auto bg-black/60 dark:bg-black/80 backdrop-blur-sm p-4 sm:p-6 md:p-10 bq-print-portal"
         >
           <div 
             onClick={(e) => e.stopPropagation()}
-            className="bg-theme-app dark:bg-theme-surface w-full max-w-4xl mx-auto rounded-3xl overflow-hidden shadow-premium relative animate-scaleUp border border-white/10 flex flex-col my-10"
+            className="bg-theme-app dark:bg-theme-surface w-full max-w-4xl mx-auto rounded-3xl overflow-hidden shadow-premium relative animate-scaleUp border border-white/10 flex flex-col my-10 bq-print-card"
           >
             
             {/* Modal Top Actions Header Bar */}
-            <div className="bg-theme-card dark:bg-theme-card border-b border-theme-border-soft px-6 py-4 flex items-center justify-between shrink-0">
+            <div className="bg-theme-card dark:bg-theme-card border-b border-theme-border-soft px-6 py-4 flex items-center justify-between shrink-0 no-print">
               <div className="flex items-center gap-2">
                 <FileSpreadsheet className="w-5 h-5 text-theme-accent" />
                 <span className="font-extrabold text-theme-primary text-sm">{viewingInvoice.invoiceNumber} - Preview & Timeline</span>
@@ -1199,7 +1199,7 @@ const Invoices = ({
             <div className="p-4 md:p-6 bg-theme-app dark:bg-theme-surface space-y-6">
               
               {/* Payment Timeline Component */}
-              <div className="bg-theme-card rounded-2xl p-4 border border-theme-border-soft shadow-xs space-y-3">
+              <div className="bg-theme-card rounded-2xl p-4 border border-theme-border-soft shadow-xs space-y-3 no-print">
                 <div className="flex items-center justify-between border-b border-theme-border-soft pb-2.5">
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4 text-theme-accent" />
@@ -1278,7 +1278,7 @@ const Invoices = ({
 
               {/* Pending Payment Verification Panel */}
               {viewingInvoice && (viewingInvoice.paymentProofs || []).filter(p => p.status === 'Pending').length > 0 && (
-                <div className="p-5 bg-gradient-to-tr from-indigo-50 to-indigo-100/50 dark:from-indigo-950/20 dark:to-indigo-900/10 border border-theme-border-soft rounded-2xl shadow-sm">
+                <div className="p-5 bg-gradient-to-tr from-indigo-50 to-indigo-100/50 dark:from-indigo-950/20 dark:to-indigo-900/10 border border-theme-border-soft rounded-2xl shadow-sm no-print">
                   <div className="flex items-center gap-2 text-theme-accent font-extrabold mb-4">
                     <ShieldCheck className="w-5 h-5 text-theme-accent" />
                     <span className="text-sm">Pending Payment Verification ({(viewingInvoice.paymentProofs || []).filter(p => p.status === 'Pending').length})</span>
@@ -1344,10 +1344,12 @@ const Invoices = ({
               )}
 
               {/* Printable Template Letterhead Preview */}
-              <InvoicePreview 
-                invoice={viewingInvoice} 
-                businessSettings={businessSettings} 
-              />
+              <div className="print-only-preview">
+                <InvoicePreview 
+                  invoice={viewingInvoice} 
+                  businessSettings={businessSettings} 
+                />
+              </div>
             </div>
           </div>
         </div>,

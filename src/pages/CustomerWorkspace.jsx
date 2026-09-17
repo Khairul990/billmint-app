@@ -331,14 +331,14 @@ export default function CustomerWorkspace({ customerId }) {
                                   href={`/invoice/${inv.publicToken}`}
                                   target="_blank"
                                   rel="noreferrer"
-                                  className="inline-flex items-center justify-center p-2 bg-theme-surface hover:bg-theme-accent/10 border border-theme-border-soft hover:border-theme-accent/30 text-theme-primary hover:text-theme-accent rounded-lg transition-colors tooltip-trigger"
+                                  className="inline-flex items-center justify-center p-2 bg-theme-surface hover:bg-theme-accent/10 border border-theme-border-soft hover:border-theme-accent/30 text-theme-primary hover:text-theme-accent rounded-lg transition-colors"
                                   title="View Invoice"
                                 >
                                   <Eye className="w-4 h-4" />
                                 </a>
                                 <button 
                                   onClick={() => downloadInvoicePDF(inv, inv.businessSnapshot, false)}
-                                  className="inline-flex items-center justify-center p-2 bg-theme-surface hover:bg-theme-accent/10 border border-theme-border-soft hover:border-theme-accent/30 text-theme-primary hover:text-theme-accent rounded-lg transition-colors tooltip-trigger"
+                                  className="inline-flex items-center justify-center p-2 bg-theme-surface hover:bg-theme-accent/10 border border-theme-border-soft hover:border-theme-accent/30 text-theme-primary hover:text-theme-accent rounded-lg transition-colors"
                                   title="Download PDF"
                                 >
                                   <Download className="w-4 h-4" />
@@ -347,7 +347,7 @@ export default function CustomerWorkspace({ customerId }) {
                                   onClick={() => {
                                       window.open(`/invoice/${inv.publicToken}?print=true`, '_blank');
                                   }}
-                                  className="hidden sm:inline-flex items-center justify-center p-2 bg-theme-surface hover:bg-theme-accent/10 border border-theme-border-soft hover:border-theme-accent/30 text-theme-primary hover:text-theme-accent rounded-lg transition-colors tooltip-trigger"
+                                  className="hidden sm:inline-flex items-center justify-center p-2 bg-theme-surface hover:bg-theme-accent/10 border border-theme-border-soft hover:border-theme-accent/30 text-theme-primary hover:text-theme-accent rounded-lg transition-colors"
                                   title="Print Invoice"
                                 >
                                   <Printer className="w-4 h-4" />

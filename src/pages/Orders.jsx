@@ -283,7 +283,7 @@ const Orders = ({ invoices = [], customers = [], businessSettings, setCurrentTab
                           </div>
                         </div>
                         <button onClick={() => handleDeleteOrder(order.id)}
-                          className="p-2 text-theme-muted hover:text-theme-danger hover:bg-theme-danger/5 rounded-xl transition-all tooltip-premium" title="Delete Order">
+                          className="p-2 text-theme-muted hover:text-theme-danger hover:bg-theme-danger/5 rounded-xl transition-all" title="Delete Order">
                           <X className="w-3.5 h-3.5" />
                         </button>
                       </div>

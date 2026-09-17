@@ -250,7 +250,7 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
               ].map(({ key, label }) => (
                 <label
                   key={key}
-                  className="flex items-center gap-2 p-2 rounded-xl bg-theme-app dark:bg-theme-surface border border-theme-border-soft cursor-pointer hover:border-theme-accent/30 transition-colors tooltip-premium"
+                  className="flex items-center gap-2 p-2 rounded-xl bg-theme-app dark:bg-theme-surface border border-theme-border-soft cursor-pointer hover:border-theme-accent/30 transition-colors"
                   title={`Include ${label.toLowerCase()} in this backup`}
                 >
                   <input
@@ -312,7 +312,7 @@ const BackupRestore = ({ settings, invoices, customers, products, expenses, onIm
             {/* Drag & Drop Zone */}
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-theme-border-soft rounded-2xl p-6 mb-4 text-center cursor-pointer hover:border-theme-accent/50 hover:bg-theme-accent/5 transition-all tooltip-premium"
+              className="border-2 border-dashed border-theme-border-soft rounded-2xl p-6 mb-4 text-center cursor-pointer hover:border-theme-accent/50 hover:bg-theme-accent/5 transition-all"
               title="Click to browse or drag a .json backup file here"
             >
               <UploadCloud className="w-8 h-8 text-theme-muted mx-auto mb-2" />
