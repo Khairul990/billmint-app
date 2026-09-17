@@ -70,7 +70,9 @@ const Landing = ({ onLoginSuccess }) => {
       localStorage.setItem('billqyro_demo_session_active', 'true');
       localStorage.setItem('billqyro_demo_journey_mode', 'true');
       const { generateDemoWorkspace } = await import('../services/demoGenerator.js');
-      generateDemoWorkspace();
+      // Seed the sandbox with the category the visitor was exploring — the
+      // demo workspace mirrors that business type end to end.
+      generateDemoWorkspace(activeCategory);
       window.location.href = '/';
     } catch (e) {
       console.warn('Demo launch failed', e);

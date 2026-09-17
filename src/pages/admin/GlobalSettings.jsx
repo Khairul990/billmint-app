@@ -19,7 +19,7 @@ const GlobalSettings = () => {
   const [maxPendingDue, setMaxPendingDue] = useState(100);
   const [maxUnpaidBillCount, setMaxUnpaidBillCount] = useState(20);
   const [lockBehavior, setLockBehavior] = useState('bill_creation');
-  const [upiId, setUpiId] = useState('khairul2052007@okaxis');
+  const [upiId, setUpiId] = useState('9903591839@ybl');
   const [payeeName, setPayeeName] = useState('BillQyro Platform');
   const [defaultTheme, setDefaultTheme] = useState('obsidian-gold');
   const [defaultTemplate, setDefaultTemplate] = useState('standard');
@@ -38,7 +38,7 @@ const GlobalSettings = () => {
         setMaxPendingDue(s.maxPendingDue ?? 100);
         setMaxUnpaidBillCount(s.maxUnpaidBillCount ?? 20);
         setLockBehavior(s.lockBehavior ?? 'bill_creation');
-        setUpiId(s.upiId || 'khairul2052007@okaxis');
+        setUpiId(s.upiId || '9903591839@ybl');
         setPayeeName(s.payeeName || 'BillQyro Platform');
         setDefaultTheme(s.defaultTheme || 'obsidian-gold');
         setDefaultTemplate(s.defaultTemplate || 'standard');

@@ -4,6 +4,7 @@ Allow: /
 Disallow: /km-admin
 Disallow: /admin
 Disallow: /invoice/*
+Disallow: /customer/*
 Disallow: /onboarding
 
-Sitemap: https://billqyro.com/sitemap.xml
+Sitemap: https://billqyro-app.vercel.app/sitemap.xml

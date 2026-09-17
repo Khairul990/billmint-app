@@ -48,7 +48,7 @@ const UpgradeCenter = ({ subscription, revenueStatus, businessSettings, setCurre
     { id: 'Lifetime', label: 'Lifetime', price: gs?.priceLifetime ?? 14999, days: 'Forever', tag: 'One Time' }
   ];
 
-  const upiId = gs?.upiId || 'billqyro@upi';
+  const upiId = gs?.upiId || '9903591839@ybl';
   const payeeName = gs?.bankAccountName || 'BillQyro Technologies';
 
   const upiLinkFor = (plan) =>

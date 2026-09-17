@@ -19,7 +19,7 @@ const DEFAULT_GLOBAL_SETTINGS = {
   bankAccountNumber: '1234567890',
   bankName: 'HDFC Bank',
   bankIfsc: 'HDFC0001234',
-  upiId: 'billqyro@upi',
+  upiId: '9903591839@ybl',
   qrImageBase64: ''
 };
 

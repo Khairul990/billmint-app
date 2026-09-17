@@ -89,7 +89,7 @@ const PaymentDueScreen = ({ pendingAmount, chargeableBills, onCancel, onLogout }
     );
   }
 
-  const upiId = globalSettings?.upiId || 'khairul2052007@okaxis';
+  const upiId = globalSettings?.upiId || '9903591839@ybl';
   const payeeName = globalSettings?.payeeName || 'BillQyro Platform';
 
   return (

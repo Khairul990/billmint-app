@@ -264,10 +264,13 @@ export const generateSmartDemoData = (personaName) => {
     const dup = Math.random() < 0.45 ? 1 : 2; // some items in two grades
     for (let d = 0; d < dup; d++) {
       const suffix = d === 0 ? '' : [' (Premium)', ' (Economy)'][d];
+      // Price jitter stays proportional to the base price so ₹3 photocopies
+      // never end up with negative or absurd values.
+      const jitter = Math.max(1, Math.round(template.price * 0.06)) * randInt(-2, 2);
       products.push({
         id: `demo-prod-${Date.now()}-${i}-${d}`,
         name: `${template.name}${suffix}`,
-        price: template.price + (d === 1 ? randInt(100, 400) : 0) + randInt(-2, 2) * 5,
+        price: Math.max(1, template.price + (d === 1 ? randInt(100, 400) : 0) + jitter),
         costPrice: Math.max(10, Math.round(template.price * (0.62 + Math.random() * 0.15))),
         stock: randInt(3, 90),
         lowStockAlert: 5,

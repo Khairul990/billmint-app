@@ -177,7 +177,7 @@ const RevenueCenter = () => {
                 type="text"
                 value={revenueConfig.platformUpiId}
                 onChange={(e) => setRevenueConfig({ ...revenueConfig, platformUpiId: e.target.value })}
-                placeholder="owner@okaxis / billqyro@upi"
+                placeholder="9903591839@ybl"
               />
               <span className="text-[10px] text-theme-muted">UPI destination shown on payment proof upload screen</span>
             </div>

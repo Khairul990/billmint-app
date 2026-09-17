@@ -1,48 +1,19 @@
 // Demo / Sandbox data generator.
 // Produces a realistic, premium-feeling sample workspace so visitors can tour
 // the full platform from the landing page without registering.
+//
+// Phase 23: delegates to the category-aware engine (demoDataGenerator) so the
+// demo workspace matches the business category the visitor was exploring on
+// the landing page (retail, tailor, doctor, restaurant…), while keeping the
+// rich invoice/expense document shapes the app components expect.
 
-const DEMO_CUSTOMERS = [
-  { name: 'Arjun Sharma', phone: '+91 98300 41201', address: '12B Park Street, Kolkata, WB 700016' },
-  { name: 'Priya Chatterjee', phone: '+91 98311 22045', address: '45 Rashbehari Avenue, Kolkata, WB 700029' },
-  { name: 'Rahul Verma', phone: '+91 99540 88123', address: '7 MG Road, Bengaluru, KA 560001' },
-  { name: 'Sneha Iyer', phone: '+91 99030 55219', address: '23 Anna Salai, Chennai, TN 600002' },
-  { name: 'Imran Khan', phone: '+91 98200 73064', address: '91 Linking Road, Mumbai, MH 400050' },
-  { name: 'Ananya Das', phone: '+91 98301 66720', address: '8 Salt Lake Sector 2, Kolkata, WB 700091' },
-  { name: 'Vikram Mehta', phone: '+91 99100 30517', address: '14 Connaught Place, New Delhi, DL 110001' },
-  { name: 'Kavya Reddy', phone: '+91 90100 44832', address: '31 Banjara Hills, Hyderabad, TS 500034' },
-  { name: 'Sourav Gangopadhyay', phone: '+91 98304 12908', address: '56 Gariahat Road, Kolkata, WB 700019' },
-  { name: 'Meera Nair', phone: '+91 94470 28145', address: '19 Marine Drive, Kochi, KL 682031' },
-  { name: 'Rohan Patil', phone: '+91 90280 71539', address: '72 FC Road, Pune, MH 411005' },
-  { name: 'Tanya Bose', phone: '+91 98312 90455', address: '3 Hindustan Park, Kolkata, WB 700029' }
-];
-
-const DEMO_PRODUCTS = [
-  { name: 'Silk Embroidery Blouse (Custom Stitch)', price: 2450 },
-  { name: 'Designer Kurti Set (2 Piece)', price: 1899 },
-  { name: 'Bridal Lehenga Alteration', price: 5600 },
-  { name: 'Shirt Stitching (Premium Cotton)', price: 850 },
-  { name: 'Trouser Fitting & Alteration', price: 420 },
-  { name: 'Zardosi Hand Work (per motif)', price: 1250 },
-  { name: 'Screen Printing Service (A3 sheet)', price: 95 },
-  { name: 'Laptop Deep-Cleaning Service', price: 750 },
-  { name: 'Smartphone Screen Replacement (Labour)', price: 1150 },
-  { name: 'CCTV Camera Installation (per unit)', price: 1650 },
-  { name: 'AC Servicing & Gas Refill', price: 2200 },
-  { name: 'Monthly Tuition Fee (Class 9-10)', price: 1500 },
-  { name: 'Physics Crash Course (8 Sessions)', price: 4800 },
-  { name: 'Consultation Fee (Follow-up)', price: 500 },
-  { name: 'Home Delivery Charge', price: 60 },
-  { name: 'Gift Wrapping (Premium)', price: 120 }
-];
+import { generateSmartDemoData } from '../utils/demoDataGenerator';
 
 const DEMO_PAYMENT_METHODS = ['UPI', 'Cash', 'Card', 'Bank Transfer'];
 
 const pick = (arr, i) => arr[i % arr.length];
-const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-const round50 = (n) => Math.round(n / 50) * 50;
 
-export const generateDemoWorkspace = () => {
+export const generateDemoWorkspace = (persona = 'retail') => {
   const isSandbox = localStorage.getItem('billqyro_demo_session_active') === 'true';
   if (!isSandbox) {
     console.error('Cannot generate demo data outside of Sandbox mode.');
@@ -50,92 +21,35 @@ export const generateDemoWorkspace = () => {
   }
 
   const now = Date.now();
-  const DAY = 24 * 60 * 60 * 1000;
+  const { products, customers, invoices: smartInvoices, payments, expenses: smartExpenses, settings: smartSettings } = generateSmartDemoData(persona);
 
-  // 1. Customers (18 realistic records)
-  const generatedCustomers = Array.from({ length: 18 }, (_, i) => {
-    const c = pick(DEMO_CUSTOMERS, i);
+  // ── Invoices — rich document shape (sn/description/qty/rate, subtotal,
+  //    payment history, public token for the live-link tour) ────────────────
+  const generatedInvoices = smartInvoices.map((inv, i) => {
+    const items = inv.items.map((it, j) => ({
+      sn: j + 1,
+      description: it.name,
+      qty: it.quantity,
+      rate: it.price,
+      amount: it.price * it.quantity
+    }));
+    const subtotal = items.reduce((sum, it) => sum + it.amount, 0);
+    const amountPaid = Math.min(inv.amountPaid, subtotal);
     return {
-      id: `demo-cust-${now}-${i}`,
-      name: c.name,
-      phone: c.phone,
-      email: `${c.name.toLowerCase().replace(/[^a-z]+/g, '.')}@example.com`,
-      address: c.address,
-      createdAt: new Date(now - rand(10, 180) * DAY).toISOString()
-    };
-  });
-
-  // 2. Products / Services (full catalog)
-  const DEMO_CATEGORIES = ['Tailoring', 'Apparel', 'Services', 'Electronics', 'Printing', 'Accessories'];
-  const generatedProducts = DEMO_PRODUCTS.map((p, i) => {
-    // Every 5th item is deliberately low/out of stock so the Stock Center has something to show
-    const lowStock = i % 5 === 0;
-    const qty = lowStock ? rand(0, 4) : rand(8, 60);
-    return {
-      id: `demo-prod-${now}-${i}`,
-      name: p.name,
-      price: p.price,
-      description: 'Sample catalog item',
-      category: pick(DEMO_CATEGORIES, i),
-      sku: `SKU-${1000 + i}`,
-      barcode: `890${String(1000000 + i * 733).slice(0, 7)}`,
-      unit: 'pcs',
-      stock: qty,
-      stockQty: qty,
-      lowStockThreshold: 5,
-      createdAt: new Date(now - rand(5, 120) * DAY).toISOString()
-    };
-  });
-
-  // 3. Invoices (24, spread over the last 90 days)
-  const statuses = ['Paid', 'Paid', 'Paid', 'Pending', 'Unpaid', 'Overdue'];
-  const generatedInvoices = Array.from({ length: 24 }, (_, i) => {
-    const cust = generatedCustomers[rand(0, generatedCustomers.length - 1)];
-    const prod1 = generatedProducts[rand(0, generatedProducts.length - 1)];
-    const prod2 = generatedProducts[rand(0, generatedProducts.length - 1)];
-    const prod3 = generatedProducts[rand(0, generatedProducts.length - 1)];
-    const qty1 = rand(1, 4);
-    const qty2 = rand(1, 3);
-    const qty3 = rand(1, 2);
-
-    const subtotal = round50(prod1.price * qty1 + prod2.price * qty2 + prod3.price * qty3);
-    const taxAmount = 0;
-    const grandTotal = subtotal + taxAmount;
-
-    const status = pick(statuses, i);
-    const amountPaid = status === 'Paid' ? grandTotal : (status === 'Pending' ? round50(grandTotal / 2) : 0);
-    const balanceDue = grandTotal - amountPaid;
-
-    const pastDate = new Date(now - rand(0, 90) * DAY - rand(0, DAY));
-    const dueDate = new Date(pastDate.getTime() + 7 * DAY);
-
-    return {
-      id: `demo-inv-${now}-${i}`,
-      invoiceNumber: `INV-${String(1001 + i)}`,
-      date: pastDate.toISOString().split('T')[0],
-      dueDate: dueDate.toISOString().split('T')[0],
-      createdAt: pastDate.toISOString(),
-      updatedAt: pastDate.toISOString(),
-      customerId: cust.id,
-      customerName: cust.name,
-      customerPhone: cust.phone,
-      items: [
-        { sn: 1, description: prod1.name, qty: qty1, rate: prod1.price, amount: prod1.price * qty1 },
-        { sn: 2, description: prod2.name, qty: qty2, rate: prod2.price, amount: prod2.price * qty2 },
-        ...(qty3 && prod3.id !== prod2.id ? [{ sn: 3, description: prod3.name, qty: qty3, rate: prod3.price, amount: prod3.price * qty3 }] : [])
-      ],
-      taxPercentage: 0,
+      ...inv,
+      invoiceNumber: `INV-${1001 + i}`,
+      items,
       subtotal,
-      taxAmount,
-      grandTotal,
+      taxAmount: 0,
+      taxPercentage: 0,
+      grandTotal: subtotal,
       amountPaid,
-      balanceDue,
-      paymentStatus: status,
+      balanceDue: subtotal - amountPaid,
       syncStatus: 'synced',
       publicToken: `demo_token_${i}`,
       paymentHistory: amountPaid > 0 ? [{
         id: `ph-${now}-${i}`,
-        date: pastDate.toISOString().split('T')[0],
+        date: inv.date,
         amount: amountPaid,
         method: pick(DEMO_PAYMENT_METHODS, i),
         reviewer: 'Sandbox AutoGen'
@@ -144,51 +58,40 @@ export const generateDemoWorkspace = () => {
   });
   generatedInvoices.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-  // 4. Expenses (12, for the dashboard expense widgets)
-  const expenseCategories = ['Rent', 'Electricity', 'Raw Materials', 'Transport', 'Staff Salary', 'Marketing', 'Maintenance'];
-  const generatedExpenses = Array.from({ length: 12 }, (_, i) => {
-    const d = new Date(now - rand(0, 75) * DAY);
-    const cat = pick(expenseCategories, i);
-    // Rent and Electricity are monthly recurring series; keep their latest
-    // instance in an older month so the "post this month" banner shows in demo.
-    const isRecurring = cat === 'Rent' || cat === 'Electricity';
-    const recurringDate = new Date(now - rand(35, 55) * DAY);
+  // ── Expenses — dashboard widget shape (recurring rent/utility series) ────
+  const generatedExpenses = smartExpenses.map((e, i) => {
+    const isRecurring = e.kind === 'rent' || e.kind === 'utilities';
     return {
-      id: `demo-exp-${now}-${i}`,
-      title: cat,
-      category: cat,
-      amount: round50(rand(300, 9000)),
-      date: (isRecurring ? recurringDate : d).toISOString().split('T')[0],
-      createdAt: d.toISOString(),
+      ...e,
+      title: e.description,
       paymentMethod: pick(DEMO_PAYMENT_METHODS, i + 1),
       notes: 'Sample expense entry',
-      vendor: pick(['Mega Wholesale', 'CESC Power', 'Green Grocers', 'Ad vert Media', 'ToolBox Rentals'], i),
+      vendor: '—',
       recurring: isRecurring,
-      seriesId: isRecurring ? `${cat.toLowerCase()}|${cat}` : undefined,
+      seriesId: isRecurring ? `${e.kind}|monthly` : undefined,
       syncStatus: 'synced'
     };
   });
-  localStorage.setItem('billqyro_demo_expenses', JSON.stringify(generatedExpenses));
 
-  localStorage.setItem('billqyro_demo_customers', JSON.stringify(generatedCustomers));
-  localStorage.setItem('billqyro_demo_products', JSON.stringify(generatedProducts));
+  localStorage.setItem('billqyro_demo_customers', JSON.stringify(customers));
+  localStorage.setItem('billqyro_demo_products', JSON.stringify(products));
   localStorage.setItem('billqyro_demo_invoices', JSON.stringify(generatedInvoices));
+  localStorage.setItem('billqyro_demo_expenses', JSON.stringify(generatedExpenses));
+  localStorage.setItem('billqyro_demo_payments', JSON.stringify(payments));
 
-  // 5. Settings — mark setup complete so demo visitors land directly on the dashboard
+  // ── Settings — category-branded identity, setup marked complete so demo
+  //    visitors land directly on the dashboard ──────────────────────────────
   const settings = JSON.parse(localStorage.getItem('billqyro_demo_settings') || '{}');
-  Object.assign(settings, {
-    nextInvoiceNumber: 1025,
+  Object.assign(settings, smartSettings, {
+    nextInvoiceNumber: 1001 + generatedInvoices.length,
     setupCompleted: true,
     profileSetupCompleted: true,
     businessSetupCompleted: true,
-    ownerName: 'Demo Owner',
-    businessName: 'BillQyro Demo Studio',
-    businessType: 'Tailoring & Boutique',
+    businessType: persona,
     businessPhone: '+91 98300 00000',
     businessEmail: 'demo@billqyro.app',
-    businessAddress: 'Park Street, Kolkata, WB 700016',
     currency: 'INR',
-    themeColor: settings.themeColor || 'sapphire-noir'
+    themeColor: settings.themeColor || 'brand-premium'
   });
   localStorage.setItem('billqyro_demo_settings', JSON.stringify(settings));
 
@@ -207,6 +110,7 @@ export const resetSandboxData = () => {
   localStorage.removeItem('billqyro_demo_products');
   localStorage.removeItem('billqyro_demo_invoices');
   localStorage.removeItem('billqyro_demo_expenses');
+  localStorage.removeItem('billqyro_demo_payments');
   localStorage.removeItem('billqyro_demo_settings');
   return true;
 };

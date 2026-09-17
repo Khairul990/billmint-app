@@ -1474,7 +1474,7 @@ export const resetToDemoData = () => {
     adminEmail: getAdminEmail(),
     paymentQrEnabled: true,
     paymentMethod: 'UPI',
-    upiId: 'khairul2052007@okaxis',
+    upiId: '9903591839@ybl',
     bkashNumber: '01700000000',
     nagadNumber: '01900000000',
     payeeName: 'BillQyro Store',
