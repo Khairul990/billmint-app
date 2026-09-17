@@ -214,6 +214,7 @@ const DueCenter = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'today' | 'week' | 'older'
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [reminderHubOpen, setReminderHubOpen] = useState(false);
 
   // Maintain isSubmittingPayment guard flag required by regression test suites
   const [isSubmittingPayment, setIsSubmittingPayment] = useState(false);
@@ -349,6 +350,21 @@ const DueCenter = ({
     }
   }, [businessSettings]);
 
+  const reminderTargets = useMemo(() => {
+    const map = new Map();
+    dueBills.forEach((b) => {
+      if (!b.customerPhone) return;
+      const key = b.customerId || b.customerPhone;
+      const cur = map.get(key) || { name: b.customerName || 'Walk-in', phone: b.customerPhone, due: 0, bills: [], oldest: null };
+      cur.due += parseFloat(b.dueAmount || b.grandTotal || 0) || 0;
+      cur.bills.push(b);
+      const d = b.dueDate ? new Date(b.dueDate).getTime() : null;
+      if (d && (!cur.oldest || d < cur.oldest)) cur.oldest = d;
+      map.set(key, cur);
+    });
+    return [...map.values()].sort((a, b) => (a.oldest || Infinity) - (b.oldest || Infinity)).slice(0, 50);
+  }, [dueBills]);
+
   const handleExportCSV = () => {
     const csvRows = ['Customer,Invoice No,Due Date,Old Due,Current Bill,Total Outstanding,Status'];
     dueBills.forEach(b => {
@@ -395,7 +411,7 @@ const DueCenter = ({
 
         <div className="flex items-center gap-2 flex-wrap">
           <button 
-            onClick={() => toast('Reminder dispatch ready. Sending notifications to pending contacts...', { icon: '🔔' })}
+            onClick={() => setReminderHubOpen(true)}
             className="px-4 py-2.5 rounded-2xl bg-[image:var(--accent-gradient)] text-white font-black text-xs flex items-center gap-2 shadow-md shadow-theme-accent/20 hover:opacity-95 transition-all cursor-pointer"
           >
             <Bell className="w-4 h-4" /> {t('dl.send_reminder_all', 'Send Reminder to All')}
@@ -675,6 +691,60 @@ const DueCenter = ({
           </p>
         </SignatureSurface>
       )}
+
+      {/* WhatsApp Reminder Hub Modal */}
+      <AnimatePresence>
+        {reminderHubOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+            onClick={() => setReminderHubOpen(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 16 }}
+              transition={{ type: 'spring', damping: 26, stiffness: 300 }}
+              className="bg-theme-card w-full max-w-md max-h-[80vh] flex flex-col rounded-3xl border border-theme-border-soft shadow-2xl overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-5 border-b border-theme-border-soft flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <h3 className="text-base font-black text-theme-primary flex items-center gap-2">
+                    <Bell className="w-4 h-4 text-theme-accent" /> {t('dl.reminder_hub', 'WhatsApp Reminder Hub')}
+                  </h3>
+                  <p className="text-[11px] font-semibold text-theme-muted mt-0.5">{t('dl.reminder_hub_sub', 'One tap per customer — sends their due summary on WhatsApp')}</p>
+                </div>
+                <button onClick={() => setReminderHubOpen(false)} className="p-1.5 rounded-lg hover:bg-theme-surface text-theme-muted hover:text-theme-primary shrink-0">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="overflow-y-auto p-4 space-y-2.5">
+                {reminderTargets.length === 0 && (
+                  <p className="text-xs font-bold text-theme-muted text-center py-8">{t('dl.reminder_no_phone', 'No phone number')}</p>
+                )}
+                {reminderTargets.map((c) => (
+                  <div key={c.phone} className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-theme-surface/70 border border-theme-border-soft/60">
+                    <div className="min-w-0">
+                      <p className="text-sm font-black text-theme-primary truncate">{c.name}</p>
+                      <p className="text-[10px] font-bold text-theme-muted font-numbers">{c.phone} · {c.bills.length} {t('dl.reminder_bills', 'bills')}</p>
+                      <p className="text-[11px] font-black text-rose-600 dark:text-rose-400 font-numbers mt-0.5">{t('dl.reminder_total_due', 'Total due')}: {formatCurrency(c.due, businessSettings?.currency || '₹')}</p>
+                    </div>
+                    <button
+                      onClick={() => { handleSendReminder(c.bills[0]); }}
+                      className="shrink-0 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-black flex items-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <Send className="w-3.5 h-3.5" /> {t('dl.reminder_send', 'Send on WhatsApp')}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Customer 360° Ledger Modal */}
       <CustomerLedger

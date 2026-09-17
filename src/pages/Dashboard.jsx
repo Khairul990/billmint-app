@@ -1000,7 +1000,7 @@ const Dashboard = ({
               </div>
             </div>
           ) : (
-            <div className="w-full max-w-[1720px] mx-auto px-3 sm:px-5 lg:px-7 pt-4 space-y-6 relative z-10">
+            <div className="w-full max-w-[1720px] mx-auto px-3 sm:px-5 lg:px-7 pt-4 space-y-6 relative z-10 bq-aurora">
 
               {/* ========================================================================= */}
               {/* LEVEL 1: EXECUTIVE HEADER & REAL-TIME BUSINESS HEALTH COCKPIT */}

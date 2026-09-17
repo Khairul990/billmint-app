@@ -160,320 +160,50 @@
     </script>
   </head>
   <body class="transition-colors duration-300">
-    <div id="root">
-      <!-- BillQyro Native Splash Screen -->
-      <style>
-        .splash-container {
-          position: fixed;
-          inset: 0;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background-color: var(--app-bg, #f8fafc);
-          z-index: 9999;
-          transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.6s;
-          overflow: hidden;
-        }
-
-        /* Animated Background Gradients & Orbs */
-        .splash-bg-glow {
-          position: absolute;
-          width: 60vw;
-          height: 60vw;
-          max-width: 600px;
-          max-height: 600px;
-          background: radial-gradient(circle, var(--accent, #10b981) 0%, transparent 70%);
-          opacity: 0.12;
-          filter: blur(80px);
-          animation: float 8s ease-in-out infinite alternate;
-          border-radius: 50%;
-        }
-        .splash-bg-glow.top-left { top: -20%; left: -10%; }
-        .splash-bg-glow.bottom-right { bottom: -20%; right: -10%; animation-delay: -4s; }
-
-        @keyframes float {
-          0% { transform: translate(0, 0) scale(1); }
-          100% { transform: translate(5%, 5%) scale(1.1); }
-        }
-
-        /* Glassmorphism Center Card */
-        .splash-card {
-          position: relative;
-          z-index: 10;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          padding: 3rem 4rem;
-          background: rgba(255, 255, 255, 0.6);
-          backdrop-filter: blur(24px);
-          -webkit-backdrop-filter: blur(24px);
-          border: 1px solid var(--border-soft, rgba(0,0,0,0.05));
-          border-radius: 2.5rem;
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.05), 0 0 40px rgba(0,0,0,0.02);
-          animation: slideUpFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-          opacity: 0;
-          transform: translateY(20px) scale(0.95);
-        }
-
-        html.dark .splash-card {
-          background: rgba(20, 25, 35, 0.5);
-          border-color: rgba(255, 255, 255, 0.05);
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 40px rgba(255,255,255,0.02);
-        }
-
-        /* Logo Pulse & Glow */
-        .splash-logo-wrapper {
-          position: relative;
-          margin-bottom: 2rem;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-        }
-
-        .splash-logo-glow {
-          position: absolute;
-          inset: -1rem;
-          background: var(--accent, #10b981);
-          filter: blur(24px);
-          opacity: 0.2;
-          border-radius: 50%;
-          animation: pulseGlow 3s ease-in-out infinite alternate;
-        }
-
-        .splash-logo {
-          position: relative;
-          width: 88px;
-          height: 88px;
-          color: var(--accent, #10b981);
-          animation: subtleScale 4s ease-in-out infinite alternate;
-          filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
-        }
-
-        @keyframes pulseGlow {
-          0% { opacity: 0.1; transform: scale(0.9); }
-          100% { opacity: 0.3; transform: scale(1.1); }
-        }
-
-        @keyframes subtleScale {
-          0% { transform: scale(1); }
-          100% { transform: scale(1.05); }
-        }
-
-        /* SVG Logo Components Styling */
-        .logo-back-ring {
-          stroke: currentColor;
-          animation: pulseRing 3s ease-in-out infinite alternate;
-        }
-        @keyframes pulseRing {
-          0% { filter: drop-shadow(0px 0px 0px currentColor); }
-          100% { filter: drop-shadow(0px 0px 8px currentColor); }
-        }
-        
-        .logo-sheet {
-          fill: #ffffff;
-          filter: drop-shadow(0 20px 13px rgba(0,0,0,0.05)) drop-shadow(0 8px 5px rgba(0,0,0,0.05));
-        }
-        
-        html.dark .logo-sheet {
-          fill: #1e293b;
-          filter: drop-shadow(0 20px 13px rgba(0,0,0,0.3)) drop-shadow(0 8px 5px rgba(0,0,0,0.2));
-        }
-        
-        .logo-fold {
-          fill: url(#foldGradient);
-        }
-
-        html.dark .logo-fold {
-          fill: url(#foldGradientDark);
-        }
-        
-        .logo-accent-rect {
-          fill: currentColor;
-          animation: revealRect 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-          transform-origin: left;
-          transform: scaleX(0);
-        }
-        
-        @keyframes revealRect {
-          to { transform: scaleX(1); }
-        }
-
-        .logo-rupee {
-          fill: currentColor;
-          animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-          opacity: 0;
-          transform: translate(39px, 56px) scale(0);
-          transform-origin: 10px 10px;
-        }
-        
-        @keyframes popIn {
-          to { opacity: 1; transform: translate(39px, 56px) scale(0.6); }
-        }
-
-        .logo-front-tail {
-          fill: currentColor;
-          animation: slideInTail 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-          opacity: 0;
-          transform: translate(-10px, -10px);
-          filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
-        }
-        
-        @keyframes slideInTail {
-          to { opacity: 1; transform: translate(0, 0); }
-        }
-
-        /* Text and Typography */
-        .splash-text-container {
-          text-align: center;
-          display: flex;
-          flex-direction: column;
-          gap: 0.6rem;
-        }
-
-        .splash-title {
-          font-family: 'Outfit', system-ui, sans-serif;
-          font-size: 1.8rem;
-          font-weight: 900;
-          letter-spacing: -0.03em;
-          color: var(--text-primary, #1F1B1D);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        html.dark .splash-title {
-          color: #ffffff;
-        }
-
-        .splash-title span {
-          color: var(--accent, #D4AF7A);
-        }
-
-        .splash-subtitle {
-          font-family: 'Inter', system-ui, sans-serif;
-          font-size: 0.75rem;
-          font-weight: 700;
-          letter-spacing: 0.1em;
-          color: var(--text-muted, #64748b);
-          text-transform: uppercase;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          min-width: 200px;
-        }
-
-        /* Animated Loading Dots */
-        .loading-dots {
-          display: inline-block;
-          width: 1.2em;
-          text-align: left;
-        }
-        
-        .loading-dots::after {
-          content: '';
-          animation: dots 1.5s infinite steps(4, end);
-        }
-
-        @keyframes dots {
-          0%, 20% { content: ''; }
-          40% { content: '.'; }
-          60% { content: '..'; }
-          80%, 100% { content: '...'; }
-        }
-
-        /* Thin Animated Progress Line */
-        .splash-progress-track {
-          margin-top: 2rem;
-          width: 100%;
-          max-width: 220px;
-          height: 2px;
-          background: var(--border-soft, rgba(0,0,0,0.05));
-          border-radius: 2px;
-          overflow: hidden;
-          position: relative;
-        }
-
-        html.dark .splash-progress-track {
-          background: rgba(255,255,255,0.05);
-        }
-
-        .splash-progress-bar {
-          position: absolute;
-          top: 0;
-          left: 0;
-          height: 100%;
-          width: 30%;
-          background: var(--accent, #10b981);
-          border-radius: 2px;
-          animation: progress 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-        }
-
-        @keyframes progress {
-          0% { transform: translateX(-150%) scaleX(0.2); }
-          50% { transform: translateX(100%) scaleX(1.5); }
-          100% { transform: translateX(350%) scaleX(0.2); }
-        }
-
-        /* Responsive */
-        @media (max-width: 640px) {
-          .splash-card {
-            padding: 2.5rem 2rem;
-            width: 90%;
-            max-width: 340px;
-          }
-          .splash-logo {
-            width: 76px;
-            height: 76px;
-          }
-          .splash-title {
-            font-size: 1.6rem;
-          }
-        }
-      </style>
-      <div class="splash-container">
-        <!-- Floating Glow Orbs -->
-        <div class="splash-bg-glow top-left"></div>
-        <div class="splash-bg-glow bottom-right"></div>
-        
-        <!-- Center Glass Card -->
-        <div class="splash-card">
-          <!-- Logo & Glow -->
-          <div class="splash-logo-wrapper">
-            <div class="splash-logo-glow"></div>
-            <!-- Official BillQyro SVG Logo (Dynamic Theme) -->
-            <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="splash-logo">
-              <defs>
-                <linearGradient id="splashThemeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="var(--accent, #D4AF7A)" />
-                  <stop offset="100%" stop-color="var(--accent-dark, #C81E5C)" />
-                </linearGradient>
-              </defs>
-              <!-- 1. Dynamic Document Outline -->
-              <path class="logo-back-ring" style="animation-delay: 0.1s;" d="M 38,20 L 62,20 L 80,38 L 80,72 A 8 8 0 0 1 72,80 L 38,80 A 8 8 0 0 1 30,72 L 30,28 A 8 8 0 0 1 38,20 Z" stroke="url(#splashThemeGrad)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
-              <!-- 2. Document Fold -->
-              <path class="logo-front-tail" style="animation-delay: 0.2s;" d="M 62,20 L 62,38 L 80,38" stroke="url(#splashThemeGrad)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
-              <!-- Inner lines -->
-              <line x1="42" y1="40" x2="52" y2="40" stroke="var(--accent, #D4AF7A)" stroke-width="4" stroke-linecap="round" opacity="0.6" style="animation: slideInTail 0.8s forwards; animation-delay: 0.3s; opacity: 0;" class="logo-front-tail" />
-              <line x1="42" y1="52" x2="68" y2="52" stroke="var(--accent, #D4AF7A)" stroke-width="4" stroke-linecap="round" opacity="0.6" style="animation: slideInTail 0.8s forwards; animation-delay: 0.4s; opacity: 0;" class="logo-front-tail" />
-              <line x1="42" y1="64" x2="58" y2="64" stroke="var(--accent, #D4AF7A)" stroke-width="4" stroke-linecap="round" opacity="0.6" style="animation: slideInTail 0.8s forwards; animation-delay: 0.5s; opacity: 0;" class="logo-front-tail" />
-              <!-- 3. The "Q" Tail -->
-              <path class="logo-front-tail" style="animation-delay: 0.6s;" d="M 66,66 L 86,86" stroke="url(#splashThemeGrad)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </div>
-
-          <!-- Text content -->
-          <div class="splash-text-container">
-            <div class="splash-title">Bill<span>Qyro</span></div>
-            <div class="splash-subtitle">Initializing BillQyro Workspace<span class="loading-dots"></span></div>
-          </div>
-
-          <!-- Progress Line -->
-          <div class="splash-progress-track">
-            <div class="splash-progress-bar"></div>
-          </div>
+    
+    <!-- ═══ BillQyro Boot Splash (premium first-paint animation) ═══ -->
+    <div id="bq-boot" aria-hidden="true">
+      <div class="bq-boot-inner">
+        <div class="bq-boot-mark">
+          <svg width="46" height="46" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" stroke="#34D399" stroke-width="1.6" rx="3"/>
+            <path d="M9 7.5h6M9 11h6M9 14.5h3.5" stroke="#34D399" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+          <span class="bq-boot-ring"></span>
         </div>
+        <div class="bq-boot-word">Bill<span>Qyro</span></div>
+        <div class="bq-boot-tag">Smart billing · Premium control</div>
+        <div class="bq-boot-bar"><i></i></div>
       </div>
     </div>
+    <style>
+      #bq-boot{position:fixed;inset:0;z-index:99999;background:#04100C;display:flex;align-items:center;justify-content:center;transition:opacity .5s ease,visibility .5s;}
+      #bq-boot.bq-boot-hide{opacity:0;visibility:hidden;pointer-events:none;}
+      .bq-boot-inner{display:flex;flex-direction:column;align-items:center;gap:10px;animation:bqBootIn .7s cubic-bezier(.22,1,.36,1) both;}
+      .bq-boot-mark{position:relative;width:74px;height:74px;display:flex;align-items:center;justify-content:center;border-radius:22px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.25);}
+      .bq-boot-ring{position:absolute;inset:-7px;border-radius:26px;border:2px solid rgba(52,211,153,.35);animation:bqRing 1.8s ease-out infinite;}
+      .bq-boot-word{font-family:'Space Grotesk','Inter',system-ui,sans-serif;font-size:30px;font-weight:800;letter-spacing:-.02em;color:#F3FBF7;}
+      .bq-boot-word span{background:linear-gradient(90deg,#34D399,#0DA678);-webkit-background-clip:text;background-clip:text;color:transparent;}
+      .bq-boot-tag{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(243,251,247,.45);}
+      .bq-boot-bar{width:132px;height:3px;border-radius:99px;background:rgba(52,211,153,.15);overflow:hidden;margin-top:8px;}
+      .bq-boot-bar i{display:block;height:100%;width:40%;border-radius:99px;background:linear-gradient(90deg,#0DA678,#34D399);animation:bqBar 1.15s ease-in-out infinite;}
+      @keyframes bqBootIn{from{opacity:0;transform:translateY(14px) scale(.97);}to{opacity:1;transform:none;}}
+      @keyframes bqRing{0%{transform:scale(.94);opacity:.9;}70%{transform:scale(1.12);opacity:0;}100%{transform:scale(1.12);opacity:0;}}
+      @keyframes bqBar{0%{transform:translateX(-110%);}100%{transform:translateX(340%);}}
+      @media (prefers-reduced-motion:reduce){#bq-boot .bq-boot-inner,.bq-boot-ring,.bq-boot-bar i{animation:none;}}
+    </style>
+    <script>
+      (function(){
+        var boot=document.getElementById('bq-boot');
+        function hideBoot(){ if(!boot||boot.classList.contains('bq-boot-hide'))return; boot.classList.add('bq-boot-hide');
+          setTimeout(function(){ if(boot&&boot.parentNode)boot.parentNode.removeChild(boot); },600); }
+        if(document.readyState==='complete'){ setTimeout(hideBoot,650); }
+        else{ window.addEventListener('load',function(){ setTimeout(hideBoot,650); });
+          setTimeout(hideBoot,3500); /* failsafe: never trap the user */ }
+      })();
+    </script>
+
+    <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

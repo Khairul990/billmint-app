@@ -108,6 +108,10 @@ it('1.1: English ↔ Bengali dictionary parity (every key translates)', () => {
     ...['bk.title', 'bk.health', 'bk.export', 'bk.restore', 'bk.exporting', 'bk.overwrite'],
     ...['ib.title', 'ib.balance', 'ib.money_in', 'ib.money_out', 'ib.search_ph', 'ib.deposit',
         'ib.withdraw', 'ib.no_tx', 'ib.settings', 'ib.opening'],
+    // ── phase 5: reminder hub / app install ──
+    ...['dl.reminder_hub', 'dl.reminder_hub_sub', 'dl.reminder_send', 'dl.reminder_no_phone',
+        'dl.reminder_total_due', 'dl.reminder_bills', 'dl.reminder_close',
+        'land.scan_install', 'land.scan_install_sub'],
     ...['dashboard', 'invoices', 'customers', 'products', 'expenses', 'settings',
         'create_invoice', 'view_all', 'recent_invoices', 'welcome', 'upgrade'],
     ...['nav.dashboard', 'nav.home', 'nav.due', 'nav.bills', 'nav.more', 'nav.reports',

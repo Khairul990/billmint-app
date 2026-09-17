@@ -469,7 +469,17 @@ const dictionary = {
     'ib.no_tx': "No transactions to show.",
     'ib.withdraw_badge': "Withdraw",
     'ib.settings': "Bank Settings",
-    'ib.opening': "Opening Balance (Rs.)"
+    'ib.opening': "Opening Balance (Rs.)",
+    // ── phase 5: reminder hub / app install / polish ──
+    'dl.reminder_hub': "WhatsApp Reminder Hub",
+    'dl.reminder_hub_sub': "One tap per customer — sends their due summary on WhatsApp",
+    'dl.reminder_send': "Send on WhatsApp",
+    'dl.reminder_no_phone': "No phone number",
+    'dl.reminder_total_due': "Total due",
+    'dl.reminder_bills': "bills",
+    'dl.reminder_close': "Close",
+    'land.scan_install': "Scan to install on your phone",
+    'land.scan_install_sub': "Point your phone camera at the code to download the app"
   },
 
   bn: {
@@ -928,7 +938,17 @@ const dictionary = {
     'ib.no_tx': "দেখানোর মতো কোনো লেনদেন নেই।",
     'ib.withdraw_badge': "উত্তোলন",
     'ib.settings': "ব্যাংক সেটিংস",
-    'ib.opening': "শুরুর ব্যালেন্স (₹)"
+    'ib.opening': "শুরুর ব্যালেন্স (₹)",
+    // ── phase 5: reminder hub / app install / polish ──
+    'dl.reminder_hub': "WhatsApp রিমাইন্ডার হাব",
+    'dl.reminder_hub_sub': "প্রতি গ্রাহকে এক ট্যাপ — তাঁর বকেয়ার সারসংক্ষেপ WhatsApp-এ চলে যাবে",
+    'dl.reminder_send': "WhatsApp-এ পাঠান",
+    'dl.reminder_no_phone': "ফোন নম্বর নেই",
+    'dl.reminder_total_due': "মোট বকেয়া",
+    'dl.reminder_bills': "টি বিল",
+    'dl.reminder_close': "বন্ধ করুন",
+    'land.scan_install': "স্ক্যান করে ফোনে ইনস্টল করুন",
+    'land.scan_install_sub': "ফোনের ক্যামেরা কোডের দিকে ধরুন — অ্যাপ নেমে যাবে"
   },
 
   hi: {

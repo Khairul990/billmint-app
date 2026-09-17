@@ -2015,3 +2015,51 @@ button:active {
   .bq26-aurora, .bq26-beam, .bq26-float, .bq26-float-slow { animation: none !important; }
   .bq26-cockpit { transform: none !important; }
 }
+
+/* ═══ Phase 17 · Premium Layered Polish ═══ */
+/* Layered hover-lift for glass cards (dashboard premium feel) */
+.luxury-glass-card:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 12px 32px -6px color-mix(in srgb, rgba(0, 0, 0, 0.10) 85%, var(--accent, #c2410c) 15%),
+    0 2px 6px 0 rgba(0, 0, 0, 0.03),
+    0 0 0 1px color-mix(in srgb, var(--accent, #c2410c) 12%, transparent),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.9);
+}
+@media (prefers-reduced-motion: reduce) {
+  .luxury-glass-card:hover { transform: none; }
+}
+
+/* Subcard lift */
+.luxury-glass-subcard { transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease; }
+.luxury-glass-subcard:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px -8px rgba(0, 0, 0, 0.12);
+}
+
+/* Aurora accent layer — drop onto any container for a premium ambient glow */
+.bq-aurora { position: relative; overflow: hidden; }
+.bq-aurora::before,
+.bq-aurora::after {
+  content: '';
+  position: absolute;
+  width: 420px; height: 420px;
+  border-radius: 9999px;
+  background: radial-gradient(circle, color-mix(in srgb, var(--accent, #10b981) 16%, transparent) 0%, transparent 70%);
+  filter: blur(48px);
+  pointer-events: none;
+  animation: bqAuroraDrift 14s ease-in-out infinite alternate;
+}
+.bq-aurora::before { top: -160px; right: -120px; }
+.bq-aurora::after { bottom: -180px; left: -140px; animation-delay: -7s; }
+@keyframes bqAuroraDrift {
+  0% { transform: translate3d(0, 0, 0) scale(1); opacity: .8; }
+  100% { transform: translate3d(-26px, 22px, 0) scale(1.08); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bq-aurora::before, .bq-aurora::after { animation: none; }
+}
+
+/* Long-page paint optimization (5000-user readiness) */
+.page-premium { content-visibility: auto; contain-intrinsic-size: auto 900px; }
+.dark .luxury-glass-card:hover { transform: translateY(-2px); }

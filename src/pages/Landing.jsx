@@ -7,6 +7,7 @@ import {
   FileSpreadsheet, Link2, Layers, Landmark, Scissors, Stethoscope,
   GraduationCap, Wrench, ShoppingBag, Languages, Crown, Infinity as InfinityIcon, WifiOff, QrCode
 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import Logo from '../components/Logo';
 import Login from './Login';
 import CustomerPortalLogin from '../components/portal/CustomerPortalLogin';
@@ -280,7 +281,7 @@ const Landing = ({ onLoginSuccess }) => {
       </nav>
 
       {/* ===== SECTION 1: HERO ===== */}
-      <section className="relative min-h-[94vh] flex items-center pt-32 pb-16 px-6 z-10">
+      <motion.section initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.55, ease: 'easeOut' }} className="relative min-h-[94vh] flex items-center pt-32 pb-16 px-6 z-10">
         <div className="max-w-7xl mx-auto w-full flex flex-col lg:flex-row items-center gap-14 lg:gap-16">
           <div className="flex-1 text-center lg:text-left space-y-7">
             <motion.div
@@ -374,6 +375,26 @@ const Landing = ({ onLoginSuccess }) => {
               ))}
             </motion.div>
           </div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.55 }}
+              className="flex items-center gap-4 bq26-glass rounded-2xl p-4 max-w-sm mx-auto lg:mx-0"
+            >
+              <div className="bg-white p-2 rounded-xl shrink-0">
+                <QRCodeSVG value="https://billqyro-app.vercel.app/downloads/BillQyro-Android.apk" size={84} level="M" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-black text-[var(--bq26-text)] flex items-center gap-1.5">
+                  <Smartphone className="w-4 h-4 text-[#34D399]" />
+                  {tr('Scan to install on your phone', 'স্ক্যান করে ফোনে ইনস্টল করুন')}
+                </p>
+                <p className="text-[11px] font-semibold text-[var(--bq26-muted)] leading-snug mt-1">
+                  {tr('Point your phone camera at the code to download the app', 'ফোনের ক্যামেরা কোডের দিকে ধরুন — অ্যাপ নেমে যাবে')}
+                </p>
+              </div>
+            </motion.div>
 
           {/* ── Hero Interactive Cockpit ── */}
           <motion.div
@@ -542,10 +563,10 @@ const Landing = ({ onLoginSuccess }) => {
           <span className="text-[9px] font-black uppercase tracking-[0.3em]">{tr('Scroll', 'স্ক্রল')}</span>
           <ChevronDown className="w-4 h-4 animate-bounce" />
         </div>
-      </section>
+      </motion.section>
 
       {/* ===== CATEGORY MARQUEE ===== */}
-      <section aria-label={tr('Business categories', 'ব্যবসার ক্যাটাগরি')} className="pb-16 px-6 relative z-10">
+      <motion.section initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.55, ease: 'easeOut' }} aria-label={tr('Business categories', 'ব্যবসার ক্যাটাগরি')} className="pb-16 px-6 relative z-10">
         <div className="max-w-7xl mx-auto">
           <div className="bq26-marquee-shell bq-marquee rounded-full py-3">
             <div className="bq-marquee-track gap-3 pr-3">
@@ -562,10 +583,10 @@ const Landing = ({ onLoginSuccess }) => {
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* ===== SECTION: WHY BILLQYRO (BENTO GRID) ===== */}
-      <section id="why-billqyro" className="relative py-24 px-6 z-10">
+      <motion.section initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.55, ease: 'easeOut' }} id="why-billqyro" className="relative py-24 px-6 z-10">
         <ScrollReveal yOffset={28}>
           <div className="max-w-7xl mx-auto">
             <div className="max-w-2xl mb-12">
@@ -657,10 +678,10 @@ const Landing = ({ onLoginSuccess }) => {
             </div>
           </div>
         </ScrollReveal>
-      </section>
+      </motion.section>
 
       {/* ===== STATS BAND ===== */}
-      <section className="relative py-14 px-6 z-10">
+      <motion.section initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.55, ease: 'easeOut' }} className="relative py-14 px-6 z-10">
         <div className="max-w-7xl mx-auto">
           <div className="bq26-glass rounded-[2rem] px-6 py-9 grid grid-cols-2 lg:grid-cols-4 gap-8 bq26-edge-light">
             {[
@@ -678,10 +699,10 @@ const Landing = ({ onLoginSuccess }) => {
             ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* ===== SECTION: BUSINESS CATEGORIES (interactive) ===== */}
-      <section id="categories" className="relative py-24 px-6 z-10">
+      <motion.section initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.55, ease: 'easeOut' }} id="categories" className="relative py-24 px-6 z-10">
         <ScrollReveal yOffset={28}>
           <div className="max-w-7xl mx-auto">
             <div className="text-center max-w-2xl mx-auto mb-12">
@@ -757,10 +778,10 @@ const Landing = ({ onLoginSuccess }) => {
             </div>
           </div>
         </ScrollReveal>
-      </section>
+      </motion.section>
 
       {/* ===== SECTION: WORKFLOW TIMELINE ===== */}
-      <section id="workflow" className="relative py-24 px-6 z-10">
+      <motion.section initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.55, ease: 'easeOut' }} id="workflow" className="relative py-24 px-6 z-10">
         <ScrollReveal yOffset={28}>
           <div className="max-w-7xl mx-auto">
             <div className="text-center max-w-2xl mx-auto mb-14">
@@ -795,10 +816,10 @@ const Landing = ({ onLoginSuccess }) => {
             </div>
           </div>
         </ScrollReveal>
-      </section>
+      </motion.section>
 
       {/* ===== SECTION: PAYMENTS ===== */}
-      <section id="payments" className="relative py-24 px-6 z-10">
+      <motion.section initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.55, ease: 'easeOut' }} id="payments" className="relative py-24 px-6 z-10">
         <ScrollReveal yOffset={28}>
           <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12">
             <div className="flex-1 space-y-5 order-2 lg:order-1">
@@ -848,10 +869,10 @@ const Landing = ({ onLoginSuccess }) => {
             </div>
           </div>
         </ScrollReveal>
-      </section>
+      </motion.section>
 
       {/* ===== SECTION: PRICING ===== */}
-      <section id="pricing" className="relative py-24 px-6 z-10">
+      <motion.section initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.55, ease: 'easeOut' }} id="pricing" className="relative py-24 px-6 z-10">
         <ScrollReveal yOffset={28}>
           <div className="max-w-7xl mx-auto">
             <div className="text-center max-w-2xl mx-auto mb-12">
@@ -942,10 +963,10 @@ const Landing = ({ onLoginSuccess }) => {
             </p>
           </div>
         </ScrollReveal>
-      </section>
+      </motion.section>
 
       {/* ===== SECTION: OFFLINE & SECURITY ===== */}
-      <section id="platform" className="relative py-24 px-6 z-10">
+      <motion.section initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.55, ease: 'easeOut' }} id="platform" className="relative py-24 px-6 z-10">
         <ScrollReveal yOffset={28}>
           <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bq26-tile rounded-3xl p-8 space-y-4">
@@ -975,10 +996,10 @@ const Landing = ({ onLoginSuccess }) => {
             </div>
           </div>
         </ScrollReveal>
-      </section>
+      </motion.section>
 
       {/* ===== SECTION: FAQ ===== */}
-      <section id="faq" className="relative py-24 px-6 z-10">
+      <motion.section initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.55, ease: 'easeOut' }} id="faq" className="relative py-24 px-6 z-10">
         <ScrollReveal yOffset={28}>
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
@@ -1018,10 +1039,10 @@ const Landing = ({ onLoginSuccess }) => {
             </div>
           </div>
         </ScrollReveal>
-      </section>
+      </motion.section>
 
       {/* ===== SECTION: AUTH / LOGIN ===== */}
-      <section id="login" className="relative py-24 px-6 z-10">
+      <motion.section initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.55, ease: 'easeOut' }} id="login" className="relative py-24 px-6 z-10">
         <div aria-hidden="true" className="absolute inset-x-0 top-0 h-56 bg-gradient-to-b from-[rgba(16,185,129,0.07)] to-transparent pointer-events-none" />
         <ScrollReveal yOffset={24}>
           <div className="max-w-6xl mx-auto grid lg:grid-cols-[1fr_1.15fr] gap-10 lg:gap-14 items-start relative">
@@ -1104,7 +1125,7 @@ const Landing = ({ onLoginSuccess }) => {
             </div>
           </div>
         </ScrollReveal>
-      </section>
+      </motion.section>
 
       {/* ===== FLOATING WHATSAPP CTA ===== */}
       <a
