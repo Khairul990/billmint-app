@@ -3,13 +3,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowRight, CheckCircle2, ShieldCheck, TrendingUp, Sparkles,
   MessageCircle, Mail, ChevronDown, Smartphone, Printer, CreditCard,
-  BarChart3, Zap, Lock, Check,
+  BarChart3, Zap, Lock, Check, Sun, Moon,
   FileSpreadsheet, Link2, Layers, Landmark, Scissors, Stethoscope,
   GraduationCap, Wrench, ShoppingBag, Languages, Crown, Infinity as InfinityIcon, WifiOff, QrCode
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import Logo from '../components/Logo';
 import { lazyWithRetry } from '../utils/lazyWithRetry';
+import AdBanner from '../components/AdBanner';
 
 // Auth/portal forms are only needed when the visitor opens the login modal —
 // lazy keeps their whole subtree (incl. dbEngine/portalEngine) off the boot path.
@@ -28,6 +29,18 @@ const Landing = ({ onLoginSuccess }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [portalMode, setPortalMode] = useState('business'); // 'business' | 'customer'
+  // Landing light/dark presentation mode — independent of the app account
+  // theme so the marketing page can always look its best for the visitor.
+  const [landingMode, setLandingMode] = useState(() => {
+    try { return localStorage.getItem('billqyro_landing_mode') === 'light' ? 'light' : 'dark'; } catch { return 'dark'; }
+  });
+  const toggleLandingMode = () => {
+    setLandingMode((m) => {
+      const next = m === 'light' ? 'dark' : 'light';
+      try { localStorage.setItem('billqyro_landing_mode', next); } catch { /* ignore */ }
+      return next;
+    });
+  };
   const [cockpitTab, setCockpitTab] = useState('dashboard');
   const [activeCategory, setActiveCategory] = useState('retail');
   const autoCycleRef = useRef(true);
@@ -213,17 +226,20 @@ const Landing = ({ onLoginSuccess }) => {
   ];
 
   return (
-    <div className="bq26-root min-h-screen flex flex-col relative">
+    <div className={`bq26-root min-h-screen flex flex-col relative ${landingMode === 'light' ? 'bq26-light' : ''}`}>
       {/* ── Cinematic aurora backdrop ─────────────────────────────────── */}
       <div aria-hidden="true" className="bq26-aurora" />
       <div aria-hidden="true" className="bq26-grid" />
       <div aria-hidden="true" className="bq26-noise" />
-      <div aria-hidden="true" className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#04100C] via-transparent to-transparent z-[1] pointer-events-none" />
+      <div aria-hidden="true" className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[var(--bq26-bg)] via-transparent to-transparent z-[1] pointer-events-none" />
+
+      {/* ===== SPONSORED BANNER (admin-controlled slot) ===== */}
+      <AdBanner />
 
       {/* ===== GLOBAL NAVIGATION ===== */}
       <nav className="fixed w-full top-3 z-50 flex justify-center px-4">
         <div className={`w-full max-w-7xl rounded-full px-5 sm:px-6 h-14 sm:h-16 flex items-center justify-between transition-all duration-300 bq26-nav ${isScrolled ? '' : '!bg-transparent !border-transparent !shadow-none'}`}>
-          <Logo type="horizontal" forceWhiteText />
+          <Logo type="horizontal" forceWhiteText={landingMode === 'dark'} />
 
           {/* Desktop nav links */}
           <div className="hidden lg:flex items-center gap-6">
@@ -233,6 +249,14 @@ const Landing = ({ onLoginSuccess }) => {
           </div>
 
           <div className="flex items-center gap-2.5">
+            <button
+              onClick={toggleLandingMode}
+              title={landingMode === 'dark' ? 'Light mode' : 'Dark mode'}
+              aria-label="Toggle landing theme"
+              className="flex items-center justify-center w-8 h-8 rounded-full border border-[var(--bq26-line)] text-[var(--bq26-muted)] hover:text-[var(--bq26-text)] hover:border-[rgba(52,211,153,0.35)] transition-all cursor-pointer"
+            >
+              {landingMode === 'dark' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+            </button>
             <button
               onClick={toggleLang}
               title={lang === 'bn' ? 'Switch to English' : 'বাংলায় দেখুন'}
@@ -246,7 +270,7 @@ const Landing = ({ onLoginSuccess }) => {
               {tr('Sign In', 'সাইন ইন')}
             </button>
             <button onClick={() => scrollTo('login')} className="bq26-beam">
-              <span className="bg-[#052e21] hover:bg-[#06392a] text-[#D9FEEA] px-5 py-2 text-xs font-black tracking-tight flex items-center gap-1.5 transition-colors">
+              <span className="bg-[var(--bq26-btn)] hover:bg-[var(--bq26-btn-hover)] text-[var(--bq26-btn-text)] px-5 py-2 text-xs font-black tracking-tight flex items-center gap-1.5 transition-colors">
                 {tr('Get Started Free', 'ফ্রি শুরু করুন')}
                 <ArrowRight className="w-3.5 h-3.5" />
               </span>
@@ -325,7 +349,7 @@ const Landing = ({ onLoginSuccess }) => {
               className="flex flex-col sm:flex-row items-center gap-3.5 justify-center lg:justify-start"
             >
               <button onClick={() => scrollTo('login')} className="bq26-beam w-full sm:w-auto">
-                <span className="bg-[#052e21] hover:bg-[#07402e] text-[#D9FEEA] px-8 py-3.5 text-base font-bold flex items-center justify-center gap-2 transition-colors">
+                <span className="bg-[var(--bq26-btn)] hover:bg-[var(--bq26-btn-hover)] text-[var(--bq26-btn-text)] px-8 py-3.5 text-base font-bold flex items-center justify-center gap-2 transition-colors">
                   {tr('Create Free Account', 'ফ্রি অ্যাকাউন্ট খুলুন')}
                   <ArrowRight className="w-4 h-4" />
                 </span>
@@ -448,7 +472,7 @@ const Landing = ({ onLoginSuccess }) => {
               </div>
 
               {/* Cockpit tabs */}
-              <div className="grid grid-cols-3 gap-1.5 mb-4 p-1 rounded-xl bg-[rgba(2,10,7,0.55)] border border-[var(--bq26-line-soft)]">
+              <div className="grid grid-cols-3 gap-1.5 mb-4 p-1 rounded-xl bg-[var(--bq26-sunken-strong)] border border-[var(--bq26-line-soft)]">
                 {[
                   ['dashboard', tr('Dashboard', 'ড্যাশবোর্ড'), BarChart3],
                   ['invoice', tr('Invoice', 'ইনভয়েস'), FileSpreadsheet],
@@ -472,21 +496,21 @@ const Landing = ({ onLoginSuccess }) => {
                   {cockpitTab === 'dashboard' && (
                     <motion.div key="dash" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="space-y-3">
                       <div className="grid grid-cols-3 gap-2.5">
-                        <div className="bg-[rgba(2,10,7,0.5)] p-3 rounded-xl border border-[var(--bq26-line-soft)]">
+                        <div className="bg-[var(--bq26-sunken)] p-3 rounded-xl border border-[var(--bq26-line-soft)]">
                           <p className="text-[9px] font-bold text-[var(--bq26-muted)] uppercase tracking-wider">{tr("Today's Revenue", 'আজকের আয়')}</p>
                           <p className="text-base font-black text-[var(--bq26-text)] font-numbers mt-0.5"><AnimatedNumber value={48250} prefix="₹" /></p>
                         </div>
-                        <div className="bg-[rgba(2,10,7,0.5)] p-3 rounded-xl border border-[var(--bq26-line-soft)]">
+                        <div className="bg-[var(--bq26-sunken)] p-3 rounded-xl border border-[var(--bq26-line-soft)]">
                           <p className="text-[9px] font-bold text-[var(--bq26-muted)] uppercase tracking-wider">{tr('Collections', 'কালেকশন')}</p>
                           <p className="text-base font-black text-[#34D399] font-numbers mt-0.5"><AnimatedNumber value={42000} prefix="₹" /></p>
                         </div>
-                        <div className="bg-[rgba(2,10,7,0.5)] p-3 rounded-xl border border-[var(--bq26-line-soft)]">
+                        <div className="bg-[var(--bq26-sunken)] p-3 rounded-xl border border-[var(--bq26-line-soft)]">
                           <p className="text-[9px] font-bold text-[var(--bq26-muted)] uppercase tracking-wider">{tr('Due', 'বাকি')}</p>
                           <p className="text-base font-black text-[#E3C98F] font-numbers mt-0.5"><AnimatedNumber value={6250} prefix="₹" /></p>
                         </div>
                       </div>
                       {/* Revenue bars */}
-                      <div className="bg-[rgba(2,10,7,0.5)] rounded-xl border border-[var(--bq26-line-soft)] p-3.5">
+                      <div className="bg-[var(--bq26-sunken)] rounded-xl border border-[var(--bq26-line-soft)] p-3.5">
                         <div className="flex items-center justify-between mb-2.5">
                           <p className="text-[10px] font-black text-[var(--bq26-text)]">{tr('Weekly collections', 'সাপ্তাহিক কালেকশন')}</p>
                           <span className="text-[9px] font-black text-[#34D399] flex items-center gap-1"><TrendingUp className="w-3 h-3" /> +18%</span>
@@ -508,7 +532,7 @@ const Landing = ({ onLoginSuccess }) => {
 
                   {cockpitTab === 'invoice' && (
                     <motion.div key="inv" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="space-y-2.5">
-                      <div className="flex justify-between items-start bg-[rgba(2,10,7,0.5)] rounded-xl border border-[var(--bq26-line-soft)] p-3.5">
+                      <div className="flex justify-between items-start bg-[var(--bq26-sunken)] rounded-xl border border-[var(--bq26-line-soft)] p-3.5">
                         <div>
                           <span className="text-[9px] font-black text-[#34D399] bg-[rgba(52,211,153,0.12)] px-2 py-0.5 rounded-md">INV-2026-0042</span>
                           <p className="text-sm font-black text-[var(--bq26-text)] mt-1.5">Apex Industrial Solutions</p>
@@ -521,7 +545,7 @@ const Landing = ({ onLoginSuccess }) => {
                         ['Design Implementation', '1 × ₹12,000', '₹12,000'],
                         ['GST (18%)', '', '₹3,060']
                       ].map(([item, qty, amt]) => (
-                        <div key={item} className="flex justify-between items-center bg-[rgba(2,10,7,0.4)] rounded-lg border border-[var(--bq26-line-soft)] px-3.5 py-2 text-[11px]">
+                        <div key={item} className="flex justify-between items-center bg-[var(--bq26-sunken-soft)] rounded-lg border border-[var(--bq26-line-soft)] px-3.5 py-2 text-[11px]">
                           <span className="font-bold text-[var(--bq26-text-soft)]">{item}</span>
                           <span className="flex items-center gap-4">
                             <span className="text-[var(--bq26-muted)] font-numbers hidden sm:inline">{qty}</span>
@@ -537,7 +561,7 @@ const Landing = ({ onLoginSuccess }) => {
                   )}
 
                   {cockpitTab === 'qr' && (
-                    <motion.div key="qr" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="flex items-center gap-4 bg-[rgba(2,10,7,0.5)] rounded-xl border border-[var(--bq26-line-soft)] p-4">
+                    <motion.div key="qr" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="flex items-center gap-4 bg-[var(--bq26-sunken)] rounded-xl border border-[var(--bq26-line-soft)] p-4">
                       <div className="w-28 h-28 sm:w-32 sm:h-32 shrink-0 bq26-qr-cell rounded-xl border border-[rgba(52,211,153,0.25)] p-2 grid grid-cols-7 grid-rows-7 gap-[2px]">
                         {[
                           1,1,1,0,1,1,1, 1,0,1,0,0,0,1, 1,1,0,1,0,1,1, 0,0,1,1,1,0,0,
@@ -621,7 +645,7 @@ const Landing = ({ onLoginSuccess }) => {
                     [tr('UPI payment received', 'UPI পেমেন্ট পেলাম'), '₹10,000', '+'],
                     [tr('Customer ledger updated', 'কাস্টমার লেজার আপডেট'), 'auto', '✓']
                   ].map(([label, val, sign]) => (
-                    <div key={label} className="flex items-center justify-between bg-[rgba(2,10,7,0.45)] border border-[var(--bq26-line-soft)] rounded-xl px-3.5 py-2.5">
+                    <div key={label} className="flex items-center justify-between bg-[var(--bq26-sunken)] border border-[var(--bq26-line-soft)] rounded-xl px-3.5 py-2.5">
                       <span className="flex items-center gap-2 text-[11px] font-bold text-[var(--bq26-text-soft)]">
                         <span className={`w-1.5 h-1.5 rounded-full ${sign === '+' ? 'bg-[#34D399]' : 'bg-[#2DD4BF]'}`} />
                         {label}
@@ -734,7 +758,7 @@ const Landing = ({ onLoginSuccess }) => {
                         : 'border-[var(--bq26-line-soft)] bg-[rgba(6,20,15,0.4)] hover:border-[rgba(52,211,153,0.25)]'
                       }`}
                     >
-                      <span className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors ${isActive ? 'bg-[rgba(52,211,153,0.18)] text-[#34D399]' : 'bg-[rgba(2,10,7,0.5)] text-[var(--bq26-muted)]'}`}>
+                      <span className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors ${isActive ? 'bg-[rgba(52,211,153,0.18)] text-[#34D399]' : 'bg-[var(--bq26-sunken)] text-[var(--bq26-muted)]'}`}>
                         <Icon className="w-[18px] h-[18px]" />
                       </span>
                       <span className="min-w-0">
@@ -769,7 +793,7 @@ const Landing = ({ onLoginSuccess }) => {
                     <p className="text-sm text-[var(--bq26-text-soft)] leading-relaxed mt-4">{activeCat.desc}</p>
                     <div className="flex flex-wrap gap-2 mt-5">
                       {activeCat.fields.map((f) => (
-                        <span key={f} className="px-3 py-1.5 rounded-full bg-[rgba(2,10,7,0.5)] border border-[var(--bq26-line-soft)] text-[10px] font-black text-[var(--bq26-text-soft)]">{f}</span>
+                        <span key={f} className="px-3 py-1.5 rounded-full bg-[var(--bq26-sunken)] border border-[var(--bq26-line-soft)] text-[10px] font-black text-[var(--bq26-text-soft)]">{f}</span>
                       ))}
                     </div>
                     <div className="mt-6 pt-4 border-t border-[var(--bq26-line-soft)] flex items-center gap-2 text-[11px] font-bold text-[#34D399]">
@@ -805,7 +829,7 @@ const Landing = ({ onLoginSuccess }) => {
                   const Icon = ws.icon;
                   return (
                     <div key={ws.step} className="relative pl-14 lg:pl-0">
-                      <div className="absolute left-0 lg:relative lg:left-auto flex items-center justify-center w-10 h-10 rounded-2xl bg-[#071c14] border border-[rgba(52,211,153,0.35)] text-[#34D399] shadow-[0_0_24px_-6px_rgba(16,185,129,0.5)] z-10">
+                      <div className="absolute left-0 lg:relative lg:left-auto flex items-center justify-center w-10 h-10 rounded-2xl bg-[var(--bq26-sunken-strong)] border border-[rgba(52,211,153,0.35)] text-[#34D399] shadow-[0_0_24px_-6px_rgba(16,185,129,0.5)] z-10">
                         <Icon className="w-[18px] h-[18px]" />
                       </div>
                       <div className="bq26-tile rounded-2xl p-5 h-full">
@@ -843,7 +867,7 @@ const Landing = ({ onLoginSuccess }) => {
                   [Printer, tr('A4 / A5 thermal-friendly print layouts', 'A4 / A5 থার্মাল-বান্ধব প্রিন্ট লেআউট')]
                 ].map(([Icon, text]) => (
                   <div key={text} className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-[rgba(2,10,7,0.5)] border border-[var(--bq26-line-soft)] flex items-center justify-center text-[#34D399] shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-[var(--bq26-sunken)] border border-[var(--bq26-line-soft)] flex items-center justify-center text-[#34D399] shrink-0">
                       <Icon className="w-4 h-4" />
                     </div>
                     <span className="text-xs font-bold text-[var(--bq26-text-soft)]">{text}</span>
@@ -855,7 +879,7 @@ const Landing = ({ onLoginSuccess }) => {
             {/* Payment mock */}
             <div className="flex-1 w-full max-w-md order-1 lg:order-2">
               <div className="bq26-cockpit rounded-[2rem] p-6 relative">
-                <div className="text-center p-5 rounded-2xl bg-[rgba(2,10,7,0.5)] border border-[var(--bq26-line-soft)]">
+                <div className="text-center p-5 rounded-2xl bg-[var(--bq26-sunken)] border border-[var(--bq26-line-soft)]">
                   <div className="w-36 h-36 mx-auto bq26-qr-cell rounded-2xl border border-[rgba(52,211,153,0.25)] p-2.5 grid grid-cols-8 grid-rows-8 gap-[2px]">
                     {[
                       1,1,1,1,0,1,1,0, 1,0,0,1,0,0,1,1, 1,1,0,0,1,1,0,1, 0,1,1,0,0,1,1,0,
@@ -934,7 +958,7 @@ const Landing = ({ onLoginSuccess }) => {
                   ))}
                 </ul>
                 <button onClick={() => scrollTo('login')} className="bq26-beam mt-7">
-                  <span className="bg-[#052e21] hover:bg-[#07402e] text-[#D9FEEA] w-full py-3 text-xs font-black flex items-center justify-center transition-colors">
+                  <span className="bg-[var(--bq26-btn)] hover:bg-[var(--bq26-btn-hover)] text-[var(--bq26-btn-text)] w-full py-3 text-xs font-black flex items-center justify-center transition-colors">
                     {tr('Go Pro', 'প্রো নিন')}
                   </span>
                 </button>
@@ -1074,7 +1098,7 @@ const Landing = ({ onLoginSuccess }) => {
 
             <div className="w-full">
               <div className="bq26-glass-strong rounded-[2rem] p-5 sm:p-8 shadow-2xl bq26-edge-light">
-                <div className="flex bg-[rgba(2,10,7,0.55)] p-1 rounded-2xl border border-[var(--bq26-line-soft)] mb-6">
+                <div className="flex bg-[var(--bq26-sunken-strong)] p-1 rounded-2xl border border-[var(--bq26-line-soft)] mb-6">
                   <button
                     onClick={() => setPortalMode('business')}
                     className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all ${portalMode === 'business' ? 'bg-gradient-to-r from-[#0DA678] to-[#0B8F78] text-white shadow-md' : 'text-[var(--bq26-muted)] hover:text-[var(--bq26-text)]'}`}
@@ -1090,7 +1114,7 @@ const Landing = ({ onLoginSuccess }) => {
                 </div>
 
                 {/* Scoped dark emerald theme so the embedded forms match the landing */}
-                <div className="dark" data-theme="emerald-royal">
+                <div className={landingMode === 'light' ? '' : 'dark'} data-theme="emerald-royal">
                   {portalMode === 'business' ? (
                     <Suspense fallback={<div className="p-10 flex justify-center"><div className="w-8 h-8 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" /></div>}>
                       <Login onLoginSuccess={onLoginSuccess} embedded={true} />
@@ -1111,7 +1135,7 @@ const Landing = ({ onLoginSuccess }) => {
 
                 {/* No-signup interactive demo access */}
                 <div className="mt-5 pt-5 border-t border-[var(--bq26-line-soft)]">
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3 rounded-2xl bg-[rgba(2,10,7,0.45)] border border-dashed border-[rgba(52,211,153,0.3)] px-4 py-3.5">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3 rounded-2xl bg-[var(--bq26-sunken)] border border-dashed border-[rgba(52,211,153,0.3)] px-4 py-3.5">
                     <div className="flex items-center gap-3 text-center sm:text-left">
                       <div className="w-9 h-9 rounded-xl bg-[rgba(52,211,153,0.1)] border border-[rgba(52,211,153,0.25)] flex items-center justify-center shrink-0">
                         <Zap className="w-4 h-4 text-[#34D399]" />
@@ -1157,15 +1181,15 @@ const Landing = ({ onLoginSuccess }) => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-10 pb-10 border-b border-[var(--bq26-line-soft)]">
             {/* Brand column */}
             <div className="col-span-2 md:col-span-1 space-y-4">
-              <Logo type="horizontal" forceWhiteText />
+              <Logo type="horizontal" forceWhiteText={landingMode === 'dark'} />
               <p className="text-[11px] font-medium leading-relaxed max-w-[28ch] text-[var(--bq26-text-soft)]">
                 {tr('The premium billing command center for small shops, studios and service businesses. Built in India 🇮🇳, made for the world.', 'ছোট দোকান, স্টুডিও আর সার্ভিস ব্যবসার জন্য প্রিমিয়াম বিলিং কমান্ড সেন্টার। ভারতে তৈরি 🇮🇳, সারা বিশ্বের জন্য।')}
               </p>
               <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[rgba(2,10,7,0.5)] border border-[var(--bq26-line-soft)] text-[10px] font-bold text-[var(--bq26-text-soft)]">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--bq26-sunken)] border border-[var(--bq26-line-soft)] text-[10px] font-bold text-[var(--bq26-text-soft)]">
                   <ShieldCheck className="w-3 h-3 text-[#34D399]" /> {tr('Secure Sync', 'সিকিউর সিঙ্ক')}
                 </span>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[rgba(2,10,7,0.5)] border border-[var(--bq26-line-soft)] text-[10px] font-bold text-[var(--bq26-text-soft)]">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--bq26-sunken)] border border-[var(--bq26-line-soft)] text-[10px] font-bold text-[var(--bq26-text-soft)]">
                   <Zap className="w-3 h-3 text-[#E3C98F]" /> {tr('Offline First', 'অফলাইন ফার্স্ট')}
                 </span>
               </div>

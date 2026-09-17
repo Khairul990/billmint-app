@@ -2705,7 +2705,7 @@ function App() {
         ) : (publicRoute && !isAuthenticated && !isDemoSessionActive) ? (
           <motion.div key="public-page" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full min-h-screen">
             <React.Suspense fallback={<div className="flex h-screen items-center justify-center"><ClassicLoader /></div>}>
-              <div className="dark min-h-screen" data-theme="emerald-royal" style={{ background: 'var(--app-bg)' }}>
+              <div className="min-h-screen" data-theme="emerald-royal" style={{ background: 'var(--app-bg)' }}>
                 <div className="max-w-4xl mx-auto px-4 pt-6">
                   <button
                     onClick={() => { window.location.href = '/'; }}
@@ -2725,7 +2725,7 @@ function App() {
             </React.Suspense>
           </motion.div>
         ) : (!isAuthenticated && !isDemoSessionActive) ? (
-          <motion.div key="landing-unauth" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full">
+          <motion.div key="landing-unauth" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full min-h-screen">
             <React.Suspense fallback={<div className="flex h-screen items-center justify-center"><ClassicLoader /></div>}>
               <Landing onLoginSuccess={handleLoginSuccess} />
             </React.Suspense>

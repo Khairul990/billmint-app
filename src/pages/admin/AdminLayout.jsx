@@ -5,7 +5,7 @@ import {
   Settings, Megaphone, ToggleRight, Power, ShieldCheck, Database,
   HardDrive, RefreshCw, ShieldAlert, ArrowLeft, Menu, X, Crown,
   ChevronLeft, ChevronRight, Sliders, Search, Zap, LayoutDashboard,
-  BarChart3, LifeBuoy, History, Beaker
+  BarChart3, LifeBuoy, History, Beaker, BadgePercent
 } from 'lucide-react';
 
 /**
@@ -49,7 +49,8 @@ const AdminLayout = ({ setCurrentTab, children, activeAdminTab, setActiveAdminTa
       items: [
         { id: 'support', label: 'Support Inbox', icon: LifeBuoy, hint: 'Tickets & feature requests' },
         { id: 'changelog', label: 'Changelog', icon: History, hint: 'Publish release notes' },
-        { id: 'announcements', label: 'Announcements', icon: Megaphone, hint: 'Broadcast messages' }
+        { id: 'announcements', label: 'Announcements', icon: Megaphone, hint: 'Broadcast messages' },
+        { id: 'advertising', label: 'Advertising', icon: BadgePercent, hint: 'Landing page ad slot' }
       ]
     },
     {

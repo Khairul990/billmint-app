@@ -44,6 +44,7 @@ const SupportCenter = lazy(() => import('./SupportCenter.jsx'));
 const AnalyticsCenter = lazy(() => import('./AnalyticsCenter.jsx'));
 const ChangelogManager = lazy(() => import('./ChangelogManager.jsx'));
 const OwnerTestLab = lazy(() => import('./OwnerTestLab.jsx'));
+const AdManager = lazy(() => import('./AdManager.jsx'));
 
 const SECTION_MAP = {
   dashboard: null, // rendered eagerly below (with its own boundary)
@@ -66,7 +67,8 @@ const SECTION_MAP = {
   support: SupportCenter,
   analytics: AnalyticsCenter,
   changelog: ChangelogManager,
-  'test-lab': OwnerTestLab
+  'test-lab': OwnerTestLab,
+  advertising: AdManager
 };
 
 const AdminPanel = ({ currentTab, setCurrentTab }) => {

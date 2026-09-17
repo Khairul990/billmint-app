@@ -1803,6 +1803,55 @@ button:active {
   overflow-x: clip;
 }
 
+/* ---- Light presentation mode (visitor toggle on the landing page) ------- */
+.bq26-root {
+  --bq26-sunken: rgba(2, 10, 7, 0.50);
+  --bq26-sunken-strong: rgba(2, 10, 7, 0.55);
+  --bq26-sunken-soft: rgba(2, 10, 7, 0.40);
+  --bq26-btn: #052e21;
+  --bq26-btn-hover: #06392a;
+  --bq26-btn-text: #D9FEEA;
+}
+.bq26-root.bq26-light {
+  --bq26-bg: #F2F8F4;
+  --bq26-bg-deep: #E7F0EA;
+  --bq26-panel: rgba(255, 255, 255, 0.62);
+  --bq26-panel-strong: rgba(255, 255, 255, 0.92);
+  --bq26-card: rgba(255, 255, 255, 0.80);
+  --bq26-line: rgba(13, 110, 84, 0.16);
+  --bq26-line-soft: rgba(13, 110, 84, 0.10);
+  --bq26-text: #08251C;
+  --bq26-text-soft: #2E4A41;
+  --bq26-muted: #5E7A70;
+  --bq26-emerald: #0B8F78;
+  --bq26-emerald-bright: #0DA678;
+  --bq26-sunken: rgba(10, 42, 32, 0.05);
+  --bq26-sunken-strong: rgba(10, 42, 32, 0.07);
+  --bq26-sunken-soft: rgba(10, 42, 32, 0.04);
+  --bq26-btn: #0B5C46;
+  --bq26-btn-hover: #0E7A5C;
+  --bq26-btn-text: #EAFFF6;
+}
+.bq26-root.bq26-light .bq26-aurora {
+  background:
+    radial-gradient(42% 34% at 18% 12%, rgba(16, 185, 129, 0.10), transparent 70%),
+    radial-gradient(38% 30% at 85% 8%, rgba(45, 212, 191, 0.08), transparent 70%),
+    radial-gradient(50% 42% at 70% 62%, rgba(4, 120, 87, 0.07), transparent 72%),
+    radial-gradient(30% 26% at 30% 78%, rgba(227, 201, 143, 0.06), transparent 70%);
+}
+.bq26-root.bq26-light .bq26-noise { opacity: 0.22; }
+.bq26-root.bq26-light .bq26-nav {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(13, 110, 84, 0.12);
+  box-shadow: 0 18px 50px -26px rgba(10, 42, 32, 0.35);
+}
+.bq26-root.bq26-light .bq26-grad-text {
+  background: linear-gradient(92deg, #0DA678 0%, #0B8F78 45%, #14B99B 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
 /* ---- Animated aurora backdrop ------------------------------------------ */
 .bq26-aurora {
   position: absolute;
@@ -1958,6 +2007,14 @@ button:active {
   transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .bq26-cockpit:hover { transform: perspective(1600px) rotateY(-1deg) rotateX(0.5deg); }
+.bq26-root.bq26-light .bq26-cockpit {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.96), rgba(240, 248, 244, 0.98));
+  border: 1px solid rgba(13, 110, 84, 0.16);
+  box-shadow:
+    0 40px 100px -34px rgba(10, 42, 32, 0.30),
+    0 0 90px -34px rgba(16, 185, 129, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
 @media (max-width: 1024px) { .bq26-cockpit { transform: none; } }
 
 .bq26-chip {
