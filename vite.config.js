@@ -90,7 +90,8 @@ export default defineConfig(({ mode }) => ({
           { name: 'Reports', url: '/?qy=reports', icons: [{ src: 'icon-192x192.png', sizes: '192x192', type: 'image/png' }] }
         ],
         screenshots: [
-          { src: 'dashboard-preview.png', sizes: '1024x640', type: 'image/png', form_factor: 'wide', label: 'BillQyro Dashboard' }
+          { src: 'dashboard-preview.png', sizes: '1024x640', type: 'image/png', form_factor: 'wide', label: 'BillQyro Dashboard' },
+          { src: 'dashboard-mobile.png', sizes: '768x1376', type: 'image/png', form_factor: 'narrow', label: 'BillQyro Mobile Dashboard' }
         ]
       },
       devOptions: {

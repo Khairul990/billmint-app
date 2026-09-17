@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowRight, CheckCircle2, ShieldCheck, TrendingUp, Sparkles,
@@ -9,15 +9,19 @@ import {
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import Logo from '../components/Logo';
-import Login from './Login';
-import CustomerPortalLogin from '../components/portal/CustomerPortalLogin';
+import { lazyWithRetry } from '../utils/lazyWithRetry';
+
+// Auth/portal forms are only needed when the visitor opens the login modal —
+// lazy keeps their whole subtree (incl. dbEngine/portalEngine) off the boot path.
+const Login = lazyWithRetry(() => import('./Login'));
+const CustomerPortalLogin = lazyWithRetry(() => import('../components/portal/CustomerPortalLogin'));
 import ScrollReveal from '../components/ScrollReveal';
 import AnimatedNumber from '../components/AnimatedNumber';
 
 // ── WhatsApp business number for the landing CTA ──────────────────────────
 // ⚠️ এখানে তোমার নিজের WhatsApp নম্বর বসাও (country code সহ, '+' ছাড়া)।
 // যেমন: ভারতের ৯৮৩০০ ০০০০০ নম্বরের জন্য '919830000000'
-const WHATSAPP_NUMBER = '910000000000';
+const WHATSAPP_NUMBER = '919477738769'; // BillQyro support (user-provided)
 
 const Landing = ({ onLoginSuccess }) => {
   const [faqOpen, setFaqOpen] = useState(null);
@@ -1088,16 +1092,20 @@ const Landing = ({ onLoginSuccess }) => {
                 {/* Scoped dark emerald theme so the embedded forms match the landing */}
                 <div className="dark" data-theme="emerald-royal">
                   {portalMode === 'business' ? (
-                    <Login onLoginSuccess={onLoginSuccess} embedded={true} />
+                    <Suspense fallback={<div className="p-10 flex justify-center"><div className="w-8 h-8 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" /></div>}>
+                      <Login onLoginSuccess={onLoginSuccess} embedded={true} />
+                    </Suspense>
                   ) : (
-                    <CustomerPortalLogin
-                      embedded={true}
-                      onVerificationSuccess={(id, phone) => {
-                        sessionStorage.setItem('billqyro_customer_portal_id', id);
-                        sessionStorage.setItem('billqyro_customer_portal_phone', phone);
-                        window.location.href = `/customer/${id}`;
-                      }}
-                    />
+                    <Suspense fallback={<div className="p-10 flex justify-center"><div className="w-8 h-8 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" /></div>}>
+                      <CustomerPortalLogin
+                        embedded={true}
+                        onVerificationSuccess={(id, phone) => {
+                          sessionStorage.setItem('billqyro_customer_portal_id', id);
+                          sessionStorage.setItem('billqyro_customer_portal_phone', phone);
+                          window.location.href = `/customer/${id}`;
+                        }}
+                      />
+                    </Suspense>
                   )}
                 </div>
 

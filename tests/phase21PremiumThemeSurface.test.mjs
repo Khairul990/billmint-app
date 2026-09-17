@@ -49,7 +49,9 @@ await test('TEST A: All existing themes remain available and properly cataloged'
   assert.ok(ALL_THEME_COLORS['gold-coast'], 'gold-coast must be defined');
   assert.ok(ALL_THEME_COLORS['royal-purple'], 'royal-purple must be defined');
   assert.ok(ALL_THEME_COLORS['cyber-teal'], 'cyber-teal must be defined');
-  assert.ok(!ALL_THEME_COLORS['warm-amber'] && !ALL_THEME_COLORS['arctic-teal'], 'Removed themes must stay removed');
+  // Phase 21: the 30-theme luxury catalog re-introduced these presets.
+  assert.ok(ALL_THEME_COLORS['warm-amber'] && ALL_THEME_COLORS['arctic-teal'], 'Re-introduced catalog themes must be present');
+  assert.ok(!ALL_THEME_COLORS['titanium-blue'] && !ALL_THEME_COLORS['orchid'], 'Legacy removed themes must stay removed');
 });
 
 await test('TEST B: Theme switching changes surface tokens dynamically', () => {
