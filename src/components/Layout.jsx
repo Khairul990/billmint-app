@@ -43,9 +43,12 @@ import { AnimatedThemeToggler } from './AnimatedThemeToggler';
 import { getNotifications, markNotificationAsRead, clearAllNotifications } from '../services/notificationsService';
 import { useOnClickOutside } from '../hooks/useOnClickOutside';
 import { useTheme } from '../context/ThemeContext';
+import { isAppMode } from '../utils/appMode';
 
 const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated, userRole, invoices = [], subscription = {}, userEmail, onQuickBillOpen, pendingPaymentsCount = 0, businessWorkspaces, activeWorkspaceId, setActiveWorkspace, syncSource, syncStatus }) => {
   const { isDarkMode } = useTheme();
+  // Phase 27: inside the APK the product wears its own native app skin.
+  const appMode = isAppMode();
   const [timeNow, setTimeNow] = useState(new Date());
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const [isNotificationMenuOpen, setIsNotificationMenuOpen] = useState(false);
@@ -155,6 +158,8 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
         return 'Reports & Analytics';
       case 'due-ledger':
         return 'Due Ledger';
+      case 'due':
+        return 'Due Payments';
       case 'collection-center':
       case 'payments':
       case 'pending-payments':
@@ -208,7 +213,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
             SYSTEM MAINTENANCE ACTIVE — Invoice creation, live links, and premium upgrades are temporarily disabled.
           </div>
         )}        {/* ===== ULTRA LUXURY COMMAND TOPBAR ===== */}
-        <header className="sticky top-0 z-40 bg-theme-app/80 backdrop-blur-2xl text-theme-primary border-b border-theme-border-soft/70 transition-all select-none">
+        <header className={`sticky top-0 z-40 text-theme-primary transition-all select-none ${appMode ? 'app-chrome' : 'bg-theme-app/80 backdrop-blur-2xl border-b border-theme-border-soft/70'}`}>
           <div className="max-w-full w-full mx-auto px-4 lg:px-6 hidden md:flex items-center justify-between gap-4 py-2.5">
             
             {['settings', 'create-invoice'].includes(currentTab) ? (
@@ -496,6 +501,11 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                   mobile
                 />
               </div>
+              {appMode && (
+                <div className="app-page-title flex-1 min-w-0 text-center">
+                  {currentTab === 'dashboard' ? 'BillQyro' : getPageTitle(currentTab)}
+                </div>
+              )}
               <div className="flex items-center gap-1.5 shrink-0">
                 {syncStatus === 'Synced' ? (
                   <span className="flex items-center gap-1 text-[9.5px] font-bold text-theme-accent bg-theme-tint-bg px-1.5 py-0.5 rounded-full border border-theme-tint-border">
@@ -518,7 +528,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                     Pending
                   </span>
                 )}
-                <span className="flex items-center gap-1 text-[9.5px] font-bold text-theme-accent bg-theme-accent-light px-1.5 py-0.5 rounded-full border border-theme-accent/15">
+                <span className={`flex items-center gap-1 text-[9.5px] font-bold text-theme-accent bg-theme-accent-light px-1.5 py-0.5 rounded-full border border-theme-accent/15${appMode ? ' app-hide' : ''}`}>
                   <ShieldCheck className="w-2 h-2" />
                   Secure
                 </span>
@@ -536,7 +546,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                 <span className="truncate">Search...</span>
               </button>
 
-              <div className="p-1 bg-white/90 dark:bg-theme-card/90 backdrop-blur-xl rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft flex items-center gap-1 shrink-0 shadow-sm">
+              <div className={`p-1 bg-white/90 dark:bg-theme-card/90 backdrop-blur-xl rounded-2xl border border-[#f0ece6] dark:border-theme-border-soft flex items-center gap-1 shrink-0 shadow-sm${appMode ? ' app-hide' : ''}`}>
                 {/* Mobile Clock Badge */}
                 <div className="flex items-center gap-1 px-2 py-1 rounded-xl bg-[#faf8f5] dark:bg-theme-surface text-[10px] font-black text-[#1c1917] dark:text-theme-primary font-numbers">
                   <span className="w-1.5 h-1.5 rounded-full bg-theme-accent animate-pulse" />
@@ -663,7 +673,13 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
         </header>
 
         <main className={`flex-1 min-w-0 w-full mx-auto ${['create-invoice', 'settings'].includes(currentTab) ? 'p-0 max-w-none' : 'max-w-full p-3 md:px-6 md:py-6'} pb-24 lg:pb-6`}>
-          {children}
+          {appMode ? (
+            <div key={currentTab} className="app-screen flex flex-col min-h-full">
+              {children}
+            </div>
+          ) : (
+            children
+          )}
         </main>
       </div>
 

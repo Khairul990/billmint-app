@@ -809,6 +809,46 @@ button.icon-only {
   }
 }
 
+/* ============================================================
+   Phase 27 — APP SHELL SKIN (APK / installed PWA only)
+   The website keeps its original chrome untouched. Inside the
+   Android app the same product wears its own native skin:
+   solid top bar with centered page title, clean native tab bar,
+   slide-in screens. Classes are only rendered when isAppMode().
+   ============================================================ */
+.app-chrome {
+  background: var(--app-bg);
+  backdrop-filter: none;
+  border-bottom: 0;
+  box-shadow: 0 1px 0 var(--border-soft), 0 6px 18px var(--accent-glow, rgba(0,0,0,.12));
+}
+.app-hide { display: none !important; }
+.app-page-title {
+  font-weight: 900;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  pointer-events: none;
+}
+.app-tabbar {
+  background: var(--card-bg, var(--surface));
+  border-top: 0;
+  box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.16);
+}
+.app-tab-chip {
+  background: var(--accent-light);
+  box-shadow: inset 0 0 0 1px var(--border-soft);
+}
+.app-screen {
+  animation: appScreenIn 0.24s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@keyframes appScreenIn {
+  from { opacity: 0; transform: translateX(18px); }
+  to   { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-screen { animation: none; }
+}
+
 body {
   /* Prevent horizontal scroll while keeping the VIEWPORT the only scroller:
      overflow-x: clip + overflow-y: visible does not turn body into a scroll

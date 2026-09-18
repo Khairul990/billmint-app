@@ -4,6 +4,7 @@ import { triggerLightHaptic } from '../utils/feedback';
 import { getCustomerLabelByType } from '../config/businessPresets';
 import { useFeatureControl } from '../hooks/useFeatureControl';
 import { useI18n } from '../utils/i18n';
+import { isAppMode } from '../utils/appMode';
 
 const BottomNav = ({ currentTab, setCurrentTab, pendingPaymentsCount = 0, businessSettings }) => {
   const activeWsId = businessSettings?.activeWorkspaceId || 'default';
@@ -11,6 +12,7 @@ const BottomNav = ({ currentTab, setCurrentTab, pendingPaymentsCount = 0, busine
   const wsType = activeWorkspace.type || 'retail';
   const { isFeatureEnabled } = useFeatureControl(activeWsId);
   const { t } = useI18n();
+  const appMode = isAppMode();
 
   const getCustomerLabel = () => getCustomerLabelByType(wsType);
 
@@ -42,7 +44,7 @@ const BottomNav = ({ currentTab, setCurrentTab, pendingPaymentsCount = 0, busine
   }
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 glass-strong border-t border-theme-border-soft safe-area-bottom backdrop-blur-2xl"
+    <nav className={`lg:hidden fixed bottom-0 left-0 right-0 z-50 safe-area-bottom ${appMode ? 'app-tabbar' : 'glass-strong border-t border-theme-border-soft backdrop-blur-2xl'}`}
       style={{ height: 'calc(64px + env(safe-area-inset-bottom))', minHeight: '64px' }}
     >
       <div className="flex items-center justify-around h-full px-2">
@@ -82,7 +84,9 @@ const BottomNav = ({ currentTab, setCurrentTab, pendingPaymentsCount = 0, busine
             >
               <div className={`relative p-1.5 rounded-xl transition-all duration-200 ${
                 isActive 
-                  ? 'bg-[image:var(--accent-gradient)] text-white shadow-md scale-110' 
+                  ? (appMode
+                      ? 'app-tab-chip text-theme-accent scale-110'
+                      : 'bg-[image:var(--accent-gradient)] text-white shadow-md scale-110') 
                   : 'text-theme-muted hover:text-theme-muted hover:bg-theme-surface-elevated'
               }`}>
                 <div className="relative">

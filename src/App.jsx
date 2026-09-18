@@ -2835,7 +2835,7 @@ function App() {
             </React.Suspense>
           </motion.div>
         ) : (
-          <motion.div key="main-app" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }} className="w-full h-full flex flex-col">
+          <motion.div key="main-app" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }} className="w-full h-full flex flex-col" data-app-shell={appMode ? '1' : undefined}>
             {isDemoSessionActive && (
               <div className="bg-amber-500 text-amber-950 px-3 sm:px-4 py-2 flex items-center justify-between gap-2 font-bold text-[11px] sm:text-sm z-[999999] relative shadow-md">
                 <span className="flex items-center min-w-0">
