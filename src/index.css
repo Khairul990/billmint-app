@@ -796,6 +796,19 @@ button.icon-only {
   padding: 10px;
 }
 
+/* Phase 27 — Android touch targets (master-spec §23/§30): compact icon
+   actions keep their visual size, but their tappable region grows ~8px in
+   every direction on touch devices. Zero visual change; desktop untouched. */
+@media (pointer: coarse) {
+  .tap-target { position: relative; }
+  .tap-target::after {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border-radius: inherit;
+  }
+}
+
 body {
   /* Prevent horizontal scroll while keeping the VIEWPORT the only scroller:
      overflow-x: clip + overflow-y: visible does not turn body into a scroll

@@ -445,7 +445,7 @@ const Expenses = ({ expenses = [], onSaveExpense, onDeleteExpense, businessSetti
 
                         <button
                           onClick={() => onDeleteExpense(exp.id)}
-                          className="p-1.5 text-theme-muted hover:text-theme-danger hover:bg-theme-danger/10 rounded-xl transition-all"
+                          className="tap-target p-1.5 text-theme-muted hover:text-theme-danger hover:bg-theme-danger/10 rounded-xl transition-all"
                           title={t('exp.delete', 'Delete Expense')}
                         >
                           <Trash2 className="w-3.5 h-3.5" />

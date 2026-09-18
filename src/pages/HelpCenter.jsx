@@ -993,7 +993,7 @@ const HelpCenter = ({ setCurrentTab, activeWorkspaceId, businessSettings }) => {
                   <div className="pt-2 border-t border-theme-border-soft flex items-center justify-between text-[10px] font-bold">
                     <button
                       onClick={() => setSelectedCategory(cat.id)}
-                      className="text-theme-secondary hover:text-theme-accent cursor-pointer"
+                      className="tap-target text-theme-secondary hover:text-theme-accent cursor-pointer"
                     >
                       Learn
                     </button>
@@ -1002,7 +1002,7 @@ const HelpCenter = ({ setCurrentTab, activeWorkspaceId, businessSettings }) => {
                         const targetTab = cat.id === 'invoices' ? 'invoices' : cat.id === 'customers' ? 'customers' : cat.id === 'reports' ? 'reports' : cat.id === 'settings' ? 'settings' : 'dashboard';
                         setCurrentTab && setCurrentTab(targetTab);
                       }}
-                      className="text-theme-accent hover:underline flex items-center gap-0.5 cursor-pointer"
+                      className="tap-target text-theme-accent hover:underline flex items-center gap-0.5 cursor-pointer"
                     >
                       <span>Open</span>
                       <ArrowRight className="w-2.5 h-2.5" />

@@ -1258,12 +1258,12 @@ const CreateInvoice = ({
                                   type="button"
                                   onClick={() => setExpandedCategoryItemId(expandedCategoryItemId === item.id ? null : item.id)}
                                   title="Category Custom Fields"
-                                  className={`p-1.5 rounded-lg transition-colors text-2xs font-bold flex items-center gap-0.5 ${expandedCategoryItemId === item.id ? 'bg-theme-accent text-white' : 'text-theme-muted hover:text-theme-accent hover:bg-theme-surface'}`}
+                                  className={`tap-target p-1.5 rounded-lg transition-colors text-2xs font-bold flex items-center gap-0.5 ${expandedCategoryItemId === item.id ? 'bg-theme-accent text-white' : 'text-theme-muted hover:text-theme-accent hover:bg-theme-surface'}`}
                                 >
                                   <Tag className="w-3.5 h-3.5" />
                                 </button>
-                                <button onClick={() => handleDuplicateItem(item.id)} className="p-1.5 text-theme-muted hover:text-theme-accent hover:bg-theme-accent/10 rounded-lg transition-colors"><Copy className="w-3.5 h-3.5" /></button>
-                                <button onClick={() => handleDeleteItem(item.id)} className="p-1.5 text-theme-muted hover:text-theme-danger hover:bg-theme-danger/10 rounded-lg transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
+                                <button onClick={() => handleDuplicateItem(item.id)} className="tap-target p-1.5 text-theme-muted hover:text-theme-accent hover:bg-theme-accent/10 rounded-lg transition-colors"><Copy className="w-3.5 h-3.5" /></button>
+                                <button onClick={() => handleDeleteItem(item.id)} className="tap-target p-1.5 text-theme-muted hover:text-theme-danger hover:bg-theme-danger/10 rounded-lg transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
                               </div>
                             </td>
                           </motion.tr>

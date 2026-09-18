@@ -283,7 +283,7 @@ const Orders = ({ invoices = [], customers = [], businessSettings, setCurrentTab
                           </div>
                         </div>
                         <button onClick={() => handleDeleteOrder(order.id)}
-                          className="p-2 text-theme-muted hover:text-theme-danger hover:bg-theme-danger/5 rounded-xl transition-all" title="Delete Order">
+                          className="tap-target p-2 text-theme-muted hover:text-theme-danger hover:bg-theme-danger/5 rounded-xl transition-all" title="Delete Order">
                           <X className="w-3.5 h-3.5" />
                         </button>
                       </div>
@@ -338,7 +338,7 @@ const Orders = ({ invoices = [], customers = [], businessSettings, setCurrentTab
               <div className="bg-theme-card rounded-3xl border border-theme-border-soft shadow-premium w-full max-w-lg pointer-events-auto overflow-hidden">
                 <div className="flex items-center justify-between p-5 border-b border-theme-border-soft">
                   <h3 className="text-sm font-extrabold text-theme-primary tracking-tight">Create New Order</h3>
-                  <button onClick={() => setShowCreateModal(false)} className="p-2 text-theme-muted hover:text-theme-primary hover:bg-theme-surface rounded-xl transition-all">
+                  <button onClick={() => setShowCreateModal(false)} className="tap-target p-2 text-theme-muted hover:text-theme-primary hover:bg-theme-surface rounded-xl transition-all">
                     <X className="w-4 h-4" />
                   </button>
                 </div>

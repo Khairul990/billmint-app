@@ -426,14 +426,14 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, onSaveExpense
                   <div className="flex gap-1">
                     <button
                       onClick={() => openEditModal(prod)}
-                      className="p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-accent-light rounded-xl transition-all"
+                      className="tap-target p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-accent-light rounded-xl transition-all"
                       title="Edit Item"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => handleDelete(prod.id)}
-                      className="p-2 text-theme-muted hover:text-theme-danger hover:bg-theme-danger/5 rounded-xl transition-all"
+                      className="tap-target p-2 text-theme-muted hover:text-theme-danger hover:bg-theme-danger/5 rounded-xl transition-all"
                       title="Delete Item"
                     >
                       <Trash2 className="w-3.5 h-3.5" />

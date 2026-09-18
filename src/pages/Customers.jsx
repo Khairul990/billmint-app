@@ -589,7 +589,7 @@ const Customers = ({
                     {/* Edit Contact */}
                     <button 
                       onClick={() => openEditModal(cust)} 
-                      className="p-2 text-theme-muted hover:text-theme-primary hover:bg-theme-surface rounded-xl transition-all cursor-pointer border border-transparent hover:border-theme-border-soft" 
+                      className="tap-target p-2 text-theme-muted hover:text-theme-primary hover:bg-theme-surface rounded-xl transition-all cursor-pointer border border-transparent hover:border-theme-border-soft" 
                       title="Edit Customer"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
@@ -598,7 +598,7 @@ const Customers = ({
                     {/* Delete Contact */}
                     <button 
                       onClick={() => handleDelete(cust.id)} 
-                      className="p-2 text-theme-muted hover:text-theme-danger hover:bg-rose-500/10 rounded-xl transition-all cursor-pointer" 
+                      className="tap-target p-2 text-theme-muted hover:text-theme-danger hover:bg-rose-500/10 rounded-xl transition-all cursor-pointer" 
                       title="Delete Customer"
                     >
                       <Trash2 className="w-3.5 h-3.5" />

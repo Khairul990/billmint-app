@@ -1124,21 +1124,21 @@ const Invoices = ({
                 )}
                 <button
                   onClick={handlePrint}
-                  className="p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-surface rounded-xl transition-all cursor-pointer"
+                  className="tap-target p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-surface rounded-xl transition-all cursor-pointer"
                   title="Print Invoice"
                 >
                   <Printer className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => onDownloadPDF(viewingInvoice)}
-                  className="p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-surface rounded-xl transition-all cursor-pointer"
+                  className="tap-target p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-surface rounded-xl transition-all cursor-pointer"
                   title="Download PDF"
                 >
                   <Download className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => onDownloadImage && onDownloadImage(viewingInvoice)}
-                  className="p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-surface rounded-xl transition-all cursor-pointer"
+                  className="tap-target p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-surface rounded-xl transition-all cursor-pointer"
                   title="Download Image (PNG)"
                 >
                   <ImageDown className="w-4 h-4" />
@@ -1174,7 +1174,7 @@ const Invoices = ({
                       setGeneratingLink(false);
                     }
                   }}
-                  className="p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-surface rounded-xl transition-all cursor-pointer"
+                  className="tap-target p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-surface rounded-xl transition-all cursor-pointer"
                   title={`Copy ${portalLabel}`}
                   disabled={generatingLink}
                 >
@@ -1188,7 +1188,7 @@ const Invoices = ({
                     setViewingInvoice(null);
                     onEditInvoice(null);
                   }}
-                  className="p-2 text-theme-muted hover:text-theme-primary hover:bg-theme-surface rounded-xl transition-all cursor-pointer"
+                  className="tap-target p-2 text-theme-muted hover:text-theme-primary hover:bg-theme-surface rounded-xl transition-all cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>

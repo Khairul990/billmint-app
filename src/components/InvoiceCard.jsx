@@ -263,13 +263,15 @@ const InvoiceCard = ({
             {/* Multi-Select Checkbox */}
             {onToggleSelect && !isDeleted && (
               <div className="pt-1 sm:pt-0 shrink-0">
-                <input
-                  type="checkbox"
-                  checked={isSelected}
-                  onChange={() => onToggleSelect(invoice.id)}
-                  className="w-4 h-4 rounded-md border-theme-border-soft text-theme-accent focus:ring-theme-accent cursor-pointer transition-all"
-                  aria-label={`Select invoice ${invoice.invoiceNumber}`}
-                />
+                <label className="flex items-center justify-center p-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={() => onToggleSelect(invoice.id)}
+                    className="w-4 h-4 rounded-md border-theme-border-soft text-theme-accent focus:ring-theme-accent cursor-pointer transition-all"
+                    aria-label={`Select invoice ${invoice.invoiceNumber}`}
+                  />
+                </label>
               </div>
             )}
 
