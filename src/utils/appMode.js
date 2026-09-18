@@ -6,22 +6,25 @@
  * opens like a native app, straight into its own entry screen (login /
  * signup / demo) and then the dashboard.
  *
- * Signals:
- *  - STRONG (a real install): document.referrer starting with
- *    android-app:// (set by Chrome when the APK opens the web app) or
- *    display-mode: standalone / navigator.standalone (installed PWA).
- *    Only strong signals PERSIST the flag — an app install stays app-mode.
- *  - WEAK: ?source=app / ?source=pwa in the URL (baked into the APK
- *    startUrl since v1.0.3). Applies to this page-load only and is never
- *    persisted, so opening such a link once in a desktop browser must not
- *    hijack that browser into app mode forever.
+ * How app mode is detected:
+ *  - STRONG (a real install, every launch): document.referrer starting
+ *    with android-app:// (Chrome sets this when the APK opens the web app)
+ *    or display-mode: standalone / navigator.standalone (installed PWA).
+ *  - APP LINK (?source=app / ?source=pwa, baked into the APK startUrl):
+ *    applies to the CURRENT TAB SESSION only (sessionStorage). The APK's
+ *    cold start always carries the param, and full-page navigations inside
+ *    the same tab (e.g. the demo journey's location.href = '/') keep the
+ *    session flag — so the app experience is continuous. But a visitor
+ *    who merely opens such a link once in a normal browser (phone or
+ *    desktop) gets the website back as soon as they open a fresh tab —
+ *    the marketing landing and APK download always stay reachable.
  *
- * Recovery: if the flag somehow got stuck in a desktop-class browser
- * (large screen, no touch, not standalone, no TWA referrer) it is cleared
- * and the visitor gets the website back — the marketing landing with the
- * APK download is always reachable from a normal browser.
+ * Migration: older builds persisted 'billqyro_app_shell' in localStorage,
+ * which permanently hijacked browsers that had once opened an app link.
+ * Any such stale flag is deleted on sight (no strong signal present).
  */
 const KEY = 'billqyro_app_shell';
+const SESSION_KEY = 'billqyro_app_shell_session';
 
 const evaluate = () => {
   try {
@@ -29,37 +32,18 @@ const evaluate = () => {
       /^android-app:\/\//i.test(document.referrer || '') ||
       window.matchMedia('(display-mode: standalone)').matches ||
       window.navigator.standalone === true;
+    if (strongSignal) return true;
 
-    if (strongSignal) {
-      try { localStorage.setItem(KEY, '1'); } catch { /* ignore */ }
-      return true;
-    }
+    // Clean up stale flags from older builds (link visits used to persist).
+    try { localStorage.removeItem(KEY); } catch { /* ignore */ }
 
-    // Desktop-class browser (big screen, no touch): a stuck flag here means
-    // someone once opened an app-mode link — recover to the website.
-    const desktopBrowser =
-      window.matchMedia('(min-width: 1024px)').matches && !('ontouchstart' in window);
-    let flagged = false;
-    try { flagged = localStorage.getItem(KEY) === '1'; } catch { /* ignore */ }
-    if (desktopBrowser) {
-      if (flagged) { try { localStorage.removeItem(KEY); } catch { /* ignore */ } }
-      // ?source=app still shows the app view on desktop for that single
-      // visit (someone explicitly previewing it), but never persists.
-      const q = new URLSearchParams(window.location.search);
-      return q.get('source') === 'app' || q.get('source') === 'pwa';
-    }
-
-    // Mobile-class device (the APK and phones): the app-link param persists,
-    // because full-page navigations inside the app (e.g. the demo journey's
-    // location.href = '/') drop the query string — without persistence the
-    // app would fall back to the website mid-flow.
     const q = new URLSearchParams(window.location.search);
     const fromParam = q.get('source') === 'app' || q.get('source') === 'pwa';
     if (fromParam) {
-      try { localStorage.setItem(KEY, '1'); } catch { /* ignore */ }
+      try { sessionStorage.setItem(SESSION_KEY, '1'); } catch { /* ignore */ }
       return true;
     }
-    return flagged;
+    try { return sessionStorage.getItem(SESSION_KEY) === '1'; } catch { return false; }
   } catch {
     return false;
   }

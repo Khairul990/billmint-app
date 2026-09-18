@@ -83,14 +83,15 @@
           // Website visitors keep sapphire-noir. An explicit user/admin theme choice
           // always wins — theme switching stays fully functional in both.
           // Strong install signals (TWA referrer / standalone) define the app
-          // shell; a stuck flag in a desktop-class browser is recovered so the
-          // marketing landing (with the APK download) always shows on the web.
+          // shell on every launch; an app link (?source=app) is session-only,
+          // and stale flags from older builds are cleaned up so the marketing
+          // landing (with the APK download) always shows in normal browsers.
           var strongShell = /^android-app:/.test(document.referrer || '')
             || window.matchMedia('(display-mode: standalone)').matches;
-          var desktopBrowser = window.matchMedia('(min-width: 1024px)').matches && !('ontouchstart' in window);
           var appShell = strongShell
             || new URLSearchParams(location.search).get('source') === 'app'
-            || (localStorage.getItem('billqyro_app_shell') === '1' && !desktopBrowser);
+            || (function() { try { return sessionStorage.getItem('billqyro_app_shell_session') === '1'; } catch (e) { return false; } })();
+          try { localStorage.removeItem('billqyro_app_shell'); } catch (e) {}
           var activeTheme = userTheme || adminTheme || (appShell ? 'emerald-royal' : 'sapphire-noir');
           // legacy guard — mode values are not themes
           if (activeTheme === 'light' || activeTheme === 'dark' || activeTheme === 'auto' || activeTheme === 'classic') activeTheme = 'sapphire-noir';
