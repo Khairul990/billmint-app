@@ -49,11 +49,17 @@ const evaluate = () => {
       return q.get('source') === 'app' || q.get('source') === 'pwa';
     }
 
-    // Phone browser: an app user returning via their browser keeps app mode;
-    // everyone else sees the website unless the URL explicitly asks for app.
-    if (flagged) return true;
+    // Mobile-class device (the APK and phones): the app-link param persists,
+    // because full-page navigations inside the app (e.g. the demo journey's
+    // location.href = '/') drop the query string — without persistence the
+    // app would fall back to the website mid-flow.
     const q = new URLSearchParams(window.location.search);
-    return q.get('source') === 'app' || q.get('source') === 'pwa';
+    const fromParam = q.get('source') === 'app' || q.get('source') === 'pwa';
+    if (fromParam) {
+      try { localStorage.setItem(KEY, '1'); } catch { /* ignore */ }
+      return true;
+    }
+    return flagged;
   } catch {
     return false;
   }

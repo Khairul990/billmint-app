@@ -78,14 +78,20 @@ try {
     assert(p.mod.isAppMode() === true, 'display-mode standalone → app mode');
   }
 
-  console.log('--- 2. Weak link signal never persists ---');
+  console.log('--- 2. App-link param: persists on mobile (APK stability), not on desktop ---');
   {
+    // The APK startUrl and the demo journey drop the query on full navigations —
+    // on a phone the param must persist or the app falls back to the website.
     const { mod, store } = await loadService({ search: '?source=app', touch: true });
-    assert(mod.isAppMode() === true, '?source=app → app mode for this visit');
-    assert(store.getItem('billqyro_app_shell') === null, 'no flag persisted from a link visit');
+    assert(mod.isAppMode() === true, '?source=app → app mode (phone)');
+    assert(store.getItem('billqyro_app_shell') === '1', 'param persists on mobile-class devices');
 
     const p2 = await loadService({ search: '?source=pwa', touch: true });
-    assert(p2.mod.isAppMode() === true, '?source=pwa → app mode for this visit');
+    assert(p2.mod.isAppMode() === true, '?source=pwa → app mode (phone)');
+
+    const d = await loadService({ desktop: true, search: '?source=app' });
+    assert(d.mod.isAppMode() === true, 'desktop preview still works');
+    assert(d.store.getItem('billqyro_app_shell') === null, 'desktop never persists the param');
   }
 
   console.log('--- 3. Desktop recovery from a stuck flag ---');
