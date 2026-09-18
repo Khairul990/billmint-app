@@ -903,13 +903,13 @@ const PublicInvoice = ({ initialInvoice }) => {
                   </div>
                 </div>
               )}
-              {/* Premium Trust Badge */}
+              {/* Premium Trust Badge — status-aware, never claims unearned verification */}
               <div className="bg-theme-tint-bg rounded-xl p-2.5 md:p-3 text-center">
                 <div className="flex items-center justify-center gap-1.5 text-[8px] md:text-[9px] text-theme-accent font-bold">
                   <ShieldCheck className="w-3 h-3" />
-                  <span>Payment Verified & Secured</span>
+                  <span>{['Paid', 'Verified'].includes(invoice.paymentStatus) ? 'Payment Verified & Secured' : 'Secure Payment Portal'}</span>
                 </div>
-                <p className="text-[7px] md:text-[8px] text-theme-accent/60 mt-0.5 font-semibold">256-bit encrypted transaction</p>
+                <p className="text-[7px] md:text-[8px] text-theme-accent/60 mt-0.5 font-semibold">UPI payments are verified by the business owner</p>
               </div>
             </div>
           </div>
