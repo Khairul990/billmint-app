@@ -306,10 +306,10 @@ const Estimates = ({
         {filteredEstimates.length === 0 && (
             <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-12 border border-theme-border-soft dark:border-theme-border-soft text-center shadow-premium relative overflow-hidden">
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03] dark:opacity-5 grayscale">
-                <img src="/brand/billqyro-icon.png" alt="Watermark" className="w-64 h-64 object-contain scale-125" />
+                <img src="/icon-512x512.png" alt="Watermark" className="w-64 h-64 object-contain scale-125" />
               </div>
               <div className="relative z-10">
-                <img src="/brand/billqyro-icon.png" alt="Empty" className="w-12 h-12 object-contain mx-auto mb-3 opacity-40 grayscale drop-shadow-sm" />
+                <img src="/icon-512x512.png" alt="Empty" className="w-12 h-12 object-contain mx-auto mb-3 opacity-40 grayscale drop-shadow-sm" />
                 <h4 className="font-extrabold text-theme-primary dark:text-theme-muted">{t('est.empty', 'No estimates yet')}</h4>
                 <p className="text-xs text-theme-muted font-semibold mt-1 max-w-xs mx-auto">
                   {t('est.empty_sub', 'Create your first estimate to see it here!')}

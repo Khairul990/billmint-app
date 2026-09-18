@@ -149,7 +149,7 @@ export default function CustomerPortalConfig() {
                     level="H"
                     includeMargin={false}
                     imageSettings={{
-                      src: "/billqyro-icon.png",
+                      src: "/icon-192x192.png",
                       x: undefined,
                       y: undefined,
                       height: 32,
