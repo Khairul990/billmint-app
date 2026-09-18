@@ -14,11 +14,12 @@ const functions = app ? getFunctions(app) : null;
 
 /**
  * Triggers an email receipt to the customer after payment.
- * Currently returns a mock success.
+ * When the backend function is unavailable this resolves as NOT sent —
+ * it never reports success for something that did not happen (spec §26).
  */
 export const sendPaymentReceiptEmail = async (invoiceId, customerEmail) => {
   if (!functions) {
-    return { data: { success: true, message: 'Email service not configured' } };
+    return { data: { success: false, unavailable: true, message: 'Email service not configured' } };
   }
   
   try {
@@ -32,12 +33,13 @@ export const sendPaymentReceiptEmail = async (invoiceId, customerEmail) => {
 };
 
 /**
- * Validates a transaction ID against a mock bank API.
- * Currently returns a mock success.
+ * Validates a transaction ID against the bank verification backend.
+ * When the backend function is unavailable this resolves as NOT verified —
+ * payments always remain 'Pending Verification' until really checked (spec §26).
  */
 export const verifyTransactionId = async (transactionId, expectedAmount) => {
   if (!functions) {
-    return { data: { isValid: true, mockReason: 'Verification service not configured' } };
+    return { data: { isValid: false, unavailable: true, reason: 'Verification service not configured' } };
   }
   
   try {
@@ -55,7 +57,7 @@ export const verifyTransactionId = async (transactionId, expectedAmount) => {
  */
 export const sendWhatsAppNotification = async (phone, invoiceLink, customerName) => {
   if (!functions) {
-    return { data: { success: true, message: 'WhatsApp service not configured' } };
+    return { data: { success: false, unavailable: true, message: 'WhatsApp service not configured' } };
   }
 
   try {

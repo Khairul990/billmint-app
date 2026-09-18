@@ -9,8 +9,12 @@ const AdminPINLogin = ({ onPinSuccess, onCancel }) => {
   const [attempts, setAttempts] = useState(0);
 
   const MAX_ATTEMPTS = 5;
+  // Fail-closed: if no PIN is configured at build time, the gate must NOT
+  // open with a guessable default. (Master-spec §24: no client-visible
+  // secrets; an unconfigured admin gate stays locked, not wide open.)
   const rawPin = import.meta.env.VITE_ADMIN_PIN;
-  const CORRECT_PIN = (rawPin && rawPin !== 'undefined') ? rawPin : '1234';
+  const CORRECT_PIN = (rawPin && rawPin !== 'undefined') ? rawPin : null;
+  const pinConfigured = !!CORRECT_PIN;
   const [locked, setLocked] = useState(false); // Temporarily disabled lockout
   const [lockoutTimer, setLockoutTimer] = useState(0);
 
@@ -126,6 +130,11 @@ const AdminPINLogin = ({ onPinSuccess, onCancel }) => {
           <p className="text-theme-secondary text-sm text-center">
             Enter Owner PIN to access the secured control panel.
           </p>
+          {!pinConfigured && (
+            <p className="mt-3 text-xs text-theme-danger bg-theme-danger/10 border border-theme-danger/30 rounded-xl px-3 py-2">
+              Admin PIN is not configured on this deployment, so the portal stays locked (fail-closed). Configure VITE_ADMIN_PIN at build time or sign in with the owner account.
+            </p>
+          )}
         </div>
 
         {/* PIN Dots */}
