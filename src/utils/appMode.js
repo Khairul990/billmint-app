@@ -1,36 +1,59 @@
 /**
- * App-shell detection (Phase 26): is this running inside the Android APK
+ * App-shell detection (Phase 26/27): is this running inside the Android APK
  * (Trusted Web Activity) or as an installed PWA?
  *
  * In app-shell mode the marketing landing is NEVER shown — the product
  * opens like a native app, straight into its own entry screen (login /
- * signup / demo) and then the dashboard. No hero, no feature sections,
- * no website chrome.
+ * signup / demo) and then the dashboard.
  *
- * Signals (any one of them switches app-mode on and persists it):
- *  - ?source=app or ?source=pwa in the launch URL (baked into the APK
- *    startUrl / shortcuts since v1.0.3)
- *  - document.referrer starting with android-app:// (the canonical TWA
- *    signal — set by Chrome when the APK opens the web app)
- *  - display-mode: standalone / navigator.standalone (installed PWA)
+ * Signals:
+ *  - STRONG (a real install): document.referrer starting with
+ *    android-app:// (set by Chrome when the APK opens the web app) or
+ *    display-mode: standalone / navigator.standalone (installed PWA).
+ *    Only strong signals PERSIST the flag — an app install stays app-mode.
+ *  - WEAK: ?source=app / ?source=pwa in the URL (baked into the APK
+ *    startUrl since v1.0.3). Applies to this page-load only and is never
+ *    persisted, so opening such a link once in a desktop browser must not
+ *    hijack that browser into app mode forever.
  *
- * Persisted because TWA navigations can drop the query string.
+ * Recovery: if the flag somehow got stuck in a desktop-class browser
+ * (large screen, no touch, not standalone, no TWA referrer) it is cleared
+ * and the visitor gets the website back — the marketing landing with the
+ * APK download is always reachable from a normal browser.
  */
 const KEY = 'billqyro_app_shell';
 
 const evaluate = () => {
   try {
-    const q = new URLSearchParams(window.location.search);
-    const fromParam = q.get('source') === 'app' || q.get('source') === 'pwa';
-    const fromReferrer = /^android-app:\/\//i.test(document.referrer || '');
-    const fromDisplay =
+    const strongSignal =
+      /^android-app:\/\//i.test(document.referrer || '') ||
       window.matchMedia('(display-mode: standalone)').matches ||
       window.navigator.standalone === true;
-    if (fromParam || fromReferrer || fromDisplay) {
+
+    if (strongSignal) {
       try { localStorage.setItem(KEY, '1'); } catch { /* ignore */ }
       return true;
     }
-    return (() => { try { return localStorage.getItem(KEY) === '1'; } catch { return false; } })();
+
+    // Desktop-class browser (big screen, no touch): a stuck flag here means
+    // someone once opened an app-mode link — recover to the website.
+    const desktopBrowser =
+      window.matchMedia('(min-width: 1024px)').matches && !('ontouchstart' in window);
+    let flagged = false;
+    try { flagged = localStorage.getItem(KEY) === '1'; } catch { /* ignore */ }
+    if (desktopBrowser) {
+      if (flagged) { try { localStorage.removeItem(KEY); } catch { /* ignore */ } }
+      // ?source=app still shows the app view on desktop for that single
+      // visit (someone explicitly previewing it), but never persists.
+      const q = new URLSearchParams(window.location.search);
+      return q.get('source') === 'app' || q.get('source') === 'pwa';
+    }
+
+    // Phone browser: an app user returning via their browser keeps app mode;
+    // everyone else sees the website unless the URL explicitly asks for app.
+    if (flagged) return true;
+    const q = new URLSearchParams(window.location.search);
+    return q.get('source') === 'app' || q.get('source') === 'pwa';
   } catch {
     return false;
   }

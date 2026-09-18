@@ -82,9 +82,15 @@
           // App shell (APK / installed PWA) gets its own signature look: emerald-royal.
           // Website visitors keep sapphire-noir. An explicit user/admin theme choice
           // always wins — theme switching stays fully functional in both.
-          var appShell = localStorage.getItem('billqyro_app_shell') === '1'
+          // Strong install signals (TWA referrer / standalone) define the app
+          // shell; a stuck flag in a desktop-class browser is recovered so the
+          // marketing landing (with the APK download) always shows on the web.
+          var strongShell = /^android-app:/.test(document.referrer || '')
+            || window.matchMedia('(display-mode: standalone)').matches;
+          var desktopBrowser = window.matchMedia('(min-width: 1024px)').matches && !('ontouchstart' in window);
+          var appShell = strongShell
             || new URLSearchParams(location.search).get('source') === 'app'
-            || /^android-app:/.test(document.referrer || '');
+            || (localStorage.getItem('billqyro_app_shell') === '1' && !desktopBrowser);
           var activeTheme = userTheme || adminTheme || (appShell ? 'emerald-royal' : 'sapphire-noir');
           // legacy guard — mode values are not themes
           if (activeTheme === 'light' || activeTheme === 'dark' || activeTheme === 'auto' || activeTheme === 'classic') activeTheme = 'sapphire-noir';

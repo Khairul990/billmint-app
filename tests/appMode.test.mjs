@@ -1,13 +1,16 @@
 /**
- * BillQyro Phase 26 — App-shell mode (APK/PWA entry redesign)
+ * BillQyro Phase 26/27 — App-shell mode (APK/PWA entry redesign)
  * Run: node tests/appMode.test.mjs
  *
  * Verifies:
- *  1. ?source=app / ?source=pwa / android-app:// referrer / standalone
- *     each switch app-mode on and persist it
- *  2. Plain website visits stay in web (landing) mode
- *  3. Persisted flag keeps app-mode after the query string is gone
- *  4. Corrupt storage never throws
+ *  1. Strong install signals (TWA referrer / standalone) switch on app mode
+ *     and PERSIST — an installed app stays in app mode.
+ *  2. Weak signal (?source=app link) applies to that visit only and never
+ *     persists — one curious desktop click cannot hijack the browser.
+ *  3. Desktop-class browser with a stuck flag RECOVERS to website mode
+ *     (marketing landing + APK download always reachable on the web).
+ *  4. Phone browser with the flag keeps app mode; clean phone visitor web.
+ *  5. Corrupt storage never throws.
  */
 
 function makeStorage(initial = {}) {
@@ -27,8 +30,7 @@ function assert(cond, msg) {
 }
 
 // run_all_tests.mjs imports every suite into ONE process with shared
-// browser mocks — snapshot the globals we touch and ALWAYS restore them,
-// otherwise this suite breaks the ones that run after it.
+// browser mocks — snapshot the globals we touch and ALWAYS restore them.
 const ORIG = {
   window: globalThis.window,
   document: globalThis.document,
@@ -40,64 +42,83 @@ const restoreGlobals = () => {
   }
 };
 
-// The util reads window.location/document.referrer/matchMedia at evaluation
-// time — shim them per scenario, then re-import with a cache-buster.
+// Shim the browser bits appMode reads: referrer, display-mode media query,
+// desktop-width media query, touch support.
 async function loadService(env) {
   const store = makeStorage(env.storage || {});
-  const search = env.search || '';
-  const referrer = env.referrer || '';
-  const standalone = !!env.standalone;
-  globalThis.localStorage = store;
-  globalThis.window = {
-    location: { search },
-    navigator: { standalone },
-    matchMedia: () => ({ matches: standalone }),
+  const w = {
+    location: { search: env.search || '' },
+    navigator: { standalone: !!env.standalone },
+    matchMedia: (q) => ({
+      matches: q.includes('standandalone') ? !!env.standalone
+        : q.includes('min-width') ? !!env.desktop
+        : false,
+    }),
   };
-  globalThis.document = { referrer };
+  if (env.touch) w.ontouchstart = () => {};
+  globalThis.localStorage = store;
+  globalThis.window = w;
+  globalThis.document = { referrer: env.referrer || '' };
   const mod = await import(`../src/utils/appMode.js?t=${Date.now()}-${Math.random()}`);
   return { mod, store };
 }
 
 console.log('\n======================================================');
-console.log('📱 RUNNING APP-MODE TEST SUITE (Phase 26)');
+console.log('📱 RUNNING APP-MODE TEST SUITE (Phase 26/27)');
 console.log('======================================================\n');
 
 try {
-  console.log('--- 1. App signals ---');
+  console.log('--- 1. Strong install signals persist ---');
   {
-    const { mod, store } = await loadService({ search: '?source=app' });
-    assert(mod.isAppMode() === true, '?source=app → app mode');
-    assert(store.getItem('billqyro_app_shell') === '1', 'flag persisted');
+    const { mod, store } = await loadService({ referrer: 'android-app://com.billqyro.app', touch: true });
+    assert(mod.isAppMode() === true, 'TWA android-app:// referrer → app mode');
+    assert(store.getItem('billqyro_app_shell') === '1', 'strong signal persists the flag');
 
-    const p2 = await loadService({ search: '?source=pwa' });
-    assert(p2.mod.isAppMode() === true, '?source=pwa → app mode');
-
-    const p3 = await loadService({ referrer: 'android-app://com.billqyro.app' });
-    assert(p3.mod.isAppMode() === true, 'android-app:// referrer (TWA) → app mode');
-
-    const p4 = await loadService({ standalone: true });
-    assert(p4.mod.isAppMode() === true, 'display-mode standalone → app mode');
+    const p = await loadService({ standalone: true, touch: true });
+    assert(p.mod.isAppMode() === true, 'display-mode standalone → app mode');
   }
 
-  console.log('--- 2. Plain web visit stays web ---');
+  console.log('--- 2. Weak link signal never persists ---');
   {
-    const { mod } = await loadService({ search: '', referrer: 'https://google.com/' });
-    assert(mod.isAppMode() === false, 'no signals → web (landing) mode');
+    const { mod, store } = await loadService({ search: '?source=app', touch: true });
+    assert(mod.isAppMode() === true, '?source=app → app mode for this visit');
+    assert(store.getItem('billqyro_app_shell') === null, 'no flag persisted from a link visit');
+
+    const p2 = await loadService({ search: '?source=pwa', touch: true });
+    assert(p2.mod.isAppMode() === true, '?source=pwa → app mode for this visit');
   }
 
-  console.log('--- 3. Persistence after query string drops ---');
+  console.log('--- 3. Desktop recovery from a stuck flag ---');
   {
-    const first = await loadService({ search: '?source=app' });
-    assert(first.mod.isAppMode() === true, 'app mode active on first open');
-    const again = await loadService({ search: '', storage: { billqyro_app_shell: first.store.getItem('billqyro_app_shell') } });
-    assert(again.mod.isAppMode() === true, 'flag survives navigation without query');
+    const { mod, store } = await loadService({
+      desktop: true, // min-width 1024 matches, no touch, no standalone, no referrer
+      storage: { billqyro_app_shell: '1' },
+    });
+    assert(mod.isAppMode() === false, 'stuck flag in a desktop browser → website mode');
+    assert(store.getItem('billqyro_app_shell') === null, 'stuck flag cleared');
+
+    const clean = await loadService({ desktop: true, search: '' });
+    assert(clean.mod.isAppMode() === false, 'clean desktop visit → website mode');
+
+    const preview = await loadService({ desktop: true, search: '?source=app' });
+    assert(preview.mod.isAppMode() === true, 'explicit ?source=app preview still works on desktop');
+    assert(preview.store.getItem('billqyro_app_shell') === null, 'desktop preview does not persist');
   }
 
-  console.log('--- 4. Corrupt storage never throws ---');
+  console.log('--- 4. Phone browser behaviour ---');
+  {
+    const phone = await loadService({ touch: true, storage: { billqyro_app_shell: '1' } });
+    assert(phone.mod.isAppMode() === true, 'flagged phone browser keeps app mode');
+
+    const fresh = await loadService({ touch: true, search: '', referrer: 'https://google.com/' });
+    assert(fresh.mod.isAppMode() === false, 'clean phone visitor → website (landing) mode');
+  }
+
+  console.log('--- 5. Corrupt storage never throws ---');
   {
     let crashed = false, result = null;
     try {
-      const r = await loadService({ storage: { billqyro_app_shell: 'garbage' }, search: '' });
+      const r = await loadService({ storage: { billqyro_app_shell: 'garbage' }, search: '', touch: true });
       result = r.mod.isAppMode();
     } catch { crashed = true; }
     assert(!crashed, 'garbage flag value does not throw');
