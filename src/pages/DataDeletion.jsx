@@ -27,9 +27,9 @@ export default function DataDeletion({ onBack }) {
           <p className="text-theme-muted mb-6 text-sm leading-relaxed">
             You have the right to request a copy of your data in a machine-readable format. This includes your invoices, customer list, and business settings.
           </p>
-          <button className="flex items-center gap-2 px-5 py-2.5 bg-theme-app border border-theme-border-soft rounded-xl text-theme-primary font-bold hover:bg-theme-surface transition-colors cursor-not-allowed opacity-75">
-            <Download className="w-4 h-4" /> Request Data Export (Coming Soon)
-          </button>
+          <a href="mailto:privacy@billqyro.com?subject=Data%20Export%20Request&body=Please%20export%20all%20my%20data%20associated%20with%20this%20email%20address." className="flex items-center gap-2 px-5 py-2.5 bg-theme-app border border-theme-border-soft rounded-xl text-theme-primary font-bold hover:bg-theme-surface transition-colors">
+            <Download className="w-4 h-4" /> Request Data Export
+          </a>
         </section>
 
         <section className="bg-theme-card rounded-3xl p-6 border border-theme-border-soft shadow-premium">
@@ -46,9 +46,9 @@ export default function DataDeletion({ onBack }) {
               <li>Public invoice links will stop working immediately.</li>
             </ul>
           </div>
-          <button className="flex items-center gap-2 px-5 py-2.5 bg-theme-danger text-white rounded-xl font-bold hover:bg-theme-danger/90 transition-colors shadow-md cursor-not-allowed opacity-75">
-            <Trash2 className="w-4 h-4" /> Request Account Deletion (Coming Soon)
-          </button>
+          <a href="mailto:privacy@billqyro.com?subject=Account%20Deletion%20Request&body=I%20request%20permanent%20deletion%20of%20my%20account%20and%20all%20associated%20data." className="flex items-center gap-2 px-5 py-2.5 bg-theme-danger text-white rounded-xl font-bold hover:bg-theme-danger/90 transition-colors shadow-md">
+            <Trash2 className="w-4 h-4" /> Request Account Deletion
+          </a>
         </section>
 
         <div className="text-center pb-10">

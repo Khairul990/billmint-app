@@ -33,6 +33,16 @@ const updateSW = registerSW({
 // scroll and swallowing taps) and again mid-session on every deploy. Instead,
 // show a non-blocking toast — the next natural reload picks up the new build.
 if ('serviceWorker' in navigator) {
+  // Dev must never keep a stale SW: an old worker precached index.html and
+  // served the pre-fix boot splash after refresh. Unregister + drop caches.
+  if (import.meta.env.DEV) {
+    navigator.serviceWorker.getRegistrations().then((regs) => {
+      regs.forEach((r) => r.unregister().catch(() => {}));
+    }).catch(() => {});
+    if (typeof caches !== 'undefined') {
+      caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k)))).catch(() => {});
+    }
+  }
   let wasControlled = false;
   navigator.serviceWorker.ready.then(() => {
     wasControlled = !!navigator.serviceWorker.controller;

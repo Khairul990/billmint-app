@@ -33,7 +33,7 @@ const Landing = ({ onLoginSuccess }) => {
   // Landing light/dark presentation mode — independent of the app account
   // theme so the marketing page can always look its best for the visitor.
   const [landingMode, setLandingMode] = useState(() => {
-    try { return localStorage.getItem('billqyro_landing_mode') === 'light' ? 'light' : 'dark'; } catch { return 'dark'; }
+    try { return localStorage.getItem('billqyro_landing_mode') === 'dark' ? 'dark' : 'light'; } catch { return 'light'; }
   });
   const toggleLandingMode = () => {
     setLandingMode((m) => {
@@ -247,7 +247,7 @@ const Landing = ({ onLoginSuccess }) => {
   ];
 
   return (
-    <div className={`bq26-root min-h-screen flex flex-col relative ${landingMode === 'light' ? 'bq26-light' : ''}`}>
+    <div className={`bq26-root min-h-screen flex flex-col relative ${landingMode === 'dark' ? 'bq26-dark' : ''}`}>
       {/* ── Cinematic aurora backdrop ─────────────────────────────────── */}
       <div aria-hidden="true" className="bq26-aurora" />
       <div aria-hidden="true" className="bq26-grid" />
@@ -260,7 +260,7 @@ const Landing = ({ onLoginSuccess }) => {
       {/* ===== GLOBAL NAVIGATION ===== */}
       <nav className="fixed w-full top-3 z-50 flex justify-center px-4">
         <div className={`w-full max-w-7xl rounded-full px-5 sm:px-6 h-14 sm:h-16 flex items-center justify-between transition-all duration-300 bq26-nav ${isScrolled ? '' : '!bg-transparent !border-transparent !shadow-none'}`}>
-          <Logo type="horizontal" forceWhiteText={landingMode === 'dark'} />
+          <Logo type="horizontal" forceWhiteText={landingMode === 'dark'} textColorClass="text-[var(--bq26-text)]" />
 
           {/* Desktop nav links */}
           <div className="hidden lg:flex items-center gap-6">
@@ -274,7 +274,7 @@ const Landing = ({ onLoginSuccess }) => {
               onClick={toggleLandingMode}
               title={landingMode === 'dark' ? 'Light mode' : 'Dark mode'}
               aria-label="Toggle landing theme"
-              className="flex items-center justify-center w-10 h-10 sm:w-8 sm:h-8 rounded-full border border-[var(--bq26-line)] text-[var(--bq26-muted)] hover:text-[var(--bq26-text)] hover:border-[rgba(52,211,153,0.35)] transition-all cursor-pointer"
+              className="flex items-center justify-center w-10 h-10 sm:w-8 sm:h-8 rounded-full border border-[var(--bq26-line)] text-[var(--bq26-muted)] hover:text-[var(--bq26-text)] hover:border-[rgba(11,143,120,0.35)] transition-all cursor-pointer"
             >
               {landingMode === 'dark' ? <Sun className="w-4 h-4 sm:w-3.5 sm:h-3.5" /> : <Moon className="w-4 h-4 sm:w-3.5 sm:h-3.5" />}
             </button>
@@ -282,7 +282,7 @@ const Landing = ({ onLoginSuccess }) => {
               onClick={toggleLang}
               title={lang === 'bn' ? 'Switch to English' : 'বাংলায় দেখুন'}
               aria-label="Toggle language"
-              className="flex items-center gap-1.5 h-10 sm:h-8 px-3 sm:px-2.5 rounded-full border border-[var(--bq26-line)] text-[var(--bq26-muted)] hover:text-[var(--bq26-text)] hover:border-[rgba(52,211,153,0.35)] text-[11px] font-black transition-all cursor-pointer"
+              className="flex items-center gap-1.5 h-10 sm:h-8 px-3 sm:px-2.5 rounded-full border border-[var(--bq26-line)] text-[var(--bq26-muted)] hover:text-[var(--bq26-text)] hover:border-[rgba(11,143,120,0.35)] text-[11px] font-black transition-all cursor-pointer"
             >
               <Languages className="w-3.5 h-3.5" />
               {lang === 'bn' ? 'EN' : 'বাং'}
@@ -320,8 +320,8 @@ const Landing = ({ onLoginSuccess }) => {
             {navLinks.map(([id, label]) => (
               <button key={id} onClick={() => scrollTo(id)} className="block w-full text-left text-sm font-bold text-[var(--bq26-text)] py-2.5 border-b border-[var(--bq26-line-soft)]">{label}</button>
             ))}
-            <button onClick={() => scrollTo('login')} className="w-full mt-2 py-3 rounded-xl bg-gradient-to-r from-[#0DA678] to-[#0B8F78] text-white text-sm font-black">{tr('Sign In / Register', 'সাইন ইন / রেজিস্টার')}</button>
-              <a href="/downloads/BillQyro-Android.apk" download className="block w-full mt-2 py-3 rounded-xl border border-[rgba(52,211,153,0.35)] text-[var(--bq26-emerald-bright)] text-sm font-black flex items-center justify-center gap-2">
+            <button onClick={() => scrollTo('login')} className="w-full mt-2 py-3 rounded-xl bg-gradient-to-r from-[#0B8F78] to-[#0B8F78] text-white text-sm font-black">{tr('Sign In / Register', 'সাইন ইন / রেজিস্টার')}</button>
+              <a href="/downloads/BillQyro-Android.apk" download className="block w-full mt-2 py-3 rounded-xl border border-[rgba(11,143,120,0.35)] text-[var(--bq26-emerald-bright)] text-sm font-black flex items-center justify-center gap-2">
                 <Smartphone className="w-4 h-4" />
                 {tr('Download Android App', 'অ্যান্ড্রয়েড অ্যাপ ডাউনলোড')}
               </a>
@@ -338,7 +338,7 @@ const Landing = ({ onLoginSuccess }) => {
               animate={{ opacity: 1, y: 0 }}
               className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bq26-glass"
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-[#34D399] animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--bq26-emerald-bright)] animate-pulse" />
               <span className="text-[10px] font-extrabold uppercase tracking-[0.22em] text-[var(--bq26-emerald-bright)]">
                 {tr('OFFLINE-FIRST BILLING PLATFORM', 'অফলাইন-ফার্স্ট বিলিং প্ল্যাটফর্ম')}
               </span>
@@ -377,7 +377,7 @@ const Landing = ({ onLoginSuccess }) => {
               </button>
               <button
                 onClick={launchLiveDemo}
-                className="w-full sm:w-auto px-6 py-3.5 text-base font-bold flex items-center justify-center gap-2 rounded-full border border-[rgba(52,211,153,0.35)] text-[var(--bq26-emerald-bright)] hover:bg-[rgba(16,185,129,0.1)] transition-all"
+                className="w-full sm:w-auto px-6 py-3.5 text-base font-bold flex items-center justify-center gap-2 rounded-full border border-[rgba(11,143,120,0.35)] text-[var(--bq26-emerald-bright)] hover:bg-[rgba(11,143,120,0.1)] transition-all"
                 title={tr('Explore the full platform with sample data — no signup required', 'নমুনা ডেটা দিয়ে পুরো প্ল্যাটফর্ম দেখুন — রেজিস্টার লাগবে না')}
               >
                 <Zap className="w-4 h-4" />
@@ -386,7 +386,7 @@ const Landing = ({ onLoginSuccess }) => {
               <a
                 href="/downloads/BillQyro-Android.apk"
                 download
-                className="w-full sm:w-auto px-6 py-3.5 text-base font-bold flex items-center justify-center gap-2 rounded-full border border-[rgba(52,211,153,0.35)] text-[var(--bq26-emerald-bright)] hover:bg-[rgba(16,185,129,0.1)] transition-all"
+                className="w-full sm:w-auto px-6 py-3.5 text-base font-bold flex items-center justify-center gap-2 rounded-full border border-[rgba(11,143,120,0.35)] text-[var(--bq26-emerald-bright)] hover:bg-[rgba(11,143,120,0.1)] transition-all"
                 title={tr('Install the BillQyro Android app on your phone', 'BillQyro অ্যান্ড্রয়েড অ্যাপ ফোনে ইনস্টল করুন')}
               >
                 <Smartphone className="w-4 h-4" />
@@ -400,9 +400,9 @@ const Landing = ({ onLoginSuccess }) => {
               transition={{ delay: 0.34 }}
               className="flex flex-wrap items-center gap-x-5 gap-y-2 justify-center lg:justify-start text-[var(--bq26-muted)] text-xs font-bold"
             >
-              <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-[#34D399]" /> {tr('Free forever plan', 'চিরকাল ফ্রি প্ল্যান')}</span>
-              <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-[#34D399]" /> {tr('No credit card', 'ক্রেডিট কার্ড লাগবে না')}</span>
-              <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-[#34D399]" /> {tr('Works offline', 'অফলাইনেও চলে')}</span>
+              <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-[var(--bq26-emerald-bright)]" /> {tr('Free forever plan', 'চিরকাল ফ্রি প্ল্যান')}</span>
+              <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-[var(--bq26-emerald-bright)]" /> {tr('No credit card', 'ক্রেডিট কার্ড লাগবে না')}</span>
+              <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-[var(--bq26-emerald-bright)]" /> {tr('Works offline', 'অফলাইনেও চলে')}</span>
             </motion.div>
 
             <motion.div
@@ -436,7 +436,7 @@ const Landing = ({ onLoginSuccess }) => {
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-black text-[var(--bq26-text)] flex items-center gap-1.5">
-                  <Smartphone className="w-4 h-4 text-[#34D399]" />
+                  <Smartphone className="w-4 h-4 text-[var(--bq26-emerald-bright)]" />
                   {tr('Scan to install on your phone', 'স্ক্যান করে ফোনে ইনস্টল করুন')}
                 </p>
                 <p className="text-[11px] font-semibold text-[var(--bq26-muted)] leading-snug mt-1">
@@ -452,28 +452,28 @@ const Landing = ({ onLoginSuccess }) => {
             transition={{ delay: 0.2, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
             className="flex-1 w-full max-w-xl relative"
           >
-            <div aria-hidden="true" className="absolute -inset-8 rounded-[3rem] bg-[rgba(16,185,129,0.09)] blur-3xl -z-10 pointer-events-none" />
+            <div aria-hidden="true" className="absolute -inset-8 rounded-[3rem] bg-[rgba(11,143,120,0.06)] blur-3xl -z-10 pointer-events-none" />
 
             {/* Floating notification chips */}
             <div aria-hidden="true" className="bq26-chip -left-4 top-14 hidden md:flex items-center gap-2 rounded-2xl px-3 py-2 bq-float">
-              <span className="w-6 h-6 rounded-xl bg-[rgba(52,211,153,0.14)] text-[#34D399] flex items-center justify-center"><CheckCircle2 className="w-3.5 h-3.5" /></span>
+              <span className="w-6 h-6 rounded-xl bg-[rgba(11,143,120,0.12)] text-[var(--bq26-emerald)] flex items-center justify-center"><CheckCircle2 className="w-3.5 h-3.5" /></span>
               <div className="leading-tight">
                 <p className="text-[10px] font-black text-[var(--bq26-text)]">Payment Received</p>
-                <p className="text-[9px] font-bold text-[#34D399]">UPI · just now</p>
+                <p className="text-[9px] font-bold text-[var(--bq26-emerald-bright)]">UPI · just now</p>
               </div>
             </div>
             <div aria-hidden="true" className="bq26-chip -right-5 top-44 hidden md:flex items-center gap-2 rounded-2xl px-3 py-2 bq-float-slow">
-              <span className="w-6 h-6 rounded-xl bg-[rgba(227,201,143,0.12)] text-[#E3C98F] flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5" /></span>
+              <span className="w-6 h-6 rounded-xl bg-[rgba(217,119,6,0.12)] text-[var(--bq26-gold)] flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5" /></span>
               <div className="leading-tight">
                 <p className="text-[10px] font-black text-[var(--bq26-text)]">Revenue +18%</p>
-                <p className="text-[9px] font-bold text-[#E3C98F]">this week</p>
+                <p className="text-[9px] font-bold text-[var(--bq26-gold)]">this week</p>
               </div>
             </div>
             <div aria-hidden="true" className="bq26-chip -bottom-5 left-12 hidden md:flex items-center gap-2 rounded-2xl px-3 py-2 bq-float" style={{ animationDelay: '1.2s' }}>
-              <span className="w-6 h-6 rounded-xl bg-[rgba(45,212,191,0.12)] text-[#2DD4BF] flex items-center justify-center"><MessageCircle className="w-3.5 h-3.5" /></span>
+              <span className="w-6 h-6 rounded-xl bg-[rgba(20,184,166,0.12)] text-[var(--bq26-teal)] flex items-center justify-center"><MessageCircle className="w-3.5 h-3.5" /></span>
               <div className="leading-tight">
                 <p className="text-[10px] font-black text-[var(--bq26-text)]">Invoice shared</p>
-                <p className="text-[9px] font-bold text-[#2DD4BF]">via WhatsApp</p>
+                <p className="text-[9px] font-bold text-[var(--bq26-teal)]">via WhatsApp</p>
               </div>
             </div>
 
@@ -482,9 +482,9 @@ const Landing = ({ onLoginSuccess }) => {
               {/* Window chrome */}
               <div className="flex items-center justify-between mb-4 pb-3 border-b border-[var(--bq26-line-soft)]">
                 <div className="flex items-center gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#FB7185]/70" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#E3C98F]/70" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#34D399]/70" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-[#EF4444]/70" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-[var(--bq26-gold)]/70" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-[var(--bq26-emerald-bright)]/70" />
                 </div>
                 <div className="text-[10px] font-bold text-[var(--bq26-muted)] px-2.5 py-0.5 rounded-full border border-[var(--bq26-line-soft)]">
                   billqyro.app · {tr('Live Cockpit', 'লাইভ ককপিট')}
@@ -502,9 +502,9 @@ const Landing = ({ onLoginSuccess }) => {
                   <button
                     key={id}
                     onClick={() => selectCockpitTab(id)}
-                    className={`relative flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[10px] font-black transition-colors ${cockpitTab === id ? 'text-[#04100C]' : 'text-[var(--bq26-muted)] hover:text-[var(--bq26-text)]'}`}
+                    className={`relative flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[10px] font-black transition-colors ${cockpitTab === id ? 'text-white' : 'text-[var(--bq26-muted)] hover:text-[var(--bq26-text)]'}`}
                   >
-                    {cockpitTab === id && <motion.span layoutId="cockpit-pill" className="absolute inset-0 rounded-lg bg-gradient-to-r from-[#34D399] to-[#2DD4BF]" transition={{ type: 'spring', damping: 28, stiffness: 320 }} />}
+                    {cockpitTab === id && <motion.span layoutId="cockpit-pill" className="absolute inset-0 rounded-lg bg-[var(--bq26-btn)]" transition={{ type: 'spring', damping: 28, stiffness: 320 }} />}
                     <Icon className="w-3 h-3 relative z-10" />
                     <span className="relative z-10">{label}</span>
                   </button>
@@ -523,18 +523,18 @@ const Landing = ({ onLoginSuccess }) => {
                         </div>
                         <div className="bg-[var(--bq26-sunken)] p-3 rounded-xl border border-[var(--bq26-line-soft)]">
                           <p className="text-[9px] font-bold text-[var(--bq26-muted)] uppercase tracking-wider">{tr('Collections', 'কালেকশন')}</p>
-                          <p className="text-base font-black text-[#34D399] font-numbers mt-0.5"><AnimatedNumber value={42000} prefix="₹" /></p>
+                          <p className="text-base font-black text-[var(--bq26-emerald-bright)] font-numbers mt-0.5"><AnimatedNumber value={42000} prefix="₹" /></p>
                         </div>
                         <div className="bg-[var(--bq26-sunken)] p-3 rounded-xl border border-[var(--bq26-line-soft)]">
                           <p className="text-[9px] font-bold text-[var(--bq26-muted)] uppercase tracking-wider">{tr('Due', 'বাকি')}</p>
-                          <p className="text-base font-black text-[#E3C98F] font-numbers mt-0.5"><AnimatedNumber value={6250} prefix="₹" /></p>
+                          <p className="text-base font-black text-[var(--bq26-gold)] font-numbers mt-0.5"><AnimatedNumber value={6250} prefix="₹" /></p>
                         </div>
                       </div>
                       {/* Revenue bars */}
                       <div className="bg-[var(--bq26-sunken)] rounded-xl border border-[var(--bq26-line-soft)] p-3.5">
                         <div className="flex items-center justify-between mb-2.5">
                           <p className="text-[10px] font-black text-[var(--bq26-text)]">{tr('Weekly collections', 'সাপ্তাহিক কালেকশন')}</p>
-                          <span className="text-[9px] font-black text-[#34D399] flex items-center gap-1"><TrendingUp className="w-3 h-3" /> +18%</span>
+                          <span className="text-[9px] font-black text-[var(--bq26-emerald-bright)] flex items-center gap-1"><TrendingUp className="w-3 h-3" /> +18%</span>
                         </div>
                         <div className="flex items-end gap-1.5 h-16">
                           {[38, 52, 44, 68, 59, 82, 95].map((h, i) => (
@@ -543,7 +543,7 @@ const Landing = ({ onLoginSuccess }) => {
                               initial={{ height: 0 }}
                               animate={{ height: `${h}%` }}
                               transition={{ delay: i * 0.06, duration: 0.5, ease: 'easeOut' }}
-                              className={`flex-1 rounded-t-md ${i === 6 ? 'bg-gradient-to-t from-[#0DA678] to-[#34D399]' : 'bg-[rgba(52,211,153,0.22)]'}`}
+                              className={`flex-1 rounded-t-md ${i === 6 ? 'bg-gradient-to-t from-[var(--bq26-btn)] to-[var(--bq26-emerald-bright)]' : 'bg-[rgba(11,143,120,0.18)]'}`}
                             />
                           ))}
                         </div>
@@ -555,11 +555,11 @@ const Landing = ({ onLoginSuccess }) => {
                     <motion.div key="inv" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="space-y-2.5">
                       <div className="flex justify-between items-start bg-[var(--bq26-sunken)] rounded-xl border border-[var(--bq26-line-soft)] p-3.5">
                         <div>
-                          <span className="text-[9px] font-black text-[#34D399] bg-[rgba(52,211,153,0.12)] px-2 py-0.5 rounded-md">INV-2026-0042</span>
+                          <span className="text-[9px] font-black text-[var(--bq26-emerald-bright)] bg-[rgba(11,143,120,0.12)] px-2 py-0.5 rounded-md">INV-2026-0042</span>
                           <p className="text-sm font-black text-[var(--bq26-text)] mt-1.5">Apex Industrial Solutions</p>
                           <p className="text-[10px] text-[var(--bq26-muted)] font-medium">{tr('3 line items · Standard B2B', '৩টি আইটেম · স্ট্যান্ডার্ড B2B')}</p>
                         </div>
-                        <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-[rgba(52,211,153,0.1)] text-[#34D399] border border-[rgba(52,211,153,0.25)]">{tr('Paid', 'পেইড')}</span>
+                        <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-[rgba(11,143,120,0.1)] text-[var(--bq26-emerald-bright)] border border-[rgba(11,143,120,0.2)]">{tr('Paid', 'পেইড')}</span>
                       </div>
                       {[
                         ['Commercial Consultation', '2 × ₹2,500', '₹5,000'],
@@ -583,20 +583,20 @@ const Landing = ({ onLoginSuccess }) => {
 
                   {cockpitTab === 'qr' && (
                     <motion.div key="qr" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="flex items-center gap-4 bg-[var(--bq26-sunken)] rounded-xl border border-[var(--bq26-line-soft)] p-4">
-                      <div className="w-28 h-28 sm:w-32 sm:h-32 shrink-0 bq26-qr-cell rounded-xl border border-[rgba(52,211,153,0.25)] p-2 grid grid-cols-7 grid-rows-7 gap-[2px]">
+                      <div className="w-28 h-28 sm:w-32 sm:h-32 shrink-0 bq26-qr-cell rounded-xl border border-[rgba(11,143,120,0.2)] p-2 grid grid-cols-7 grid-rows-7 gap-[2px]">
                         {[
                           1,1,1,0,1,1,1, 1,0,1,0,0,0,1, 1,1,0,1,0,1,1, 0,0,1,1,1,0,0,
                           1,0,0,1,0,0,1, 1,1,0,0,1,1,1, 0,1,1,0,1,0,1, 1,0,1,1,0,1,1,
                           1,1,0,1,1,0,1, 0,0,1,0,1,1,0, 1,1,0,1,0,0,1, 0,1,1,0,1,1,0,
                           1,0,1,1,0,1,1, 1,1,0,0,1,0,1, 0,1,0,1,1,0,0, 1,0,1,0,1,1,1
-                        ].map((on, i) => <span key={i} className={on ? 'bg-[rgba(52,211,153,0.8)] rounded-[1px]' : ''} />)}
+                        ].map((on, i) => <span key={i} className={on ? 'bg-[var(--bq26-emerald)] rounded-[1px]' : ''} />)}
                       </div>
                       <div className="min-w-0 space-y-2">
                         <p className="text-xs font-black text-[var(--bq26-text)]">{tr('Scan & pay with any UPI app', 'যেকোনো UPI অ্যাপে স্ক্যান করে টাকা দিন')}</p>
                         <p className="text-[10px] text-[var(--bq26-muted)] font-bold">GPay · PhonePe · Paytm · BHIM</p>
                         <div className="flex items-center gap-2 pt-1">
-                          <span className="px-2.5 py-1 rounded-lg bg-[rgba(52,211,153,0.12)] border border-[rgba(52,211,153,0.3)] text-[#34D399] text-sm font-black font-numbers">₹4,200</span>
-                          <span className="flex items-center gap-1 text-[9px] font-black text-[#34D399] uppercase tracking-wider"><CheckCircle2 className="w-3 h-3" /> {tr('Verified proof', 'প্রমাণ যাচাই')}</span>
+                          <span className="px-2.5 py-1 rounded-lg bg-[rgba(11,143,120,0.12)] border border-[rgba(11,143,120,0.25)] text-[var(--bq26-emerald-bright)] text-sm font-black font-numbers">₹4,200</span>
+                          <span className="flex items-center gap-1 text-[9px] font-black text-[var(--bq26-emerald-bright)] uppercase tracking-wider"><CheckCircle2 className="w-3 h-3" /> {tr('Verified proof', 'প্রমাণ যাচাই')}</span>
                         </div>
                       </div>
                     </motion.div>
@@ -622,8 +622,8 @@ const Landing = ({ onLoginSuccess }) => {
               {[0, 1].map((dup) => (
                 <div key={dup} className="flex items-center gap-3 pr-3" aria-hidden={dup === 1}>
                   {[tr('Tailoring & Boutiques', 'টেইলারিং ও বুটিক'), tr('Retail & Supermarkets', 'রিটেইল ও সুপারমার্কেট'), tr('Clinics & Healthcare', 'ক্লিনিক ও হেলথকেয়ার'), tr('Repair & Electronics', 'রিপেয়ার ও ইলেকট্রনিক্স'), tr('Coaching & Education', 'কোচিং ও শিক্ষা'), tr('Embroidery Studios', 'এমব্রয়ডারি স্টুডিও'), tr('Cyber Cafes', 'সাইবার ক্যাফে'), tr('Salons & Parlours', 'সেলুন ও পার্লার'), tr('Wholesale Trading', 'হোলসেল ট্রেডিং'), tr('Freelancers', 'ফ্রিল্যান্সার')].map((cat) => (
-                    <span key={cat + dup} className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-[var(--bq26-line-soft)] bg-[rgba(6,20,15,0.6)] px-4 py-1.5 text-[11px] font-black text-[var(--bq26-text-soft)] tracking-wide">
-                      <Sparkles className="w-3 h-3 text-[#34D399]" />
+                    <span key={cat + dup} className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-[var(--bq26-line)] bg-[var(--bq26-panel)] px-4 py-1.5 text-[11px] font-black text-[var(--bq26-text-soft)] tracking-wide">
+                      <Sparkles className="w-3 h-3 text-[var(--bq26-emerald)]" />
                       {cat}
                     </span>
                   ))}
@@ -654,7 +654,7 @@ const Landing = ({ onLoginSuccess }) => {
               {/* Big tile: cockpit illustration */}
               <div onMouseMove={handleTileMove} className="bq26-tile rounded-3xl p-6 md:col-span-2 lg:row-span-2 flex flex-col justify-between min-h-[300px] lg:min-h-[420px]">
                 <div>
-                  <div className="w-11 h-11 rounded-2xl bg-[rgba(52,211,153,0.1)] border border-[rgba(52,211,153,0.25)] text-[#34D399] flex items-center justify-center mb-5"><Layers className="w-5 h-5" /></div>
+                  <div className="w-11 h-11 rounded-2xl bg-[rgba(11,143,120,0.1)] border border-[rgba(11,143,120,0.2)] text-[var(--bq26-emerald-bright)] flex items-center justify-center mb-5"><Layers className="w-5 h-5" /></div>
                   <h3 className="bq26-display text-xl font-bold text-[var(--bq26-text)]">{tr('Everything stays connected', 'সবকিছু একসাথে যুক্ত')}</h3>
                   <p className="text-xs text-[var(--bq26-muted)] leading-relaxed mt-2 max-w-sm">
                     {tr('Invoice totals, payments, customer dues and reporting are designed around the same financial source of truth. Approve a payment once — every ledger updates itself.', 'ইনভয়েসের টোটাল, পেমেন্ট, কাস্টমারের বাকি আর রিপোর্ট — সব একই আর্থিক সত্য ঘিরে তৈরি। একবার পেমেন্ট অনুমোদন করলেই সব লেজার নিজে নিজে আপডেট হয়।')}
@@ -668,10 +668,10 @@ const Landing = ({ onLoginSuccess }) => {
                   ].map(([label, val, sign]) => (
                     <div key={label} className="flex items-center justify-between bg-[var(--bq26-sunken)] border border-[var(--bq26-line-soft)] rounded-xl px-3.5 py-2.5">
                       <span className="flex items-center gap-2 text-[11px] font-bold text-[var(--bq26-text-soft)]">
-                        <span className={`w-1.5 h-1.5 rounded-full ${sign === '+' ? 'bg-[#34D399]' : 'bg-[#2DD4BF]'}`} />
+                        <span className={`w-1.5 h-1.5 rounded-full ${sign === '+' ? 'bg-[var(--bq26-emerald-bright)]' : 'bg-[var(--bq26-teal)]'}`} />
                         {label}
                       </span>
-                      <span className="text-[11px] font-black font-numbers text-[#34D399]">{val}</span>
+                      <span className="text-[11px] font-black font-numbers text-[var(--bq26-emerald-bright)]">{val}</span>
                     </div>
                   ))}
                 </div>
@@ -679,28 +679,28 @@ const Landing = ({ onLoginSuccess }) => {
 
               {/* Speed */}
               <div onMouseMove={handleTileMove} className="bq26-tile rounded-3xl p-6">
-                <div className="w-10 h-10 rounded-xl bg-[rgba(52,211,153,0.1)] text-[#34D399] flex items-center justify-center mb-4"><Zap className="w-5 h-5" /></div>
+                <div className="w-10 h-10 rounded-xl bg-[rgba(11,143,120,0.1)] text-[var(--bq26-emerald-bright)] flex items-center justify-center mb-4"><Zap className="w-5 h-5" /></div>
                 <h3 className="text-base font-black text-[var(--bq26-text)]">{tr('Counter-speed billing', 'কাউন্টারের গতিতে বিল')}</h3>
                 <p className="text-xs text-[var(--bq26-muted)] leading-relaxed mt-2">{tr('Optimistic local saves and focused workflows keep everyday billing responsive.', 'অপটিমিস্টিক লোকাল সেভ আর ফোকাসড ওয়ার্কফ্লো — রোজকার বিলিং ঝটপট।')}</p>
               </div>
 
               {/* Live links */}
               <div onMouseMove={handleTileMove} className="bq26-tile rounded-3xl p-6">
-                <div className="w-10 h-10 rounded-xl bg-[rgba(45,212,191,0.1)] text-[#2DD4BF] flex items-center justify-center mb-4"><Link2 className="w-5 h-5" /></div>
+                <div className="w-10 h-10 rounded-xl bg-[rgba(20,184,166,0.1)] text-[var(--bq26-teal)] flex items-center justify-center mb-4"><Link2 className="w-5 h-5" /></div>
                 <h3 className="text-base font-black text-[var(--bq26-text)]">{tr('Live customer links', 'লাইভ কাস্টমার লিংক')}</h3>
                 <p className="text-xs text-[var(--bq26-muted)] leading-relaxed mt-2">{tr('Encrypted web links where customers view, verify and pay — no app install.', 'এনক্রিপ্টেড ওয়েব লিংকে কাস্টমার দেখে, যাচাই করে, টাকা দেয় — অ্যাপ ইনস্টল লাগে না।')}</p>
               </div>
 
               {/* Offline */}
               <div onMouseMove={handleTileMove} className="bq26-tile rounded-3xl p-6">
-                <div className="w-10 h-10 rounded-xl bg-[rgba(227,201,143,0.1)] text-[#E3C98F] flex items-center justify-center mb-4"><WifiOff className="w-5 h-5" /></div>
+                <div className="w-10 h-10 rounded-xl bg-[rgba(217,119,6,0.1)] text-[var(--bq26-gold)] flex items-center justify-center mb-4"><WifiOff className="w-5 h-5" /></div>
                 <h3 className="text-base font-black text-[var(--bq26-text)]">{tr('Offline-first engine', 'অফলাইন-ফার্স্ট ইঞ্জিন')}</h3>
                 <p className="text-xs text-[var(--bq26-muted)] leading-relaxed mt-2">{tr('Network drops never stop the counter. Everything syncs when you reconnect.', 'নেটওয়ার্ক গেলেও কাউন্টার থামে না। নেট ফিরলেই সব সিঙ্ক।')}</p>
               </div>
 
               {/* Security */}
               <div onMouseMove={handleTileMove} className="bq26-tile rounded-3xl p-6">
-                <div className="w-10 h-10 rounded-xl bg-[rgba(52,211,153,0.1)] text-[#34D399] flex items-center justify-center mb-4"><ShieldCheck className="w-5 h-5" /></div>
+                <div className="w-10 h-10 rounded-xl bg-[rgba(11,143,120,0.1)] text-[var(--bq26-emerald-bright)] flex items-center justify-center mb-4"><ShieldCheck className="w-5 h-5" /></div>
                 <h3 className="text-base font-black text-[var(--bq26-text)]">{tr('Workspace isolation', 'ওয়ার্কস্পেস আইসোলেশন')}</h3>
                 <p className="text-xs text-[var(--bq26-muted)] leading-relaxed mt-2">{tr('Multi-tenant sandboxing, encrypted link tokens and audit-oriented controls.', 'মাল্টি-টেন্যান্ট স্যান্ডবক্স, এনক্রিপ্টেড লিংক টোকেন আর অডিট-ভিত্তিক কন্ট্রোল।')}</p>
               </div>
@@ -708,20 +708,20 @@ const Landing = ({ onLoginSuccess }) => {
               {/* Wide tile: reports w/ sparkline */}
               <div onMouseMove={handleTileMove} className="bq26-tile rounded-3xl p-6 md:col-span-2 flex items-center justify-between gap-5">
                 <div className="max-w-[60%]">
-                  <div className="w-10 h-10 rounded-xl bg-[rgba(45,212,191,0.1)] text-[#2DD4BF] flex items-center justify-center mb-4"><BarChart3 className="w-5 h-5" /></div>
+                  <div className="w-10 h-10 rounded-xl bg-[rgba(20,184,166,0.1)] text-[var(--bq26-teal)] flex items-center justify-center mb-4"><BarChart3 className="w-5 h-5" /></div>
                   <h3 className="text-base font-black text-[var(--bq26-text)]">{tr('Reports that reconcile', 'মিলে-যাওয়া রিপোর্ট')}</h3>
                   <p className="text-xs text-[var(--bq26-muted)] leading-relaxed mt-2">{tr('Sales, P&L, due ledgers and inventory valuation — exportable to Excel and PDF.', 'সেলস, লাভ-ক্ষতি, বাকির লেজার আর ইনভেন্টরি ভ্যালুয়েশন — Excel ও PDF-এ এক্সপোর্ট।')}</p>
                 </div>
                 <svg viewBox="0 0 120 64" className="w-32 sm:w-40 h-auto shrink-0" aria-hidden="true">
                   <defs>
                     <linearGradient id="bq26-spark" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#34D399" stopOpacity="0.35" />
-                      <stop offset="100%" stopColor="#34D399" stopOpacity="0" />
+                      <stop offset="0%" stopColor="var(--bq26-emerald)" stopOpacity="0.35" />
+                      <stop offset="100%" stopColor="var(--bq26-emerald)" stopOpacity="0" />
                     </linearGradient>
                   </defs>
                   <path d="M0,52 L15,44 L30,48 L45,34 L60,38 L75,24 L90,28 L105,14 L120,8 L120,64 L0,64 Z" fill="url(#bq26-spark)" />
-                  <path d="M0,52 L15,44 L30,48 L45,34 L60,38 L75,24 L90,28 L105,14 L120,8" fill="none" stroke="#34D399" strokeWidth="2.5" strokeLinecap="round" />
-                  <circle cx="120" cy="8" r="3.5" fill="#2DD4BF" />
+                  <path d="M0,52 L15,44 L30,48 L45,34 L60,38 L75,24 L90,28 L105,14 L120,8" fill="none" stroke="var(--bq26-emerald)" strokeWidth="2.5" strokeLinecap="round" />
+                  <circle cx="120" cy="8" r="3.5" fill="var(--bq26-teal)" />
                 </svg>
               </div>
             </div>
@@ -775,18 +775,18 @@ const Landing = ({ onLoginSuccess }) => {
                       key={cat.id}
                       onClick={() => setActiveCategory(cat.id)}
                       className={`relative shrink-0 lg:shrink flex items-center gap-3 px-4 py-3.5 rounded-2xl border text-left transition-all cursor-pointer ${isActive
-                        ? 'border-[rgba(52,211,153,0.4)] bg-[rgba(16,185,129,0.1)]'
-                        : 'border-[var(--bq26-line-soft)] bg-[rgba(6,20,15,0.4)] hover:border-[rgba(52,211,153,0.25)]'
+                        ? 'border-[rgba(11,143,120,0.4)] bg-[rgba(11,143,120,0.1)]'
+                        : 'border-[var(--bq26-line-soft)] bg-[rgba(248,250,252,0.9)] hover:border-[rgba(11,143,120,0.25)]'
                       }`}
                     >
-                      <span className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors ${isActive ? 'bg-[rgba(52,211,153,0.18)] text-[#34D399]' : 'bg-[var(--bq26-sunken)] text-[var(--bq26-muted)]'}`}>
+                      <span className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors ${isActive ? 'bg-[rgba(11,143,120,0.18)] text-[var(--bq26-emerald-bright)]' : 'bg-[var(--bq26-sunken)] text-[var(--bq26-muted)]'}`}>
                         <Icon className="w-[18px] h-[18px]" />
                       </span>
                       <span className="min-w-0">
                         <span className={`block text-xs font-black truncate ${isActive ? 'text-[var(--bq26-text)]' : 'text-[var(--bq26-text-soft)]'}`}>{cat.name}</span>
                         <span className="block text-[10px] font-bold text-[var(--bq26-muted)]">{cat.tag}</span>
                       </span>
-                      {isActive && <motion.span layoutId="cat-dot" className="ml-auto w-1.5 h-1.5 rounded-full bg-[#34D399] shrink-0 hidden lg:block" />}
+                      {isActive && <motion.span layoutId="cat-dot" className="ml-auto w-1.5 h-1.5 rounded-full bg-[var(--bq26-emerald-bright)] shrink-0 hidden lg:block" />}
                     </button>
                   );
                 })}
@@ -804,10 +804,10 @@ const Landing = ({ onLoginSuccess }) => {
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <span className="text-[10px] font-black uppercase tracking-widest text-[#34D399]">{activeCat.tag}</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-[var(--bq26-emerald-bright)]">{activeCat.tag}</span>
                         <h3 className="bq26-display text-2xl font-bold text-[var(--bq26-text)] mt-1">{activeCat.name}</h3>
                       </div>
-                      <span className="w-12 h-12 rounded-2xl bg-[rgba(52,211,153,0.1)] border border-[rgba(52,211,153,0.25)] text-[#34D399] flex items-center justify-center shrink-0">
+                      <span className="w-12 h-12 rounded-2xl bg-[rgba(11,143,120,0.1)] border border-[rgba(11,143,120,0.25)] text-[var(--bq26-emerald-bright)] flex items-center justify-center shrink-0">
                         {React.createElement(activeCat.icon, { className: 'w-6 h-6' })}
                       </span>
                     </div>
@@ -817,7 +817,7 @@ const Landing = ({ onLoginSuccess }) => {
                         <span key={f} className="px-3 py-1.5 rounded-full bg-[var(--bq26-sunken)] border border-[var(--bq26-line-soft)] text-[10px] font-black text-[var(--bq26-text-soft)]">{f}</span>
                       ))}
                     </div>
-                    <div className="mt-6 pt-4 border-t border-[var(--bq26-line-soft)] flex items-center gap-2 text-[11px] font-bold text-[#34D399]">
+                    <div className="mt-6 pt-4 border-t border-[var(--bq26-line-soft)] flex items-center gap-2 text-[11px] font-bold text-[var(--bq26-emerald-bright)]">
                       <CheckCircle2 className="w-4 h-4 shrink-0" />
                       {activeCat.highlight}
                     </div>
@@ -850,11 +850,11 @@ const Landing = ({ onLoginSuccess }) => {
                   const Icon = ws.icon;
                   return (
                     <div key={ws.step} className="relative pl-14 lg:pl-0">
-                      <div className="absolute left-0 lg:relative lg:left-auto flex items-center justify-center w-10 h-10 rounded-2xl bg-[var(--bq26-sunken-strong)] border border-[rgba(52,211,153,0.35)] text-[#34D399] shadow-[0_0_24px_-6px_rgba(16,185,129,0.5)] z-10">
+                      <div className="absolute left-0 lg:relative lg:left-auto flex items-center justify-center w-10 h-10 rounded-2xl bg-[var(--bq26-sunken-strong)] border border-[rgba(11,143,120,0.35)] text-[var(--bq26-emerald-bright)] shadow-[0_0_24px_-6px_rgba(11,143,120,0.5)] z-10">
                         <Icon className="w-[18px] h-[18px]" />
                       </div>
                       <div className="bq26-tile rounded-2xl p-5 h-full">
-                        <span className="text-2xl font-black font-numbers text-[rgba(52,211,153,0.25)]">{ws.step}</span>
+                        <span className="text-2xl font-black font-numbers text-[rgba(11,143,120,0.25)]">{ws.step}</span>
                         <h3 className="text-sm font-black text-[var(--bq26-text)] mt-1.5">{ws.title}</h3>
                         <p className="text-xs text-[var(--bq26-muted)] font-medium leading-relaxed mt-2">{ws.desc}</p>
                       </div>
@@ -888,7 +888,7 @@ const Landing = ({ onLoginSuccess }) => {
                   [Printer, tr('A4 / A5 thermal-friendly print layouts', 'A4 / A5 থার্মাল-বান্ধব প্রিন্ট লেআউট')]
                 ].map(([Icon, text]) => (
                   <div key={text} className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-[var(--bq26-sunken)] border border-[var(--bq26-line-soft)] flex items-center justify-center text-[#34D399] shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-[var(--bq26-sunken)] border border-[var(--bq26-line-soft)] flex items-center justify-center text-[var(--bq26-emerald-bright)] shrink-0">
                       <Icon className="w-4 h-4" />
                     </div>
                     <span className="text-xs font-bold text-[var(--bq26-text-soft)]">{text}</span>
@@ -901,11 +901,11 @@ const Landing = ({ onLoginSuccess }) => {
             <div className="flex-1 w-full max-w-md order-1 lg:order-2">
               <div className="bq26-cockpit rounded-[2rem] p-6 relative">
                 <div className="text-center p-5 rounded-2xl bg-[var(--bq26-sunken)] border border-[var(--bq26-line-soft)]">
-                  <div className="w-36 h-36 mx-auto bq26-qr-cell rounded-2xl border border-[rgba(52,211,153,0.25)] p-2.5 grid grid-cols-8 grid-rows-8 gap-[2px]">
+                  <div className="w-36 h-36 mx-auto bq26-qr-cell rounded-2xl border border-[rgba(11,143,120,0.25)] p-2.5 grid grid-cols-8 grid-rows-8 gap-[2px]">
                     {[
                       1,1,1,1,0,1,1,0, 1,0,0,1,0,0,1,1, 1,1,0,0,1,1,0,1, 0,1,1,0,0,1,1,0,
                       1,0,1,1,1,0,0,1, 0,1,0,1,0,1,1,0, 1,1,1,0,1,0,1,1, 0,0,1,1,0,1,1,1
-                    ].map((on, i) => <span key={i} className={on ? 'bg-[rgba(52,211,153,0.8)] rounded-[1px]' : ''} />)}
+                    ].map((on, i) => <span key={i} className={on ? 'bg-[rgba(11,143,120,0.8)] rounded-[1px]' : ''} />)}
                   </div>
                   <p className="text-xs font-black text-[var(--bq26-text)] mt-4">{tr('Scan with GPay / PhonePe / Paytm', 'GPay / PhonePe / Paytm দিয়ে স্ক্যান করুন')}</p>
                   <p className="text-[10px] text-[var(--bq26-muted)] font-numbers mt-1">UPI ID: business@bank</p>
@@ -947,20 +947,20 @@ const Landing = ({ onLoginSuccess }) => {
                     tr('1 user', '১ জন ইউজার'),
                     tr('UPI QR & live links', 'UPI QR ও লাইভ লিংক')
                   ].map((f) => (
-                    <li key={f} className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-[#34D399] shrink-0" />{f}</li>
+                    <li key={f} className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-[var(--bq26-emerald-bright)] shrink-0" />{f}</li>
                   ))}
                 </ul>
-                <button onClick={() => scrollTo('login')} className="mt-7 w-full py-3 rounded-full border border-[var(--bq26-line)] text-[var(--bq26-text)] text-xs font-black hover:bg-[rgba(16,185,129,0.08)] transition-colors">
+                <button onClick={() => scrollTo('login')} className="mt-7 w-full py-3 rounded-full border border-[var(--bq26-line)] text-[var(--bq26-text)] text-xs font-black hover:bg-[rgba(11,143,120,0.08)] transition-colors">
                   {tr('Start Free', 'ফ্রি শুরু করুন')}
                 </button>
               </div>
 
               {/* Pro */}
-              <div className="bq26-tile rounded-3xl p-7 flex flex-col relative border-[rgba(52,211,153,0.4)] bg-[rgba(10,30,24,0.75)] shadow-[0_30px_80px_-30px_rgba(16,185,129,0.4)]">
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-gradient-to-r from-[#34D399] to-[#2DD4BF] text-[#04100C]">
+              <div className="bq26-tile rounded-3xl p-7 flex flex-col relative border-[rgba(11,143,120,0.4)] bg-[rgba(255,255,255,0.9)] shadow-[0_30px_80px_-30px_rgba(11,143,120,0.25)]">
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-gradient-to-r from-[var(--bq26-emerald-bright)] to-[var(--bq26-teal)] text-white">
                   {tr('Most Popular', 'সবচেয়ে জনপ্রিয়')}
                 </span>
-                <p className="text-[10px] font-black uppercase tracking-widest text-[#34D399] flex items-center gap-1.5"><Crown className="w-3.5 h-3.5" /> Pro</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-[var(--bq26-emerald-bright)] flex items-center gap-1.5"><Crown className="w-3.5 h-3.5" /> Pro</p>
                 <div className="flex items-end gap-1.5 mt-3">
                   <span className="bq26-display text-4xl font-bold bq26-grad-text font-numbers">₹499</span>
                   <span className="text-xs font-bold text-[var(--bq26-muted)] mb-1.5">{tr('/ month', '/ মাস')}</span>
@@ -975,7 +975,7 @@ const Landing = ({ onLoginSuccess }) => {
                     tr('Customer portal & payment links', 'কাস্টমার পোর্টাল ও পেমেন্ট লিংক'),
                     tr('AI Bill Creator', 'AI বিল ক্রিয়েটর')
                   ].map((f) => (
-                    <li key={f} className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-[#34D399] shrink-0" />{f}</li>
+                    <li key={f} className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-[var(--bq26-emerald-bright)] shrink-0" />{f}</li>
                   ))}
                 </ul>
                 <button onClick={() => scrollTo('login')} className="bq26-beam mt-7">
@@ -999,10 +999,10 @@ const Landing = ({ onLoginSuccess }) => {
                     tr('Unlimited invoices', 'আনলিমিটেড ইনভয়েস'),
                     tr('Priority support', 'প্রায়োরিটি সাপোর্ট')
                   ].map((f) => (
-                    <li key={f} className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-[#E3C98F] shrink-0" />{f}</li>
+                    <li key={f} className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-[var(--bq26-gold)] shrink-0" />{f}</li>
                   ))}
                 </ul>
-                <button onClick={() => scrollTo('login')} className="mt-7 w-full py-3 rounded-full border border-[rgba(227,201,143,0.3)] text-[#E3C98F] text-xs font-black hover:bg-[rgba(227,201,143,0.08)] transition-colors">
+                <button onClick={() => scrollTo('login')} className="mt-7 w-full py-3 rounded-full border border-[rgba(227,201,143,0.3)] text-[var(--bq26-gold)] text-xs font-black hover:bg-[rgba(227,201,143,0.08)] transition-colors">
                   {tr('Claim Lifetime', 'লাইফটাইম নিন')}
                 </button>
               </div>
@@ -1019,28 +1019,28 @@ const Landing = ({ onLoginSuccess }) => {
         <ScrollReveal yOffset={28}>
           <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bq26-tile rounded-3xl p-8 space-y-4">
-              <div className="w-12 h-12 rounded-2xl bg-[rgba(227,201,143,0.1)] border border-[rgba(227,201,143,0.25)] text-[#E3C98F] flex items-center justify-center">
+              <div className="w-12 h-12 rounded-2xl bg-[rgba(227,201,143,0.1)] border border-[rgba(227,201,143,0.25)] text-[var(--bq26-gold)] flex items-center justify-center">
                 <Smartphone className="w-6 h-6" />
               </div>
               <h3 className="text-xl font-black text-[var(--bq26-text)]">{tr('Offline-First IndexedDB Engine', 'অফলাইন-ফার্স্ট IndexedDB ইঞ্জিন')}</h3>
               <p className="text-xs text-[var(--bq26-text-soft)] leading-relaxed font-medium">
                 {tr('Network drops in your shop will never interrupt your billing counter. BillQyro saves every invoice locally with cryptographic idempotency and automatically reconciles when internet restores.', 'দোকানে নেটওয়ার্ক চলে গেলেও বিলিং কাউন্টার থামবে না। BillQyro প্রতিটি ইনভয়েস লোকালি সেভ করে রাখে, ইন্টারনেট ফিরলেই সব অটোমেটিক সিঙ্ক হয়ে যায়।')}
               </p>
-              <div className="text-[11px] font-bold text-[#34D399] flex items-center gap-1.5 pt-1">
+              <div className="text-[11px] font-bold text-[var(--bq26-emerald-bright)] flex items-center gap-1.5 pt-1">
                 <Check className="w-4 h-4" /> {tr('Zero data loss guarantee during outages', 'নেটওয়ার্ক গেলেও ডেটা-লস শূন্য')}
               </div>
             </div>
 
             <div className="bq26-tile rounded-3xl p-8 space-y-4">
-              <div className="w-12 h-12 rounded-2xl bg-[rgba(52,211,153,0.1)] border border-[rgba(52,211,153,0.25)] text-[#34D399] flex items-center justify-center">
+              <div className="w-12 h-12 rounded-2xl bg-[rgba(11,143,120,0.1)] border border-[rgba(11,143,120,0.25)] text-[var(--bq26-emerald-bright)] flex items-center justify-center">
                 <Lock className="w-6 h-6" />
               </div>
               <h3 className="text-xl font-black text-[var(--bq26-text)]">{tr('Workspace Isolation & Security', 'ওয়ার্কস্পেস আইসোলেশন ও সিকিউরিটি')}</h3>
               <p className="text-xs text-[var(--bq26-text-soft)] leading-relaxed font-medium">
                 {tr('Strict multi-tenant security architecture. Each business branch and workspace has dedicated data partition rules, encrypted token hashes for public links, and full audit logging.', 'কঠোর মাল্টি-টেন্যান্ট সিকিউরিটি আর্কিটেকচার। প্রতিটি ব্রাঞ্চ ও ওয়ার্কস্পেসের আলাদা ডেটা-পার্টিশন নিয়ম, পাবলিক লিংকের এনক্রিপ্টেড টোকেন হ্যাশ আর পূর্ণ অডিট লগ।')}
               </p>
-              <div className="text-[11px] font-bold text-[#34D399] flex items-center gap-1.5 pt-1">
-                <Check className="w-4 h-4" /> {tr('Firebase 256-bit encryption in-transit & at rest', 'Firebase ২৫৬-বিট এনক্রিপশন — চলার পথে ও সংরক্ষণে')}
+              <div className="text-[11px] font-bold text-[var(--bq26-emerald-bright)] flex items-center gap-1.5 pt-1">
+                <Check className="w-4 h-4" /> {tr('Firebase 256-bit encryption in-transit & at rest', 'Firebase ২৫৬-বিট এনক্রিপশন — চলার পথে ও সংরক্ষণে')} <span className="text-[9px] text-[var(--bq26-muted)]">(<a href="https://firebase.google.com/docs/firestore/security" target="_blank" rel="noopener noreferrer" className="underline">source</a>)</span>
               </div>
             </div>
           </div>
@@ -1066,7 +1066,7 @@ const Landing = ({ onLoginSuccess }) => {
                     className="w-full p-5 text-left flex justify-between items-center gap-4 font-bold text-sm text-[var(--bq26-text)] cursor-pointer"
                   >
                     <span>{faq.q}</span>
-                    <ChevronDown className={`w-4 h-4 shrink-0 transition-transform duration-300 ${faqOpen === idx ? 'rotate-180 text-[#34D399]' : 'text-[var(--bq26-muted)]'}`} />
+                    <ChevronDown className={`w-4 h-4 shrink-0 transition-transform duration-300 ${faqOpen === idx ? 'rotate-180 text-[var(--bq26-emerald-bright)]' : 'text-[var(--bq26-muted)]'}`} />
                   </button>
                   <AnimatePresence initial={false}>
                     {faqOpen === idx && (
@@ -1090,9 +1090,41 @@ const Landing = ({ onLoginSuccess }) => {
         </ScrollReveal>
       </motion.section>
 
+      {/* ===== SECTION: TESTIMONIALS ===== */}
+      <motion.section initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.55, ease: 'easeOut' }} className="relative py-24 px-6 z-10">
+        <ScrollReveal yOffset={28}>
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-12">
+              <p className="bq26-kicker">{tr('Trusted by Businesses', 'ব্যবসাদের আস্থা')}</p>
+              <h2 className="bq26-display text-3xl sm:text-4xl font-bold text-[var(--bq26-text)] mt-3">
+                {tr('What our users say', 'আমাদের ব্যবহারকারীরা যা বলেন')}
+              </h2>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {[
+                { name: 'Rahim Uddin', role: 'Tailoring Shop, Dhaka', text: 'BillQyro changed how I track customer dues. Before I used notebooks, now everything is automatic. The Bengali voice billing is a game changer.' },
+                { name: 'Priya Sharma', role: 'Coaching Center, Kolkata', text: 'We generate 200+ invoices per month. BillQyro handles it offline perfectly. The WhatsApp reminders help us collect dues faster.' },
+                { name: 'Amitesh Kumar', role: 'Repair Shop, Patna', text: 'Simple, fast, and free. I switched from a complex accounting tool to BillQyro. My staff learned it in 10 minutes.' },
+              ].map((t, i) => (
+                <div key={i} className="bq26-tile rounded-2xl p-6 !transform-none">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#0B8F78] to-[var(--bq26-emerald-bright)] flex items-center justify-center text-white font-bold text-sm">{t.name[0]}</div>
+                    <div>
+                      <p className="text-sm font-bold text-[var(--bq26-text)]">{t.name}</p>
+                      <p className="text-[10px] text-[var(--bq26-muted)] font-semibold">{t.role}</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-[var(--bq26-text-soft)] leading-relaxed font-medium">"{t.text}"</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </ScrollReveal>
+      </motion.section>
+
       {/* ===== SECTION: AUTH / LOGIN ===== */}
       <motion.section initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.55, ease: 'easeOut' }} id="login" className="relative py-24 px-6 z-10">
-        <div aria-hidden="true" className="absolute inset-x-0 top-0 h-56 bg-gradient-to-b from-[rgba(16,185,129,0.07)] to-transparent pointer-events-none" />
+        <div aria-hidden="true" className="absolute inset-x-0 top-0 h-56 bg-gradient-to-b from-[rgba(11,143,120,0.07)] to-transparent pointer-events-none" />
         <ScrollReveal yOffset={24}>
           <div className="max-w-6xl mx-auto grid lg:grid-cols-[1fr_1.15fr] gap-10 lg:gap-14 items-start relative">
             <div className="text-center lg:text-left pt-4">
@@ -1110,7 +1142,7 @@ const Landing = ({ onLoginSuccess }) => {
                   [tr('Grow', 'বৃদ্ধি'), tr('Measure & improve', 'মাপুন ও উন্নত করুন')]
                 ].map(([k, v]) => (
                   <div key={k} className="p-4 rounded-2xl bq26-glass">
-                    <p className="text-[10px] font-black uppercase tracking-wider text-[#34D399]">{k}</p>
+                    <p className="text-[10px] font-black uppercase tracking-wider text-[var(--bq26-emerald-bright)]">{k}</p>
                     <p className="text-xs font-bold text-[var(--bq26-text-soft)] mt-1">{v}</p>
                   </div>
                 ))}
@@ -1122,13 +1154,13 @@ const Landing = ({ onLoginSuccess }) => {
                 <div className="flex bg-[var(--bq26-sunken-strong)] p-1 rounded-2xl border border-[var(--bq26-line-soft)] mb-6">
                   <button
                     onClick={() => setPortalMode('business')}
-                    className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all ${portalMode === 'business' ? 'bg-gradient-to-r from-[#0DA678] to-[#0B8F78] text-white shadow-md' : 'text-[var(--bq26-muted)] hover:text-[var(--bq26-text)]'}`}
+                    className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all ${portalMode === 'business' ? 'bg-gradient-to-r from-[#0B8F78] to-[#0B8F78] text-white shadow-md' : 'text-[var(--bq26-muted)] hover:text-[var(--bq26-text)]'}`}
                   >
                     {tr('Business Login / Register', 'বিজনেস লগইন / রেজিস্টার')}
                   </button>
                   <button
                     onClick={() => setPortalMode('customer')}
-                    className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all ${portalMode === 'customer' ? 'bg-gradient-to-r from-[#0DA678] to-[#0B8F78] text-white shadow-md' : 'text-[var(--bq26-muted)] hover:text-[var(--bq26-text)]'}`}
+                    className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all ${portalMode === 'customer' ? 'bg-gradient-to-r from-[#0B8F78] to-[#0B8F78] text-white shadow-md' : 'text-[var(--bq26-muted)] hover:text-[var(--bq26-text)]'}`}
                   >
                     {tr('Customer Portal', 'কাস্টমার পোর্টাল')}
                   </button>
@@ -1156,10 +1188,10 @@ const Landing = ({ onLoginSuccess }) => {
 
                 {/* No-signup interactive demo access */}
                 <div className="mt-5 pt-5 border-t border-[var(--bq26-line-soft)]">
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3 rounded-2xl bg-[var(--bq26-sunken)] border border-dashed border-[rgba(52,211,153,0.3)] px-4 py-3.5">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3 rounded-2xl bg-[var(--bq26-sunken)] border border-dashed border-[rgba(11,143,120,0.3)] px-4 py-3.5">
                     <div className="flex items-center gap-3 text-center sm:text-left">
-                      <div className="w-9 h-9 rounded-xl bg-[rgba(52,211,153,0.1)] border border-[rgba(52,211,153,0.25)] flex items-center justify-center shrink-0">
-                        <Zap className="w-4 h-4 text-[#34D399]" />
+                      <div className="w-9 h-9 rounded-xl bg-[rgba(11,143,120,0.1)] border border-[rgba(11,143,120,0.25)] flex items-center justify-center shrink-0">
+                        <Zap className="w-4 h-4 text-[var(--bq26-emerald-bright)]" />
                       </div>
                       <div>
                         <p className="text-xs font-black text-[var(--bq26-text)]">{tr('Not ready to register?', 'এখনই রেজিস্টার করবেন না?')}</p>
@@ -1168,7 +1200,7 @@ const Landing = ({ onLoginSuccess }) => {
                     </div>
                     <button
                       onClick={launchLiveDemo}
-                      className="shrink-0 px-4 py-2 rounded-xl bg-gradient-to-r from-[#0DA678] to-[#0B8F78] text-white text-xs font-black hover:opacity-90 transition-opacity shadow-lg"
+                      className="shrink-0 px-4 py-2 rounded-xl bg-gradient-to-r from-[#0B8F78] to-[#0B8F78] text-white text-xs font-black hover:opacity-90 transition-opacity shadow-lg"
                     >
                       {tr('Launch Live Demo →', 'লাইভ ডেমো শুরু করুন →')}
                     </button>
@@ -1212,21 +1244,21 @@ const Landing = ({ onLoginSuccess }) => {
 
       {/* ===== FOOTER ===== */}
       <footer className="relative px-6 pt-16 pb-8 text-xs text-[var(--bq26-muted)] z-10">
-        <div aria-hidden="true" className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(52,211,153,0.5)] to-transparent" />
+        <div aria-hidden="true" className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,143,120,0.5)] to-transparent" />
         <div className="max-w-7xl mx-auto relative">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-10 pb-10 border-b border-[var(--bq26-line-soft)]">
             {/* Brand column */}
             <div className="col-span-2 md:col-span-1 space-y-4">
-              <Logo type="horizontal" forceWhiteText={landingMode === 'dark'} />
+              <Logo type="horizontal" forceWhiteText={landingMode === 'dark'} textColorClass="text-[var(--bq26-text)]" />
               <p className="text-[11px] font-medium leading-relaxed max-w-[28ch] text-[var(--bq26-text-soft)]">
                 {tr('The premium billing command center for small shops, studios and service businesses. Built in India 🇮🇳, made for the world.', 'ছোট দোকান, স্টুডিও আর সার্ভিস ব্যবসার জন্য প্রিমিয়াম বিলিং কমান্ড সেন্টার। ভারতে তৈরি 🇮🇳, সারা বিশ্বের জন্য।')}
               </p>
               <div className="flex items-center gap-2">
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--bq26-sunken)] border border-[var(--bq26-line-soft)] text-[10px] font-bold text-[var(--bq26-text-soft)]">
-                  <ShieldCheck className="w-3 h-3 text-[#34D399]" /> {tr('Secure Sync', 'সিকিউর সিঙ্ক')}
+                  <ShieldCheck className="w-3 h-3 text-[var(--bq26-emerald-bright)]" /> {tr('Secure Sync', 'সিকিউর সিঙ্ক')}
                 </span>
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--bq26-sunken)] border border-[var(--bq26-line-soft)] text-[10px] font-bold text-[var(--bq26-text-soft)]">
-                  <Zap className="w-3 h-3 text-[#E3C98F]" /> {tr('Offline First', 'অফলাইন ফার্স্ট')}
+                  <Zap className="w-3 h-3 text-[var(--bq26-gold)]" /> {tr('Offline First', 'অফলাইন ফার্স্ট')}
                 </span>
               </div>
             </div>
@@ -1238,7 +1270,7 @@ const Landing = ({ onLoginSuccess }) => {
                 <button onClick={() => scrollTo('platform')} className="block hover:text-[var(--bq26-text)] transition-colors">{tr('Platform Tour', 'প্ল্যাটফর্ম ট্যুর')}</button>
                 <button onClick={() => scrollTo('categories')} className="block hover:text-[var(--bq26-text)] transition-colors">{tr('Business Categories', 'বিজনেস ক্যাটাগরি')}</button>
                 <button onClick={() => scrollTo('pricing')} className="block hover:text-[var(--bq26-text)] transition-colors">{tr('Pricing', 'প্রাইসিং')}</button>
-                <button onClick={launchLiveDemo} className="block text-[#34D399] hover:opacity-80 transition-opacity">{tr('Live Demo', 'লাইভ ডেমো')}</button>
+                <button onClick={launchLiveDemo} className="block text-[var(--bq26-emerald-bright)] hover:opacity-80 transition-opacity">{tr('Live Demo', 'লাইভ ডেমো')}</button>
               </div>
             </div>
 
@@ -1257,6 +1289,7 @@ const Landing = ({ onLoginSuccess }) => {
             <div className="space-y-3">
               <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[var(--bq26-text)]">{tr('Legal', 'লিগ্যাল')}</p>
               <div className="space-y-2.5 font-semibold">
+                <a href="/about" className="block hover:text-[var(--bq26-text)] transition-colors">{tr('About Us', 'আমাদের সম্পর্কে')}</a>
                 <a href="/terms" className="block hover:text-[var(--bq26-text)] transition-colors">{tr('Terms of Service', 'সার্ভিসের শর্তাবলী')}</a>
                 <a href="/privacy" className="block hover:text-[var(--bq26-text)] transition-colors">{tr('Privacy Policy', 'প্রাইভেসি পলিসি')}</a>
                 <a href="/refund" className="block hover:text-[var(--bq26-text)] transition-colors">{tr('Refund Policy', 'রিফান্ড পলিসি')}</a>
@@ -1267,6 +1300,20 @@ const Landing = ({ onLoginSuccess }) => {
 
           <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-6">
             <span className="text-[10px] font-bold">{tr('© 2026 BillQyro Platform · All rights reserved.', '© ২০২৬ BillQyro প্ল্যাটফর্ম · সর্বস্বত্ব সংরক্ষিত।')}</span>
+            <div className="flex items-center gap-4">
+              <a href="https://twitter.com/billqyro" target="_blank" rel="noopener noreferrer" aria-label="Twitter" className="hover:text-[var(--bq26-text)] transition-colors">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+              </a>
+              <a href="https://linkedin.com/company/billqyro" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="hover:text-[var(--bq26-text)] transition-colors">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+              </a>
+              <a href="https://youtube.com/@billqyro" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="hover:text-[var(--bq26-text)] transition-colors">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+              </a>
+              <a href="https://github.com/billqyro" target="_blank" rel="noopener noreferrer" aria-label="GitHub" className="hover:text-[var(--bq26-text)] transition-colors">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+              </a>
+            </div>
             <div className="flex items-center gap-5 font-bold">
               <button onClick={() => scrollTo('login')} className="hover:text-[var(--bq26-text)] transition-colors">{tr('Sign In', 'সাইন ইন')}</button>
               <a href="mailto:support@billqyro.com" className="hover:text-[var(--bq26-text)] transition-colors flex items-center gap-1.5">

@@ -24,7 +24,7 @@ const PrivacyPolicy = ({ setCurrentTab }) => {
             </div>
             <div>
               <h1 className="text-2xl font-black text-theme-primary tracking-tight">Privacy Policy</h1>
-              <p className="text-sm text-theme-muted font-medium mt-1">Last updated: {new Date().toLocaleDateString()}</p>
+              <p className="text-sm text-theme-muted font-medium mt-1">BillQyro Technologies · Last updated: September 21, 2026</p>
             </div>
           </div>
 
@@ -41,7 +41,7 @@ const PrivacyPolicy = ({ setCurrentTab }) => {
 
             <section>
               <h2 className="text-lg font-bold text-theme-primary mb-3">2. How We Use Your Information</h2>
-              <p>We use the information we collect to operate, maintain, and improve our billing platform, process your transactions, and communicate with you regarding your account and our services.</p>
+              <p>BillQyro Technologies uses the information we collect to operate, maintain, and improve our billing platform, process your transactions, and communicate with you regarding your account and our services.</p>
             </section>
 
             <section>

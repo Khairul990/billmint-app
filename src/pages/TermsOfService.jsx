@@ -24,7 +24,7 @@ const TermsOfService = ({ setCurrentTab }) => {
           </div>
           <div>
             <h1 className="text-2xl font-black text-theme-primary tracking-tight">Terms of Service</h1>
-            <p className="text-sm text-theme-muted font-medium mt-1">Last updated: {new Date().toLocaleDateString()}</p>
+            <p className="text-sm text-theme-muted font-medium mt-1">BillQyro Technologies · Last updated: September 21, 2026</p>
           </div>
         </div>
 
@@ -46,7 +46,7 @@ const TermsOfService = ({ setCurrentTab }) => {
 
           <section>
             <h2 className="text-lg font-bold text-theme-primary mb-3">4. Intellectual Property</h2>
-            <p>The Service and its original content, features, and functionality are and will remain the exclusive property of our company and its licensors. The Service is protected by copyright, trademark, and other laws.</p>
+            <p>The Service and its original content, features, and functionality are and will remain the exclusive property of BillQyro Technologies and its licensors. The Service is protected by copyright, trademark, and other laws.</p>
           </section>
 
           <section>

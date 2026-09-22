@@ -1,7 +1,7 @@
 import React, { useState, useId } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const Logo = ({ type = 'horizontal', className = '', forceWhiteText = false, onClick }) => {
+const Logo = ({ type = 'horizontal', className = '', forceWhiteText = false, textColorClass = '', onClick }) => {
   const [isClicked, setIsClicked] = useState(false);
   const rawId = useId();
   const uid = rawId.replace(/:/g, '');
@@ -195,10 +195,10 @@ const Logo = ({ type = 'horizontal', className = '', forceWhiteText = false, onC
         {/* Brand name row */}
         <div className="flex items-baseline leading-none pt-0.5">
           <motion.span
-            className={`text-[26px] font-bold tracking-tighter leading-none ${forceWhiteText ? 'text-white' : 'text-theme-primary'}`}
+            className={`text-[26px] font-bold tracking-tighter leading-none ${textColorClass ? textColorClass : (forceWhiteText ? 'text-white' : 'text-theme-primary')}`}
             style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
             animate={{
-              color: isClicked ? 'var(--accent)' : (forceWhiteText ? '#ffffff' : 'var(--text-primary)'),
+              color: isClicked ? 'var(--accent)' : (textColorClass ? undefined : (forceWhiteText ? '#ffffff' : 'var(--text-primary)')),
               transition: { duration: 1.5 }
             }}
           >

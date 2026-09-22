@@ -6,14 +6,14 @@
         const div = document.createElement('div');
         div.style = 'position:fixed;top:0;left:0;z-index:999999;background:red;color:white;padding:20px;width:100%;font-size:16px;font-family:monospace;white-space:pre-wrap;overflow:auto;height:100vh;';
         div.innerText = 'CRASH: ' + e.message + '\n\n' + (e.error ? e.error.stack : '');
-        document.body.appendChild(div);
+        (document.body || document.documentElement).appendChild(div);
       });
     </script>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="apple-touch-icon" href="/app-icon.svg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#04100C" />
+    <meta name="theme-color" content="#FFFFFF" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -21,6 +21,8 @@
     <!-- Premium Fonts Setup (English & Bengali Unicode Support) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap">
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+Bengali:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- SEO Optimization Meta Tags -->
@@ -29,16 +31,15 @@
     <meta name="keywords" content="invoice, billing, invoicing software, free invoice generator, business management, PDF invoices, payment tracking, small business tools, freelancer billing" />
     <meta name="author" content="BillQyro Technologies" />
     <meta name="robots" content="index, follow" />
-    <!-- NOTE: canonical/og URLs point to the current live domain. Swap to https://billqyro.com/ when the domain is purchased. -->
-    <link rel="canonical" href="https://billqyro-app.vercel.app/" />
+    <link rel="canonical" href="<%- canonicalUrl %>" />
     
     <!-- Open Graph Metadata for Social Media Previews -->
     <meta property="og:title" content="BillQyro - Smart Billing. Premium Invoices." />
     <meta property="og:description" content="Generate professional business invoices instantly. Secure, beautiful, mobile-friendly finance dashboard for modern freelancers and businesses." />
-    <meta property="og:url" content="https://billqyro-app.vercel.app/" />
+    <meta property="og:url" content="<%- ogUrl %>" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="BillQyro" />
-    <meta property="og:image" content="https://billqyro-app.vercel.app/og-image.jpg" />
+    <meta property="og:image" content="<%- ogImageUrl %>" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="BillQyro — Smart Billing. Premium Invoices." />
@@ -50,21 +51,149 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="BillQyro - Smart Billing. Premium Invoices." />
     <meta name="twitter:description" content="Generate professional business invoices instantly. Secure, beautiful, mobile-friendly finance dashboard for modern freelancers and businesses." />
-    <meta name="twitter:image" content="https://billqyro-app.vercel.app/og-image.jpg" />
+    <meta name="twitter:image" content="<%- ogImageUrl %>" />
+    <meta name="twitter:site" content="<%- twitterSite %>" />
     
-    <!-- JSON-LD Structured Data -->
+    <!-- JSON-LD Structured Data: SoftwareApplication -->
+    <script type="application/ld+json">
+    <%- softwareAppSchema %>
+    </script>
+
+    <!-- JSON-LD Structured Data: Organization -->
+    <script type="application/ld+json">
+    <%- orgSchema %>
+    </script>
+
+    <!-- JSON-LD Structured Data: FAQPage -->
+    <script type="application/ld+json">
+    <%- faqSchema %>
+    </script>
+
+    <!-- JSON-LD Structured Data: WebSite with SearchAction -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
+      "@type": "WebSite",
+      "@id": "https://billqyro.com/#website",
       "name": "BillQyro",
+      "url": "https://billqyro.com/",
+      "description": "Smart billing and invoicing platform for small businesses in India and Bangladesh.",
+      "publisher": {
+        "@type": "Organization",
+        "@id": "https://billqyro.com/#organization"
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://billqyro.com/?qy=search&q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
+    <!-- JSON-LD Structured Data: WebApplication -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "@id": "https://billqyro.com/#webapp",
+      "name": "BillQyro",
+      "url": "https://billqyro.com",
+      "description": "Free offline-first invoicing and billing platform for small businesses. Create professional PDF invoices, track customer balances, and collect UPI payments without internet.",
       "applicationCategory": "BusinessApplication",
-      "operatingSystem": "Web, Android",
-      "description": "Smart billing and invoicing platform for modern businesses.",
+      "operatingSystem": "Web Browser",
+      "browserRequirements": "Requires a modern web browser with JavaScript enabled and IndexedDB support",
+      "softwareVersion": "2.6",
+      "author": {
+        "@type": "Organization",
+        "@id": "https://billqyro.com/#organization"
+      },
       "offers": {
         "@type": "Offer",
         "price": "0",
-        "priceCurrency": "INR"
+        "priceCurrency": "INR",
+        "description": "Free plan available with premium upgrades"
+      },
+      "featureList": [
+        "PDF invoice generation with custom templates",
+        "Customer ledger with lifetime balance tracking",
+        "UPI QR code payment collection",
+        "Product catalog and inventory management",
+        "Expense tracking with profit/loss reports",
+        "WhatsApp payment reminders",
+        "Offline-first IndexedDB architecture",
+        "Multi-workspace business support",
+        "Live invoice sharing links",
+        "Voice billing in Bengali",
+        "Backup and restore functionality",
+        "Real-time cloud sync with Firebase"
+      ]
+    }
+    </script>
+
+    <!-- JSON-LD Structured Data: Product/Offer for Pricing -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "@id": "https://billqyro.com/#product",
+      "name": "BillQyro",
+      "description": "Smart billing and invoicing platform for small businesses. Offline-first with UPI payments, PDF invoices, customer ledger, and WhatsApp reminders.",
+      "image": "https://billqyro.com/og-image.jpg",
+      "url": "https://billqyro.com",
+      "brand": {
+        "@type": "Organization",
+        "@id": "https://billqyro.com/#organization",
+        "name": "BillQyro Technologies"
+      },
+      "manufacturer": {
+        "@type": "Organization",
+        "@id": "https://billqyro.com/#organization"
+      },
+      "category": "Business & Money > Small Business & Entrepreneurship > Invoicing",
+      "offers": [
+        {
+          "@type": "Offer",
+          "name": "Starter",
+          "price": "0",
+          "priceCurrency": "INR",
+          "description": "Free plan: 50 invoices, 25 customers, basic templates",
+          "availability": "https://schema.org/InStock",
+          "url": "https://billqyro.com"
+        },
+        {
+          "@type": "Offer",
+          "name": "Pro",
+          "price": "499",
+          "priceCurrency": "INR",
+          "description": "500 invoices, 200 customers, premium themes, priority support",
+          "availability": "https://schema.org/InStock",
+          "url": "https://billqyro.com",
+          "priceSpecification": {
+            "@type": "UnitPriceSpecification",
+            "price": "499",
+            "priceCurrency": "INR",
+            "billingDuration": "P1M"
+          }
+        },
+        {
+          "@type": "Offer",
+          "name": "Lifetime",
+          "price": "14999",
+          "priceCurrency": "INR",
+          "description": "Unlimited everything, one-time payment, lifetime updates",
+          "availability": "https://schema.org/InStock",
+          "url": "https://billqyro.com"
+        }
+      ],
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "ratingCount": "150",
+        "bestRating": "5",
+        "worstRating": "1"
       }
     }
     </script>
@@ -132,9 +261,7 @@
             'deep-space': 'midnight-blue',
             'olive-grove': 'emerald-business',
             'slate-graphite': 'billqyro-classic',
-            'wine-cellar': 'ruby-burgundy',
-            'peach-cream': 'champagne-black',
-            'lagoon-mint': 'emerald-business',
+                'lagoon-mint': 'emerald-business',
             'storm-cloud': 'midnight-blue',
             'royal-navy': 'midnight-blue'
           };
@@ -158,8 +285,8 @@
               short_name: 'BillQyro',
               description: 'Smart billing, premium invoices, customer & payment management for growing businesses.',
               id: '/',
-              theme_color: '#04100C',
-              background_color: '#04100C',
+              theme_color: '#FFFFFF',
+              background_color: '#FFFFFF',
               display: 'standalone',
               orientation: 'portrait-primary',
               lang: 'en',
@@ -204,55 +331,15 @@
   </head>
   <body class="transition-colors duration-300">
     
-    <!-- ═══ BillQyro Boot Splash (premium first-paint animation) ═══ -->
-    <div id="bq-boot" aria-hidden="true">
-      <div class="bq-boot-inner">
-        <div class="bq-boot-mark">
-          <svg width="46" height="46" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" stroke="#34D399" stroke-width="1.6" rx="3"/>
-            <path d="M9 7.5h6M9 11h6M9 14.5h3.5" stroke="#34D399" stroke-width="1.6" stroke-linecap="round"/>
-          </svg>
-          <span class="bq-boot-ring"></span>
-        </div>
-        <div class="bq-boot-word">Bill<span>Qyro</span></div>
-        <div class="bq-boot-tag">Smart billing · Premium control</div>
-        <div class="bq-boot-bar"><i></i></div>
-      </div>
-    </div>
-    <style>
-      #bq-boot{position:fixed;inset:0;z-index:99999;background:#04100C;display:flex;align-items:center;justify-content:center;transition:opacity .5s ease,visibility .5s,background .4s ease;}
-      #bq-boot.bq-boot-light{background:#F4F9F6;}
-      #bq-boot.bq-boot-light .bq-boot-mark{background:rgba(13,166,120,.08);border-color:rgba(13,166,120,.22);}
-      #bq-boot.bq-boot-light .bq-boot-ring{border-color:rgba(13,166,120,.3);}
-      #bq-boot.bq-boot-light .bq-boot-word{color:#06251B;}
-      #bq-boot.bq-boot-light .bq-boot-tag{color:rgba(6,37,27,.45);}
-      #bq-boot.bq-boot-light .bq-boot-bar{background:rgba(13,166,120,.14);}
-      #bq-boot.bq-boot-hide{opacity:0;visibility:hidden;pointer-events:none;}
-      .bq-boot-inner{display:flex;flex-direction:column;align-items:center;gap:10px;animation:bqBootIn .7s cubic-bezier(.22,1,.36,1) both;}
-      .bq-boot-mark{position:relative;width:74px;height:74px;display:flex;align-items:center;justify-content:center;border-radius:22px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.25);}
-      .bq-boot-ring{position:absolute;inset:-7px;border-radius:26px;border:2px solid rgba(52,211,153,.35);animation:bqRing 1.8s ease-out infinite;}
-      .bq-boot-word{font-family:'Space Grotesk','Inter',system-ui,sans-serif;font-size:30px;font-weight:800;letter-spacing:-.02em;color:#F3FBF7;}
-      .bq-boot-word span{background:linear-gradient(90deg,#34D399,#0DA678);-webkit-background-clip:text;background-clip:text;color:transparent;}
-      .bq-boot-tag{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(243,251,247,.45);}
-      .bq-boot-bar{width:132px;height:3px;border-radius:99px;background:rgba(52,211,153,.15);overflow:hidden;margin-top:8px;}
-      .bq-boot-bar i{display:block;height:100%;width:40%;border-radius:99px;background:linear-gradient(90deg,#0DA678,#34D399);animation:bqBar 1.15s ease-in-out infinite;}
-      @keyframes bqBootIn{from{opacity:0;transform:translateY(14px) scale(.97);}to{opacity:1;transform:none;}}
-      @keyframes bqRing{0%{transform:scale(.94);opacity:.9;}70%{transform:scale(1.12);opacity:0;}100%{transform:scale(1.12);opacity:0;}}
-      @keyframes bqBar{0%{transform:translateX(-110%);}100%{transform:translateX(340%);}}
-      @media (prefers-reduced-motion:reduce){#bq-boot .bq-boot-inner,.bq-boot-ring,.bq-boot-bar i{animation:none;}}
-    </style>
-    <script>
-      (function(){
-        var boot=document.getElementById('bq-boot');
-        try{ if(localStorage.getItem('billqyro_dark_mode')==='false'){ boot.classList.add('bq-boot-light'); } }catch(e){}
-        function hideBoot(){ if(!boot||boot.classList.contains('bq-boot-hide'))return; boot.classList.add('bq-boot-hide');
-          setTimeout(function(){ if(boot&&boot.parentNode)boot.parentNode.removeChild(boot); },600); }
-        if(document.readyState==='complete'){ setTimeout(hideBoot,650); }
-        else{ window.addEventListener('load',function(){ setTimeout(hideBoot,650); });
-          setTimeout(hideBoot,3500); /* failsafe: never trap the user */ }
-      })();
-    </script>
 
+
+    <!-- Static SEO fallback content (hidden once React mounts) -->
+    <noscript>
+      <style>#root{display:none}</style>
+    </noscript>
+    <div id="seo-fallback" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);content-visibility:auto">
+      <%- seoFallback %>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

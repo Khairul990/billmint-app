@@ -1,33 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://billqyro-app.vercel.app/</loc>
+    <loc>https://billqyro.com/</loc>
+    <lastmod>2026-09-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://billqyro-app.vercel.app/terms</loc>
+    <loc>https://billqyro.com/about</loc>
+    <lastmod>2026-09-21</lastmod>
     <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://billqyro.com/support</loc>
+    <lastmod>2026-09-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://billqyro.com/terms</loc>
+    <lastmod>2026-09-21</lastmod>
+    <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://billqyro-app.vercel.app/privacy</loc>
-    <changefreq>monthly</changefreq>
+    <loc>https://billqyro.com/privacy</loc>
+    <lastmod>2026-09-21</lastmod>
+    <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://billqyro-app.vercel.app/refund</loc>
-    <changefreq>monthly</changefreq>
+    <loc>https://billqyro.com/refund</loc>
+    <lastmod>2026-09-21</lastmod>
+    <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://billqyro-app.vercel.app/data-deletion</loc>
-    <changefreq>monthly</changefreq>
+    <loc>https://billqyro.com/data-deletion</loc>
+    <lastmod>2026-09-21</lastmod>
+    <changefreq>yearly</changefreq>
     <priority>0.2</priority>
-  </url>
-  <url>
-    <loc>https://billqyro-app.vercel.app/support</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
   </url>
 </urlset>

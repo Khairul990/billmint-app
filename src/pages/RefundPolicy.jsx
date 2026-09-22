@@ -24,7 +24,7 @@ const RefundPolicy = ({ setCurrentTab }) => {
           </div>
           <div>
             <h1 className="text-2xl font-black text-theme-primary tracking-tight">Refund Policy</h1>
-            <p className="text-sm text-theme-muted font-medium mt-1">Last updated: {new Date().toLocaleDateString()}</p>
+            <p className="text-sm text-theme-muted font-medium mt-1">BillQyro Technologies · Last updated: September 21, 2026</p>
           </div>
         </div>
 

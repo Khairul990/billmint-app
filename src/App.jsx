@@ -60,6 +60,7 @@ import Confetti from 'react-confetti';
 import CommandPalette from './components/CommandPalette';
 import { pageVariants } from './utils/animations';
 import Landing from './pages/Landing';
+import About from './pages/About';
 import AppEntry from './pages/AppEntry';
 import { isAppMode } from './utils/appMode';
 
@@ -556,7 +557,8 @@ function App() {
       '/privacy': 'privacy',
       '/refund': 'refund',
       '/data-deletion': 'data-deletion',
-      '/support': 'support'
+      '/support': 'support',
+      '/about': 'about'
     };
     const clean = (window.location.pathname || '/').replace(/\/+$/, '') || '/';
     if (PUBLIC_PAGES[clean]) setPublicRoute(PUBLIC_PAGES[clean]);
@@ -1942,26 +1944,29 @@ function App() {
   }, [loadLocalData]);
 
   const handleOnboardingComplete = useCallback(async (newSettings) => {
-    await settingsEngine.saveSettings(newSettings);
-    setSettings(newSettings);
+    const updated = {
+      ...(newSettings || {}),
+      setupCompleted: true,
+      profileSetupCompleted: true,
+      businessSetupCompleted: true
+    };
+    await settingsEngine.saveSettings(updated);
+    setSettings(updated);
     if (isDemoSessionActive) {
-      setDemoSettings(newSettings);
+      setDemoSettings(updated);
     }
     setCurrentTab('dashboard');
     toast.success('Workspace configured successfully!');
   }, [isDemoSessionActive]);
 
-  // Legacy Account Migration Guard: Auto-set canonical setupCompleted for previously configured businesses
+  // Migration Guard: Auto-set canonical setupCompleted for authenticated users with existing data or workspaces
   useEffect(() => {
     if (isAuthenticated && activeSettings && !activeSettings.setupCompleted) {
-      const isLegacySetup = Boolean(
-        activeSettings.businessName && (
-          activeSettings.profileSetupCompleted === true ||
-          activeSettings.businessSetupCompleted === true ||
-          (Array.isArray(activeSettings.businessWorkspaces) && activeSettings.businessWorkspaces.length > 0)
-        )
-      );
-      if (isLegacySetup) {
+      const hasWorkspaces = Array.isArray(activeSettings.businessWorkspaces) && activeSettings.businessWorkspaces.length > 0;
+      const hasData = (invoices && invoices.length > 0) || (customers && customers.length > 0);
+      const hasDetails = Boolean(activeSettings.businessName || activeSettings.phone || activeSettings.email || activeSettings.ownerName);
+      
+      if (hasWorkspaces || hasData || hasDetails || activeSettings.profileSetupCompleted) {
         const migrated = {
           ...activeSettings,
           setupCompleted: true,
@@ -1972,7 +1977,7 @@ function App() {
         setSettings(migrated);
       }
     }
-  }, [isAuthenticated, activeSettings]);
+  }, [isAuthenticated, activeSettings, invoices, customers]);
 
   // --- PDF GENERATOR WORKER ---
   const handleDownloadPDF = async (invoice) => {
@@ -2536,6 +2541,8 @@ function App() {
         return <DataDeletion onBack={() => setCurrentTab('more')} />;
       case 'support':
         return <Support onBack={() => setCurrentTab('more')} />;
+      case 'about':
+        return <About setCurrentTab={setCurrentTab} />;
       case 'workspace-manager':
         return (
           <WorkspaceManager
@@ -2758,12 +2765,11 @@ function App() {
 
   // Enterprise Route Gate - Wait for Auth, Workspace, and Sync to resolve
   const isAppReady = !isAppBooting;
-  const isSetupIncomplete = isAuthenticated && !activeSettings?.setupCompleted && !(
-    activeSettings?.businessName && (
-      activeSettings?.profileSetupCompleted === true || 
-      activeSettings?.businessSetupCompleted === true ||
-      (Array.isArray(activeSettings?.businessWorkspaces) && activeSettings?.businessWorkspaces.length > 0)
-    )
+  const isSetupIncomplete = isAuthenticated && !isDemoSessionActive && !activeSettings?.setupCompleted && !activeSettings?.profileSetupCompleted && !(
+    (activeSettings?.businessName && activeSettings.businessName !== 'My Business' && activeSettings.businessName !== 'BillQyro Workspace') ||
+    (Array.isArray(activeSettings?.businessWorkspaces) && activeSettings.businessWorkspaces.length > 0) ||
+    (invoices && invoices.length > 0) ||
+    (customers && customers.length > 0)
   );
 
   // Resolve currentTab when we reach layout (defaulting to dashboard if null)
@@ -2822,6 +2828,7 @@ function App() {
                   {publicRoute === 'refund' && <RefundPolicy setCurrentTab={() => { window.location.href = '/'; }} />}
                   {publicRoute === 'data-deletion' && <DataDeletion onBack={() => { window.location.href = '/'; }} />}
                   {publicRoute === 'support' && <Support onBack={() => { window.location.href = '/'; }} />}
+                  {publicRoute === 'about' && <About setCurrentTab={() => { window.location.href = '/'; }} />}
                 </div>
               </div>
             </React.Suspense>

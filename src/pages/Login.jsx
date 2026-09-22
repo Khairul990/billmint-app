@@ -65,7 +65,7 @@ function ShowcaseCard({ icon: Icon, title, sub, children }) {
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -20, scale: 0.95 }}
       transition={{ type: "spring", stiffness: 160, damping: 18, mass: 1 }}
-      className="relative flex h-[430px] w-full flex-col overflow-hidden rounded-[1.8rem] border border-theme-border-soft/40 bg-theme-app/40 p-5 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] backdrop-blur-2xl ring-1 ring-inset ring-white/5 before:pointer-events-none before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/[0.08] before:to-transparent before:content-['']"
+      className="relative flex h-[430px] w-full flex-col overflow-hidden rounded-[1.8rem] border border-theme-border-soft/40 bg-theme-card/60 p-5 shadow-[0_30px_60px_-15px_rgba(15,23,42,0.18)] backdrop-blur-2xl ring-1 ring-inset ring-black/5 before:pointer-events-none before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/40 before:to-transparent before:content-[''] dark:ring-white/10 dark:before:from-white/10"
     >
       <div className="relative z-10 mb-4 flex shrink-0 items-center gap-3 border-b border-theme-border-soft pb-4">
         <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-theme-accent-light text-theme-accent">
@@ -211,7 +211,7 @@ function DashStat({ label, value, active = false }) {
 
 function ActionTile({ icon: Icon, text, active = false }) {
   return (
-    <div className={cn("flex flex-col items-center justify-center gap-1 rounded-xl px-2 py-2 text-[9px] font-black", active ? "bg-theme-accent text-theme-primary" : "bg-theme-surface text-theme-muted")}>
+    <div             className={cn("flex flex-col items-center justify-center gap-1 rounded-xl px-2 py-2 text-[9px] font-black", active ? "bg-theme-accent text-white" : "bg-theme-surface text-theme-muted")}>
       <Icon size={13} />
       {text}
     </div>
@@ -224,7 +224,7 @@ function DashboardCard() {
       <div className="h-full overflow-hidden rounded-[1.4rem] border border-theme-border-soft bg-theme-surface">
         <div className="flex h-full">
           <div className="w-[76px] border-r border-theme-border-soft bg-theme-card p-2.5">
-            <div className="mb-4 grid h-7 w-7 place-items-center rounded-lg bg-theme-accent text-[10px] font-black text-theme-primary">BQ</div>
+            <div className="mb-4 grid h-7 w-7 place-items-center rounded-lg bg-theme-accent text-[10px] font-black text-white">BQ</div>
             <div className="space-y-2">
               <SideMini active label="Dash" />
               <SideMini label="Bills" />
@@ -275,7 +275,7 @@ function DashboardCard() {
                   <ReceiptText size={18} />
                 </div>
               </div>
-              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-theme-card/10">
+              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-theme-muted/20">
                 <motion.div initial={{ width: "0%" }} animate={{ width: "76%" }} transition={{ duration: 1, ease: "easeOut" }} className="h-full rounded-full bg-[image:var(--accent-gradient)]" />
               </div>
             </div>
@@ -492,7 +492,7 @@ function DownloadCard() {
         >
           <Check size={34} strokeWidth={3} />
         </motion.div>
-        <div className="mt-5 h-2 w-full overflow-hidden rounded-full bg-theme-card/10">
+        <div className="mt-5 h-2 w-full overflow-hidden rounded-full bg-theme-muted/20">
           <motion.div initial={{ width: "0%" }} animate={{ width: "100%" }} transition={{ duration: 1.1, ease: "easeOut" }} className="h-full rounded-full bg-[image:var(--accent-gradient)]" />
         </div>
         <p className="mt-3 text-sm font-bold text-theme-accent">100% Complete</p>
@@ -517,7 +517,7 @@ function ShareChip({ icon: Icon, label, value, compact = false }) {
       animate={{ opacity: 1, y: 0 }}
       className={cn("flex items-center gap-3 rounded-2xl border border-theme-border-soft bg-theme-surface", compact ? "p-2.5" : "p-3")}
     >
-      <div className={cn("grid place-items-center rounded-xl bg-theme-card/5 text-theme-accent", compact ? "h-8 w-8" : "h-9 w-9")}>
+      <div className={cn("grid place-items-center rounded-xl bg-theme-accent-light text-theme-accent", compact ? "h-8 w-8" : "h-9 w-9")}>
         <Icon size={compact ? 15 : 17} />
       </div>
       <div className="min-w-0">
@@ -575,7 +575,7 @@ function ShareCard() {
               <SkeletonLine w="62%" />
             </div>
             <div className="mt-3 rounded-xl bg-theme-surface p-2 text-center text-[9px] font-black text-theme-primary">₹2,510 Due</div>
-            <div className="mt-2 rounded-xl bg-theme-accent p-2 text-center text-[9px] font-black text-theme-primary">Pay Now</div>
+            <div className="mt-2 rounded-xl bg-theme-accent p-2 text-center text-[9px] font-black text-white">Pay Now</div>
           </motion.div>
         </div>
       </div>
@@ -703,7 +703,7 @@ function ShowcasePanel() {
     <section
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      className="relative flex min-h-[560px] flex-col overflow-hidden bg-theme-surface p-6 lg:min-h-[640px] lg:w-[47%] lg:p-8"
+      className="relative flex min-h-[560px] w-full flex-col overflow-hidden bg-theme-surface p-6 lg:min-h-[640px] lg:w-[47%] lg:p-8"
     >
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_48%_36%,var(--accent-glow),transparent_32%),radial-gradient(circle_at_82%_18%,var(--accent-glow),transparent_28%)] opacity-30" />
       <motion.div
@@ -756,7 +756,7 @@ function ShowcasePanel() {
           </div>
         </div>
 
-        <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-theme-card/10">
+        <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-theme-muted/20">
           <motion.div
             className="h-full rounded-full bg-[image:var(--accent-gradient)]"
             animate={{ width: `${((active + 1) / STEPS.length) * 100}%` }}
@@ -781,7 +781,7 @@ function ShowcasePanel() {
                 title={`${step.title} - ${step.sub}`}
                 className={cn(
                   "grid h-6 w-6 shrink-0 place-items-center rounded-full border text-xs transition",
-                  isActive && "border-theme-accent bg-theme-accent text-theme-primary shadow-lg shadow-theme-glow",
+                  isActive && "border-theme-accent bg-theme-accent text-white shadow-lg shadow-theme-glow",
                   isDone && !isActive && "border-theme-accent/40 bg-theme-accent-light text-theme-accent",
                   !isDone && !isActive && "border-theme-border-soft bg-theme-surface text-theme-muted"
                 )}
@@ -809,7 +809,7 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [error, setError] = useState('');
 
-  const [isLoginMode, setIsLoginMode] = useState(true);
+  const [isLoginMode, setIsLoginMode] = useState(false);
 
   // Demo → signup conversion: the landing page sets this flag when a demo
   // visitor taps "Create free account". This panel is lazy-loaded, so it
@@ -927,7 +927,7 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
 
   const content = (
     <div className="relative z-10 w-full">
-      {!embedded && <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-theme-accent via-purple-500/80 to-theme-accent rounded-t-[2rem]" />}
+      {!embedded && <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-theme-accent via-emerald-400/80 to-theme-accent rounded-t-[2rem]" />}
       {!embedded && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.5 }} className="mb-8">
           <BrandMark />
@@ -1072,7 +1072,7 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
               shimmerColor="#ffffff"
               background="var(--accent-gradient)"
             >
-              <div className="flex items-center gap-2 text-[15px] font-black drop-shadow-[0_1px_8px_rgba(0,0,0,0.3)] text-theme-primary">
+              <div className="flex items-center gap-2 text-[15px] font-black text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.3)]">
                 {isSigningIn ? (isLoginMode ? "Signing in..." : "Creating account...") : (isLoginMode ? "Sign In to Dashboard" : "Register & Begin Setup")}
                 {isSigningIn ? (
                   <motion.span
@@ -1088,9 +1088,9 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7, duration: 0.5 }} className="flex items-center gap-3">
-            <div className="h-px flex-1 bg-theme-card/10" />
+            <div className="h-px flex-1 bg-theme-border-soft" />
             <span className="text-xs font-bold uppercase tracking-wider text-theme-muted">or</span>
-            <div className="h-px flex-1 bg-theme-card/10" />
+            <div className="h-px flex-1 bg-theme-border-soft" />
           </motion.div>
 
           <motion.button 
@@ -1138,7 +1138,7 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
   }
 
   return (
-    <section className="flex flex-1 items-center justify-center border-l border-theme-border-soft bg-theme-app/50 p-6 sm:p-10">
+    <section className="flex flex-1 items-center justify-center border-t border-theme-border-soft bg-theme-app/50 p-6 sm:p-10 lg:border-t-0 lg:border-l">
       <motion.div
         initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
@@ -1159,7 +1159,7 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
           animate={cardHover ? { opacity: 0.72 } : { opacity: 0.18 }}
           transition={{ duration: 0.28 }}
           style={{
-            background: `radial-gradient(420px circle at ${mousePosition.x}% ${mousePosition.y}%, rgba(225,29,72,0.16), rgba(244,114,182,0.055) 28%, transparent 64%)`,
+            background: `radial-gradient(420px circle at ${mousePosition.x}% ${mousePosition.y}%, rgba(13,138,107,0.16), rgba(16,185,129,0.055) 28%, transparent 64%)`,
           }}
         />
         <motion.div
@@ -1177,7 +1177,7 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
         <motion.div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 rounded-[2rem] ring-1 ring-inset ring-theme-accent/10"
-          animate={cardHover ? { boxShadow: "inset 0 0 0 1px rgba(225,29,72,0.18), 0 0 40px rgba(225,29,72,0.10)" } : { boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.04), 0 0 0 rgba(0,0,0,0)" }}
+          animate={cardHover ? { boxShadow: "inset 0 0 0 1px rgba(13,138,107,0.18), 0 0 40px rgba(13,138,107,0.10)" } : { boxShadow: "inset 0 0 0 1px rgba(13,138,107,0.06), 0 0 0 rgba(0,0,0,0)" }}
           transition={{ duration: 0.25 }}
         />
         {content}
@@ -1200,11 +1200,7 @@ export default function Login({ onLoginSuccess, embedded = false }) {
       className="relative w-full py-12 p-4 text-theme-primary sm:p-6 lg:py-20 lg:px-8 z-10"
     >
       <motion.div initial={{ opacity: 0, scale: 0.95, y: 30 }} whileInView={{ opacity: 1, scale: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }} className="card-premium relative z-10 mx-auto flex w-[98%] max-w-7xl overflow-hidden rounded-[2rem] border border-theme-border-soft bg-theme-surface/60 backdrop-blur-3xl shadow-2xl shadow-theme-glow/10 min-h-[600px] lg:min-h-[680px]">
-        <div className="hidden lg:flex lg:w-full">
-          <ShowcasePanel />
-          <LoginPanel onLoginSuccess={onLoginSuccess} />
-        </div>
-        <div className="flex w-full flex-col lg:hidden">
+        <div className="flex w-full flex-col lg:flex-row">
           <ShowcasePanel />
           <LoginPanel onLoginSuccess={onLoginSuccess} />
         </div>

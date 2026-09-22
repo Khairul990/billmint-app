@@ -67,7 +67,7 @@ await test('2.1 Vite Config: PWA configuration excludes API endpoints and strips
 await test('2.2 PWA Manifest: BillQyro branding, standalone mode, and icons are configured', () => {
   const viteConfig = fs.readFileSync('vite.config.js', 'utf8');
   assert.ok(viteConfig.includes("short_name: 'BillQyro'"));
-  assert.ok(viteConfig.includes("theme_color: '#04100C'"));
+  assert.ok(viteConfig.includes("theme_color: '#FFFFFF'"));
   assert.ok(viteConfig.includes("display: 'standalone'"));
   assert.ok(viteConfig.includes('shortcuts:'));
   assert.ok(viteConfig.includes('screenshots:'));

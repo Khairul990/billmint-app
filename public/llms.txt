@@ -1,0 +1,33 @@
+# BillQyro
+
+> Smart billing and premium invoicing platform for small businesses, freelancers, and service shops.
+
+BillQyro is a free, offline-first SaaS billing app for small shops, studios, clinics, tailors, repair businesses, and educators in India and Bangladesh. It supports English and Bengali (Bangla).
+
+## Key Features
+- PDF invoice generation (A4/A5 templates)
+- Customer ledger with balance tracking
+- UPI QR code payment collection
+- Product and inventory management
+- Expense tracking and profit/loss reports
+- WhatsApp payment reminders
+- Offline-first — works without internet
+- Multi-workspace support
+- Live invoice sharing links
+- Voice billing in Bengali
+
+## Pricing
+- Starter: Free (50 invoices, 25 customers)
+- Pro: 499 INR per month (500 invoices, 200 customers, premium themes)
+- Lifetime: 14,999 INR one-time (unlimited everything)
+
+## Links
+- App: https://billqyro.com
+- Help Center: https://billqyro.com/support
+- Terms: https://billqyro.com/terms
+- Privacy: https://billqyro.com/privacy
+- Android APK: https://billqyro.com/downloads/BillQyro-Android.apk
+
+## Contact
+- Email: support@billqyro.com
+- WhatsApp: +91 94777 38769
