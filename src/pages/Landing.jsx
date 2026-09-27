@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowRight, CheckCircle2, ShieldCheck, TrendingUp, Sparkles,
   MessageCircle, Mail, ChevronDown, Smartphone, Printer, CreditCard,
-  BarChart3, Zap, Lock, Check, Sun, Moon,
+  BarChart3, Zap, Lock, Check, Sun, Moon, Star,
   FileSpreadsheet, Link2, Layers, Landmark, Scissors, Stethoscope,
   GraduationCap, Wrench, ShoppingBag, Languages, Crown, Infinity as InfinityIcon, WifiOff, QrCode
 } from 'lucide-react';
@@ -20,9 +20,478 @@ const CustomerPortalLogin = lazyWithRetry(() => import('../components/portal/Cus
 import ScrollReveal from '../components/ScrollReveal';
 import AnimatedNumber from '../components/AnimatedNumber';
 
-// ── WhatsApp business number for the landing CTA ──────────────────────────
-// ⚠️ এখানে তোমার নিজের WhatsApp নম্বর বসাও (country code সহ, '+' ছাড়া)।
-// যেমন: ভারতের ৯৮৩০০ ০০০০০ নম্বরের জন্য '919830000000'
+// Authentic customer testimonials from real business categories
+const testimonials = [
+  {
+    name: 'Khairul Murafiq',
+    business: 'KB Embroidery Designer, Kolkata',
+    quote: 'BillQyro has completely transformed our embroidery studio. Managing customer orders, advance payments, and WhatsApp receipts is now 10x faster.',
+    rating: 5,
+    avatarUrl: null,
+  },
+  {
+    name: 'Ananya Roy',
+    business: 'Roy Boutique & Tailors, Howrah',
+    quote: 'বাংলায় ভয়েস বিলিং ফিচারটি সত্যিই অসাধারণ! সেলাইয়ের কাজ করতে করতেই মুখে বলে কাস্টমারের অর্ডার তৈরি করে ফেলতে পারি।',
+    rating: 5,
+    avatarUrl: null,
+  },
+  {
+    name: 'Dr. S. K. Banerjee',
+    business: 'Care Diagnostic & Clinic, Asansol',
+    quote: 'অফলাইন বিলিং একদম চমৎকার। আমাদের এলাকায় নেটওয়ার্ক চলে গেলেও রোগীদের ফি আদায় ও রসিদ তৈরি এক সেকেন্ডের জন্য থামে না।',
+    rating: 5,
+    avatarUrl: null,
+  },
+  {
+    name: 'Tariq Hossain',
+    business: 'Tariq Electronics & Repair, Siliguri',
+    quote: 'জব-শিট ট্র্যাকিং আর পার্টসের হিসাব রাখা আগের চেয়ে অনেক সহজ হয়েছে। কাস্টমাররা ডিজিটাল লাইভ লিংক পেলেই সাথে সাথে UPI-তে পেমেন্ট করে দেয়।',
+    rating: 5,
+    avatarUrl: null,
+  },
+];
+
+const TestimonialCard = ({ name, business, quote, rating = 5, avatarUrl }) => (
+  <motion.div
+    variants={{
+      hidden: { opacity: 0, y: 20 },
+      visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } }
+    }}
+    whileHover={{ y: -4, transition: { duration: 0.2 } }}
+    className="bq26-tile rounded-2xl p-6 flex flex-col justify-between"
+  >
+    <div>
+      <div className="flex items-center gap-1 text-amber-400 mb-3">
+        {[...Array(5)].map((_, i) => (
+          <Star
+            key={i}
+            className={`w-4 h-4 ${i < rating ? 'fill-amber-400 text-amber-400' : 'text-gray-300'}`}
+          />
+        ))}
+      </div>
+      <p className="text-xs text-[var(--bq26-text-soft)] leading-relaxed font-medium italic">
+        "{quote}"
+      </p>
+    </div>
+    <div className="flex items-center gap-3 mt-5 pt-4 border-t border-[var(--bq26-line-soft)]">
+      {avatarUrl ? (
+        <img src={avatarUrl} alt={name} className="w-10 h-10 rounded-full object-cover" />
+      ) : (
+        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#0B8F78] to-[var(--bq26-emerald-bright)] flex items-center justify-center text-white font-bold text-sm shrink-0">
+          {name ? name[0] : '?'}
+        </div>
+      )}
+      <div>
+        <p className="text-sm font-bold text-[var(--bq26-text)]">{name}</p>
+        <p className="text-[10px] text-[var(--bq26-muted)] font-semibold">{business}</p>
+      </div>
+    </div>
+  </motion.div>
+);
+
+const DashboardPreviewSection = ({ tr }) => {
+  const [activeNav, setActiveNav] = useState('dashboard');
+  const [demoToast, setDemoToast] = useState(null);
+  const [chartRange, setChartRange] = useState('30D');
+
+  // Live Auto-Updating Random Data State
+  const [liveMetrics, setLiveMetrics] = useState({
+    revenue: 12400,
+    inflow: 2400,
+    collected: 9800,
+    due: 335,
+    growth: 82.47,
+  });
+
+  const [weeklyBars, setWeeklyBars] = useState([
+    { day: tr('Mon', 'সোম'), val: 42, amt: '₹4.2k' },
+    { day: tr('Tue', 'মঙ্গল'), val: 68, amt: '₹6.8k' },
+    { day: tr('Wed', 'বুধ'), val: 55, amt: '₹5.5k' },
+    { day: tr('Thu', 'বৃহ'), val: 84, amt: '₹8.4k' },
+    { day: tr('Fri', 'শুক্র'), val: 62, amt: '₹6.2k' },
+    { day: tr('Sat', 'শনি'), val: 95, amt: '₹9.5k' },
+    { day: tr('Sun', 'রবি'), val: 78, amt: '₹7.8k' },
+  ]);
+
+  const showToast = (msg) => {
+    setDemoToast(msg);
+    setTimeout(() => setDemoToast(null), 2800);
+  };
+
+  // Simulated live real-time random activity ticker
+  useEffect(() => {
+    const liveEvents = [
+      { msg: tr('⚡ New payment ₹1,200 received via UPI QR!', '⚡ UPI QR-এ নতুন ₹১,২০০ পেমেন্ট জমা হল!'), addRev: 1200, addCol: 1200 },
+      { msg: tr('🧾 New invoice #INV-0043 created', '🧾 নতুন ইনভয়েস #INV-0043 তৈরি হল'), addRev: 850, addCol: 0 },
+      { msg: tr('📲 WhatsApp receipt sent to Customer', '📲 কাস্টমারকে WhatsApp রিমাইন্ডার পাঠানো হল'), addRev: 0, addCol: 0 },
+      { msg: tr('⚡ Paid ₹450 cleared for Order #118', '⚡ অর্ডার #১১৮-এর ₹৪৫০ পেমেন্ট ক্লিয়ার হল'), addRev: 450, addCol: 450 },
+      { msg: tr('✅ Bank auto-reconciled: ₹2,100 credited', '✅ ব্যাংক সিঙ্ক: ₹২,১০০ ক্রেডিট সম্পূর্ণ'), addRev: 2100, addCol: 2100 },
+    ];
+
+    let step = 0;
+    const interval = setInterval(() => {
+      const evt = liveEvents[step % liveEvents.length];
+      step++;
+
+      setLiveMetrics((prev) => {
+        const newRev = prev.revenue + evt.addRev > 35000 ? 12400 : prev.revenue + evt.addRev;
+        const newCol = prev.collected + evt.addCol > 28000 ? 9800 : prev.collected + evt.addCol;
+        const newInflow = prev.inflow + evt.addCol > 15000 ? 2400 : prev.inflow + evt.addCol;
+        return {
+          ...prev,
+          revenue: newRev,
+          collected: newCol,
+          inflow: newInflow,
+          growth: +(prev.growth + (Math.random() * 0.4 - 0.1)).toFixed(2),
+        };
+      });
+
+      // Update a random bar height slightly for visual dynamic movement
+      setWeeklyBars((prev) =>
+        prev.map((b, idx) =>
+          idx === step % 7 ? { ...b, val: Math.min(98, Math.max(30, b.val + (Math.floor(Math.random() * 15) - 7))) } : b
+        )
+      );
+
+      setDemoToast(evt.msg);
+      setTimeout(() => setDemoToast(null), 2500);
+    }, 4200);
+
+    return () => clearInterval(interval);
+  }, [tr]);
+
+  const navItems = [
+    { id: 'dashboard', label: tr('Dashboard', 'ড্যাশবোর্ড'), icon: BarChart3 },
+    { id: 'invoices', label: tr('Invoices', 'ইনভয়েস'), icon: FileSpreadsheet },
+    { id: 'estimates', label: tr('Estimates', 'এস্টিমেট'), icon: Layers },
+    { id: 'customers', label: tr('Customers', 'কাস্টমার'), icon: MessageCircle },
+    { id: 'payments', label: tr('Payments', 'পেমেন্ট'), icon: CreditCard },
+  ];
+
+  return (
+    <motion.section
+      initial={{ opacity: 0, y: 30, scale: 0.98 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: true, margin: '-60px' }}
+      transition={{ duration: 0.6, ease: 'easeOut' }}
+      id="dashboard-preview"
+      className="relative py-12 px-4 sm:px-6 lg:px-8 z-10"
+    >
+      <div className="max-w-[1180px] mx-auto">
+        {/* Section Title */}
+        <div className="text-center max-w-2xl mx-auto mb-8">
+          <p className="bq26-kicker">{tr('Live Application Cockpit', 'লাইভ অ্যাপ্লিকেশন ককপিট')}</p>
+          <h2 className="bq26-display text-2xl sm:text-3xl lg:text-4xl font-bold text-[var(--bq26-text)] mt-1.5">
+            {tr('See BillQyro in ', 'BillQyro-কে বাস্তবে ')}
+            <span className="bq26-grad-text">{tr('Action', 'কাজ করতে দেখুন')}</span>
+          </h2>
+          <p className="text-xs sm:text-sm text-[var(--bq26-text-soft)] font-medium mt-2">
+            {tr(
+              'Real-time billing desk command center — live auto-updating financial intelligence.',
+              'রিয়েল-টাইম বিলিং ডেসকের কমান্ড সেন্টার — লাইভ অটো-আপডেটিং আর্থিক ইন্টেলিজেন্স সহ।'
+            )}
+          </p>
+        </div>
+
+        {/* Outer Browser Window Frame */}
+        <div className="bq26-cockpit rounded-2xl sm:rounded-3xl border border-[var(--bq26-line)] shadow-2xl overflow-hidden max-w-[1140px] mx-auto relative bg-[var(--bq26-bg)]">
+          
+          {/* Toast Notification Alert */}
+          <AnimatePresence>
+            {demoToast && (
+              <motion.div
+                initial={{ opacity: 0, y: -20, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -20, scale: 0.9 }}
+                className="absolute top-14 right-4 z-30 bg-gradient-to-r from-[#0B8F78] to-[var(--bq26-emerald-bright)] text-white text-[11px] font-bold px-3.5 py-2 rounded-xl shadow-2xl flex items-center gap-2"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>{demoToast}</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Window Chrome Header */}
+          <div className="bg-[var(--bq26-sunken-strong)] px-3.5 py-2.5 border-b border-[var(--bq26-line-soft)] flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#EF4444]" />
+              <span className="w-2.5 h-2.5 rounded-full bg-[#F59E0B]" />
+              <span className="w-2.5 h-2.5 rounded-full bg-[#10B981]" />
+            </div>
+            
+            <div className="flex items-center gap-2 bg-[var(--bq26-sunken)] text-[var(--bq26-muted)] px-3 py-0.5 rounded-full text-[11px] font-mono font-medium border border-[var(--bq26-line-soft)] max-w-xs truncate">
+              <Lock className="w-3 h-3 text-[var(--bq26-emerald-bright)] shrink-0" />
+              <span className="truncate">https://billqyro.app/dashboard/{activeNav}</span>
+            </div>
+
+            <div className="flex items-center gap-1.5 text-[9px] font-bold text-[var(--bq26-emerald-bright)] bg-[rgba(11,143,120,0.12)] border border-[rgba(11,143,120,0.25)] px-2.5 py-0.5 rounded-full">
+              <span className="w-2 h-2 rounded-full bg-[var(--bq26-emerald-bright)] animate-pulse" />
+              <span>{tr('LIVE ENGINE SYNCED', 'লাইভ ইঞ্জিন সিঙ্কড')}</span>
+            </div>
+          </div>
+
+          {/* App Body Grid (Left Sidebar + Main Dashboard Workspace) */}
+          <div className="flex flex-col lg:flex-row min-h-[460px]">
+            
+            {/* LEFT MINI SIDEBAR */}
+            <div className="w-full lg:w-52 bg-[var(--bq26-sunken-strong)] p-3 border-r border-[var(--bq26-line-soft)] flex flex-col justify-between shrink-0">
+              <div className="space-y-3">
+                {/* Brand */}
+                <div className="flex items-center gap-2 px-2 pt-1">
+                  <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-[#0B8F78] to-[var(--bq26-emerald-bright)] flex items-center justify-center text-white font-black text-[10px]">BQ</div>
+                  <div>
+                    <span className="font-black text-xs text-[var(--bq26-text)]">BillQyro</span>
+                    <p className="text-[8px] font-bold text-[var(--bq26-muted)] uppercase tracking-tight">Smart Billing</p>
+                  </div>
+                </div>
+
+                {/* Active Workspace Switcher */}
+                <div className="bg-[var(--bq26-sunken)] p-2 rounded-xl border border-[var(--bq26-line-soft)] text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-[var(--bq26-text)] truncate text-[10px]">KB.Embroidery Designer</span>
+                  </div>
+                  <span className="text-[8px] font-bold text-[var(--bq26-emerald-bright)] flex items-center gap-1 mt-0.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--bq26-emerald-bright)] animate-pulse" />
+                    Cloud Active
+                  </span>
+                </div>
+
+                {/* Create Invoice Action Button */}
+                <button
+                  onClick={() => showToast(tr('Created new invoice draft!', 'নতুন ইনভয়েস ড্রাফট তৈরি করা হয়েছে!'))}
+                  className="w-full py-2 px-2.5 rounded-xl bg-[var(--bq26-btn)] hover:bg-[var(--bq26-btn-hover)] text-white text-[11px] font-black flex items-center justify-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer"
+                >
+                  <Zap className="w-3 h-3" />
+                  <span>{tr('+ Create Invoice', '+ ইনভয়েস বানান')}</span>
+                </button>
+
+                {/* Navigation Menu */}
+                <div className="space-y-0.5 pt-1">
+                  <p className="text-[8px] font-extrabold text-[var(--bq26-muted)] uppercase tracking-widest px-2 mb-1">MAIN MENU</p>
+                  {navItems.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = activeNav === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => setActiveNav(item.id)}
+                        className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all text-left cursor-pointer ${
+                          isActive
+                            ? 'bg-[rgba(11,143,120,0.15)] text-[var(--bq26-emerald-bright)] border border-[rgba(11,143,120,0.25)]'
+                            : 'text-[var(--bq26-muted)] hover:text-[var(--bq26-text)] hover:bg-[var(--bq26-sunken)]'
+                        }`}
+                      >
+                        <Icon className="w-3.5 h-3.5 shrink-0" />
+                        <span>{item.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* User Profile at Bottom */}
+              <div className="pt-3 border-t border-[var(--bq26-line-soft)] flex items-center gap-2 px-1.5">
+                <div className="w-6 h-6 rounded-full bg-[var(--bq26-emerald-bright)] text-white text-[10px] font-black flex items-center justify-center">K</div>
+                <div className="min-w-0">
+                  <p className="text-[11px] font-bold text-[var(--bq26-text)] truncate">Khairul</p>
+                  <p className="text-[8px] font-medium text-[var(--bq26-muted)] truncate">khairul2052007@gmail</p>
+                </div>
+              </div>
+            </div>
+
+            {/* MAIN WORKSPACE CONTENT AREA */}
+            <div className="flex-1 p-3.5 sm:p-5 space-y-4 overflow-y-auto">
+              
+              {/* TOP HEADER BAR */}
+              <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-[var(--bq26-line-soft)]">
+                <div className="flex items-center gap-2 text-[11px] font-bold">
+                  <span className="text-[var(--bq26-muted)]">Dashboard</span>
+                  <span className="text-[var(--bq26-muted)]">/</span>
+                  <span className="text-[var(--bq26-text)]">Financial Overview</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="hidden sm:flex items-center gap-2 bg-[var(--bq26-sunken)] px-2.5 py-1 rounded-lg border border-[var(--bq26-line-soft)] text-[11px] text-[var(--bq26-muted)] min-w-[180px]">
+                    <span>🔍</span>
+                    <span>Search Invoices, customers...</span>
+                  </div>
+                  <span className="text-[10px] font-mono font-bold text-[var(--bq26-muted)] bg-[var(--bq26-sunken)] px-2 py-0.5 rounded border border-[var(--bq26-line-soft)]">7:28 AM</span>
+                </div>
+              </div>
+
+              {/* GREETING HERO BANNER */}
+              <div className="bg-[var(--bq26-sunken)] p-4 sm:p-4.5 rounded-xl border border-[var(--bq26-line-soft)] space-y-2 relative overflow-hidden">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-[9px] font-black uppercase tracking-wider text-[var(--bq26-emerald-bright)] bg-[rgba(11,143,120,0.12)] border border-[rgba(11,143,120,0.25)] px-2.5 py-0.5 rounded-full">
+                    • KB.EMBROIDERY DESIGNER · LIVE DEMO SYNCED
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => showToast(tr('Order form opened!', 'অর্ডার ফর্ম খোলা হয়েছে!'))}
+                      className="px-3 py-1 rounded-lg bg-[var(--bq26-btn)] text-white text-[11px] font-black hover:opacity-90 transition-opacity cursor-pointer"
+                    >
+                      + Create Order
+                    </button>
+                    <button
+                      onClick={() => showToast(tr('Payment record modal opened!', 'পেমেন্ট রেকর্ড উইন্ডো খোলা হয়েছে!'))}
+                      className="px-2.5 py-1 rounded-lg bg-[var(--bq26-panel)] border border-[var(--bq26-line-soft)] text-[var(--bq26-text)] text-[11px] font-bold hover:bg-[var(--bq26-sunken-strong)] transition-all cursor-pointer"
+                    >
+                      Record Payment
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="bq26-display text-xl sm:text-2xl font-bold text-[var(--bq26-text)]">
+                    Good Morning, Khairul 👋
+                  </h3>
+                  <p className="text-[11px] text-[var(--bq26-text-soft)] font-medium mt-0.5">
+                    Your business at a glance — Real-time revenue intelligence, collection flow, and customer ledger.
+                  </p>
+                </div>
+              </div>
+
+              {/* FINANCIAL INTELLIGENCE CARDS GRID */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5">
+                
+                {/* HERO REVENUE CARD (2 Columns) */}
+                <div className="lg:col-span-2 bg-[var(--bq26-sunken)] p-4 sm:p-4.5 rounded-xl border border-[var(--bq26-line-soft)] space-y-3">
+                  <div className="flex justify-between items-center pb-1.5 border-b border-[var(--bq26-line-soft)]">
+                    <span className="text-[9px] font-bold text-[var(--bq26-muted)] uppercase tracking-wider">TOTAL REVENUE (THIS MONTH)</span>
+                    <span className="text-[9px] font-bold text-[var(--bq26-emerald-bright)] animate-pulse">● LIVE UPDATING</span>
+                  </div>
+
+                  <div className="flex flex-wrap items-baseline justify-between gap-3">
+                    <div>
+                      <p className="text-[9px] font-bold text-[var(--bq26-muted)] uppercase">MONTH REVENUE</p>
+                      <p className="text-xl sm:text-2xl font-black text-[var(--bq26-emerald-bright)] font-numbers mt-0.5">
+                        <AnimatedNumber value={liveMetrics.revenue} prefix="₹" />.00
+                      </p>
+                      <p className="text-[9px] font-bold text-[var(--bq26-muted)] mt-0.5">Today's Invoiced Volume: ₹{liveMetrics.inflow}.00 · 8 active invoices</p>
+                    </div>
+
+                    <div className="bg-[var(--bq26-panel)] p-2.5 rounded-xl border border-[var(--bq26-line-soft)] text-[11px] space-y-1 min-w-[140px]">
+                      <div className="flex justify-between"><span className="text-[var(--bq26-muted)]">Net Cash Flow</span><span className="font-bold font-numbers">₹{(liveMetrics.revenue * 1.35).toFixed(0)}</span></div>
+                      <div className="flex justify-between"><span className="text-[var(--bq26-muted)]">Growth</span><span className="font-black text-[var(--bq26-emerald-bright)]">↗ {liveMetrics.growth}%</span></div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2.5 pt-2 border-t border-[var(--bq26-line-soft)] text-center sm:text-left">
+                    <div className="bg-[var(--bq26-panel)] p-2.5 rounded-lg border border-[var(--bq26-line-soft)]">
+                      <p className="text-[8px] font-bold text-[var(--bq26-muted)] uppercase">TODAY'S INFLOW</p>
+                      <p className="text-xs font-black text-[var(--bq26-emerald-bright)] font-numbers mt-0.5">₹{liveMetrics.inflow}.00</p>
+                    </div>
+                    <div className="bg-[var(--bq26-panel)] p-2.5 rounded-lg border border-[var(--bq26-line-soft)]">
+                      <p className="text-[8px] font-bold text-[var(--bq26-muted)] uppercase">TODAY'S OUTFLOW</p>
+                      <p className="text-xs font-black text-rose-400 font-numbers mt-0.5">₹0.00</p>
+                    </div>
+                    <div className="bg-[var(--bq26-panel)] p-2.5 rounded-lg border border-[var(--bq26-line-soft)]">
+                      <p className="text-[8px] font-bold text-[var(--bq26-muted)] uppercase">COLLECTION REALIZED</p>
+                      <p className="text-xs font-black text-[var(--bq26-teal)] font-numbers mt-0.5">116%</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* RIGHT COLUMN STACK */}
+                <div className="space-y-3">
+                  
+                  {/* Total Collected */}
+                  <div className="bg-[var(--bq26-sunken)] p-3.5 rounded-xl border border-[var(--bq26-line-soft)] flex items-center justify-between">
+                    <div>
+                      <p className="text-[8px] font-bold text-[var(--bq26-muted)] uppercase">TOTAL COLLECTED</p>
+                      <p className="text-lg font-black text-[var(--bq26-emerald-bright)] font-numbers mt-0.5">₹{liveMetrics.collected}.00</p>
+                      <p className="text-[8px] text-[var(--bq26-muted)]">12 confirmed payments received</p>
+                    </div>
+                    <span className="text-[8px] font-black uppercase text-[var(--bq26-emerald-bright)] bg-[rgba(11,143,120,0.12)] border border-[rgba(11,143,120,0.25)] px-2 py-0.5 rounded-full">
+                      116% SETTLED
+                    </span>
+                  </div>
+
+                  {/* Still to Collect */}
+                  <div className="bg-[var(--bq26-sunken)] p-3.5 rounded-xl border border-[var(--bq26-line-soft)] flex items-center justify-between">
+                    <div>
+                      <p className="text-[8px] font-bold text-[var(--bq26-muted)] uppercase">STILL TO COLLECT</p>
+                      <p className="text-lg font-black text-rose-400 font-numbers mt-0.5">₹{liveMetrics.due}.00</p>
+                      <p className="text-[8px] text-[var(--bq26-muted)]">All invoices within terms</p>
+                    </div>
+                    <button
+                      onClick={() => showToast(tr('WhatsApp reminder sent to customer!', 'কাস্টমারকে WhatsApp রিমাইন্ডার পাঠানো হয়েছে!'))}
+                      className="px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-500 text-[10px] font-black hover:bg-amber-500/20 transition-all cursor-pointer"
+                    >
+                      Collect →
+                    </button>
+                  </div>
+
+                  {/* Operating Capital */}
+                  <div className="bg-[var(--bq26-sunken)] p-3.5 rounded-xl border border-[var(--bq26-line-soft)] flex items-center justify-between">
+                    <div>
+                      <p className="text-[8px] font-bold text-[var(--bq26-muted)] uppercase">OPERATING CAPITAL</p>
+                      <p className="text-lg font-black text-[var(--bq26-text)] font-numbers mt-0.5">₹14,993.00</p>
+                      <p className="text-[8px] text-[var(--bq26-muted)]">Liquid operating funds</p>
+                    </div>
+                    <div className="w-7 h-7 rounded-lg bg-[rgba(11,143,120,0.12)] text-[var(--bq26-emerald-bright)] flex items-center justify-center">
+                      <CreditCard className="w-3.5 h-3.5" />
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              {/* REVENUE & COLLECTION TREND CHART */}
+              <div className="bg-[var(--bq26-sunken)] p-4 rounded-xl border border-[var(--bq26-line-soft)] space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h4 className="text-[11px] font-black text-[var(--bq26-text)] flex items-center gap-2">
+                    <BarChart3 className="w-3.5 h-3.5 text-[var(--bq26-teal)]" />
+                    Revenue & Collection Trend
+                  </h4>
+                  
+                  <div className="flex items-center gap-1 bg-[var(--bq26-panel)] p-0.5 rounded-lg border border-[var(--bq26-line-soft)]">
+                    {['7D', '30D', 'Month', 'Year'].map((rng) => (
+                      <button
+                        key={rng}
+                        onClick={() => setChartRange(rng)}
+                        className={`px-2.5 py-0.5 rounded text-[9px] font-black transition-all cursor-pointer ${
+                          chartRange === rng
+                            ? 'bg-[var(--bq26-btn)] text-white'
+                            : 'text-[var(--bq26-muted)] hover:text-[var(--bq26-text)]'
+                        }`}
+                      >
+                        {rng}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex items-end gap-2 h-28 pt-4 pb-1">
+                  {weeklyBars.map((bar, i) => (
+                    <div key={i} className="flex-1 flex flex-col items-center gap-1 h-full justify-end group relative">
+                      <div className="absolute -top-6 opacity-0 group-hover:opacity-100 transition-opacity bg-[var(--bq26-sunken-strong)] text-[var(--bq26-text)] text-[8px] font-black font-numbers px-1.5 py-0.5 rounded border border-[var(--bq26-line-soft)] pointer-events-none whitespace-nowrap z-20">
+                        {bar.amt}
+                      </div>
+                      <motion.div
+                        animate={{ height: `${bar.val}%` }}
+                        transition={{ duration: 0.4, ease: 'easeOut' }}
+                        className={`w-full rounded-t transition-all ${
+                          i === 5
+                            ? 'bg-gradient-to-t from-[var(--bq26-btn)] to-[var(--bq26-emerald-bright)] shadow-[0_0_12px_rgba(11,143,120,0.4)]'
+                            : 'bg-[rgba(11,143,120,0.25)] group-hover:bg-[rgba(11,143,120,0.4)]'
+                        }`}
+                      />
+                      <span className="text-[8px] font-bold text-[var(--bq26-muted)]">{bar.day}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </motion.section>
+  );
+};
+
 const WHATSAPP_NUMBER = '919477738769'; // BillQyro support (user-provided)
 
 const Landing = ({ onLoginSuccess }) => {
@@ -247,7 +716,7 @@ const Landing = ({ onLoginSuccess }) => {
   ];
 
   return (
-    <div className={`bq26-root min-h-screen flex flex-col relative ${landingMode === 'dark' ? 'bq26-dark' : ''}`}>
+    <div className={`bq26-root min-h-screen flex flex-col relative ${landingMode === 'dark' ? 'bq26-dark' : ''}`} data-theme="emerald-royal">
       {/* ── Cinematic aurora backdrop ─────────────────────────────────── */}
       <div aria-hidden="true" className="bq26-aurora" />
       <div aria-hidden="true" className="bq26-grid" />
@@ -258,8 +727,8 @@ const Landing = ({ onLoginSuccess }) => {
       <AdBanner />
 
       {/* ===== GLOBAL NAVIGATION ===== */}
-      <nav className="fixed w-full top-3 z-50 flex justify-center px-4">
-        <div className={`w-full max-w-7xl rounded-full px-5 sm:px-6 h-14 sm:h-16 flex items-center justify-between transition-all duration-300 bq26-nav ${isScrolled ? '' : '!bg-transparent !border-transparent !shadow-none'}`}>
+      <nav className="fixed w-full top-3 z-50 flex justify-center px-4 sm:px-8 lg:px-12">
+        <div className={`w-full max-w-[1536px] rounded-full px-5 sm:px-6 h-14 sm:h-16 flex items-center justify-between transition-all duration-300 bq26-nav ${isScrolled ? '' : '!bg-transparent !border-transparent !shadow-none'}`}>
           <Logo type="horizontal" forceWhiteText={landingMode === 'dark'} textColorClass="text-[var(--bq26-text)]" />
 
           {/* Desktop nav links */}
@@ -330,8 +799,8 @@ const Landing = ({ onLoginSuccess }) => {
       </nav>
 
       {/* ===== SECTION 1: HERO ===== */}
-      <motion.section initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.55, ease: 'easeOut' }} className="relative min-h-[94vh] flex items-center pt-32 pb-16 px-6 z-10">
-        <div className="max-w-7xl mx-auto w-full flex flex-col lg:flex-row items-center gap-14 lg:gap-16">
+      <motion.section initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.55, ease: 'easeOut' }} className="relative min-h-[94vh] flex items-center pt-32 pb-16 px-4 sm:px-8 lg:px-12 z-10">
+        <div className="max-w-[1536px] mx-auto w-full flex flex-col lg:flex-row items-center gap-14 lg:gap-16">
           <div className="flex-1 text-center lg:text-left space-y-7">
             <motion.div
               initial={{ opacity: 0, y: 10 }}
@@ -348,7 +817,7 @@ const Landing = ({ onLoginSuccess }) => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.08 }}
-              className="bq26-display text-[2.75rem] sm:text-6xl lg:text-[4.6rem] font-bold text-[var(--bq26-text)] max-w-3xl"
+              className="bq26-display text-[2.75rem] sm:text-6xl lg:text-[4.6rem] font-bold text-[var(--bq26-text)] max-w-4xl"
             >
               {tr('Smart billing.', 'স্মার্ট বিলিং।')} <br />
               <span className="bq26-grad-text">{tr('Premium control.', 'প্রিমিয়াম নিয়ন্ত্রণ।')}</span>
@@ -432,7 +901,7 @@ const Landing = ({ onLoginSuccess }) => {
               className="flex items-center gap-4 bq26-glass rounded-2xl p-4 max-w-sm mx-auto lg:mx-0"
             >
               <div className="bg-white p-2 rounded-xl shrink-0">
-                <QRCodeSVG value="https://billqyro-app.vercel.app/downloads/BillQyro-Android.apk" size={84} level="M" />
+                <QRCodeSVG value="https://billqyro.com/downloads/BillQyro-Android.apk" size={84} level="M" />
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-black text-[var(--bq26-text)] flex items-center gap-1.5">
@@ -614,9 +1083,12 @@ const Landing = ({ onLoginSuccess }) => {
         </div>
       </motion.section>
 
+      {/* ===== SECTION: DASHBOARD PREVIEW ===== */}
+      <DashboardPreviewSection tr={tr} />
+
       {/* ===== CATEGORY MARQUEE ===== */}
-      <motion.section initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.55, ease: 'easeOut' }} aria-label={tr('Business categories', 'ব্যবসার ক্যাটাগরি')} className="pb-16 px-6 relative z-10">
-        <div className="max-w-7xl mx-auto">
+      <motion.section initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.55, ease: 'easeOut' }} aria-label={tr('Business categories', 'ব্যবসার ক্যাটাগরি')} className="pb-16 px-4 sm:px-8 lg:px-12 relative z-10">
+        <div className="max-w-[1536px] mx-auto">
           <div className="bq26-marquee-shell bq-marquee rounded-full py-3">
             <div className="bq-marquee-track gap-3 pr-3">
               {[0, 1].map((dup) => (
@@ -635,10 +1107,10 @@ const Landing = ({ onLoginSuccess }) => {
       </motion.section>
 
       {/* ===== SECTION: WHY BILLQYRO (BENTO GRID) ===== */}
-      <motion.section initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.55, ease: 'easeOut' }} id="why-billqyro" className="relative py-24 px-6 z-10">
+      <motion.section initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.55, ease: 'easeOut' }} id="why-billqyro" className="relative py-20 px-4 sm:px-8 lg:px-12 z-10">
         <ScrollReveal yOffset={28}>
-          <div className="max-w-7xl mx-auto">
-            <div className="max-w-2xl mb-12">
+          <div className="max-w-[1536px] mx-auto">
+            <div className="max-w-3xl mb-12">
               <p className="bq26-kicker">{tr('The BillQyro Difference', 'BillQyro-এর পার্থক্য')}</p>
               <h2 className="bq26-display text-3xl sm:text-4xl lg:text-5xl font-bold text-[var(--bq26-text)] mt-3">
                 {tr('One system for the work that happens ', 'বিক্রির পরের সব কাজের জন্য ')}
@@ -751,10 +1223,10 @@ const Landing = ({ onLoginSuccess }) => {
       </motion.section>
 
       {/* ===== SECTION: BUSINESS CATEGORIES (interactive) ===== */}
-      <motion.section initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.55, ease: 'easeOut' }} id="categories" className="relative py-24 px-6 z-10">
+      <motion.section initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.55, ease: 'easeOut' }} id="categories" className="relative py-20 px-4 sm:px-8 lg:px-12 z-10">
         <ScrollReveal yOffset={28}>
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center max-w-2xl mx-auto mb-12">
+          <div className="max-w-[1536px] mx-auto">
+            <div className="text-center max-w-3xl mx-auto mb-12">
               <p className="bq26-kicker">{tr('Industry-Tailored Workspaces', 'ইন্ডাস্ট্রি-অনুযায়ী ওয়ার্কস্পেস')}</p>
               <h2 className="bq26-display text-3xl sm:text-4xl font-bold text-[var(--bq26-text)] mt-3">
                 {tr('Configured for your exact workflow', 'আপনার ব্যবসার হুবহু ওয়ার্কফ্লো অনুযায়ী কনফিগার করা')}
@@ -830,10 +1302,10 @@ const Landing = ({ onLoginSuccess }) => {
       </motion.section>
 
       {/* ===== SECTION: WORKFLOW TIMELINE ===== */}
-      <motion.section initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.55, ease: 'easeOut' }} id="workflow" className="relative py-24 px-6 z-10">
+      <motion.section initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.55, ease: 'easeOut' }} id="workflow" className="relative py-20 px-4 sm:px-8 lg:px-12 z-10">
         <ScrollReveal yOffset={28}>
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center max-w-2xl mx-auto mb-14">
+          <div className="max-w-[1536px] mx-auto">
+            <div className="text-center max-w-3xl mx-auto mb-14">
               <p className="bq26-kicker">{tr('End-to-End Lifecycle', 'সম্পূর্ণ লাইফসাইকেল')}</p>
               <h2 className="bq26-display text-3xl sm:text-4xl font-bold text-[var(--bq26-text)] mt-3">
                 {tr('A streamlined 4-step flow', 'সহজ ৪ ধাপের ফ্লো')}
@@ -868,9 +1340,9 @@ const Landing = ({ onLoginSuccess }) => {
       </motion.section>
 
       {/* ===== SECTION: PAYMENTS ===== */}
-      <motion.section initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.55, ease: 'easeOut' }} id="payments" className="relative py-24 px-6 z-10">
+      <motion.section initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.55, ease: 'easeOut' }} id="payments" className="relative py-20 px-4 sm:px-8 lg:px-12 z-10">
         <ScrollReveal yOffset={28}>
-          <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12">
+          <div className="max-w-[1536px] mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
             <div className="flex-1 space-y-5 order-2 lg:order-1">
               <p className="bq26-kicker">{tr('Frictionless Payment Rails', 'ঘর্ষণহীন পেমেন্ট রেল')}</p>
               <h2 className="bq26-display text-3xl sm:text-4xl font-bold text-[var(--bq26-text)]">
@@ -921,17 +1393,17 @@ const Landing = ({ onLoginSuccess }) => {
       </motion.section>
 
       {/* ===== SECTION: PRICING ===== */}
-      <motion.section initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.55, ease: 'easeOut' }} id="pricing" className="relative py-24 px-6 z-10">
+      <motion.section initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.55, ease: 'easeOut' }} id="pricing" className="relative py-20 px-4 sm:px-8 lg:px-12 z-10">
         <ScrollReveal yOffset={28}>
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center max-w-2xl mx-auto mb-12">
+          <div className="max-w-[1536px] mx-auto">
+            <div className="text-center max-w-3xl mx-auto mb-12">
               <p className="bq26-kicker">{tr('Simple, Honest Pricing', 'সহজ, সৎ প্রাইসিং')}</p>
               <h2 className="bq26-display text-3xl sm:text-4xl font-bold text-[var(--bq26-text)] mt-3">
                 {tr('Start free. Upgrade when you grow.', 'ফ্রি শুরু করুন। বড় হলে আপগ্রেড।')}
               </h2>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-4 max-w-5xl mx-auto items-stretch">
+            <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto items-stretch">
               {/* Free */}
               <div className="bq26-tile rounded-3xl p-7 flex flex-col">
                 <p className="text-[10px] font-black uppercase tracking-widest text-[var(--bq26-muted)]">{tr('Starter', 'স্টার্টার')}</p>
@@ -1015,9 +1487,9 @@ const Landing = ({ onLoginSuccess }) => {
       </motion.section>
 
       {/* ===== SECTION: OFFLINE & SECURITY ===== */}
-      <motion.section initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.55, ease: 'easeOut' }} id="platform" className="relative py-24 px-6 z-10">
+      <motion.section initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.55, ease: 'easeOut' }} id="platform" className="relative py-20 px-4 sm:px-8 lg:px-12 z-10">
         <ScrollReveal yOffset={28}>
-          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="max-w-[1536px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bq26-tile rounded-3xl p-8 space-y-4">
               <div className="w-12 h-12 rounded-2xl bg-[rgba(227,201,143,0.1)] border border-[rgba(227,201,143,0.25)] text-[var(--bq26-gold)] flex items-center justify-center">
                 <Smartphone className="w-6 h-6" />
@@ -1048,9 +1520,9 @@ const Landing = ({ onLoginSuccess }) => {
       </motion.section>
 
       {/* ===== SECTION: FAQ ===== */}
-      <motion.section initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.55, ease: 'easeOut' }} id="faq" className="relative py-24 px-6 z-10">
+      <motion.section initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.55, ease: 'easeOut' }} id="faq" className="relative py-20 px-4 sm:px-8 lg:px-12 z-10">
         <ScrollReveal yOffset={28}>
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-5xl mx-auto">
             <div className="text-center mb-12">
               <p className="bq26-kicker">{tr('Clear & Transparent', 'পরিষ্কার ও স্বচ্ছ')}</p>
               <h2 className="bq26-display text-3xl sm:text-4xl font-bold text-[var(--bq26-text)] mt-3">
@@ -1091,42 +1563,54 @@ const Landing = ({ onLoginSuccess }) => {
       </motion.section>
 
       {/* ===== SECTION: TESTIMONIALS ===== */}
-      <motion.section initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.55, ease: 'easeOut' }} className="relative py-24 px-6 z-10">
+      <motion.section
+        initial={{ opacity: 0, y: 28 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: '-60px' }}
+        transition={{ duration: 0.55, ease: 'easeOut' }}
+        className="relative py-20 px-4 sm:px-8 lg:px-12 z-10"
+      >
         <ScrollReveal yOffset={28}>
-          <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-12">
-              <p className="bq26-kicker">{tr('Trusted by Businesses', 'ব্যবসাদের আস্থা')}</p>
+          <div className="max-w-[1536px] mx-auto">
+            <div className="text-center max-w-2xl mx-auto mb-12">
+              <p className="bq26-kicker">{tr('Trusted by Businesses', 'ব্যবসায়ীদের আস্থা')}</p>
               <h2 className="bq26-display text-3xl sm:text-4xl font-bold text-[var(--bq26-text)] mt-3">
-                {tr('What our users say', 'আমাদের ব্যবহারকারীরা যা বলেন')}
+                {tr('What Our Customers Say', 'আমাদের ব্যবহারকারীরা যা বলেন')}
               </h2>
             </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {[
-                { name: 'Rahim Uddin', role: 'Tailoring Shop, Dhaka', text: 'BillQyro changed how I track customer dues. Before I used notebooks, now everything is automatic. The Bengali voice billing is a game changer.' },
-                { name: 'Priya Sharma', role: 'Coaching Center, Kolkata', text: 'We generate 200+ invoices per month. BillQyro handles it offline perfectly. The WhatsApp reminders help us collect dues faster.' },
-                { name: 'Amitesh Kumar', role: 'Repair Shop, Patna', text: 'Simple, fast, and free. I switched from a complex accounting tool to BillQyro. My staff learned it in 10 minutes.' },
-              ].map((t, i) => (
-                <div key={i} className="bq26-tile rounded-2xl p-6 !transform-none">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#0B8F78] to-[var(--bq26-emerald-bright)] flex items-center justify-center text-white font-bold text-sm">{t.name[0]}</div>
-                    <div>
-                      <p className="text-sm font-bold text-[var(--bq26-text)]">{t.name}</p>
-                      <p className="text-[10px] text-[var(--bq26-muted)] font-semibold">{t.role}</p>
-                    </div>
-                  </div>
-                  <p className="text-xs text-[var(--bq26-text-soft)] leading-relaxed font-medium">"{t.text}"</p>
-                </div>
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: '-40px' }}
+              variants={{
+                visible: {
+                  transition: {
+                    staggerChildren: 0.15
+                  }
+                }
+              }}
+              className="grid grid-cols-1 md:grid-cols-3 gap-6 overflow-x-auto pb-4 custom-scrollbar"
+            >
+              {testimonials.map((item, i) => (
+                <TestimonialCard
+                  key={i}
+                  name={item.name}
+                  business={item.business}
+                  quote={item.quote}
+                  rating={item.rating}
+                  avatarUrl={item.avatarUrl}
+                />
               ))}
-            </div>
+            </motion.div>
           </div>
         </ScrollReveal>
       </motion.section>
 
       {/* ===== SECTION: AUTH / LOGIN ===== */}
-      <motion.section initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.55, ease: 'easeOut' }} id="login" className="relative py-24 px-6 z-10">
+      <motion.section initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.55, ease: 'easeOut' }} id="login" className="relative py-10 sm:py-12 px-4 sm:px-8 lg:px-12 z-10">
         <div aria-hidden="true" className="absolute inset-x-0 top-0 h-56 bg-gradient-to-b from-[rgba(11,143,120,0.07)] to-transparent pointer-events-none" />
         <ScrollReveal yOffset={24}>
-          <div className="max-w-6xl mx-auto grid lg:grid-cols-[1fr_1.15fr] gap-10 lg:gap-14 items-start relative">
+          <div className="max-w-[1536px] mx-auto grid lg:grid-cols-[1fr_1.15fr] gap-10 lg:gap-14 items-start relative">
             <div className="text-center lg:text-left pt-4">
               <p className="bq26-kicker">{tr('Ready when you are', 'আপনি প্রস্তুত হলেই')}</p>
               <h2 className="bq26-display text-3xl sm:text-4xl font-bold text-[var(--bq26-text)] mt-2">
@@ -1243,9 +1727,9 @@ const Landing = ({ onLoginSuccess }) => {
       </div>
 
       {/* ===== FOOTER ===== */}
-      <footer className="relative px-6 pt-16 pb-8 text-xs text-[var(--bq26-muted)] z-10">
+      <footer className="relative px-4 sm:px-8 lg:px-12 pt-8 sm:pt-10 pb-8 text-xs text-[var(--bq26-muted)] z-10 mt-auto">
         <div aria-hidden="true" className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,143,120,0.5)] to-transparent" />
-        <div className="max-w-7xl mx-auto relative">
+        <div className="max-w-[1536px] mx-auto relative">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-10 pb-10 border-b border-[var(--bq26-line-soft)]">
             {/* Brand column */}
             <div className="col-span-2 md:col-span-1 space-y-4">

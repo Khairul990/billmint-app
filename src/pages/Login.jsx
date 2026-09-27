@@ -60,11 +60,7 @@ function BrandMark({ small = false }) {
 
 function ShowcaseCard({ icon: Icon, title, sub, children }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 30, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: -20, scale: 0.95 }}
-      transition={{ type: "spring", stiffness: 160, damping: 18, mass: 1 }}
+    <div
       className="relative flex h-[430px] w-full flex-col overflow-hidden rounded-[1.8rem] border border-theme-border-soft/40 bg-theme-card/60 p-5 shadow-[0_30px_60px_-15px_rgba(15,23,42,0.18)] backdrop-blur-2xl ring-1 ring-inset ring-black/5 before:pointer-events-none before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/40 before:to-transparent before:content-[''] dark:ring-white/10 dark:before:from-white/10"
     >
       <div className="relative z-10 mb-4 flex shrink-0 items-center gap-3 border-b border-theme-border-soft pb-4">
@@ -77,7 +73,7 @@ function ShowcaseCard({ icon: Icon, title, sub, children }) {
         </div>
       </div>
       <div className="relative z-10 min-h-0 flex-1 overflow-hidden">{children}</div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -106,10 +102,7 @@ function LoginDemoCard() {
           <DemoInput width="70%" />
           <DemoInput width="52%" />
         </div>
-        <motion.div
-          initial={{ width: "0%" }}
-          animate={{ width: "100%" }}
-          transition={{ duration: 1.15, ease: "easeOut" }}
+        <div
           className="mt-4 h-10 rounded-2xl bg-[image:var(--accent-gradient)] shadow-glow"
         />
       </div>
@@ -148,11 +141,8 @@ function SetupCard() {
           </div>
           <div className="grid grid-cols-3 gap-2">
             {regions.map((region, index) => (
-              <motion.div
+              <div
                 key={region.code}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.12 }}
                 className={cn(
                   "rounded-2xl border p-3 text-center",
                   index === 0 ? "border-theme-accent/60 bg-theme-accent-light" : "border-theme-border-soft bg-theme-surface"
@@ -160,7 +150,7 @@ function SetupCard() {
               >
                 <p className="text-base font-black text-theme-primary">{region.code}</p>
                 <p className="mt-1 text-[10px] text-theme-muted">{region.label}</p>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
@@ -198,14 +188,12 @@ function SideMini({ label, active = false }) {
 
 function DashStat({ label, value, active = false }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
+    <div
       className={cn("rounded-2xl border p-2", active ? "border-theme-border-soft bg-theme-accent-light" : "border-theme-border-soft bg-theme-surface")}
     >
       <p className={cn("text-[9px] font-bold uppercase tracking-wide", active ? "text-theme-accent/80" : "text-theme-muted")}>{label}</p>
       <p className="mt-1 text-sm font-black text-theme-primary">{value}</p>
-    </motion.div>
+    </div>
   );
 }
 
@@ -276,7 +264,7 @@ function DashboardCard() {
                 </div>
               </div>
               <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-theme-muted/20">
-                <motion.div initial={{ width: "0%" }} animate={{ width: "76%" }} transition={{ duration: 1, ease: "easeOut" }} className="h-full rounded-full bg-[image:var(--accent-gradient)]" />
+                <div className="h-full rounded-full bg-[image:var(--accent-gradient)]" />
               </div>
             </div>
           </div>
@@ -328,11 +316,8 @@ function InvoiceCard() {
       <div className="flex h-full flex-col justify-center">
         <div className="space-y-2">
           {rows.map(([item, price], index) => (
-            <motion.div
+            <div
               key={item}
-              initial={{ opacity: 0, x: -14, scale: 0.98 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              transition={{ delay: index * 0.16, duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
               className="flex items-center justify-between rounded-xl bg-theme-surface px-3 py-2 text-xs"
             >
               <span className="flex min-w-0 items-center gap-2 truncate text-theme-muted">
@@ -340,16 +325,16 @@ function InvoiceCard() {
                 {item}
               </span>
               <span className="shrink-0 font-semibold text-theme-primary">{price}</span>
-            </motion.div>
+            </div>
           ))}
         </div>
         <div className="mt-4 flex items-center justify-between border-t border-theme-border-soft pt-4">
           <span className="text-xs text-theme-muted">Grand Total</span>
-          <motion.span initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.72, duration: 0.45 }} className="text-2xl font-black text-theme-accent">
+          <span className="text-2xl font-black text-theme-accent">
             ₹2,510
-          </motion.span>
+          </span>
         </div>
-        <motion.div initial={{ width: "0%" }} animate={{ width: "100%" }} transition={{ delay: 0.25, duration: 1.2, ease: "easeOut" }} className="mt-4 h-1.5 rounded-full bg-[image:var(--accent-gradient)]" />
+        <div className="mt-4 h-1.5 rounded-full bg-[image:var(--accent-gradient)]" />
       </div>
     </ShowcaseCard>
   );
@@ -367,7 +352,7 @@ function MiniInvoiceDocument({ compact = false, pdf = false }) {
     <div className={cn("flex h-full flex-col overflow-hidden rounded-[1rem] bg-theme-card text-theme-primary", compact ? "p-3" : "p-2")}>
       <div className="shrink-0 border-b border-theme-border-soft pb-2">
         <p className={cn("font-black leading-tight", compact ? "text-[11px]" : "text-[10px]")}>KB.Embroidery Designer</p>
-        <p className="mt-0.5 truncate text-[9px] font-semibold text-theme-muted">Dhulagor Howrah · khairul2052007@gmail.com</p>
+        <p className="mt-0.5 truncate text-[9px] font-semibold text-theme-muted">Dhulagor Howrah · info@billqyro.app</p>
         <div className="mt-2 flex items-center justify-between">
           <p className="text-[10px] font-black tracking-wide">INVOICE</p>
           <div className="text-right text-[9px] font-bold text-theme-muted">
@@ -449,20 +434,14 @@ function PdfCard() {
   return (
     <ShowcaseCard icon={FileCheck2} title="PDF Ready" sub="Invoice converted to printable PDF">
       <div className="grid h-full grid-cols-[1fr_0.62fr] gap-3">
-        <motion.div
-          initial={{ opacity: 0, x: -14, rotate: -1 }}
-          animate={{ opacity: 1, x: 0, rotate: 0 }}
-          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+        <div
           className="min-h-0 overflow-hidden rounded-[1.35rem] border border-theme-border-soft bg-theme-card p-3 text-theme-primary shadow-xl"
         >
           <MiniInvoiceDocument pdf />
-        </motion.div>
+        </div>
 
         <div className="flex min-h-0 flex-col justify-between gap-3">
-          <motion.div
-            initial={{ scale: 0.84, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.22, type: "spring", stiffness: 150, damping: 14 }}
+          <div
             className="grid flex-1 place-items-center rounded-[1.35rem] border border-theme-border-soft bg-theme-accent-light p-3 text-center"
           >
             <div>
@@ -472,7 +451,7 @@ function PdfCard() {
               <p className="mt-3 text-lg font-black text-theme-primary">PDF</p>
               <p className="mt-1 text-[10px] font-semibold text-theme-muted">2 pages · 184 KB</p>
             </div>
-          </motion.div>
+          </div>
           <div className="rounded-2xl border border-theme-border-soft bg-theme-surface p-3 text-center text-[10px] font-bold text-theme-muted">INV-DEMO-1002.pdf</div>
         </div>
       </div>
@@ -484,16 +463,13 @@ function DownloadCard() {
   return (
     <ShowcaseCard icon={Download} title="Downloaded" sub="Saved successfully">
       <div className="flex h-full flex-col items-center justify-center text-center">
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: "spring", stiffness: 180, damping: 12 }}
+        <div
           className="grid h-20 w-20 place-items-center rounded-full border border-theme-accent/35 bg-theme-accent-light text-theme-accent shadow-xl shadow-glow"
         >
           <Check size={34} strokeWidth={3} />
-        </motion.div>
+        </div>
         <div className="mt-5 h-2 w-full overflow-hidden rounded-full bg-theme-muted/20">
-          <motion.div initial={{ width: "0%" }} animate={{ width: "100%" }} transition={{ duration: 1.1, ease: "easeOut" }} className="h-full rounded-full bg-[image:var(--accent-gradient)]" />
+          <div className="h-full rounded-full bg-[image:var(--accent-gradient)]" />
         </div>
         <p className="mt-3 text-sm font-bold text-theme-accent">100% Complete</p>
       </div>
@@ -503,18 +479,16 @@ function DownloadCard() {
 
 function LinkFeature({ icon: Icon, label }) {
   return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl border border-theme-border-soft bg-theme-surface p-2 text-center">
+    <div className="rounded-xl border border-theme-border-soft bg-theme-surface p-2 text-center">
       <Icon className="mx-auto text-theme-accent" size={15} />
       <p className="mt-1.5 text-[9px] font-bold text-theme-muted">{label}</p>
-    </motion.div>
+    </div>
   );
 }
 
 function ShareChip({ icon: Icon, label, value, compact = false }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
+    <div
       className={cn("flex items-center gap-3 rounded-2xl border border-theme-border-soft bg-theme-surface", compact ? "p-2.5" : "p-3")}
     >
       <div className={cn("grid place-items-center rounded-xl bg-theme-accent-light text-theme-accent", compact ? "h-8 w-8" : "h-9 w-9")}>
@@ -524,7 +498,7 @@ function ShareChip({ icon: Icon, label, value, compact = false }) {
         <p className="truncate text-xs text-theme-muted">{label}</p>
         <p className="truncate text-xs font-bold text-theme-accent">{value}</p>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -559,10 +533,7 @@ function ShareCard() {
             <ShareChip icon={Mail} label="Email" value="Delivered" compact />
             <ShareChip icon={QrCode} label="QR Code" value="Ready" compact />
           </div>
-          <motion.div
-            initial={{ opacity: 0, x: 16 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.25 }}
+          <div
             className="flex min-h-0 flex-col rounded-[1.25rem] border border-theme-border-soft bg-theme-card p-3 text-theme-primary shadow-xl"
           >
             <div className="mb-2 flex shrink-0 items-center justify-between text-[9.5px] font-black">
@@ -576,7 +547,7 @@ function ShareCard() {
             </div>
             <div className="mt-3 rounded-xl bg-theme-surface p-2 text-center text-[9px] font-black text-theme-primary">₹2,510 Due</div>
             <div className="mt-2 rounded-xl bg-theme-accent p-2 text-center text-[9px] font-black text-white">Pay Now</div>
-          </motion.div>
+          </div>
         </div>
       </div>
     </ShowcaseCard>
@@ -587,15 +558,12 @@ function PaymentLinkCard() {
   return (
     <ShowcaseCard icon={IndianRupee} title="Payment Link Opened" sub="Customer pays from invoice link">
       <div className="grid h-full grid-cols-[0.92fr_1fr] gap-3">
-        <motion.div initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} className="min-h-0 overflow-hidden rounded-[1.35rem] border border-theme-border-soft bg-theme-card p-2.5 text-theme-primary shadow-xl">
+        <div className="min-h-0 overflow-hidden rounded-[1.35rem] border border-theme-border-soft bg-theme-card p-2.5 text-theme-primary shadow-xl">
           <MiniInvoiceDocument compact />
-        </motion.div>
+        </div>
 
         <div className="flex min-h-0 flex-col gap-3">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
+          <div
             className="rounded-2xl border border-theme-border-soft bg-theme-accent-light p-4"
           >
             <div className="mb-3 flex items-center justify-between">
@@ -608,8 +576,8 @@ function PaymentLinkCard() {
                 <QrCode size={24} />
               </div>
             </div>
-            <motion.div initial={{ width: "0%" }} animate={{ width: "100%" }} transition={{ duration: 1.1, ease: "easeOut" }} className="h-1.5 rounded-full bg-[image:var(--accent-gradient)]" />
-          </motion.div>
+            <div className="h-1.5 rounded-full bg-[image:var(--accent-gradient)]" />
+          </div>
           <div className="rounded-2xl border border-theme-border-soft bg-theme-surface p-3 text-xs text-theme-muted">
             Customer can view bill, download PDF, scan QR, or pay through link.
           </div>
@@ -623,14 +591,11 @@ function PaymentSuccessCard() {
   return (
     <ShowcaseCard icon={CreditCard} title="Payment Received" sub="Invoice status auto-updated">
       <div className="flex h-full flex-col items-center justify-center text-center">
-        <motion.div
-          initial={{ scale: 0.78, opacity: 0 }}
-          animate={{ scale: [0.78, 1.08, 1], opacity: 1 }}
-          transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+        <div
           className="grid h-20 w-20 place-items-center rounded-full border border-theme-accent/35 bg-theme-accent-light text-theme-accent shadow-xl shadow-glow"
         >
           <IndianRupee size={34} strokeWidth={3} />
-        </motion.div>
+        </div>
         <h3 className="mt-5 text-2xl font-black text-theme-primary">₹2,510 Paid</h3>
         <p className="mt-2 text-sm text-theme-muted">Payment status changed to Paid.</p>
         <div className="mt-5 grid w-full grid-cols-2 gap-3 text-left">
@@ -646,24 +611,18 @@ function DeliveredCard() {
   return (
     <ShowcaseCard icon={Check} title="Completed" sub="Billing completed">
       <div className="flex h-full flex-col items-center justify-center text-center">
-        <motion.div
-          initial={{ scale: 0.7, opacity: 0 }}
-          animate={{ scale: [0.7, 1.08, 1], opacity: 1 }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        <div
           className="grid h-24 w-24 place-items-center rounded-full border border-theme-accent/35 bg-theme-accent-light text-theme-accent shadow-xl shadow-glow"
         >
           <Check size={42} strokeWidth={3} />
-        </motion.div>
+        </div>
         <h3 className="mt-6 text-2xl font-black text-theme-primary">All set</h3>
         <p className="mt-2 max-w-[240px] text-sm leading-6 text-theme-muted">Customer, invoice, PDF, share link and payment completed.</p>
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.45 }}
+        <div
           className="mt-5 inline-flex items-center gap-2 rounded-full border border-theme-border-soft bg-theme-accent-light px-4 py-2 text-xs font-bold text-theme-accent"
         >
           <Zap size={14} /> Ready for next bill
-        </motion.div>
+        </div>
       </div>
     </ShowcaseCard>
   );
@@ -706,10 +665,8 @@ function ShowcasePanel() {
       className="relative flex min-h-[560px] w-full flex-col overflow-hidden bg-theme-surface p-6 lg:min-h-[640px] lg:w-[47%] lg:p-8"
     >
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_48%_36%,var(--accent-glow),transparent_32%),radial-gradient(circle_at_82%_18%,var(--accent-glow),transparent_28%)] opacity-30" />
-      <motion.div
+      <div
         aria-hidden="true"
-        animate={isPaused ? { scale: 1, opacity: 0.42 } : { scale: [1, 1.12, 1], opacity: [0.35, 0.65, 0.35] }}
-        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
         className="pointer-events-none absolute left-1/2 top-1/2 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-theme-accent-light blur-3xl"
       />
       <div className="pointer-events-none absolute inset-x-8 top-24 h-px bg-gradient-to-r from-transparent via-theme-accent/20 to-transparent" />
@@ -724,21 +681,17 @@ function ShowcasePanel() {
 
       <div className="relative z-10 flex flex-1 items-center justify-center py-7">
         <div className="relative w-full max-w-[390px]">
-          <motion.div
+          <div
             aria-hidden="true"
-            animate={isPaused ? { rotate: 0 } : { rotate: 360 }}
-            transition={{ duration: 22, repeat: isPaused ? 0 : Infinity, ease: "linear" }}
             className="absolute -inset-7 rounded-[2.3rem] border border-theme-border-soft"
           />
-          <motion.div
+          <div
             aria-hidden="true"
-            animate={isPaused ? { rotate: 0 } : { rotate: -360 }}
-            transition={{ duration: 28, repeat: isPaused ? 0 : Infinity, ease: "linear" }}
             className="absolute -inset-12 rounded-[2.6rem] border border-theme-accent/5"
           />
-          <AnimatePresence mode="wait">
+          
             <ActiveComponent key={STEPS[active].key} />
-          </AnimatePresence>
+          
         </div>
       </div>
 
@@ -757,10 +710,8 @@ function ShowcasePanel() {
         </div>
 
         <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-theme-muted/20">
-          <motion.div
+          <div
             className="h-full rounded-full bg-[image:var(--accent-gradient)]"
-            animate={{ width: `${((active + 1) / STEPS.length) * 100}%` }}
-            transition={{ duration: 0.45, ease: "easeOut" }}
           />
         </div>
 
@@ -809,7 +760,7 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [error, setError] = useState('');
 
-  const [isLoginMode, setIsLoginMode] = useState(false);
+  const [isLoginMode, setIsLoginMode] = useState(true);
 
   // Demo → signup conversion: the landing page sets this flag when a demo
   // visitor taps "Create free account". This panel is lazy-loaded, so it
@@ -929,11 +880,11 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
     <div className="relative z-10 w-full">
       {!embedded && <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-theme-accent via-emerald-400/80 to-theme-accent rounded-t-[2rem]" />}
       {!embedded && (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.5 }} className="mb-8">
+        <div className="mb-8">
           <BrandMark />
-        </motion.div>
+        </div>
       )}
-      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.4 }}>
+      <div>
         <div className="badge-premium mb-2.5 inline-flex items-center gap-2 rounded-full border border-theme-border-soft bg-theme-accent-light px-3 py-1 text-[10px] font-black uppercase tracking-wide text-theme-accent">
           {isLoginMode ? 'Secure Login' : 'Create Account'} <span className="h-1.5 w-1.5 rounded-full bg-theme-accent" />
         </div>
@@ -945,7 +896,7 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
             ? 'Sign in to manage your customers, invoices, PDFs, and collections.' 
             : 'Create your account, then complete the 1-minute setup wizard to launch your business.'}
         </p>
-      </motion.div>
+      </div>
 
         {error && <p className="mt-4 rounded-xl bg-theme-danger/10 px-4 py-2.5 text-sm font-semibold text-theme-danger border border-theme-danger/20">{error}</p>}
 
@@ -954,7 +905,7 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
           onSubmit={handleSubmit}
         >
           {!isLoginMode && (
-            <motion.label initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25, duration: 0.5 }} className="block relative group">
+            <label className="block relative group">
               <span className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-theme-muted transition-colors group-focus-within:text-theme-accent">Full Name</span>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -968,9 +919,9 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
                   className="input-premium premium-focus h-12 w-full rounded-2xl border border-theme-border-soft bg-theme-surface pl-11 pr-4 text-sm text-theme-primary outline-none transition-all placeholder:text-theme-muted focus:border-theme-accent/60 focus:bg-theme-accent-light focus:ring-4 focus:ring-theme-accent/10 focus:shadow-[0_0_15px_var(--accent-glow)]"
                 />
               </div>
-            </motion.label>
+            </label>
           )}
-          <motion.label initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.5 }} className="block relative group">
+          <label className="block relative group">
             <span className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-theme-muted transition-colors group-focus-within:text-theme-accent">Email address</span>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -984,9 +935,9 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
                   className="input-premium premium-focus h-12 w-full rounded-2xl border border-theme-border-soft bg-theme-surface pl-11 pr-4 text-sm text-theme-primary outline-none transition-all placeholder:text-theme-muted focus:border-theme-accent/60 focus:bg-theme-accent-light focus:ring-4 focus:ring-theme-accent/10 focus:shadow-[0_0_15px_var(--accent-glow)]"
               />
             </div>
-          </motion.label>
+          </label>
 
-          <motion.label initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4, duration: 0.5 }} className="block relative group">
+          <label className="block relative group">
             <span className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-theme-muted transition-colors group-focus-within:text-theme-accent">Password</span>
             <div className="relative">
               <input
@@ -1005,10 +956,10 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
-          </motion.label>
+          </label>
 
           {!isLoginMode && (
-            <motion.label initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45, duration: 0.5 }} className="block relative group">
+            <label className="block relative group">
               <span className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-theme-muted transition-colors group-focus-within:text-theme-accent">Confirm Password</span>
               <div className="relative">
                 <input
@@ -1027,11 +978,11 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
                   {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
-            </motion.label>
+            </label>
           )}
 
           {!isLoginMode ? (
-            <motion.label initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.5 }} className="flex items-start gap-2.5 pt-1 text-xs text-theme-muted cursor-pointer">
+            <label className="flex items-start gap-2.5 pt-1 text-xs text-theme-muted cursor-pointer">
               <input 
                 type="checkbox" 
                 checked={agreeTerms}
@@ -1039,9 +990,9 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
                 className="mt-0.5 h-4 w-4 rounded accent-theme-accent" 
               />
               <span>I agree to the <span className="font-bold text-theme-primary">Terms of Service</span> & <span className="font-bold text-theme-primary">Privacy Policy</span>.</span>
-            </motion.label>
+            </label>
           ) : (
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.5 }} className="flex items-center justify-end text-sm">
+            <div className="flex items-center justify-end text-sm">
               <button
                 type="button"
                 onClick={async () => {
@@ -1061,10 +1012,10 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
               >
                 Forgot password?
               </button>
-            </motion.div>
+            </div>
           )}
 
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6, duration: 0.5 }}>
+          <div>
             <ShimmerButton
               type="submit"
               disabled={isSigningIn}
@@ -1075,28 +1026,23 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
               <div className="flex items-center gap-2 text-[15px] font-black text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.3)]">
                 {isSigningIn ? (isLoginMode ? "Signing in..." : "Creating account...") : (isLoginMode ? "Sign In to Dashboard" : "Register & Begin Setup")}
                 {isSigningIn ? (
-                  <motion.span
+                  <span
                     className="h-4 w-4 rounded-full border-2 border-white/40 border-t-white"
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
                   />
                 ) : (
                   <ArrowRight className="transition-transform duration-300 group-hover:translate-x-1" size={18} />
                 )}
               </div>
             </ShimmerButton>
-          </motion.div>
+          </div>
 
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7, duration: 0.5 }} className="flex items-center gap-3">
+          <div className="flex items-center gap-3">
             <div className="h-px flex-1 bg-theme-border-soft" />
             <span className="text-xs font-bold uppercase tracking-wider text-theme-muted">or</span>
             <div className="h-px flex-1 bg-theme-border-soft" />
-          </motion.div>
+          </div>
 
-          <motion.button 
-            initial={{ opacity: 0, y: 20 }} 
-            animate={{ opacity: 1, y: 0 }} 
-            transition={{ delay: 0.8, duration: 0.5 }} 
+          <button 
             type="button" 
             onClick={handleGoogleLogin}
             disabled={isSigningIn}
@@ -1104,28 +1050,25 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
           >
             <span className="grid h-6 w-6 place-items-center rounded-full bg-theme-app text-xs font-black text-theme-primary">G</span>
             {isSigningIn && !email && !password ? "Connecting to Google..." : "Continue with Google"}
-          </motion.button>
+          </button>
         </form>
 
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9, duration: 0.5 }} className="mt-6 text-center text-sm text-theme-muted">
+        <p className="mt-6 text-center text-sm text-theme-muted">
           {isLoginMode ? (
             <>Need an account? <button type="button" onClick={() => { setIsLoginMode(false); setError(''); }} className="font-bold text-theme-accent hover:text-theme-primary transition-colors cursor-pointer">Create account</button></>
           ) : (
             <>Already have an account? <button type="button" onClick={() => { setIsLoginMode(true); setError(''); }} className="font-bold text-theme-accent hover:text-theme-primary transition-colors cursor-pointer">Sign in instead</button></>
           )}
-        </motion.p>
+        </p>
 
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1, duration: 0.5 }}
+        <div
           className="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[10px] font-semibold text-theme-muted"
         >
           <span className="flex items-center gap-1.5"><Check size={11} className="text-theme-accent" /> 256-bit Encryption</span>
           <span className="flex items-center gap-1.5"><Check size={11} className="text-theme-accent" /> SOC 2 Compliant</span>
           <span className="flex items-center gap-1.5"><Check size={11} className="text-theme-accent" /> 99.9% Uptime</span>
           <span className="flex items-center gap-1.5"><Check size={11} className="text-theme-accent" /> Secure Cloud</span>
-        </motion.div>
+        </div>
     </div>
   );
 
@@ -1139,10 +1082,7 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
 
   return (
     <section className="flex flex-1 items-center justify-center border-t border-theme-border-soft bg-theme-app/50 p-6 sm:p-10 lg:border-t-0 lg:border-l">
-      <motion.div
-        initial={{ opacity: 0, y: 18 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+      <div
         onMouseMove={(event) => {
           const rect = event.currentTarget.getBoundingClientRect();
           const x = ((event.clientX - rect.left) / rect.width) * 100;
@@ -1153,35 +1093,27 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
         onMouseLeave={() => setCardHover(false)}
         className="card-premium glass glass-strong relative w-full max-w-md overflow-hidden rounded-[2rem] border border-theme-border-soft bg-theme-surface/80 p-6 shadow-2xl shadow-theme-glow/5 backdrop-blur-xl transition-colors duration-300 sm:p-7"
       >
-        <motion.div
+        <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0"
-          animate={cardHover ? { opacity: 0.72 } : { opacity: 0.18 }}
-          transition={{ duration: 0.28 }}
           style={{
             background: `radial-gradient(420px circle at ${mousePosition.x}% ${mousePosition.y}%, rgba(13,138,107,0.16), rgba(16,185,129,0.055) 28%, transparent 64%)`,
           }}
         />
-        <motion.div
+        <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/[0.075] via-transparent to-transparent"
-          animate={cardHover ? { opacity: 0.75 } : { opacity: 0.22 }}
-          transition={{ duration: 0.3 }}
         />
-        <motion.div
+        <div
           aria-hidden="true"
           className="pointer-events-none absolute -left-1/3 top-0 h-full w-1/3 rotate-12 bg-theme-card/12 blur-xl"
-          animate={cardHover ? { x: [0, 760] } : { x: 0 }}
-          transition={{ duration: 1.15, ease: "easeInOut" }}
         />
-        <motion.div
+        <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 rounded-[2rem] ring-1 ring-inset ring-theme-accent/10"
-          animate={cardHover ? { boxShadow: "inset 0 0 0 1px rgba(13,138,107,0.18), 0 0 40px rgba(13,138,107,0.10)" } : { boxShadow: "inset 0 0 0 1px rgba(13,138,107,0.06), 0 0 0 rgba(0,0,0,0)" }}
-          transition={{ duration: 0.25 }}
         />
         {content}
-      </motion.div>
+      </div>
     </section>
   );
 }
@@ -1192,19 +1124,15 @@ export default function Login({ onLoginSuccess, embedded = false }) {
   }
 
   return (
-    <motion.div
-      variants={pageVariants}
-      initial="initial"
-      animate="animate"
-      exit="exit"
+    <div
       className="relative w-full py-12 p-4 text-theme-primary sm:p-6 lg:py-20 lg:px-8 z-10"
     >
-      <motion.div initial={{ opacity: 0, scale: 0.95, y: 30 }} whileInView={{ opacity: 1, scale: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }} className="card-premium relative z-10 mx-auto flex w-[98%] max-w-7xl overflow-hidden rounded-[2rem] border border-theme-border-soft bg-theme-surface/60 backdrop-blur-3xl shadow-2xl shadow-theme-glow/10 min-h-[600px] lg:min-h-[680px]">
+      <div className="card-premium relative z-10 mx-auto flex w-[98%] max-w-7xl overflow-hidden rounded-[2rem] border border-theme-border-soft bg-theme-surface/60 backdrop-blur-3xl shadow-2xl shadow-theme-glow/10 min-h-[600px] lg:min-h-[680px]">
         <div className="flex w-full flex-col lg:flex-row">
-          <ShowcasePanel />
+          
           <LoginPanel onLoginSuccess={onLoginSuccess} />
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }

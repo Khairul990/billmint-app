@@ -17,7 +17,7 @@ const fs = require('fs');
 const path = require('path');
 
 const SERVICE_ACCOUNT_PATH = path.join(__dirname, '../service-account.json');
-const MASTER_ADMIN = 'khairul2052007@gmail.com';
+const MASTER_ADMIN = process.env.ADMIN_EMAIL || process.argv[2];
 
 const rl = readline.createInterface({
   input: process.stdin,

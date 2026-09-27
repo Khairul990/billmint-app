@@ -69,3 +69,38 @@ export const sendWhatsAppNotification = async (phone, invoiceLink, customerName)
     throw error;
   }
 };
+
+/**
+ * Triggers a transactional email via SendGrid Cloud Function.
+ */
+export const sendTransactionalEmail = async ({ to, subject, templateId, templateData, text, html }) => {
+  if (!functions) {
+    return { data: { success: false, unavailable: true, message: 'Cloud Functions unavailable' } };
+  }
+  try {
+    const fn = httpsCallable(functions, 'sendTransactionalEmail');
+    const result = await fn({ to, subject, templateId, templateData, text, html });
+    return result;
+  } catch (error) {
+    console.error('Error calling sendTransactionalEmail:', error);
+    throw error;
+  }
+};
+
+/**
+ * Submits a manual bKash/Nagad payment for backend verification.
+ */
+export const verifyManualPayment = async ({ transactionId, method, amount, invoiceId }) => {
+  if (!functions) {
+    return { data: { success: false, unavailable: true, message: 'Cloud Functions unavailable' } };
+  }
+  try {
+    const fn = httpsCallable(functions, 'verifyManualPayment');
+    const result = await fn({ transactionId, method, amount, invoiceId });
+    return result;
+  } catch (error) {
+    console.error('Error calling verifyManualPayment:', error);
+    throw error;
+  }
+};
+

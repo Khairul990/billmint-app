@@ -333,13 +333,6 @@
     
 
 
-    <!-- Static SEO fallback content (hidden once React mounts) -->
-    <noscript>
-      <style>#root{display:none}</style>
-    </noscript>
-    <div id="seo-fallback" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);content-visibility:auto">
-      <%- seoFallback %>
-    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

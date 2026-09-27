@@ -374,12 +374,17 @@ function App() {
       window.history.replaceState({}, '', '/');
     }
 
+    // Clean up stale #/login or #login from URL when logged in
+    if (isAuthenticated && window.location.hash && (window.location.hash === '#login' || window.location.hash.startsWith('#/login'))) {
+      window.history.replaceState({}, '', window.location.pathname || '/');
+    }
+
     sendEmpireEvent({
       eventType: "page_view",
       message: `Navigated to ${currentTab}`,
       page: currentTab
     });
-  }, [currentTab]);
+  }, [currentTab, isAuthenticated]);
 
   const [userRole, setUserRole] = useState(() => localStorage.getItem('billqyro_user_role') || 'user');
   const [userPermissions, setUserPermissions] = useState(null);
@@ -1110,7 +1115,7 @@ function App() {
             token: 'billqyro-secure-session',
             userEmail: user.email || '',
             uid: user.uid,
-            isSuperAdmin: !!tokenResult.claims.superAdmin
+            isSuperAdmin: tokenResult.claims.role === "superadmin" || !!tokenResult.claims.superAdmin
           };
           localStorage.setItem('billqyro_auth', JSON.stringify(newSession));
           setIsAuthenticated(true);
@@ -2765,11 +2770,17 @@ function App() {
 
   // Enterprise Route Gate - Wait for Auth, Workspace, and Sync to resolve
   const isAppReady = !isAppBooting;
-  const isSetupIncomplete = isAuthenticated && !isDemoSessionActive && !activeSettings?.setupCompleted && !activeSettings?.profileSetupCompleted && !(
-    (activeSettings?.businessName && activeSettings.businessName !== 'My Business' && activeSettings.businessName !== 'BillQyro Workspace') ||
-    (Array.isArray(activeSettings?.businessWorkspaces) && activeSettings.businessWorkspaces.length > 0) ||
-    (invoices && invoices.length > 0) ||
-    (customers && customers.length > 0)
+  const isSetupIncomplete = isAuthenticated && !isDemoSessionActive && !isDataHydrating && (
+    !(activeSettings?.setupCompleted === true || activeSettings?.profileSetupCompleted === true || activeSettings?.businessSetupCompleted === true) &&
+    !(
+      (activeSettings?.businessName && activeSettings.businessName !== 'My Business' && activeSettings.businessName !== 'BillQyro Workspace') ||
+      (Array.isArray(activeSettings?.businessWorkspaces) && activeSettings.businessWorkspaces.length > 0) ||
+      Boolean(activeSettings?.phone && activeSettings.phone.trim() !== '') ||
+      Boolean(activeSettings?.ownerName && activeSettings?.email && activeSettings?.setupCompleted !== false) ||
+      Boolean(activeSettings?.contactEmail || activeSettings?.email) ||
+      (invoices && invoices.length > 0) ||
+      (customers && customers.length > 0)
+    )
   );
 
   // Resolve currentTab when we reach layout (defaulting to dashboard if null)

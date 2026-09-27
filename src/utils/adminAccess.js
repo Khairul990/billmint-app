@@ -1,3 +1,5 @@
+import { getAdminClaim, getAdminEmail } from '../services/adminAccess.js';
+
 export function getUserEmail(user) {
   if (!user) return "";
   return (
@@ -8,27 +10,19 @@ export function getUserEmail(user) {
   ).toLowerCase().trim();
 }
 
-export function getAdminEmail() {
-  const envEmail = import.meta.env?.VITE_ADMIN_EMAIL;
-  const envOwnerEmail = import.meta.env?.VITE_ADMIN_OWNER_EMAIL;
-  
-  if (envEmail && envEmail !== 'undefined') return envEmail.toLowerCase().trim();
-  if (envOwnerEmail && envOwnerEmail !== 'undefined') return envOwnerEmail.toLowerCase().trim();
-  
-  return null;
-}
-
+/**
+ * Checks if user object / session has superadmin permissions.
+ * DEV mode returns true for local development. Production checks custom claim flags.
+ */
 export function isAdminUser(user) {
-  const userEmail = getUserEmail(user);
-  
-  if (!userEmail) return false;
+  if (!user) return false;
+  if (user.isSuperAdmin === true || user.role === 'superadmin') return true;
+  if (user.customClaims?.role === 'superadmin' || user.claims?.role === 'superadmin') return true;
 
-  if (user.isSuperAdmin === true) return true;
-  
-  const adminEmail = getAdminEmail();
-  
   if (import.meta.env.DEV) return true;
-  if (!adminEmail) return false;
-  
-  return userEmail === adminEmail;
+
+  return false;
 }
+
+export { getAdminClaim, getAdminEmail };
+

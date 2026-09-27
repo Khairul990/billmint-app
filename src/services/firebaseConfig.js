@@ -55,14 +55,33 @@ export const firebaseInitPromise = (async () => {
       { getAuth },
       { getFirestore },
       { getStorage },
+      { initializeAppCheck, ReCaptchaV3Provider },
     ] = await Promise.all([
       import('firebase/app'),
       import('firebase/auth'),
       import('firebase/firestore'),
       import('firebase/storage'),
+      import('firebase/app-check'),
     ]);
 
     app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+
+    if (import.meta.env.DEV && typeof self !== 'undefined') {
+      self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+    }
+
+    const recaptchaKey = import.meta.env?.VITE_RECAPTCHA_V3_SITE_KEY || import.meta.env?.VITE_APPCHECK_RECAPTCHA_KEY;
+    if (recaptchaKey) {
+      try {
+        initializeAppCheck(app, {
+          provider: new ReCaptchaV3Provider(recaptchaKey),
+          isTokenAutoRefreshEnabled: true,
+        });
+      } catch (appCheckErr) {
+        console.warn('App Check initialization failed:', appCheckErr);
+      }
+    }
+
     auth = getAuth(app);
     db = getFirestore(app);
     storage = getStorage(app);

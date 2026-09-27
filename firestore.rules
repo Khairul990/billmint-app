@@ -3,7 +3,7 @@ service cloud.firestore {
   match /databases/{database}/documents {
     function isAuth() { return request.auth != null; }
     function isOwner(userId) { return isAuth() && request.auth.uid == userId; }
-    function isAdmin() { return isAuth() && request.auth.token.superAdmin == true; }
+    function isAdmin() { return isAuth() && (request.auth.token.role == "superadmin" || request.auth.token.superAdmin == true); }
 
     function isValidPublicInvoiceData() {
       let diff = request.resource.data.diff(resource.data);
@@ -196,6 +196,17 @@ service cloud.firestore {
 
     match /control_website_health/{healthId} {
       allow read, write: if isAdmin();
+    }
+
+    match /paymentVerifications/{verificationId} {
+      allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
+      allow read: if isAuth() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow update, delete: if isAdmin();
+    }
+
+    match /adminNotifications/{notificationId} {
+      allow read, write: if isAdmin();
+      allow create: if isAuth();
     }
   }
 }

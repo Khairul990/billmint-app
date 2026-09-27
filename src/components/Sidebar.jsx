@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import { 
   LayoutDashboard, 
   FileSpreadsheet, 
@@ -295,10 +295,8 @@ const Sidebar = ({
                   title={isCollapsed ? item.label : undefined}
                 >
                   {isActive && (
-                    <motion.span
-                      layoutId="sb-active-pill"
+                    <span
                       className="absolute inset-0 rounded-xl bg-theme-accent/10 ring-1 ring-inset ring-theme-accent/20 shadow-xs"
-                      transition={{ type: 'spring', damping: 30, stiffness: 380 }}
                     />
                   )}
                   <span className={`relative z-10 flex items-center justify-center w-6 h-6 rounded-lg shrink-0 transition-colors ${isActive ? 'bg-theme-accent/15 text-theme-accent' : 'text-theme-muted group-hover:text-theme-primary group-hover:bg-theme-surface/80'}`}>

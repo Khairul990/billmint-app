@@ -133,7 +133,9 @@ export default defineConfig(({ mode }) => ({
             "description": "Creators of BillQyro — smart billing and premium invoicing for growing businesses in India and Bangladesh.",
             "email": "support@billqyro.com",
             "telephone": "+919477738769",
+            // TODO (USER): Replace placeholder social URLs below with your official social profile links
             "sameAs": [
+              "https://facebook.com/billqyro",
               "https://twitter.com/billqyro",
               "https://linkedin.com/company/billqyro",
               "https://youtube.com/@billqyro",
@@ -279,28 +281,7 @@ export default defineConfig(({ mode }) => ({
                 }
               ]
             }
-          }),
-          seoFallback: `<h1>BillQyro — Smart Billing. Premium Invoices.</h1>
-      <p>BillQyro is a free, offline-first invoicing and billing platform for small businesses in India and Bangladesh. Create professional PDF invoices, track customer balances, collect UPI payments, and manage your business from anywhere.</p>
-      <h2>Features</h2>
-      <ul>
-        <li>PDF invoice generation with A4/A5 templates</li>
-        <li>Customer ledger with balance tracking</li>
-        <li>UPI QR code payment collection</li>
-        <li>Product and inventory management</li>
-        <li>Expense tracking and profit/loss reports</li>
-        <li>WhatsApp payment reminders</li>
-        <li>Offline-first — works without internet</li>
-        <li>Multi-workspace support</li>
-        <li>Live invoice sharing links</li>
-        <li>Voice billing in Bengali</li>
-      </ul>
-      <h2>Pricing</h2>
-      <p>Starter: Free (50 invoices, 25 customers). Pro: 499 INR per month (500 invoices, 200 customers). Lifetime: 14,999 INR one-time (unlimited).</p>
-      <h2>Supported Business Types</h2>
-      <p>Retail, tailoring, clinics, repair shops, coaching centers, and service businesses.</p>
-      <p>Contact: support@billqyro.com | WhatsApp: +91 94777 38769</p>
-      <p><a href="/support">Help Center</a> | <a href="/terms">Terms</a> | <a href="/privacy">Privacy</a> | <a href="/refund">Refund Policy</a></p>`
+          })
         }
       }
     })
@@ -336,13 +317,25 @@ export default defineConfig(({ mode }) => ({
             if (normalized.includes('lucide-react')) {
               return 'vendor-icons';
             }
-            if (normalized.includes('jspdf') || normalized.includes('html2canvas') || normalized.includes('@react-pdf')) {
+            if (normalized.includes('jspdf') || normalized.includes('html2canvas') || normalized.includes('@react-pdf') || normalized.includes('pdfjs-dist')) {
               return 'vendor-pdf';
             }
             if (normalized.includes('qrcode')) {
               return 'vendor-qr';
             }
-            if (normalized.includes('react') || normalized.includes('react-dom')) {
+            if (normalized.includes('recharts') || normalized.includes('d3')) {
+              return 'vendor-charts';
+            }
+            if (normalized.includes('@xyflow') || normalized.includes('@dnd-kit')) {
+              return 'vendor-flow';
+            }
+            if (normalized.includes('@supabase')) {
+              return 'vendor-supabase';
+            }
+            if (normalized.includes('zod') || normalized.includes('pako') || normalized.includes('uuid')) {
+              return 'vendor-utils';
+            }
+            if (normalized.includes('react') || normalized.includes('react-dom') || normalized.includes('react-hot-toast')) {
               return 'vendor-react';
             }
           }
