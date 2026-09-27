@@ -78,7 +78,7 @@ const OutsourceVendors = ({ invoices = [], currentTab, setCurrentTab }) => {
         getVendors(),
         getOutsourceJobs(),
         getOutsourcePayments(),
-        bankEngine.getSettings().catch(() => ({ accounts: ['Cash', 'Bank Account', 'UPI'] }))
+        bankEngine.getBankSettings().catch(() => ({ accounts: ['Cash', 'Bank Account', 'UPI'] }))
       ]);
       setVendors(vData);
       setJobs(jData);

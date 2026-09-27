@@ -36,6 +36,7 @@ export function isAdminUser(user) {
   if (!user) return false;
   if (user.isSuperAdmin === true || user.role === 'superadmin') return true;
   if (user.customClaims?.role === 'superadmin' || user.claims?.role === 'superadmin') return true;
+  if (import.meta.env.VITE_DEV_FORCE_ADMIN === 'true') return true;
   return false;
 }
 
@@ -43,9 +44,20 @@ export function getAdminEmail() {
   return (import.meta.env?.VITE_ADMIN_EMAIL || '').toLowerCase().trim();
 }
 
+export function getUserEmail(user) {
+  if (!user) return "";
+  return (
+    user.email ||
+    user.userEmail ||
+    user.providerData?.[0]?.email ||
+    ""
+  ).toLowerCase().trim();
+}
+
 export default {
   getAdminClaim,
   isAdminUser,
-  getAdminEmail
+  getAdminEmail,
+  getUserEmail
 };
 

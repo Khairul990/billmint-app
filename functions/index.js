@@ -179,7 +179,17 @@ exports.verifyManualPayment = onCall({ enforceAppCheck: true }, async (request) 
     throw new HttpsError("invalid-argument", "Invalid transaction ID format. Must be an 8-14 character alphanumeric code.");
   }
 
+  const numericAmount = Number(amount);
+  if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
+    throw new HttpsError("invalid-argument", "Amount must be a finite positive number.");
+  }
+
   try {
+    const invoiceRef = db.doc(`users/${request.auth.uid}/invoices/${invoiceId}`);
+    const invoiceSnap = await invoiceRef.get();
+    if (!invoiceSnap.exists) {
+      throw new HttpsError("permission-denied", "Invoice not found or does not belong to you.");
+    }
     const verificationRef = db.collection("paymentVerifications").doc();
     const verificationData = {
       id: verificationRef.id,
@@ -187,7 +197,7 @@ exports.verifyManualPayment = onCall({ enforceAppCheck: true }, async (request) 
       userEmail: request.auth.token.email || "",
       transactionId: cleanTxnId,
       method: cleanMethod,
-      amount: Number(amount),
+      amount: numericAmount,
       invoiceId: String(invoiceId),
       status: "pending_review",
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -203,7 +213,7 @@ exports.verifyManualPayment = onCall({ enforceAppCheck: true }, async (request) 
       body: `User ${request.auth.token.email || request.auth.uid} submitted Txn #${cleanTxnId} for ${amount} (Invoice: ${invoiceId}).`,
       verificationId: verificationRef.id,
       invoiceId: String(invoiceId),
-      amount: Number(amount),
+      amount: numericAmount,
       method: cleanMethod,
       transactionId: cleanTxnId,
       userId: request.auth.uid,
@@ -221,4 +231,55 @@ exports.verifyManualPayment = onCall({ enforceAppCheck: true }, async (request) 
     console.error("Error creating payment verification doc:", error);
     throw new HttpsError("internal", error.message || "Failed to submit manual payment verification.");
   }
-});
+});
+/**
+ * Callable Cloud Function to send payment receipt.
+ */
+exports.sendPaymentReceiptEmail = onCall({ enforceAppCheck: true, secrets: [sendgridApiKey, sendgridFromEmail] }, async (request) => {
+  if (!request.auth) throw new HttpsError("unauthenticated", "Authentication required.");
+  const { invoiceId, customerEmail } = request.data || {};
+  if (!invoiceId || !customerEmail) throw new HttpsError("invalid-argument", "Missing invoiceId or customerEmail.");
+
+  const invoiceSnap = await db.doc(`users/${request.auth.uid}/invoices/${invoiceId}`).get();
+  if (!invoiceSnap.exists) throw new HttpsError("permission-denied", "Invoice not found or does not belong to you.");
+  
+  const invoiceData = invoiceSnap.data();
+  if (invoiceData.customerEmail !== customerEmail) {
+    throw new HttpsError("permission-denied", "Customer email does not match invoice record.");
+  }
+
+  const apiKey = sendgridApiKey.value() || process.env.SENDGRID_API_KEY;
+  if (!apiKey) throw new HttpsError("failed-precondition", "SENDGRID_API_KEY missing.");
+  
+  const sgMail = require("@sendgrid/mail");
+  sgMail.setApiKey(apiKey);
+  const fromEmail = sendgridFromEmail.value() || process.env.SENDGRID_FROM_EMAIL || "no-reply@billqyro.app";
+
+  try {
+    const msg = {
+      to: customerEmail,
+      from: fromEmail,
+      subject: `Payment Receipt for Invoice #${invoiceId}`,
+      text: `Your payment for invoice ${invoiceId} has been received. Thank you!`,
+    };
+    await sgMail.send(msg);
+    return { success: true };
+  } catch (err) {
+    console.error(err);
+    throw new HttpsError("internal", "Failed to send receipt.");
+  }
+});
+
+/**
+ * Stub for verifyTransactionId.
+ */
+exports.verifyTransactionId = onCall({ enforceAppCheck: true }, async (request) => {
+  return { isValid: false, unavailable: true, reason: "Manual verification required" };
+});
+
+/**
+ * Stub for sendWhatsAppNotification.
+ */
+exports.sendWhatsAppNotification = onCall({ enforceAppCheck: true }, async (request) => {
+  return { success: false, unavailable: true };
+});
