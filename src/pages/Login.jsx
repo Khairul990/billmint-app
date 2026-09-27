@@ -885,13 +885,13 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
         </div>
       )}
       <div>
-        <div className="badge-premium mb-2.5 inline-flex items-center gap-2 rounded-full border border-theme-border-soft bg-theme-accent-light px-3 py-1 text-[10px] font-black uppercase tracking-wide text-theme-accent">
-          {isLoginMode ? 'Secure Login' : 'Create Account'} <span className="h-1.5 w-1.5 rounded-full bg-theme-accent" />
+        <div className="badge-premium mb-2 inline-flex items-center gap-1.5 rounded-full border border-theme-border-soft bg-theme-accent-light px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-theme-accent">
+          {isLoginMode ? 'Secure Login' : 'Create Account'} <span className="h-1 w-1 rounded-full bg-theme-accent" />
         </div>
-        <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-theme-primary">
+        <h2 className="text-xl sm:text-2xl font-black tracking-tight text-theme-primary">
           {isLoginMode ? 'Welcome back' : 'Get started'}
         </h2>
-        <p className="mt-1.5 text-xs sm:text-sm font-medium text-theme-muted">
+        <p className="mt-1.5 text-[11px] sm:text-xs font-medium text-theme-muted">
           {isLoginMode 
             ? 'Sign in to manage your customers, invoices, PDFs, and collections.' 
             : 'Create your account, then complete the 1-minute setup wizard to launch your business.'}
@@ -909,14 +909,14 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
               <span className="mb-2 block text-[11px] font-black uppercase tracking-[0.16em] text-theme-muted transition-colors group-focus-within:text-theme-accent pl-1">Full Name</span>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <UserRound className="h-[18px] w-[18px] text-theme-muted group-focus-within:text-theme-accent transition-colors duration-200" />
+                  <UserRound className="h-3.5 w-3.5 text-theme-muted group-focus-within:text-theme-accent transition-colors duration-200" />
                 </div>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Your Full Name"
-                  className="input-premium premium-focus h-14 w-full rounded-2xl border border-theme-border-soft bg-theme-surface pl-11 pr-4 text-[15px] font-medium text-theme-primary outline-none transition-all duration-200 placeholder:text-theme-muted/70 focus:border-theme-accent focus:bg-theme-surface focus:ring-4 focus:ring-theme-accent/15 focus:shadow-[0_0_12px_var(--accent-glow)]"
+                  className="input-premium premium-focus h-[42px] w-full rounded-xl border border-theme-border-soft bg-theme-surface pl-9 pr-3 text-[13px] font-semibold text-theme-primary outline-none transition-all duration-200 placeholder:text-theme-muted/60 focus:border-theme-accent focus:bg-theme-surface focus:ring-[2px] focus:ring-theme-accent/20 focus:shadow-sm"
                 />
               </div>
             </label>
@@ -925,14 +925,14 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
             <span className="mb-2 block text-[11px] font-black uppercase tracking-[0.16em] text-theme-muted transition-colors group-focus-within:text-theme-accent pl-1">Email address</span>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <Mail className="h-[18px] w-[18px] text-theme-muted group-focus-within:text-theme-accent transition-colors duration-200" />
+                <Mail className="h-3.5 w-3.5 text-theme-muted group-focus-within:text-theme-accent transition-colors duration-200" />
               </div>
               <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="your@email.com"
-                  className="input-premium premium-focus h-14 w-full rounded-2xl border border-theme-border-soft bg-theme-surface pl-11 pr-4 text-[15px] font-medium text-theme-primary outline-none transition-all duration-200 placeholder:text-theme-muted/70 focus:border-theme-accent focus:bg-theme-surface focus:ring-4 focus:ring-theme-accent/15 focus:shadow-[0_0_12px_var(--accent-glow)]"
+                  className="input-premium premium-focus h-[42px] w-full rounded-xl border border-theme-border-soft bg-theme-surface pl-9 pr-3 text-[13px] font-semibold text-theme-primary outline-none transition-all duration-200 placeholder:text-theme-muted/60 focus:border-theme-accent focus:bg-theme-surface focus:ring-[2px] focus:ring-theme-accent/20 focus:shadow-sm"
               />
             </div>
           </label>
@@ -945,15 +945,15 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="input-premium premium-focus h-14 w-full rounded-2xl border border-theme-border-soft bg-theme-surface pl-4 pr-12 text-[15px] font-medium text-theme-primary outline-none transition-all duration-200 placeholder:text-theme-muted/70 focus:border-theme-accent focus:bg-theme-surface focus:ring-4 focus:ring-theme-accent/15 focus:shadow-[0_0_12px_var(--accent-glow)]"
+                  className="input-premium premium-focus h-[42px] w-full rounded-xl border border-theme-border-soft bg-theme-surface pl-4 pr-10 text-[13px] font-semibold tracking-widest text-theme-primary outline-none transition-all duration-200 placeholder:text-theme-muted/60 placeholder:tracking-normal focus:border-theme-accent focus:bg-theme-surface focus:ring-[2px] focus:ring-theme-accent/20 focus:shadow-sm"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((value) => !value)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-theme-muted transition hover:text-theme-accent cursor-pointer"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-theme-muted transition hover:text-theme-accent cursor-pointer"
                 aria-label="Toggle password visibility"
               >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
           </label>
@@ -967,15 +967,15 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="input-premium premium-focus h-14 w-full rounded-2xl border border-theme-border-soft bg-theme-surface pl-4 pr-12 text-[15px] font-medium text-theme-primary outline-none transition-all duration-200 placeholder:text-theme-muted/70 focus:border-theme-accent focus:bg-theme-surface focus:ring-4 focus:ring-theme-accent/15 focus:shadow-[0_0_12px_var(--accent-glow)]"
+                    className="input-premium premium-focus h-[42px] w-full rounded-xl border border-theme-border-soft bg-theme-surface pl-4 pr-10 text-[13px] font-semibold tracking-widest text-theme-primary outline-none transition-all duration-200 placeholder:text-theme-muted/60 placeholder:tracking-normal focus:border-theme-accent focus:bg-theme-surface focus:ring-[2px] focus:ring-theme-accent/20 focus:shadow-sm"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword((value) => !value)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-theme-muted transition hover:text-theme-accent cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-theme-muted transition hover:text-theme-accent cursor-pointer"
                   aria-label="Toggle password visibility"
                 >
-                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
             </label>
@@ -1019,18 +1019,18 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
             <ShimmerButton
               type="submit"
               disabled={isSigningIn}
-              className="btn-premium w-full h-[56px] transition-all hover:-translate-y-[1px] hover:shadow-[0_8px_20px_rgba(11,143,120,0.3)]"
+              className="btn-premium w-full h-[44px] transition-all hover:-translate-y-[1px] hover:shadow-[0_6px_16px_rgba(11,143,120,0.35)] rounded-xl"
               shimmerColor="#ffffff"
               background="var(--accent-gradient)"
             >
-              <div className="flex items-center justify-center gap-2 text-[15px] font-black text-white drop-shadow-md">
+              <div className="flex items-center justify-center gap-2 text-[13px] font-black tracking-wide text-white drop-shadow-md">
                 {isSigningIn ? (isLoginMode ? "Signing in..." : "Creating account...") : (isLoginMode ? "Sign In to Dashboard" : "Register & Begin Setup")}
                 {isSigningIn ? (
                   <span
-                    className="h-4 w-4 rounded-full border-2 border-white/40 border-t-white animate-spin"
+                    className="h-3.5 w-3.5 rounded-full border-2 border-white/40 border-t-white animate-spin"
                   />
                 ) : (
-                  <ArrowRight className="transition-transform duration-300 group-hover:translate-x-1" size={18} />
+                  <ArrowRight className="transition-transform duration-300 group-hover:translate-x-1" size={16} />
                 )}
               </div>
             </ShimmerButton>
@@ -1046,9 +1046,9 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
             type="button" 
             onClick={handleGoogleLogin}
             disabled={isSigningIn}
-            className="btn-premium flex h-[56px] w-full items-center justify-center gap-3 rounded-[22px] border-2 border-theme-border-soft bg-theme-surface/50 text-[14px] font-black text-theme-primary transition-all hover:bg-theme-surface hover:border-theme-border hover:shadow-[0_4px_12px_rgba(0,0,0,0.04)] disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
+            className="btn-premium flex h-[44px] w-full items-center justify-center gap-2 rounded-xl border-[1.5px] border-theme-border-soft bg-theme-surface/70 text-[12px] font-black text-theme-primary transition-all hover:bg-theme-surface hover:border-theme-border hover:shadow-sm disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
           >
-            <span className="grid h-6 w-6 place-items-center rounded-full bg-[var(--bq26-sunken)] border border-theme-border-soft text-[11px] font-black text-theme-primary">G</span>
+            <span className="grid h-4 w-4 place-items-center rounded-full bg-[var(--bq26-sunken)] border border-theme-border-soft text-[9px] font-black text-theme-primary">G</span>
             {isSigningIn && !email && !password ? "Connecting to Google..." : "Continue with Google"}
           </button>
         </form>

@@ -1610,8 +1610,10 @@ const Landing = ({ onLoginSuccess }) => {
       <motion.section initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.55, ease: 'easeOut' }} id="login" className="relative py-10 sm:py-12 px-4 sm:px-8 lg:px-12 z-10">
         <div aria-hidden="true" className="absolute inset-x-0 top-0 h-56 bg-gradient-to-b from-[rgba(11,143,120,0.07)] to-transparent pointer-events-none" />
         <ScrollReveal yOffset={24}>
-          <div className="max-w-[1536px] mx-auto grid lg:grid-cols-[1fr_1.15fr] gap-10 lg:gap-14 items-start relative">
-            <div className="text-center lg:text-left pt-4">
+          <div className="max-w-[1300px] mx-auto flex flex-col lg:grid lg:grid-cols-[1.25fr_0.75fr] lg:grid-rows-[auto_1fr] gap-x-12 lg:gap-x-20 gap-y-10 items-start relative">
+            
+            {/* Header Content (Order 1 on mobile, Col 1 Row 1 on desktop) */}
+            <div className="text-center lg:text-left pt-6 order-1 lg:col-start-1 lg:row-start-1 z-10">
               <p className="bq26-kicker">{tr('Ready when you are', 'আপনি প্রস্তুত হলেই')}</p>
               <h2 className="bq26-display text-3xl sm:text-4xl font-bold text-[var(--bq26-text)] mt-2">
                 {tr('Bring your billing desk into focus.', 'আপনার বিলিং ডেস্ককে গুছিয়ে নিন।')}
@@ -1633,9 +1635,10 @@ const Landing = ({ onLoginSuccess }) => {
               </div>
             </div>
 
-            <div className="w-full">
-              <div className="bq26-glass-strong rounded-[2rem] p-6 sm:p-10 shadow-[0_20px_60px_-15px_rgba(11,143,120,0.15)] ring-1 ring-inset ring-white/20 bq26-edge-light relative">
-                <div className="relative flex bg-[var(--bq26-sunken-strong)] p-1.5 rounded-2xl border border-[var(--bq26-line-soft)] mb-8">
+            {/* Login Card (Order 2 on mobile, Col 2 Row 1-span-2 on desktop) */}
+            <div className="w-full max-w-md mx-auto lg:mx-0 lg:max-w-[420px] order-2 lg:col-start-2 lg:row-start-1 lg:row-span-2 z-20">
+              <div className="bq26-glass-strong rounded-[1.5rem] p-5 sm:p-7 shadow-[0_25px_65px_-15px_rgba(11,143,120,0.18)] ring-1 ring-inset ring-white/30 bq26-edge-light relative backdrop-blur-2xl bg-white/40">
+                <div className="relative flex bg-[var(--bq26-sunken-strong)] p-1.5 rounded-[14px] border border-[var(--bq26-line-soft)] mb-6">
                   <motion.div 
                     layoutId="tab-pill"
                     className="absolute top-1.5 bottom-1.5 rounded-xl bg-gradient-to-r from-[#0B8F78] to-[#097a66] shadow-md"
@@ -1702,6 +1705,49 @@ const Landing = ({ onLoginSuccess }) => {
                 </div>
               </div>
             </div>
+
+            {/* Stats & Why Us (Order 3 on mobile, Col 1 Row 2 on desktop) */}
+            <div className="w-full order-3 lg:col-start-1 lg:row-start-2 mt-4 lg:mt-0 relative z-10">
+              {/* Decorative background blob */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[110%] h-[120%] bg-gradient-to-br from-[var(--bq26-emerald-bright)] to-[var(--bq26-blue)] opacity-[0.03] blur-3xl rounded-[100%] pointer-events-none hidden lg:block" />
+              
+              {/* Stats Strip */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 relative z-10">
+                {[
+                  { label: tr('Businesses Onboarded', 'যুক্ত ব্যবসা'), value: '500+' /* TODO (USER): replace with real stats once available */ },
+                  { label: tr('Invoices Generated', 'তৈরি ইনভয়েস'), value: '10,000+' /* TODO (USER): replace with real stats once available */ },
+                  { label: tr('System Uptime', 'সিস্টেম আপটাইম'), value: '99.9%' /* TODO (USER): replace with real stats once available */ }
+                ].map((stat, i) => (
+                  <div key={i} className="bq26-glass p-4 rounded-2xl flex flex-col justify-center items-center lg:items-start text-center lg:text-left border border-[var(--bq26-line-soft)]">
+                    <span className="text-2xl lg:text-3xl font-black text-[var(--bq26-emerald-bright)]">{stat.value}</span>
+                    <span className="text-[10px] font-bold text-[var(--bq26-text-soft)] uppercase tracking-wider mt-1">{stat.label}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Why Businesses Choose BillQyro Mini-List */}
+              <div className="mt-8 relative z-10 p-6 rounded-[2rem] border border-[var(--bq26-line-soft)] bg-[rgba(11,143,120,0.02)] hidden sm:block">
+                <p className="text-[11px] font-black uppercase tracking-wider text-[var(--bq26-muted)] mb-5 text-center lg:text-left">
+                  {tr('Why businesses choose us', 'কেন আমাদের বেছে নেন')}
+                </p>
+                <div className="space-y-4">
+                  {[
+                    { icon: <WifiOff className="w-4 h-4" />, text: tr('Offline-first architecture (works without internet)', 'অফলাইন-ফার্স্ট (ইন্টারনেট ছাড়াও কাজ করে)') },
+                    { icon: <FileSpreadsheet className="w-4 h-4" />, text: tr('Professional PDF invoicing & instant sharing', 'প্রফেশনাল পিডিএফ ইনভয়েস ও ইনস্ট্যান্ট শেয়ারিং') },
+                    { icon: <MessageCircle className="w-4 h-4" />, text: tr('Automated WhatsApp payment reminders', 'অটোমেটেড হোয়াটসঅ্যাপ পেমেন্ট রিমাইন্ডার') },
+                    { icon: <CreditCard className="w-4 h-4" />, text: tr('Seamless UPI & bKash collections', 'সহজ ইউপিআই ও বিকাশ কালেকশন') }
+                  ].map((feature, i) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-[rgba(11,143,120,0.1)] border border-[rgba(11,143,120,0.15)] text-[var(--bq26-emerald-bright)] flex items-center justify-center shrink-0">
+                        {feature.icon}
+                      </div>
+                      <p className="text-[13px] font-semibold text-[var(--bq26-text)]">{feature.text}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
           </div>
         </ScrollReveal>
       </motion.section>
