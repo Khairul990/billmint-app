@@ -156,7 +156,7 @@ const CreateInvoice = ({
   const [oldDue, setOldDue] = useState(0);
   const [amountPaid, setAmountPaid] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState(businessSettings?.defaultPaymentMethod || 'Cash');
-  const [notes, setNotes] = useState('Thank you for your business!');
+  const [notes, setNotes] = useState(t('Thank you for your business!', 'আপনার ব্যবসার জন্য ধন্যবাদ!'));
   const [dueDate, setDueDate] = useState('');
   const [terms, setTerms] = useState('');
   const [previewQrCode, setPreviewQrCode] = useState(null);
@@ -417,7 +417,7 @@ const CreateInvoice = ({
       setOldDue(0);
       setAmountPaid(0);
       setPaymentMethod(businessSettings?.defaultPaymentMethod || 'Cash');
-      setNotes(businessSettings?.defaultNotes || 'Thank you for your business!');
+      setNotes(businessSettings?.defaultNotes || t('Thank you for your business!', 'আপনার ব্যবসার জন্য ধন্যবাদ!'));
       setDueDate('');
       setTerms(businessSettings?.invoiceTerms || '');
       // Restore an unsaved draft so an accidental refresh never loses work
@@ -435,10 +435,10 @@ const CreateInvoice = ({
           setShipping(parseFloat(draft.shipping) || 0);
           setAmountPaid(parseFloat(draft.amountPaid) || 0);
           setPaymentMethod(draft.paymentMethod || 'Cash');
-          setNotes(draft.notes || businessSettings?.defaultNotes || 'Thank you for your business!');
+          setNotes(draft.notes || businessSettings?.defaultNotes || t('Thank you for your business!', 'আপনার ব্যবসার জন্য ধন্যবাদ!'));
           setTerms(draft.terms || '');
           setTaxMode(draft.taxMode === 'inclusive' ? 'inclusive' : 'exclusive');
-          toast.info('Unsaved draft restored');
+          toast.info(t('Unsaved draft restored', 'আনসেভড ড্রাফট রিস্টোর করা হয়েছে'));
         }
       } catch (e) { /* corrupt draft - start fresh */ }
     }
@@ -468,13 +468,13 @@ const CreateInvoice = ({
         setShipping(parseFloat(src.shipping) || 0);
         setNotes(src.notes || '');
         setTerms(src.terms || '');
-        toast.success('Bill duplicated — review and save');
+        toast.success(t('Bill duplicated — review and save', 'বিল কপি করা হয়েছে — চেক করে সেভ করুন'));
       } else if (billPrefill.mode === 'fee' && billPrefill.student) {
         const st = billPrefill.student;
         setSelectedCustomerId(st.customerId || st.id || '');
         setItems([{ id: `fee_${Date.now()}`, sNo: '1', name: `Monthly Fee — ${st.name || 'Student'}`, qty: 1, price: parseFloat(st.monthlyFee ?? st.fee) || 0, customFields: {} }]);
-        setNotes('Monthly tuition fee. Thank you!');
-        toast.success(`Fee bill started for ${st.name || 'student'}`);
+        setNotes(t('Monthly tuition fee. Thank you!', 'মাসিক টিউশন ফি। ধন্যবাদ!'));
+        toast.success(t(`Fee bill started for ${st.name || 'student'}`, `${st.name || 'ছাত্র/ছাত্রীর'} ফি বিল শুরু হয়েছে`));
       }
     } finally {
       onPrefillConsumed?.();
@@ -1031,8 +1031,8 @@ const CreateInvoice = ({
       <div className={`max-w-[1600px] mx-auto p-4 lg:p-6 grid grid-cols-1 ${showPreviewPanel ? 'xl:grid-cols-[1.2fr_0.8fr]' : 'xl:max-w-6xl xl:mx-auto'} gap-6 items-start transition-all duration-300`}>
 
         {/* LEFT COLUMN: FORM */}
-        <div className="glass-panel p-6 shadow-premium-sm min-w-0">
-          <div className="flex overflow-x-auto no-scrollbar gap-2 mb-6 p-1 bg-theme-surface/50 border border-theme-border-soft rounded-xl shadow-inner max-w-full">
+        <div className="bq26-glass p-6 sm:p-8 rounded-[2rem] border border-[var(--bq26-line-soft)] shadow-[0_32px_64px_-16px_rgba(11,143,120,0.15)] bq26-edge-light min-w-0 relative overflow-hidden backdrop-blur-2xl">
+          <div className="flex overflow-x-auto no-scrollbar gap-2 mb-8 p-1.5 bg-[var(--bq26-sunken-strong)] border border-[var(--bq26-line-soft)] rounded-2xl shadow-inner max-w-full">
             {[
               { id: 'listing', label: 'Bill Listing', icon: FileText },
               { id: 'templates', label: 'Templates', icon: Palette },
@@ -1042,10 +1042,10 @@ const CreateInvoice = ({
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
+                className={`flex items-center gap-2.5 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
                   activeTab === tab.id 
-                    ? 'bg-white shadow-sm text-theme-primary border border-theme-border-soft/50' 
-                    : 'text-theme-muted hover:text-theme-primary hover:bg-white/60'
+                    ? 'bg-[var(--bq26-panel)] shadow-md text-[var(--bq26-emerald-bright)] border border-[rgba(11,143,120,0.25)]' 
+                    : 'text-[var(--bq26-text-soft)] hover:text-[var(--bq26-text)] hover:bg-[var(--bq26-sunken)]'
                 }`}
               >
                 <tab.icon className="w-3.5 h-3.5" />
@@ -1060,8 +1060,11 @@ const CreateInvoice = ({
 
             {/* 1. Client Info */}
             <section>
-              <div className="flex items-center justify-between mb-4 pb-3 border-b border-theme-border-soft relative after:content-[''] after:absolute after:bottom-[-1px] after:left-0 after:w-10 after:h-[2px] after:bg-theme-accent">
-                <h3 className="text-xs font-black text-theme-muted uppercase tracking-wider">1. Client Info</h3>
+              <div className="flex items-center justify-between mb-5 pb-3 border-b border-[var(--bq26-line-soft)]">
+                <h3 className="text-[10px] font-black text-[var(--bq26-emerald-bright)] uppercase tracking-[0.25em] flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--bq26-emerald-bright)] shadow-[0_0_8px_rgba(11,143,120,0.8)]" />
+                  1. Client Info
+                </h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="form-group col-span-1 md:col-span-2">
@@ -1157,8 +1160,11 @@ const CreateInvoice = ({
 
             {/* 2. Line Items */}
             <section>
-              <div className="flex items-center justify-between mb-4 pb-3 border-b border-theme-border-soft relative after:content-[''] after:absolute after:bottom-[-1px] after:left-0 after:w-10 after:h-[2px] after:bg-theme-accent">
-                <h3 className="text-xs font-black text-theme-muted uppercase tracking-wider">2. Line Items</h3>
+              <div className="flex items-center justify-between mb-5 pb-3 border-b border-[var(--bq26-line-soft)]">
+                <h3 className="text-[10px] font-black text-[var(--bq26-emerald-bright)] uppercase tracking-[0.25em] flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--bq26-emerald-bright)] shadow-[0_0_8px_rgba(11,143,120,0.8)]" />
+                  2. Line Items
+                </h3>
                 <div className="flex items-center gap-2">
                   <span className="text-2xs text-theme-muted font-semibold hidden sm:inline">Type item name to auto-fill from catalog</span>
                   <button
@@ -1397,16 +1403,19 @@ const CreateInvoice = ({
                   </tbody>
                 </table>
               </div>
-              <button onClick={handleAddItem} className="btn-premium-dashed w-full mt-4 flex items-center justify-center gap-2 py-3 border border-dashed border-theme-border-strong rounded-xl text-sm font-bold text-theme-muted hover:text-theme-accent hover:border-theme-accent transition-colors bg-theme-surface/30 hover:bg-theme-accent/5">
+              <button onClick={handleAddItem} className="w-full mt-5 flex items-center justify-center gap-2 py-3.5 border-2 border-dashed border-[var(--bq26-line-soft)] rounded-xl text-sm font-bold text-[var(--bq26-text-soft)] hover:text-[var(--bq26-emerald-bright)] hover:border-[rgba(11,143,120,0.35)] hover:bg-[var(--bq26-sunken)] transition-all">
                 <Plus className="w-4 h-4" /> Add Line Item
               </button>
             </section>
 
             {/* 3. Totals, Advance Payment & Financial Invariant */}
-            <section className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+            <section className="mt-8 grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-6 items-start">
               
-              {/* Payment Recording Box */}
-              <div className="bg-theme-card p-5 rounded-2xl border border-theme-border-soft shadow-sm space-y-4">
+              {/* Left Column: Payment & Notes */}
+              <div className="flex flex-col gap-6">
+                {/* Payment Recording Box */}
+                <div className="bq26-sunken p-5 sm:p-6 rounded-[1.5rem] border border-[var(--bq26-line-soft)] shadow-inner space-y-5 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--bq26-emerald)] opacity-5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                 <div className="flex items-center gap-2 pb-2 border-b border-theme-border-soft">
                   <CreditCard className="w-4 h-4 text-theme-accent" />
                   <h4 className="text-xs font-black uppercase tracking-wider text-theme-primary">Payment Recording</h4>
@@ -1491,9 +1500,11 @@ const CreateInvoice = ({
                 </div>
                 )}
               </div>
+            </div>
 
-              {/* Invariant Totals Box */}
-              <div className="space-y-3 bg-white dark:bg-theme-card p-6 rounded-2xl border border-theme-border-soft shadow-sm">
+              {/* Right Column: Invariant Totals Box */}
+              <div className="space-y-4 bq26-sunken p-5 sm:p-6 rounded-[1.5rem] border border-[var(--bq26-line-soft)] shadow-inner relative overflow-hidden h-full">
+                <div className="absolute top-0 left-0 w-32 h-32 bg-[var(--bq26-emerald)] opacity-5 rounded-full blur-2xl -translate-y-1/2 -translate-x-1/2 pointer-events-none" />
                 <div className="flex justify-between items-center text-sm font-semibold text-theme-muted">
                   <span>{t('ci.subtotal', 'Subtotal')}</span>
                   <span className="text-theme-primary font-bold tabular-nums">{formatCurrency(totals.subtotal)}</span>
@@ -1573,6 +1584,7 @@ const CreateInvoice = ({
                       paid={totals.paidVal}
                       balanceDue={totals.balanceDue}
                       currency={draftBusinessSettings?.currency || '₹'}
+                      layoutMode="vertical"
                     />
                   </div>
                   {flagShowWords && <p className="text-[10px] italic text-theme-muted text-center pt-1" title={t('ci.amount_words', 'Amount in words')}>{amountInWords}</p>}
@@ -1594,11 +1606,11 @@ const CreateInvoice = ({
             </section>
 
             {/* Bottom Actions Bar */}
-            <div className="mt-8 pt-6 border-t border-theme-border-soft flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="mt-10 pt-6 border-t border-[var(--bq26-line-soft)] flex flex-col sm:flex-row items-center justify-between gap-4">
               <button
                 type="button"
                 onClick={() => onBack ? onBack() : window.history.back()}
-                className="btn-premium-outline w-full sm:w-auto px-6 py-3 text-sm font-bold text-theme-muted hover:text-theme-primary flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-6 py-3 rounded-full text-sm font-bold text-[var(--bq26-text-soft)] hover:text-[var(--bq26-text)] hover:bg-[var(--bq26-sunken)] flex items-center justify-center gap-2 transition-all border border-transparent hover:border-[var(--bq26-line-soft)]"
               >
                 <ArrowLeft className="w-4 h-4" /> Cancel
               </button>
@@ -1606,7 +1618,7 @@ const CreateInvoice = ({
                 <button
                   type="button"
                   onClick={() => setShowPreviewModal(true)}
-                  className="btn-premium-outline flex-1 sm:flex-initial px-5 py-3 text-sm font-bold flex items-center justify-center gap-2"
+                  className="flex-1 sm:flex-initial px-6 py-3 rounded-full text-sm font-bold flex items-center justify-center gap-2 border border-[var(--bq26-line-soft)] text-[var(--bq26-text)] hover:bg-[var(--bq26-sunken)] transition-all"
                 >
                   <Eye className="w-4 h-4" /> Preview
                 </button>
@@ -1614,7 +1626,7 @@ const CreateInvoice = ({
                   type="button"
                   onClick={handleSave}
                   disabled={isSaving}
-                  className="btn-premium flex-1 sm:flex-initial px-8 py-3 text-sm font-bold flex items-center justify-center gap-2 shadow-premium"
+                  className="flex-1 sm:flex-initial px-8 py-3 text-sm font-bold flex items-center justify-center gap-2 rounded-full bg-[var(--bq26-btn)] hover:bg-[var(--bq26-btn-hover)] text-[var(--bq26-btn-text)] shadow-lg shadow-[rgba(11,143,120,0.2)] transition-all"
                 >
                   {isSaving ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> : <Save className="w-4 h-4" />}
                   {isSaving ? 'Saving...' : (editingInvoice ? 'Update Invoice' : 'Save Invoice')}

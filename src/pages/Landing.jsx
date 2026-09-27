@@ -347,10 +347,10 @@ const DashboardPreviewSection = ({ tr }) => {
 
                 <div>
                   <h3 className="bq26-display text-xl sm:text-2xl font-bold text-[var(--bq26-text)]">
-                    Good Morning, Khairul 👋
+                    {tr('Good Morning, Khairul 👋', 'শুভ সকাল, খাইরুল 👋')}
                   </h3>
                   <p className="text-[11px] text-[var(--bq26-text-soft)] font-medium mt-0.5">
-                    Your business at a glance — Real-time revenue intelligence, collection flow, and customer ledger.
+                    {tr('Your business at a glance — Real-time revenue intelligence, collection flow, and customer ledger.', 'আপনার ব্যবসার একনজর — রিয়েল-টাইম আয়, কালেকশন ফ্লো এবং কাস্টমার খাতা।')}
                   </p>
                 </div>
               </div>
@@ -931,22 +931,22 @@ const Landing = ({ onLoginSuccess }) => {
             <div aria-hidden="true" className="bq26-chip -left-4 top-14 hidden md:flex items-center gap-2 rounded-2xl px-3 py-2 bq-float">
               <span className="w-6 h-6 rounded-xl bg-[rgba(11,143,120,0.12)] text-[var(--bq26-emerald)] flex items-center justify-center"><CheckCircle2 className="w-3.5 h-3.5" /></span>
               <div className="leading-tight">
-                <p className="text-[10px] font-black text-[var(--bq26-text)]">Payment Received</p>
-                <p className="text-[9px] font-bold text-[var(--bq26-emerald-bright)]">UPI · just now</p>
+                <p className="text-[10px] font-black text-[var(--bq26-text)]">{tr('Payment Received', 'পেমেন্ট পেয়েছি')}</p>
+                <p className="text-[9px] font-bold text-[var(--bq26-emerald-bright)]">{tr('UPI · just now', 'UPI · এইমাত্র')}</p>
               </div>
             </div>
             <div aria-hidden="true" className="bq26-chip -right-5 top-44 hidden md:flex items-center gap-2 rounded-2xl px-3 py-2 bq-float-slow">
               <span className="w-6 h-6 rounded-xl bg-[rgba(217,119,6,0.12)] text-[var(--bq26-gold)] flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5" /></span>
               <div className="leading-tight">
-                <p className="text-[10px] font-black text-[var(--bq26-text)]">Revenue +18%</p>
-                <p className="text-[9px] font-bold text-[var(--bq26-gold)]">this week</p>
+                <p className="text-[10px] font-black text-[var(--bq26-text)]">{tr('Revenue +18%', 'রেভিনিউ +১৮%')}</p>
+                <p className="text-[9px] font-bold text-[var(--bq26-gold)]">{tr('this week', 'এই সপ্তাহে')}</p>
               </div>
             </div>
             <div aria-hidden="true" className="bq26-chip -bottom-5 left-12 hidden md:flex items-center gap-2 rounded-2xl px-3 py-2 bq-float" style={{ animationDelay: '1.2s' }}>
               <span className="w-6 h-6 rounded-xl bg-[rgba(20,184,166,0.12)] text-[var(--bq26-teal)] flex items-center justify-center"><MessageCircle className="w-3.5 h-3.5" /></span>
               <div className="leading-tight">
-                <p className="text-[10px] font-black text-[var(--bq26-text)]">Invoice shared</p>
-                <p className="text-[9px] font-bold text-[var(--bq26-teal)]">via WhatsApp</p>
+                <p className="text-[10px] font-black text-[var(--bq26-text)]">{tr('Invoice shared', 'ইনভয়েস পাঠানো হয়েছে')}</p>
+                <p className="text-[9px] font-bold text-[var(--bq26-teal)]">{tr('via WhatsApp', 'WhatsApp দিয়ে')}</p>
               </div>
             </div>
 

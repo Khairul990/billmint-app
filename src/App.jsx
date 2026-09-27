@@ -2769,7 +2769,7 @@ function App() {
   const showAdminRoute = path === '/km-admin' || currentTab === 'admin-panel';
 
   // Enterprise Route Gate - Wait for Auth, Workspace, and Sync to resolve
-  const isAppReady = !isAppBooting;
+  const isAppReady = !isAppBooting && (!isAuthenticated || cloudSyncDone || isDemoSessionActive);
   const isSetupIncomplete = isAuthenticated && !isDemoSessionActive && !isDataHydrating && (
     !(activeSettings?.setupCompleted === true || activeSettings?.profileSetupCompleted === true || activeSettings?.businessSetupCompleted === true) &&
     !(

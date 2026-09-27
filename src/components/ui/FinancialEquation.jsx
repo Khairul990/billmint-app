@@ -19,6 +19,7 @@ export const FinancialEquation = ({
   balanceDue = null,
   currency = '₹',
   size = 'md',
+  layoutMode = 'auto', // 'auto', 'vertical', 'horizontal'
   className = '',
   ...props
 }) => {
@@ -31,8 +32,8 @@ export const FinancialEquation = ({
       className={`p-4 md:p-5 rounded-2xl bq-surface-financial border border-theme-tint-border ${className}`}
       {...props}
     >
-      {/* Desktop / Tablet Flow */}
-      <div className="hidden lg:flex items-center justify-between gap-3 overflow-x-auto py-1">
+      {/* Horizontal Flow */}
+      <div className={`items-center justify-between gap-3 overflow-x-auto py-1 ${layoutMode === 'horizontal' ? 'flex' : layoutMode === 'vertical' ? 'hidden' : 'hidden lg:flex'}`}>
         {/* Step 1: Old Due */}
         <div className="flex-1 min-w-[110px]">
           <FinancialValue 
@@ -97,8 +98,8 @@ export const FinancialEquation = ({
         </div>
       </div>
 
-      {/* Mobile Stacked Flow */}
-      <div className="flex flex-col gap-2.5 lg:hidden">
+      {/* Stacked Flow */}
+      <div className={`flex-col gap-2.5 ${layoutMode === 'vertical' ? 'flex' : layoutMode === 'horizontal' ? 'hidden' : 'flex lg:hidden'}`}>
         <div className="flex items-center justify-between pb-2 border-b border-theme-border-soft/60">
           <FinancialValue label="Old Due" value={oldDue} currency={currency} intent="oldDue" size="sm" />
           <span className="text-xs text-theme-muted font-bold">+</span>

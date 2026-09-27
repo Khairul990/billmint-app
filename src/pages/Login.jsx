@@ -781,43 +781,43 @@ function LoginPanel({ onLoginSuccess, embedded = false, tr = (e, b) => e }) {
     setError('');
     
     if (!email || !email.trim()) {
-      setError('Email address is required.');
+      setError(tr('Email address is required.', 'ইমেইল অ্যাড্রেস দেওয়া আবশ্যক।'));
       setIsSigningIn(false);
       return;
     }
     
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email.trim())) {
-      setError('Please enter a valid email address.');
+      setError(tr('Please enter a valid email address.', 'দয়া করে সঠিক ইমেইল অ্যাড্রেস দিন।'));
       setIsSigningIn(false);
       return;
     }
 
     if (!password || !password.trim()) {
-      setError('Password is required.');
+      setError(tr('Password is required.', 'পাসওয়ার্ড দেওয়া আবশ্যক।'));
       setIsSigningIn(false);
       return;
     }
 
     if (password.trim().length < 6) {
-      setError('Password must be at least 6 characters.');
+      setError(tr('Password must be at least 6 characters.', 'পাসওয়ার্ড অন্তত ৬ অক্ষরের হতে হবে।'));
       setIsSigningIn(false);
       return;
     }
 
     if (!isLoginMode) {
       if (!name || !name.trim()) {
-        setError('Full Name is required for registration.');
+        setError(tr('Full Name is required for registration.', 'অ্যাকাউন্ট খুলতে আপনার পুরো নাম দিন।'));
         setIsSigningIn(false);
         return;
       }
       if (password !== confirmPassword) {
-        setError('Passwords do not match.');
+        setError(tr('Passwords do not match.', 'পাসওয়ার্ড মিলছে না।'));
         setIsSigningIn(false);
         return;
       }
       if (!agreeTerms) {
-        setError('You must agree to the Terms of Service & Privacy Policy.');
+        setError(tr('You must agree to the Terms of Service & Privacy Policy.', 'আপনাকে আমাদের শর্তাবলী মানতে হবে।'));
         setIsSigningIn(false);
         return;
       }
@@ -839,12 +839,12 @@ function LoginPanel({ onLoginSuccess, embedded = false, tr = (e, b) => e }) {
       }
     } catch (err) {
       console.error('Firebase auth error', err);
-      let errorMsg = 'Authentication failed. Please check your details.';
-      if (err.code === 'auth/email-already-in-use') errorMsg = 'An account already exists with this email address. Please sign in.';
-      else if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') errorMsg = 'Invalid email or password. Please verify your credentials.';
-      else if (err.code === 'auth/weak-password') errorMsg = 'Password is too weak. Please choose a stronger password.';
-      else if (err.code === 'auth/too-many-requests') errorMsg = 'Too many failed attempts. Please wait a moment before trying again.';
-      else if (err.code === 'auth/network-request-failed') errorMsg = 'Network error. Please check your internet connection and retry.';
+      let errorMsg = tr('Authentication failed. Please check your details.', 'লগইন ব্যর্থ হয়েছে। আপনার তথ্য চেক করুন।');
+      if (err.code === 'auth/email-already-in-use') errorMsg = tr('An account already exists with this email address. Please sign in.', 'এই ইমেইল দিয়ে আগে থেকেই অ্যাকাউন্ট খোলা আছে। লগইন করুন।');
+      else if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') errorMsg = tr('Invalid email or password. Please verify your credentials.', 'ইমেইল বা পাসওয়ার্ড ভুল হয়েছে।');
+      else if (err.code === 'auth/weak-password') errorMsg = tr('Password is too weak. Please choose a stronger password.', 'পাসওয়ার্ড খুব দুর্বল। একটু কঠিন পাসওয়ার্ড দিন।');
+      else if (err.code === 'auth/too-many-requests') errorMsg = tr('Too many failed attempts. Please wait a moment before trying again.', 'অনেকবার ভুল চেষ্টা করা হয়েছে। কিছুক্ষণ পর আবার চেষ্টা করুন।');
+      else if (err.code === 'auth/network-request-failed') errorMsg = tr('Network error. Please check your internet connection and retry.', 'নেটওয়ার্ক সমস্যা। আপনার ইন্টারনেট কানেকশন চেক করুন।');
       else if (err.message) errorMsg = err.message;
       
       setError(errorMsg);
@@ -860,16 +860,16 @@ function LoginPanel({ onLoginSuccess, embedded = false, tr = (e, b) => e }) {
       if (firebaseReady) {
         const user = await authEngine.signInWithGoogle(name.trim());
         if (user) {
-          toast.success("Signed in with Google successfully!");
+          toast.success(tr("Signed in with Google successfully!", "Google অ্যাকাউন্ট দিয়ে লগইন সফল হয়েছে!"));
           if (onLoginSuccess) onLoginSuccess();
         }
       } else {
-        setError('Firebase is not configured for Google login.');
+        setError(tr('Firebase is not configured for Google login.', 'Google লগইন এর জন্য ফায়ারবেস কনফিগার করা নেই।'));
       }
     } catch (err) {
       console.error('Firebase auth error', err);
       if (err.code !== 'auth/popup-closed-by-user') {
-        setError(err.message || 'Google login failed');
+        setError(err.message || tr('Google login failed', 'Google লগইন ব্যর্থ হয়েছে'));
       }
     } finally {
       setIsSigningIn(false);
@@ -989,7 +989,13 @@ function LoginPanel({ onLoginSuccess, embedded = false, tr = (e, b) => e }) {
                 onChange={(e) => setAgreeTerms(e.target.checked)}
                 className="mt-0.5 h-4 w-4 rounded accent-theme-accent" 
               />
-              <span>I agree to the <span className="font-bold text-theme-primary">Terms of Service</span> & <span className="font-bold text-theme-primary">Privacy Policy</span>.</span>
+              <span>
+                {tr('I agree to the ', 'আমি ')}
+                <span className="font-bold text-theme-primary">{tr('Terms of Service', 'শর্তাবলী')}</span> 
+                {tr(' & ', ' এবং ')} 
+                <span className="font-bold text-theme-primary">{tr('Privacy Policy', 'গোপনীয়তা নীতির')}</span>
+                {tr('.', ' সাথে একমত।')}
+              </span>
             </label>
           ) : (
             <div className="flex items-center justify-end text-sm">
