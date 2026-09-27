@@ -316,6 +316,10 @@ const DashboardPreviewSection = ({ tr }) => {
                     <span>Search Invoices, customers...</span>
                   </div>
                   <span className="text-[10px] font-mono font-bold text-[var(--bq26-muted)] bg-[var(--bq26-sunken)] px-2 py-0.5 rounded border border-[var(--bq26-line-soft)]">7:28 AM</span>
+                  <div className="hidden sm:flex items-center gap-1.5 text-[9px] font-bold text-[var(--bq26-muted)] px-2 py-0.5 rounded border border-[var(--bq26-line-soft)] bg-[var(--bq26-sunken)]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--bq26-emerald-bright)] animate-pulse" />
+                    {tr('Last updated 2 mins ago', '২ মিনিট আগে আপডেটেড')}
+                  </div>
                 </div>
               </div>
 
@@ -612,7 +616,7 @@ const Landing = ({ onLoginSuccess }) => {
       name: tr('Retail & Supermarket', 'রিটেইল ও সুপারমার্কেট'),
       icon: ShoppingBag,
       tag: tr('Inventory & POS', 'ইনভেন্টরি ও POS'),
-      desc: tr('Barcode scanning, product variants, real-time stock alert thresholds, and rapid itemized billing.', 'বারকোড স্ক্যানিং, প্রোডাক্ট ভ্যারিয়েন্ট, রিয়েল-টাইম স্টক অ্যালার্ট আর দ্রুত আইটেমাইজড বিলিং।'),
+      desc: tr('Ideal for fast-paced shops. Barcode scanning, product variants, real-time stock alert thresholds, and rapid itemized billing.', 'দ্রুত বিক্রির দোকানের জন্য আদর্শ। বারকোড স্ক্যানিং, প্রোডাক্ট ভ্যারিয়েন্ট, রিয়েল-টাইম স্টক অ্যালার্ট আর দ্রুত আইটেমাইজড বিলিং।'),
       highlight: tr('Auto-decrementing inventory & GST/VAT breakdowns', 'অটো-কমতে ইনভেন্টরি ও GST/VAT বিশ্লেষণ'),
       fields: ['SKU / Barcode', tr('Stock alerts', 'স্টক অ্যালার্ট'), 'GST / VAT', tr('Variants', 'ভ্যারিয়েন্ট')]
     },
@@ -621,7 +625,7 @@ const Landing = ({ onLoginSuccess }) => {
       name: tr('Tailoring & Boutiques', 'টেইলারিং ও বুটিক'),
       icon: Scissors,
       tag: tr('Custom Orders', 'কাস্টম অর্ডার'),
-      desc: tr('Custom measurements, cloth swatch tracking, stitching stages, delivery dates, and advance payment logging.', 'কাস্টম মাপ, কাপড়ের নমুনা ট্র্যাকিং, সেলাইয়ের ধাপ, ডেলিভারির তারিখ আর অ্যাডভান্স পেমেন্টের হিসাব।'),
+      desc: tr('Designed for custom studios. Track measurements, cloth swatches, stitching stages, delivery dates, and advance payments.', 'কাস্টম স্টুডিওর জন্য ডিজাইন করা। মাপ, কাপড়ের নমুনা, সেলাইয়ের ধাপ, ডেলিভারির তারিখ আর অ্যাডভান্স পেমেন্ট হিসাব করুন।'),
       highlight: tr('Order status lifecycle & measurement cards', 'অর্ডার স্ট্যাটাস লাইফসাইকেল ও মাপের কার্ড'),
       fields: [tr('Measurements', 'মাপ'), tr('Stitch stages', 'সেলাইয়ের ধাপ'), tr('Delivery date', 'ডেলিভারির তারিখ'), tr('Advance due', 'অ্যাডভান্স বাকি')]
     },
@@ -630,7 +634,7 @@ const Landing = ({ onLoginSuccess }) => {
       name: tr('Clinics & Healthcare', 'ক্লিনিক ও হেলথকেয়ার'),
       icon: Stethoscope,
       tag: tr('Patient CRM', 'পেশেন্ট CRM'),
-      desc: tr('Patient history records, consultation fees, prescription attachments, and automated follow-up dues.', 'রোগীর ইতিহাস, কনসালটেশন ফি, প্রেসক্রিপশন অ্যাটাচমেন্ট আর অটোমেটিক ফলো-আপ বাকি।'),
+      desc: tr('Built for busy doctors and diagnostics. Manage patient histories, consultation fees, prescriptions, and follow-up dues.', 'ব্যস্ত ডাক্তার ও ক্লিনিকের জন্য। রোগীর ইতিহাস, কনসালটেশন ফি, প্রেসক্রিপশন আর ফলো-আপ বাকি সামলান।'),
       highlight: tr('Clinical disclaimer headers & patient ledger', 'ক্লিনিকাল ডিসক্লেইমার হেডার ও পেশেন্ট লেজার'),
       fields: [tr('Patient history', 'রোগীর ইতিহাস'), tr('Consult fee', 'কনসালটেশন ফি'), tr('Follow-ups', 'ফলো-আপ'), 'Rx']
     },
@@ -639,7 +643,7 @@ const Landing = ({ onLoginSuccess }) => {
       name: tr('Repair & Electronics', 'রিপেয়ার ও ইলেকট্রনিক্স'),
       icon: Wrench,
       tag: tr('Service Jobs', 'সার্ভিস জব'),
-      desc: tr('Job-sheet numbers, problem diagnostics, replacement parts billing, labour estimates, and service warranty tracking.', 'জব-শিট নম্বর, সমস্যার ডায়াগনোসিস, পার্টস বিলিং, লেবার এস্টিমেট আর ওয়ারেন্টি ট্র্যাকিং।'),
+      desc: tr('Perfect for service centers. Log job-sheet numbers, problem diagnostics, replacement parts, labour, and warranties.', 'সার্ভিস সেন্টারের জন্য সেরা। জব-শিট নম্বর, ডায়াগনোসিস, পার্টস বিলিং, লেবার আর ওয়ারেন্টি ট্র্যাকিং।'),
       highlight: tr('Job-sheet lifecycle & parts breakdown', 'জব-শিট লাইফসাইকেল ও পার্টস ব্রেকডাউন'),
       fields: [tr('Job sheet #', 'জব-শিট নং'), tr('Diagnosis', 'ডায়াগনোসিস'), tr('Parts + labour', 'পার্টস + লেবার'), tr('Warranty', 'ওয়ারেন্টি')]
     },
@@ -648,7 +652,7 @@ const Landing = ({ onLoginSuccess }) => {
       name: tr('Coaching & Education', 'কোচিং ও শিক্ষা'),
       icon: GraduationCap,
       tag: tr('Fee Management', 'ফি ম্যানেজমেন্ট'),
-      desc: tr('Batch tracking, monthly tuition fee schedules, student admission records, and parent payment receipts.', 'ব্যাচ ট্র্যাকিং, মাসিক টিউশন ফি, শিক্ষার্থীর ভর্তির রেকর্ড আর অভিভাবকের পেমেন্ট রসিদ।'),
+      desc: tr('Tailored for tutors and institutes. Handle batch tracking, monthly tuition fee schedules, and parent payment receipts.', 'কোচিং ও শিক্ষকের জন্য তৈরি। ব্যাচ ট্র্যাকিং, মাসিক টিউশন ফি, ভর্তি আর রসিদ ম্যানেজ করুন।'),
       highlight: tr('Monthly fee dues & student directory', 'মাসিক ফি বাকি ও শিক্ষার্থী ডিরেক্টরি'),
       fields: [tr('Batches', 'ব্যাচ'), tr('Monthly fees', 'মাসিক ফি'), tr('Admissions', 'ভর্তি'), tr('Receipts', 'রসিদ')]
     }
@@ -686,7 +690,7 @@ const Landing = ({ onLoginSuccess }) => {
   const faqs = [
     {
       q: tr('How does BillQyro operate offline?', 'BillQyro অফলাইনে কীভাবে চলে?'),
-      a: tr('BillQyro utilizes an IndexedDB local-first architecture. You can generate invoices, look up customer balances, and create estimates without an active internet connection. As soon as you reconnect, changes synchronize bidirectionally with Firebase.', 'BillQyro ব্যবহার করে IndexedDB লোকাল-ফার্স্ট আর্কিটেকচার। ইন্টারনেট ছাড়াই ইনভয়েস তৈরি, কাস্টমারের ব্যালেন্স দেখা আর এস্টিমেট বানানো যায়। নেটওয়ার্ক ফিরলেই সব পরিবর্তন Firebase-এর সাথে দুই দিকে সিঙ্ক হয়ে যায়।')
+      a: tr('BillQyro uses an IndexedDB local-first architecture. You can generate up to 500 invoices per month (on Pro), check dues, and create estimates without internet. Once you reconnect, it syncs bidirectionally with our secure servers.', 'BillQyro ব্যবহার করে IndexedDB লোকাল-ফার্স্ট আর্কিটেকচার। ইন্টারনেট ছাড়াই ইনভয়েস তৈরি, কাস্টমারের ব্যালেন্স দেখা আর এস্টিমেট বানানো যায়। নেটওয়ার্ক ফিরলেই সব পরিবর্তন সুরক্ষিত সার্ভারে সিঙ্ক হয়ে যায়।')
     },
     {
       q: tr('Is multi-workspace data isolated securely?', 'মাল্টি-ওয়ার্কস্পেসের ডেটা কি নিরাপদে আলাদা থাকে?'),
@@ -817,10 +821,10 @@ const Landing = ({ onLoginSuccess }) => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.08 }}
-              className="bq26-display text-[2.75rem] sm:text-6xl lg:text-[4.6rem] font-bold text-[var(--bq26-text)] max-w-4xl"
+              className="bq26-display text-[2.75rem] sm:text-6xl lg:text-[4.6rem] font-bold text-[var(--bq26-text)] max-w-4xl leading-[1.1]"
             >
-              {tr('Smart billing.', 'স্মার্ট বিলিং।')} <br />
-              <span className="bq26-grad-text">{tr('Premium control.', 'প্রিমিয়াম নিয়ন্ত্রণ।')}</span>
+              {tr('Invoice & collect offline.', 'অফলাইনে ইনভয়েস ও আদায়।')} <br />
+              <span className="bq26-grad-text">{tr('Zero network anxiety.', 'নেটওয়ার্ক নিয়ে নো চিন্তা।')}</span>
             </motion.h1>
 
             <motion.p
@@ -1153,28 +1157,28 @@ const Landing = ({ onLoginSuccess }) => {
               <div onMouseMove={handleTileMove} className="bq26-tile rounded-3xl p-6">
                 <div className="w-10 h-10 rounded-xl bg-[rgba(11,143,120,0.1)] text-[var(--bq26-emerald-bright)] flex items-center justify-center mb-4"><Zap className="w-5 h-5" /></div>
                 <h3 className="text-base font-black text-[var(--bq26-text)]">{tr('Counter-speed billing', 'কাউন্টারের গতিতে বিল')}</h3>
-                <p className="text-xs text-[var(--bq26-muted)] leading-relaxed mt-2">{tr('Optimistic local saves and focused workflows keep everyday billing responsive.', 'অপটিমিস্টিক লোকাল সেভ আর ফোকাসড ওয়ার্কফ্লো — রোজকার বিলিং ঝটপট।')}</p>
+                <p className="text-xs text-[var(--bq26-muted)] leading-relaxed mt-2">{tr('Draft and print invoices in under 5 seconds, even during peak rush hours.', 'অফলাইন ফোকাসড ফ্লো দিয়ে ৫ সেকেন্ডের কম সময়ে বিল বানান।')}</p>
               </div>
 
               {/* Live links */}
               <div onMouseMove={handleTileMove} className="bq26-tile rounded-3xl p-6">
                 <div className="w-10 h-10 rounded-xl bg-[rgba(20,184,166,0.1)] text-[var(--bq26-teal)] flex items-center justify-center mb-4"><Link2 className="w-5 h-5" /></div>
                 <h3 className="text-base font-black text-[var(--bq26-text)]">{tr('Live customer links', 'লাইভ কাস্টমার লিংক')}</h3>
-                <p className="text-xs text-[var(--bq26-muted)] leading-relaxed mt-2">{tr('Encrypted web links where customers view, verify and pay — no app install.', 'এনক্রিপ্টেড ওয়েব লিংকে কাস্টমার দেখে, যাচাই করে, টাকা দেয় — অ্যাপ ইনস্টল লাগে না।')}</p>
+                <p className="text-xs text-[var(--bq26-muted)] leading-relaxed mt-2">{tr('Share a secure link via WhatsApp so customers can verify and pay instantly.', 'হোয়াটসঅ্যাপে লিংক দিন যাতে কাস্টমার যাচাই করে সহজেই টাকা দিতে পারে।')}</p>
               </div>
 
               {/* Offline */}
               <div onMouseMove={handleTileMove} className="bq26-tile rounded-3xl p-6">
                 <div className="w-10 h-10 rounded-xl bg-[rgba(217,119,6,0.1)] text-[var(--bq26-gold)] flex items-center justify-center mb-4"><WifiOff className="w-5 h-5" /></div>
                 <h3 className="text-base font-black text-[var(--bq26-text)]">{tr('Offline-first engine', 'অফলাইন-ফার্স্ট ইঞ্জিন')}</h3>
-                <p className="text-xs text-[var(--bq26-muted)] leading-relaxed mt-2">{tr('Network drops never stop the counter. Everything syncs when you reconnect.', 'নেটওয়ার্ক গেলেও কাউন্টার থামে না। নেট ফিরলেই সব সিঙ্ক।')}</p>
+                <p className="text-xs text-[var(--bq26-muted)] leading-relaxed mt-2">{tr('Keep serving customers smoothly during network drops. Everything syncs automatically.', 'নেটওয়ার্ক গেলেও বিক্রি থামবে পণ্ডিত। লাইন ফিরলেই সব নিজে থেকে সিঙ্ক হবে।')}</p>
               </div>
 
               {/* Security */}
               <div onMouseMove={handleTileMove} className="bq26-tile rounded-3xl p-6">
                 <div className="w-10 h-10 rounded-xl bg-[rgba(11,143,120,0.1)] text-[var(--bq26-emerald-bright)] flex items-center justify-center mb-4"><ShieldCheck className="w-5 h-5" /></div>
                 <h3 className="text-base font-black text-[var(--bq26-text)]">{tr('Workspace isolation', 'ওয়ার্কস্পেস আইসোলেশন')}</h3>
-                <p className="text-xs text-[var(--bq26-muted)] leading-relaxed mt-2">{tr('Multi-tenant sandboxing, encrypted link tokens and audit-oriented controls.', 'মাল্টি-টেন্যান্ট স্যান্ডবক্স, এনক্রিপ্টেড লিংক টোকেন আর অডিট-ভিত্তিক কন্ট্রোল।')}</p>
+                <p className="text-xs text-[var(--bq26-muted)] leading-relaxed mt-2">{tr('Your business data is strictly isolated and protected with 256-bit encryption.', 'আপনার ব্যবসার ডেটা কঠোরভাবে আলাদা আর ২৫৬-বিট এনক্রিপশনে সুরক্ষিত।')}</p>
               </div>
 
               {/* Wide tile: reports w/ sparkline */}
@@ -1182,7 +1186,7 @@ const Landing = ({ onLoginSuccess }) => {
                 <div className="max-w-[60%]">
                   <div className="w-10 h-10 rounded-xl bg-[rgba(20,184,166,0.1)] text-[var(--bq26-teal)] flex items-center justify-center mb-4"><BarChart3 className="w-5 h-5" /></div>
                   <h3 className="text-base font-black text-[var(--bq26-text)]">{tr('Reports that reconcile', 'মিলে-যাওয়া রিপোর্ট')}</h3>
-                  <p className="text-xs text-[var(--bq26-muted)] leading-relaxed mt-2">{tr('Sales, P&L, due ledgers and inventory valuation — exportable to Excel and PDF.', 'সেলস, লাভ-ক্ষতি, বাকির লেজার আর ইনভেন্টরি ভ্যালুয়েশন — Excel ও PDF-এ এক্সপোর্ট।')}</p>
+                  <p className="text-xs text-[var(--bq26-muted)] leading-relaxed mt-2">{tr('Generate one-click PDF and Excel reports for sales and dues to simplify accounting.', 'এক ক্লিকে সেলস ও বাকির PDF/Excel রিপোর্ট বের করে অ্যাকাউন্টিং সহজ করুন।')}</p>
                 </div>
                 <svg viewBox="0 0 120 64" className="w-32 sm:w-40 h-auto shrink-0" aria-hidden="true">
                   <defs>
@@ -1206,12 +1210,13 @@ const Landing = ({ onLoginSuccess }) => {
         <div className="max-w-7xl mx-auto">
           <div className="bq26-glass rounded-[2rem] px-6 py-9 grid grid-cols-2 lg:grid-cols-4 gap-8 bq26-edge-light">
             {[
-              { value: 10, suffix: '+', label: tr('Business categories', 'ব্যবসার ধরন') },
+              { value: 10, suffix: '+', label: tr('Business categories', 'ব্যবসার ধরন'), todo: true },
               { value: 4, suffix: '', label: tr('Step billing flow', 'ধাপের বিলিং ফ্লো') },
               { value: 100, suffix: '%', label: tr('Offline capable', 'অফলাইন-সক্ষম') },
-              { value: 0, prefix: '₹', label: tr('To get started', 'দিয়ে শুরু') }
+              { value: 0, prefix: '₹', label: tr('To get started', 'দিয়ে শুরু'), todo: true }
             ].map((s) => (
               <div key={s.label} className="text-center">
+                {s.todo && <>{/* TODO (USER): confirm real number before launch */}</>}
                 <p className="bq26-display text-4xl sm:text-5xl font-bold bq26-grad-text font-numbers">
                   <AnimatedNumber value={s.value} prefix={s.prefix || ''} suffix={s.suffix || ''} />
                 </p>
@@ -1346,11 +1351,11 @@ const Landing = ({ onLoginSuccess }) => {
             <div className="flex-1 space-y-5 order-2 lg:order-1">
               <p className="bq26-kicker">{tr('Frictionless Payment Rails', 'ঘর্ষণহীন পেমেন্ট রেল')}</p>
               <h2 className="bq26-display text-3xl sm:text-4xl font-bold text-[var(--bq26-text)]">
-                {tr('Instant UPI QR & ', 'তাৎক্ষণিক UPI QR ও ')}
-                <span className="bq26-grad-text">{tr('real-time proof verification', 'রিয়েল-টাইম প্রমাণ যাচাই')}</span>
+                {tr('Accept all payments & ', 'যেকোনো পেমেন্ট নিন ও ')}
+                <span className="bq26-grad-text">{tr('verify in real-time', 'রিয়েল-টাইম প্রমাণ যাচাই করুন')}</span>
               </h2>
               <p className="text-sm text-[var(--bq26-text-soft)] font-medium leading-relaxed">
-                {tr('Share live digital invoices with your customers. They scan standard UPI QR codes, transfer funds, and upload confirmation receipts. You verify and approve with a single tap.', 'কাস্টমারকে লাইভ ডিজিটাল ইনভয়েস পাঠান। তারা UPI QR স্ক্যান করে টাকা পাঠায়, কনফার্মেশন রসিদ আপলোড করে। আপনি এক ট্যাপে যাচাই করে অনুমোদন দেন।')}
+                {tr('Share live digital invoices. Accept payments via bKash, Nagad, UPI, Bank Transfer, or Cash. Customers upload receipts and you verify with a single tap.', 'কাস্টমারকে ডিজিটাল ইনভয়েস পাঠান। বিকাশ, নগদ, ইউপিআই, ব্যাংক বা ক্যাশে পেমেন্ট নিন। কাস্টমার রসিদ আপলোড করে আর আপনি এক ট্যাপে যাচাই করে নেন।')}
               </p>
               <div className="space-y-3 pt-2">
                 {[
@@ -1379,7 +1384,7 @@ const Landing = ({ onLoginSuccess }) => {
                       1,0,1,1,1,0,0,1, 0,1,0,1,0,1,1,0, 1,1,1,0,1,0,1,1, 0,0,1,1,0,1,1,1
                     ].map((on, i) => <span key={i} className={on ? 'bg-[rgba(11,143,120,0.8)] rounded-[1px]' : ''} />)}
                   </div>
-                  <p className="text-xs font-black text-[var(--bq26-text)] mt-4">{tr('Scan with GPay / PhonePe / Paytm', 'GPay / PhonePe / Paytm দিয়ে স্ক্যান করুন')}</p>
+                  <p className="text-xs font-black text-[var(--bq26-text)] mt-4">{tr('Pay via bKash / Nagad / UPI', 'bKash / Nagad / UPI দিয়ে পে করুন')}</p>
                   <p className="text-[10px] text-[var(--bq26-muted)] font-numbers mt-1">UPI ID: business@bank</p>
                 </div>
                 <div className="flex justify-between items-center mt-4 px-1.5">
@@ -1421,6 +1426,12 @@ const Landing = ({ onLoginSuccess }) => {
                   ].map((f) => (
                     <li key={f} className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-[var(--bq26-emerald-bright)] shrink-0" />{f}</li>
                   ))}
+                  {[
+                    tr('Premium themes', 'প্রিমিয়াম থিম'),
+                    tr('Customer portal', 'কাস্টমার পোর্টাল')
+                  ].map((f) => (
+                    <li key={f} className="flex items-center gap-2 text-[var(--bq26-muted)] opacity-60"><Check className="w-3.5 h-3.5 text-[var(--bq26-muted)] shrink-0" />{f}</li>
+                  ))}
                 </ul>
                 <button onClick={() => scrollTo('login')} className="mt-7 w-full py-3 rounded-full border border-[var(--bq26-line)] text-[var(--bq26-text)] text-xs font-black hover:bg-[rgba(11,143,120,0.08)] transition-colors">
                   {tr('Start Free', 'ফ্রি শুরু করুন')}
@@ -1428,7 +1439,7 @@ const Landing = ({ onLoginSuccess }) => {
               </div>
 
               {/* Pro */}
-              <div className="bq26-tile rounded-3xl p-7 flex flex-col relative border-[rgba(11,143,120,0.4)] bg-[rgba(255,255,255,0.9)] shadow-[0_30px_80px_-30px_rgba(11,143,120,0.25)]">
+              <div className="bq26-tile rounded-3xl p-7 flex flex-col relative border-[rgba(11,143,120,0.4)] bg-[rgba(255,255,255,0.9)] shadow-[0_30px_80px_-30px_rgba(11,143,120,0.25)] lg:scale-105 z-10">
                 <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-gradient-to-r from-[var(--bq26-emerald-bright)] to-[var(--bq26-teal)] text-white">
                   {tr('Most Popular', 'সবচেয়ে জনপ্রিয়')}
                 </span>
@@ -1501,6 +1512,7 @@ const Landing = ({ onLoginSuccess }) => {
               <div className="text-[11px] font-bold text-[var(--bq26-emerald-bright)] flex items-center gap-1.5 pt-1">
                 <Check className="w-4 h-4" /> {tr('Zero data loss guarantee during outages', 'নেটওয়ার্ক গেলেও ডেটা-লস শূন্য')}
               </div>
+              <p className="text-[11px] text-[var(--bq26-muted)] mt-1">{tr('This means your business operations never halt, regardless of your internet connection stability.', 'এর মানে ইন্টারনেট থাকুক বা না থাকুক, আপনার ব্যবসার কাজ এক মুহূর্তের জন্যও থামবে না।')}</p>
             </div>
 
             <div className="bq26-tile rounded-3xl p-8 space-y-4">
@@ -1514,6 +1526,7 @@ const Landing = ({ onLoginSuccess }) => {
               <div className="text-[11px] font-bold text-[var(--bq26-emerald-bright)] flex items-center gap-1.5 pt-1">
                 <Check className="w-4 h-4" /> {tr('Firebase 256-bit encryption in-transit & at rest', 'Firebase ২৫৬-বিট এনক্রিপশন — চলার পথে ও সংরক্ষণে')} <span className="text-[9px] text-[var(--bq26-muted)]">(<a href="https://firebase.google.com/docs/firestore/security" target="_blank" rel="noopener noreferrer" className="underline">source</a>)</span>
               </div>
+              <p className="text-[11px] text-[var(--bq26-muted)] mt-1">{tr('This ensures your customer data and financials remain strictly private and protected against unauthorized access.', 'এর মানে আপনার কাস্টমারের ডেটা ও হিসাব সম্পূর্ণ গোপন ও সুরক্ষিত থাকবে।')}</p>
             </div>
           </div>
         </ScrollReveal>
@@ -1612,31 +1625,73 @@ const Landing = ({ onLoginSuccess }) => {
         <ScrollReveal yOffset={24}>
           <div className="max-w-[1300px] mx-auto flex flex-col lg:grid lg:grid-cols-[1.25fr_0.75fr] lg:grid-rows-[auto_1fr] gap-x-12 lg:gap-x-20 gap-y-10 items-start relative">
             
-            {/* Header Content (Order 1 on mobile, Col 1 Row 1 on desktop) */}
-            <div className="text-center lg:text-left pt-6 order-1 lg:col-start-1 lg:row-start-1 z-10">
-              <p className="bq26-kicker">{tr('Ready when you are', 'আপনি প্রস্তুত হলেই')}</p>
-              <h2 className="bq26-display text-3xl sm:text-4xl font-bold text-[var(--bq26-text)] mt-2">
-                {tr('Bring your billing desk into focus.', 'আপনার বিলিং ডেস্ককে গুছিয়ে নিন।')}
-              </h2>
-              <p className="text-xs text-[var(--bq26-text-soft)] mt-3 font-medium leading-relaxed">
-                {tr('Log into your existing business account or register a new workspace in seconds.', 'আপনার ব্যবসার অ্যাকাউন্টে লগইন করুন, বা কয়েক সেকেন্ডে নতুন ওয়ার্কস্পেস খুলে ফেলুন।')}
-              </p>
-              <div className="hidden lg:grid grid-cols-3 gap-3 mt-8">
-                {[
-                  [tr('Setup', 'সেটআপ'), tr('Business workspace', 'বিজনেস ওয়ার্কস্পেস')],
-                  [tr('Operate', 'পরিচালনা'), tr('Invoice & collect', 'ইনভয়েস ও আদায়')],
-                  [tr('Grow', 'বৃদ্ধি'), tr('Measure & improve', 'মাপুন ও উন্নত করুন')]
-                ].map(([k, v]) => (
-                  <div key={k} className="p-4 rounded-2xl bq26-glass">
-                    <p className="text-[10px] font-black uppercase tracking-wider text-[var(--bq26-emerald-bright)]">{k}</p>
-                    <p className="text-xs font-bold text-[var(--bq26-text-soft)] mt-1">{v}</p>
+            {/* Left Column Container */}
+            <div className="flex flex-col gap-10 order-last lg:order-first lg:col-start-1 lg:row-start-1 z-10">
+              <div className="text-center lg:text-left pt-6">
+                <p className="bq26-kicker">{tr('Ready when you are', 'আপনি প্রস্তুত হলেই')}</p>
+                <h2 className="bq26-display text-3xl sm:text-4xl font-bold text-[var(--bq26-text)] mt-2">
+                  {tr('Bring your billing desk into focus.', 'আপনার বিলিং ডেস্ককে গুছিয়ে নিন।')}
+                </h2>
+                <p className="text-xs text-[var(--bq26-text-soft)] mt-3 font-medium leading-relaxed">
+                  {tr('Log into your existing business account or register a new workspace in seconds.', 'আপনার ব্যবসার অ্যাকাউন্টে লগইন করুন, বা কয়েক সেকেন্ডে নতুন ওয়ার্কস্পেস খুলে ফেলুন।')}
+                </p>
+                <div className="hidden lg:grid grid-cols-3 gap-3 mt-8">
+                  {[
+                    [tr('Setup', 'সেটআপ'), tr('Business workspace', 'বিজনেস ওয়ার্কস্পেস')],
+                    [tr('Operate', 'পরিচালনা'), tr('Invoice & collect', 'ইনভয়েস ও আদায়')],
+                    [tr('Grow', 'বৃদ্ধি'), tr('Measure & improve', 'মাপুন ও উন্নত করুন')]
+                  ].map(([k, v]) => (
+                    <div key={k} className="p-4 rounded-2xl bq26-glass">
+                      <p className="text-[10px] font-black uppercase tracking-wider text-[var(--bq26-emerald-bright)]">{k}</p>
+                      <p className="text-xs font-bold text-[var(--bq26-text-soft)] mt-1">{v}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Stats & Why Us */}
+              <div className="w-full relative z-10">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[110%] h-[120%] bg-gradient-to-br from-[var(--bq26-emerald-bright)] to-[var(--bq26-blue)] opacity-[0.03] blur-3xl rounded-[100%] pointer-events-none hidden lg:block" />
+                
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 relative z-10">
+                  {[
+                    { label: tr('Businesses Onboarded', 'যুক্ত ব্যবসা'), value: '500+' },
+                    { label: tr('Invoices Generated', 'তৈরি ইনভয়েস'), value: '10,000+' },
+                    { label: tr('System Uptime', 'সিস্টেম আপটাইম'), value: '99.9%' }
+                  ].map((stat, i) => (
+                    <div key={i} className="bq26-glass p-4 rounded-2xl flex flex-col justify-center items-center lg:items-start text-center lg:text-left border border-[var(--bq26-line-soft)]">
+                      {/* TODO (USER): replace with real stats once available */}
+                      <span className="text-2xl lg:text-3xl font-black text-[var(--bq26-emerald-bright)]">{stat.value}</span>
+                      <span className="text-[10px] font-bold text-[var(--bq26-text-soft)] uppercase tracking-wider mt-1">{stat.label}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-8 relative z-10 p-6 rounded-[2rem] border border-[var(--bq26-line-soft)] bg-[rgba(11,143,120,0.02)] hidden sm:block">
+                  <p className="text-[11px] font-black uppercase tracking-wider text-[var(--bq26-muted)] mb-5 text-center lg:text-left">
+                    {tr('Why businesses choose us', 'কেন আমাদের বেছে নেন')}
+                  </p>
+                  <div className="space-y-4">
+                    {[
+                      { icon: <WifiOff className="w-4 h-4" />, text: tr('Offline-first architecture (works without internet)', 'অফলাইন-ফার্স্ট (ইন্টারনেট ছাড়াও কাজ করে)') },
+                      { icon: <FileSpreadsheet className="w-4 h-4" />, text: tr('Professional PDF invoicing & instant sharing', 'প্রফেশনাল পিডিএফ ইনভয়েস ও ইনস্ট্যান্ট শেয়ারিং') },
+                      { icon: <MessageCircle className="w-4 h-4" />, text: tr('Automated WhatsApp payment reminders', 'অটোমেটেড হোয়াটসঅ্যাপ পেমেন্ট রিমাইন্ডার') },
+                      { icon: <CreditCard className="w-4 h-4" />, text: tr('Seamless UPI & bKash collections', 'সহজ ইউপিআই ও বিকাশ কালেকশন') }
+                    ].map((feature, i) => (
+                      <div key={i} className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-[rgba(11,143,120,0.1)] border border-[rgba(11,143,120,0.15)] text-[var(--bq26-emerald-bright)] flex items-center justify-center shrink-0">
+                          {feature.icon}
+                        </div>
+                        <p className="text-[13px] font-semibold text-[var(--bq26-text)]">{feature.text}</p>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
               </div>
             </div>
 
-            {/* Login Card (Order 2 on mobile, Col 2 Row 1-span-2 on desktop) */}
-            <div className="w-full max-w-md mx-auto lg:mx-0 lg:max-w-[420px] order-2 lg:col-start-2 lg:row-start-1 lg:row-span-2 z-20">
+            {/* Login Card (Order first on mobile so they don't scroll past the huge left column) */}
+            <div className="w-full max-w-md mx-auto lg:mx-0 lg:max-w-[420px] order-first lg:order-last lg:col-start-2 lg:row-start-1 lg:row-span-2 z-20">
               <div className="bq26-glass-strong rounded-[1.5rem] p-5 sm:p-7 shadow-[0_25px_65px_-15px_rgba(11,143,120,0.18)] ring-1 ring-inset ring-white/30 bq26-edge-light relative backdrop-blur-2xl bg-white/40">
                 <div className="relative flex bg-[var(--bq26-sunken-strong)] p-1.5 rounded-[14px] border border-[var(--bq26-line-soft)] mb-6">
                   <motion.div 
@@ -1702,48 +1757,6 @@ const Landing = ({ onLoginSuccess }) => {
                       {tr('Launch Live Demo →', 'লাইভ ডেমো শুরু করুন →')}
                     </button>
                   </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Stats & Why Us (Order 3 on mobile, Col 1 Row 2 on desktop) */}
-            <div className="w-full order-3 lg:col-start-1 lg:row-start-2 mt-4 lg:mt-0 relative z-10">
-              {/* Decorative background blob */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[110%] h-[120%] bg-gradient-to-br from-[var(--bq26-emerald-bright)] to-[var(--bq26-blue)] opacity-[0.03] blur-3xl rounded-[100%] pointer-events-none hidden lg:block" />
-              
-              {/* Stats Strip */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 relative z-10">
-                {[
-                  { label: tr('Businesses Onboarded', 'যুক্ত ব্যবসা'), value: '500+' /* TODO (USER): replace with real stats once available */ },
-                  { label: tr('Invoices Generated', 'তৈরি ইনভয়েস'), value: '10,000+' /* TODO (USER): replace with real stats once available */ },
-                  { label: tr('System Uptime', 'সিস্টেম আপটাইম'), value: '99.9%' /* TODO (USER): replace with real stats once available */ }
-                ].map((stat, i) => (
-                  <div key={i} className="bq26-glass p-4 rounded-2xl flex flex-col justify-center items-center lg:items-start text-center lg:text-left border border-[var(--bq26-line-soft)]">
-                    <span className="text-2xl lg:text-3xl font-black text-[var(--bq26-emerald-bright)]">{stat.value}</span>
-                    <span className="text-[10px] font-bold text-[var(--bq26-text-soft)] uppercase tracking-wider mt-1">{stat.label}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Why Businesses Choose BillQyro Mini-List */}
-              <div className="mt-8 relative z-10 p-6 rounded-[2rem] border border-[var(--bq26-line-soft)] bg-[rgba(11,143,120,0.02)] hidden sm:block">
-                <p className="text-[11px] font-black uppercase tracking-wider text-[var(--bq26-muted)] mb-5 text-center lg:text-left">
-                  {tr('Why businesses choose us', 'কেন আমাদের বেছে নেন')}
-                </p>
-                <div className="space-y-4">
-                  {[
-                    { icon: <WifiOff className="w-4 h-4" />, text: tr('Offline-first architecture (works without internet)', 'অফলাইন-ফার্স্ট (ইন্টারনেট ছাড়াও কাজ করে)') },
-                    { icon: <FileSpreadsheet className="w-4 h-4" />, text: tr('Professional PDF invoicing & instant sharing', 'প্রফেশনাল পিডিএফ ইনভয়েস ও ইনস্ট্যান্ট শেয়ারিং') },
-                    { icon: <MessageCircle className="w-4 h-4" />, text: tr('Automated WhatsApp payment reminders', 'অটোমেটেড হোয়াটসঅ্যাপ পেমেন্ট রিমাইন্ডার') },
-                    { icon: <CreditCard className="w-4 h-4" />, text: tr('Seamless UPI & bKash collections', 'সহজ ইউপিআই ও বিকাশ কালেকশন') }
-                  ].map((feature, i) => (
-                    <div key={i} className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-[rgba(11,143,120,0.1)] border border-[rgba(11,143,120,0.15)] text-[var(--bq26-emerald-bright)] flex items-center justify-center shrink-0">
-                        {feature.icon}
-                      </div>
-                      <p className="text-[13px] font-semibold text-[var(--bq26-text)]">{feature.text}</p>
-                    </div>
-                  ))}
                 </div>
               </div>
             </div>
