@@ -1015,15 +1015,14 @@ const Invoices = ({
                   Cancel
                 </button>
                 <button
-                  disabled={(paidDeleteTarget?.paymentHistory?.length > 0) || getInvoicePaidTotal(paidDeleteTarget) > 0}
-                    onClick={() => {
-                      onDeleteInvoice(paidDeleteTarget.id, false, true);
-                      setPaidDeleteTarget(null);
-                    }}
+                  onClick={() => {
+                    onDeleteInvoice(paidDeleteTarget.id, false, true);
+                    setPaidDeleteTarget(null);
+                  }}
                   className="flex-1 bg-rose-600 text-white font-bold py-2.5 rounded-xl transition-all hover:bg-rose-700 text-xs shadow-md shadow-rose-500/20"
                 >
-                  {(paidDeleteTarget?.paymentHistory?.length > 0) ? "Cannot Trash Invoice With History" : "Move To Trash"}
-                  </button>
+                  {(paidDeleteTarget?.paymentHistory?.length > 0) ? "Force Move To Trash" : "Move To Trash"}
+                </button>
                 </div>
               </div>
             </motion.div>

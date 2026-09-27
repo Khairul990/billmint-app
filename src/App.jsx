@@ -823,24 +823,36 @@ function App() {
         const health = runDataHealthCheck({ invoices, customers, products, expenses });
         if (health.status !== 'healthy' && health.counts.totalRecords > 0) {
           const total = health.issues.reduce((s, i) => s + i.count, 0);
-          toast((tt) => (
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-semibold">⚠️ ডেটা-হেলথ: {total}টি সমস্যা (স্কোর {health.score})</span>
+          toast.custom((tt) => (
+            <div className={`luxury-glass-card flex items-center gap-4 px-4 py-3 pointer-events-auto shadow-2xl transition-all duration-300 ${tt.visible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'} rounded-[1rem] border-amber-500/30 dark:border-amber-500/20 max-w-sm`}>
+              <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0 border border-amber-500/20">
+                <span className="text-amber-500 text-lg">⚠️</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-black text-theme-primary uppercase tracking-wider">ডেটা-হেলথ সতর্কতা</p>
+                <p className="text-[11px] font-semibold text-theme-muted mt-0.5 truncate">{total}টি সমস্যা সনাক্ত হয়েছে (স্কোর: {health.score})</p>
+              </div>
               <button
                 onClick={() => { toast.dismiss(tt.id); setCurrentTab('backup-restore'); }}
-                className="px-3 py-1.5 bg-[image:var(--accent-gradient)] text-white text-xs font-bold rounded-lg"
+                className="px-3.5 py-2 bg-[image:var(--accent-gradient)] text-white text-xs font-black rounded-xl hover:scale-105 active:scale-95 transition-transform shadow-md shrink-0"
               >দেখুন</button>
             </div>
           ), { duration: 9000 });
         }
         const backupNudge = evaluateBackupReminder({ invoices, customers, products });
         if (backupNudge) {
-          toast((tt) => (
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-semibold">🛡️ {backupNudge.daysSince === null ? 'এখনো কোনো ব্যাকআপ নেননি' : `শেষ ব্যাকআপ ${backupNudge.daysSince} দিন আগে`} — আজ ব্যাকআপ নিয়ে রাখুন</span>
+          toast.custom((tt) => (
+            <div className={`luxury-glass-card flex items-center gap-4 px-4 py-3 pointer-events-auto shadow-2xl transition-all duration-300 ${tt.visible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'} rounded-[1rem] border-indigo-500/30 dark:border-indigo-500/20 max-w-sm`}>
+              <div className="w-10 h-10 rounded-full bg-indigo-500/10 flex items-center justify-center shrink-0 border border-indigo-500/20">
+                <span className="text-indigo-500 text-lg">🛡️</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-black text-theme-primary uppercase tracking-wider">ব্যাকআপ রিমাইন্ডার</p>
+                <p className="text-[11px] font-semibold text-theme-muted mt-0.5 truncate">{backupNudge.daysSince === null ? 'এখনো কোনো ব্যাকআপ নেননি' : `শেষ ব্যাকআপ ${backupNudge.daysSince} দিন আগে`}</p>
+              </div>
               <button
                 onClick={() => { toast.dismiss(tt.id); markBackupReminderDismissed(); setCurrentTab('backup-restore'); }}
-                className="px-3 py-1.5 bg-[image:var(--accent-gradient)] text-white text-xs font-bold rounded-lg"
+                className="px-3.5 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-black rounded-xl hover:scale-105 active:scale-95 transition-transform shadow-md shrink-0"
               >ব্যাকআপ</button>
             </div>
           ), { duration: 12000, id: 'monthly-backup-nudge' });
@@ -1550,7 +1562,7 @@ function App() {
       } else {
         paidVal = Number(targetInv.paidAmount ?? targetInv.amountPaid ?? 0);
       }
-      if (paidVal > 0) {
+      if (paidVal > 0 && !skipConfirmation) {
         toast.error('Cannot delete invoices with collected revenue. Void payments first.');
         return;
       }
@@ -1586,7 +1598,7 @@ function App() {
         }
       }
       const { updatedInvoices, firebaseStatus } = await invoiceEngine.deleteInvoice(id, permanent);
-      setInvoices(updatedInvoices);
+      setInvoices([...updatedInvoices]);
       if (firebaseStatus === 'failed') {
         toast.success(permanent ? 'Invoice permanently deleted locally. Will sync when online.' : 'Invoice moved to trash locally.');
       } else {

@@ -248,12 +248,12 @@ const InvoiceCard = ({
 
   return (
     <>
-      <div className={`bg-theme-card rounded-2xl p-4 border transition-all duration-200 group shadow-xs hover:shadow-md relative ${
+      <div className={`luxury-glass-card rounded-[1.5rem] p-4 transition-all duration-300 group relative ${
         showMoreMenu ? 'z-30' : 'z-1'
       } ${
         isSelected 
-          ? 'border-theme-accent bg-theme-accent/5 ring-1 ring-theme-accent/30' 
-          : 'border-theme-border-soft hover:border-theme-border-strong'
+          ? '!border-theme-accent !bg-theme-accent/5 ring-2 ring-theme-accent/40 shadow-premium' 
+          : ''
       }`}>
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           
@@ -464,7 +464,7 @@ const InvoiceCard = ({
                       aria-label="More Options"
                       className={`w-8 h-8 flex items-center justify-center rounded-xl border transition-all cursor-pointer ${
                         showMoreMenu
-                          ? 'text-theme-accent bg-theme-accent/10 border-theme-accent/30'
+                          ? 'text-[var(--bq26-app)] bg-gradient-to-br from-[var(--bq26-emerald)] to-[var(--bq26-emerald-bright)] border-[var(--bq26-emerald)] shadow-[0_4px_12px_rgba(11,143,120,0.4)]'
                           : 'text-theme-secondary bg-theme-surface hover:bg-theme-surface-elevated border-theme-border-soft'
                       }`}
                     >
@@ -478,8 +478,8 @@ const InvoiceCard = ({
                           animate={{ opacity: 1, scale: 1, y: 0 }}
                           exit={{ opacity: 0, scale: 0.95, y: -6 }}
                           transition={{ duration: 0.12 }}
-                          style={{ position: 'absolute', right: 0, top: '100%', marginTop: '6px', zIndex: 9999 }}
-                          className="w-56 bg-theme-card border border-theme-border-soft rounded-2xl p-1.5 shadow-2xl flex flex-col gap-0.5 text-xs max-h-[380px] overflow-y-auto"
+                          style={{ position: 'absolute', right: 0, top: '100%', marginTop: '8px', zIndex: 9999 }}
+                          className="w-60 bg-theme-surface/80 backdrop-blur-3xl border border-[var(--bq26-emerald)]/20 rounded-[1.5rem] p-2 shadow-[0_32px_64px_-12px_rgba(11,143,120,0.25)] flex flex-col gap-1 text-xs max-h-[380px] overflow-y-auto ring-1 ring-white/50 dark:ring-white/5"
                         >
                           <button
                             onClick={() => {

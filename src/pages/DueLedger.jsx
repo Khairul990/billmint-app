@@ -147,7 +147,7 @@ const DueSection = React.memo(({
                 </div>
 
                 {/* Middle: Financial Equation / Breakdown */}
-                <div className="shrink-0 flex items-center justify-end w-full lg:w-auto mt-3 lg:mt-0 lg:max-w-xl">
+                <div className="shrink flex items-center justify-end w-full lg:w-auto mt-3 lg:mt-0 lg:flex-1 lg:max-w-2xl xl:max-w-3xl overflow-hidden">
                   <FinancialEquation
                     oldDue={bill.previousDue}
                     currentBill={bill.grandTotal}

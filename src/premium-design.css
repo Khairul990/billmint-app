@@ -329,21 +329,23 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.625rem 1.25rem;
+  padding: 0.5rem 1.5rem;
   font-size: 0.75rem;
-  font-weight: 700;
-  border-radius: 0.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 9999px;
   background-image: var(--accent-gradient);
   color: var(--button-text);
   box-shadow: 0 4px 16px -4px var(--accent-glow);
-  transition: all var(--transition-base) var(--transition-spring);
+  transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
   cursor: pointer;
   border: none;
   min-height: 44px;
 }
 .btn-premium:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 24px -6px var(--accent-glow);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 24px -4px var(--accent-glow);
 }
 .btn-premium:active {
   transform: translateY(0) scale(0.97);
@@ -354,20 +356,24 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.625rem 1.25rem;
+  padding: 0.5rem 1.5rem;
   font-size: 0.75rem;
-  font-weight: 700;
-  border-radius: 0.75rem;
-  border: 1.5px solid var(--border-strong);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 9999px;
+  border: 1px solid var(--border-strong);
   color: var(--text-primary);
   background: transparent;
-  transition: all var(--transition-base) var(--transition-spring);
+  transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
   cursor: pointer;
   min-height: 44px;
 }
 .btn-premium-outline:hover {
   border-color: var(--accent);
-  background: var(--accent-light);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  color: var(--accent);
+  transform: translateY(-1px);
 }
 .btn-premium-outline:active {
   transform: scale(0.97);
@@ -378,20 +384,23 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 1.25rem;
   font-size: 0.75rem;
-  font-weight: 700;
-  border-radius: 0.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 9999px;
   color: var(--text-muted);
   background: transparent;
-  transition: all var(--transition-base) var(--transition-spring);
+  transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
   cursor: pointer;
   border: none;
   min-height: 44px;
 }
 .btn-premium-ghost:hover {
-  color: var(--text-primary);
-  background: var(--accent-light);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  transform: translateY(-1px);
 }
 .btn-premium-ghost:active {
   transform: scale(0.97);

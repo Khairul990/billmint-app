@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Upload, Check, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import confetti from 'canvas-confetti';
 
 const PaymentModal = ({ invoice, onClose }) => {
   const [paymentMethod, setPaymentMethod] = useState('upi');
@@ -39,6 +40,15 @@ const PaymentModal = ({ invoice, onClose }) => {
       // This prevents duplicate submissions and ensures atomicity
       setSubmitted(true);
       toast.success('Payment proof submitted successfully!');
+      
+      // Celebrate payment collection!
+      const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 99999 };
+      confetti({
+        ...defaults,
+        particleCount: 150,
+        origin: { y: 0.6 },
+        colors: ['#10B981', '#059669', '#34D399', '#FFFFFF']
+      });
       
       setTimeout(() => {
         onClose(screenshot, paymentMethod, dueAmount);

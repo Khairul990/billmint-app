@@ -1,15 +1,15 @@
 import React from 'react';
 
 const cardVariants = {
-  neutral: 'bg-theme-card border-theme-border-soft shadow-premium-sm',
-  elevated: 'bg-theme-surface-elevated border-theme-border-soft shadow-premium',
-  financial: 'bg-[var(--bq-surface-financial)] border-[color-mix(in_srgb,var(--bq-accent)_24%,var(--border-soft))] shadow-premium',
-  action: 'bg-[var(--bq-surface-action)] border-[color-mix(in_srgb,var(--bq-accent)_20%,var(--border-soft))] shadow-premium-sm',
-  insight: 'bg-[var(--bq-surface-insight)] border-blue-500/20 shadow-premium-sm',
-  activity: 'bg-[var(--bq-surface-activity)] border-theme-border-soft shadow-premium-sm',
-  warning: 'bg-[var(--bq-surface-warning)] border-amber-500/25 shadow-premium-sm',
-  success: 'bg-[var(--bq-surface-success)] border-theme-tint-border shadow-premium-sm',
-  danger: 'bg-[var(--bq-surface-danger)] border-rose-500/25 shadow-premium-sm',
+  neutral: 'luxury-glass-card',
+  elevated: 'luxury-glass-card ring-2 ring-theme-accent/20',
+  financial: 'luxury-glass-card bg-[var(--bq-surface-financial)]',
+  action: 'luxury-glass-card bg-[var(--bq-surface-action)]',
+  insight: 'luxury-glass-card bg-[var(--bq-surface-insight)]',
+  activity: 'luxury-glass-card bg-[var(--bq-surface-activity)]',
+  warning: 'luxury-glass-card bg-[var(--bq-surface-warning)]',
+  success: 'luxury-glass-card bg-[var(--bq-surface-success)]',
+  danger: 'luxury-glass-card bg-[var(--bq-surface-danger)]',
 };
 
 export const Card = ({ 

@@ -213,8 +213,8 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
             SYSTEM MAINTENANCE ACTIVE — Invoice creation, live links, and premium upgrades are temporarily disabled.
           </div>
         )}        {/* ===== ULTRA LUXURY COMMAND TOPBAR ===== */}
-        <header className={`sticky top-0 z-40 text-theme-primary transition-all select-none ${appMode ? 'app-chrome' : 'bg-theme-app/80 backdrop-blur-2xl border-b border-theme-border-soft/70'}`}>
-          <div className="max-w-full w-full mx-auto px-4 lg:px-6 hidden md:flex items-center justify-between gap-4 py-2.5">
+        <header className={`sticky top-4 z-40 mx-4 lg:mx-6 rounded-[1.5rem] transition-all select-none ${appMode ? 'app-chrome' : 'bg-white/50 dark:bg-[#0B1220]/50 backdrop-blur-[24px] border border-white/40 dark:border-white/10 shadow-[0_4px_24px_0_rgba(11,143,120,0.1)]'}`}>
+          <div className="max-w-full w-full mx-auto px-4 lg:px-5 hidden md:flex items-center justify-between gap-4 py-2">
             
             {['settings', 'create-invoice'].includes(currentTab) ? (
               <div id="studio-header-portal" className="flex items-center flex-1 min-w-[280px]"></div>
@@ -672,7 +672,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
           )}
         </header>
 
-        <main className={`flex-1 min-w-0 w-full mx-auto ${['create-invoice', 'settings'].includes(currentTab) ? 'p-0 max-w-none' : 'max-w-full p-3 md:px-6 md:py-6'} pb-24 lg:pb-6`}>
+        <main className={`flex-1 min-w-0 w-full mx-auto ${['create-invoice', 'settings'].includes(currentTab) ? 'p-4 max-w-none' : 'max-w-full p-4 md:px-8 md:py-8'} pb-24 lg:pb-8 pt-6`}>
           {appMode ? (
             <div key={currentTab} className="app-screen flex flex-col min-h-full">
               {children}

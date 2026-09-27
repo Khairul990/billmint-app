@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { 
   ArrowLeft, Save, LayoutTemplate, Plus, Trash2, Copy, FileText, 
   Eye, EyeOff, Maximize, X, Check, ChevronDown, Palette, Columns, 
-  DollarSign, UserPlus, CreditCard, Layers, Tag, ChevronUp, AlertCircle, Scan, Sparkles, Wand2, Loader2, Mic
+  DollarSign, UserPlus, CreditCard, Layers, Tag, ChevronUp, AlertCircle, Scan, Sparkles, Wand2, Loader2, Mic, Phone, MapPin
 } from 'lucide-react';
 import BarcodeScannerModal from '../components/BarcodeScannerModal';
 import { analyzeCustomerHistory, buildSmartBillDraft, generateLocalInsight, generateGeminiInsight } from '../utils/aiBillCreator';
@@ -969,21 +969,21 @@ const CreateInvoice = ({
         getStudioHeaderTarget('studio-header-portal')
       )}
       {getStudioHeaderTarget('studio-header-actions-portal') && createPortal(
-        <div className="flex items-center gap-3 pr-4">
-          <button onClick={() => setShowPreviewModal(true)} className="p-2 rounded-xl border border-theme-border-soft hover:bg-theme-surface transition-colors flex items-center gap-2 text-sm font-bold text-theme-primary bg-theme-card shadow-sm">
-            <Maximize className="w-4 h-4" /> <span className="hidden sm:inline">Popup</span>
+        <div className="flex items-center gap-2 pr-4">
+          <button onClick={() => setShowPreviewModal(true)} className="px-4 py-2 rounded-full border border-[var(--bq26-line-soft)] hover:border-[var(--bq26-emerald)] hover:text-[var(--bq26-emerald)] hover:bg-[var(--bq26-emerald)]/10 transition-all flex items-center gap-2 text-xs font-black text-theme-primary bg-theme-surface shadow-sm uppercase tracking-widest">
+            <Maximize className="w-3.5 h-3.5" /> <span className="hidden md:inline">Popup</span>
           </button>
-          <button onClick={() => setShowPreviewPanel(!showPreviewPanel)} className="p-2 rounded-xl border border-theme-border-soft hover:bg-theme-surface transition-colors flex items-center gap-2 text-sm font-bold text-theme-primary bg-theme-card shadow-sm">
-            {showPreviewPanel ? <><EyeOff className="w-4 h-4" /> <span className="hidden sm:inline">Hide</span></> : <><Eye className="w-4 h-4" /> <span className="hidden sm:inline">Show Preview</span></>}
+          <button onClick={() => setShowPreviewPanel(!showPreviewPanel)} className="px-4 py-2 rounded-full border border-[var(--bq26-line-soft)] hover:border-[var(--bq26-emerald)] hover:text-[var(--bq26-emerald)] hover:bg-[var(--bq26-emerald)]/10 transition-all flex items-center gap-2 text-xs font-black text-theme-primary bg-theme-surface shadow-sm uppercase tracking-widest">
+            {showPreviewPanel ? <><EyeOff className="w-3.5 h-3.5" /> <span className="hidden md:inline">Hide</span></> : <><Eye className="w-3.5 h-3.5" /> <span className="hidden md:inline">Show</span></>}
           </button>
-          <button onClick={handleSave} disabled={isSaving} className="btn-premium ml-2 flex items-center justify-center gap-2 min-w-[140px]">
-            {isSaving ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> : <Save className="w-4 h-4" />}
-            {isSaving ? 'Saving...' : (editingInvoice ? 'Update Invoice' : 'Save Invoice')}
+          <button onClick={handleSave} disabled={isSaving} className="px-6 py-2 ml-1 rounded-full flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest transition-all bg-[var(--bq26-emerald)] hover:bg-[var(--bq26-emerald-bright)] text-[var(--bq26-app)] shadow-md shadow-[rgba(11,143,120,0.3)] hover:scale-105 hover:shadow-lg">
+            {isSaving ? <span className="w-3.5 h-3.5 border-2 border-[var(--bq26-app)]/30 border-t-[var(--bq26-app)] rounded-full animate-spin"></span> : <Save className="w-3.5 h-3.5" />}
+            <span className="hidden sm:inline">{isSaving ? 'Saving...' : (editingInvoice ? 'Update' : 'Save')}</span>
           </button>
           {!editingInvoice && (
-            <button onClick={() => handleSave(true)} disabled={isSaving} className="btn-premium-outline ml-2 flex items-center justify-center gap-2 min-w-[130px]">
-              <Plus className="w-4 h-4" />
-              Save &amp; New
+            <button onClick={() => handleSave(true)} disabled={isSaving} className="px-6 py-2 ml-1 rounded-full flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest transition-all border border-[var(--bq26-line-soft)] hover:border-[var(--bq26-emerald)] hover:bg-[var(--bq26-emerald)]/10 text-theme-primary hover:text-[var(--bq26-emerald)] shadow-sm">
+              <Plus className="w-3.5 h-3.5" />
+              <span className="hidden xl:inline">+ New</span>
             </button>
           )}
         </div>,
@@ -1031,8 +1031,12 @@ const CreateInvoice = ({
       <div className={`max-w-[1600px] mx-auto p-4 lg:p-6 grid grid-cols-1 ${showPreviewPanel ? 'xl:grid-cols-[1.2fr_0.8fr]' : 'xl:max-w-6xl xl:mx-auto'} gap-6 items-start transition-all duration-300`}>
 
         {/* LEFT COLUMN: FORM */}
-        <div className="bq26-glass p-6 sm:p-8 rounded-[2rem] border border-[var(--bq26-line-soft)] shadow-[0_32px_64px_-16px_rgba(11,143,120,0.15)] bq26-edge-light min-w-0 relative overflow-hidden backdrop-blur-2xl">
-          <div className="flex overflow-x-auto no-scrollbar gap-2 mb-8 p-1.5 bg-[var(--bq26-sunken-strong)] border border-[var(--bq26-line-soft)] rounded-2xl shadow-inner max-w-full">
+        <div className="p-6 sm:p-8 rounded-[2.5rem] border border-[var(--bq26-emerald)]/20 shadow-[0_32px_80px_-16px_rgba(11,143,120,0.2)] bg-gradient-to-br from-theme-surface/80 via-theme-surface/60 to-[var(--bq26-emerald)]/10 min-w-0 relative overflow-hidden backdrop-blur-3xl ring-1 ring-white/40 dark:ring-white/5">
+          {/* Subtle Glowing Decor */}
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[var(--bq26-emerald-bright)]/10 rounded-full blur-[120px] pointer-events-none -translate-y-1/2 translate-x-1/3" />
+          <div className="absolute top-0 left-10 right-10 h-px bg-gradient-to-r from-transparent via-[var(--bq26-emerald)]/40 to-transparent" />
+          
+          <div className="flex overflow-x-auto no-scrollbar gap-2 mb-10 p-1.5 bg-theme-surface/50 border border-[var(--bq26-line-soft)] rounded-full shadow-inner max-w-full backdrop-blur-sm">
             {[
               { id: 'listing', label: 'Bill Listing', icon: FileText },
               { id: 'templates', label: 'Templates', icon: Palette },
@@ -1042,14 +1046,26 @@ const CreateInvoice = ({
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2.5 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                className={`relative flex items-center gap-3 pl-2 pr-6 py-2 rounded-full text-[10px] font-black transition-all whitespace-nowrap uppercase tracking-widest overflow-hidden group ${
                   activeTab === tab.id 
-                    ? 'bg-[var(--bq26-panel)] shadow-md text-[var(--bq26-emerald-bright)] border border-[rgba(11,143,120,0.25)]' 
-                    : 'text-[var(--bq26-text-soft)] hover:text-[var(--bq26-text)] hover:bg-[var(--bq26-sunken)]'
+                    ? 'text-[var(--bq26-app)] scale-[1.02] shadow-[0_8px_24px_-6px_rgba(11,143,120,0.4)]' 
+                    : 'text-theme-muted hover:text-[var(--bq26-emerald)] hover:bg-[var(--bq26-emerald)]/10'
                 }`}
               >
-                <tab.icon className="w-3.5 h-3.5" />
-                {tab.label}
+                {activeTab === tab.id && (
+                  <span className="absolute inset-0 bg-gradient-to-r from-[var(--bq26-emerald)] to-[var(--bq26-emerald-bright)] rounded-full -z-10" />
+                )}
+                {activeTab === tab.id && (
+                  <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 -z-10" />
+                )}
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-all z-10 ${
+                  activeTab === tab.id 
+                    ? 'bg-white text-[var(--bq26-emerald)] shadow-[0_2px_8px_rgba(0,0,0,0.1)]'
+                    : 'bg-theme-surface/80 group-hover:bg-white text-theme-muted group-hover:text-[var(--bq26-emerald)] shadow-inner border border-[var(--bq26-line-soft)]'
+                }`}>
+                  <tab.icon className="w-3.5 h-3.5" />
+                </div>
+                <span className="relative z-10 mt-0.5">{tab.label}</span>
               </button>
             ))}
           </div>
@@ -1066,20 +1082,22 @@ const CreateInvoice = ({
                   1. Client Info
                 </h3>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="form-group col-span-1 md:col-span-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                {/* Left Column: Customer Details */}
+                <div className="space-y-4">
                   
                   {/* Billing Target Toggle */}
-                  <div className="flex gap-2 mb-4 bg-theme-border p-1 rounded-lg">
+                  <div className="flex gap-1 mb-6 bg-theme-surface-elevated/50 p-1.5 rounded-full border border-[var(--bq26-line-soft)] shadow-inner backdrop-blur-sm w-max">
                     <button 
                       onClick={() => setBillingTarget('customer')}
-                      className={`flex-1 py-1.5 text-xs font-bold rounded ${billingTarget === 'customer' ? 'bg-theme-surface text-theme-text shadow-sm' : 'text-theme-muted hover:text-theme-text'}`}
+                      className={`px-6 py-2 text-[10px] uppercase tracking-widest font-black rounded-full transition-all duration-300 ${billingTarget === 'customer' ? 'bg-[var(--bq26-emerald)] text-[var(--bq26-app)] shadow-md shadow-[rgba(11,143,120,0.3)]' : 'text-theme-muted hover:text-theme-primary'}`}
                     >
                       {t('ci.customer', 'Customer')}
                     </button>
                     <button 
                       onClick={() => setBillingTarget('staff')}
-                      className={`flex-1 py-1.5 text-xs font-bold rounded ${billingTarget === 'staff' ? 'bg-theme-surface text-theme-text shadow-sm' : 'text-theme-muted hover:text-theme-text'}`}
+                      className={`px-6 py-2 text-[10px] uppercase tracking-widest font-black rounded-full transition-all duration-300 ${billingTarget === 'staff' ? 'bg-[var(--bq26-emerald)] text-[var(--bq26-app)] shadow-md shadow-[rgba(11,143,120,0.3)]' : 'text-theme-muted hover:text-theme-primary'}`}
                     >
                       {t('ci.staff', 'Staff')}
                     </button>
@@ -1087,40 +1105,69 @@ const CreateInvoice = ({
 
                   {billingTarget === 'customer' ? (
                     <>
-                      <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex flex-wrap items-center gap-2 justify-between mb-2">
                         <label className="text-[10px] font-bold text-theme-muted uppercase">{t('ci.select_customer', 'Select Customer')}</label>
-                        <button 
-                          type="button"
-                          onClick={() => setShowQuickAddCustomer(true)} 
-                          className="text-[10px] font-bold text-theme-accent hover:underline flex items-center gap-1"
-                        >
-                          <UserPlus className="w-3 h-3" /> {t('ci.new_customer', '+ New Customer')}
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <button 
+                            type="button"
+                            onClick={() => setShowQuickAddCustomer(true)} 
+                            className="px-3 py-1.5 rounded-full text-[10px] font-black transition-all bg-theme-surface hover:bg-[var(--bq26-emerald-muted)]/20 text-theme-muted hover:text-[var(--bq26-emerald)] border border-[var(--bq26-line-soft)] hover:border-[var(--bq26-emerald)]/30 flex items-center gap-1.5 shadow-sm"
+                          >
+                          <UserPlus className="w-3.5 h-3.5" /> {t('ci.new_customer', '+ New Customer')}
                         </button>
                         <button
                           type="button"
                           onClick={openAiAssistant}
-                          className="text-[10px] font-black px-2 py-0.5 rounded-full bg-[image:var(--accent-gradient)] text-white flex items-center gap-1 hover:opacity-90 transition-all"
+                          className="px-3 py-1.5 rounded-full text-[10px] font-black transition-all bg-gradient-to-r from-purple-500/10 to-indigo-500/10 hover:from-purple-500/20 hover:to-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 hover:border-indigo-500/50 flex items-center gap-1.5 shadow-sm"
                           title={t('ci.ai_bill_title', "AI Bill Creator — analyse this customer's history and prefill the bill")}
                         >
-                          <Sparkles className="w-3 h-3" /> {t('ci.ai_bill', 'AI Bill')}
+                          <Sparkles className="w-3.5 h-3.5" /> {t('ci.ai_bill', 'AI Bill')}
                         </button>
                         <button
                           type="button"
                           onClick={voiceState.listening ? stopVoiceBill : startVoiceBill}
-                          className={`text-[10px] font-black px-2 py-0.5 rounded-full flex items-center gap-1 transition-all cursor-pointer ${
+                          className={`px-3 py-1.5 rounded-full text-[10px] font-black transition-all flex items-center gap-1.5 shadow-sm ${
                             voiceState.listening
-                              ? 'bg-rose-500 text-white animate-pulse'
-                              : 'bg-theme-surface text-rose-600 dark:text-rose-400 border border-rose-500/30 hover:bg-rose-500/10'
+                              ? 'bg-rose-500 text-white animate-pulse shadow-[0_0_12px_rgba(244,63,94,0.5)] border border-rose-500'
+                              : 'bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 hover:border-rose-500/50'
                           }`}
                           title={t('voice.title', 'Voice to Bill — speak customer, items & amounts (e.g. Rahims bill, rice 5 kg 200 rupees)')}
                         >
-                          <Mic className="w-3 h-3" /> {voiceState.listening ? t('voice.stop', 'Stop') : t('voice.bill', 'Voice Bill')}
+                          <Mic className="w-3.5 h-3.5" /> {voiceState.listening ? t('voice.stop', 'Stop') : t('voice.bill', 'Voice Bill')}
                         </button>
+                        </div>
                       </div>
                       <select className="input-premium bg-theme-surface" value={selectedCustomerId} onChange={(e) => setSelectedCustomerId(e.target.value)}>
                         <option value="">{t('ci.walk_in', 'Walk-in Customer')}</option>
                         {customers.map(c => <option key={c.id} value={c.id}>{c.name} {c.phone ? `(${c.phone})` : ''}</option>)}
                       </select>
+                      {selectedCustomerId && customers.find(c => c.id === selectedCustomerId) && (() => {
+                        const cust = customers.find(c => c.id === selectedCustomerId);
+                        return (
+                          <div className="mt-4 p-4 bg-gradient-to-br from-theme-surface/80 to-[var(--bq26-emerald-muted)]/10 border border-[var(--bq26-emerald)]/20 rounded-[1.5rem] shadow-sm backdrop-blur-md animate-fade-in-down relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--bq26-emerald-bright)] opacity-10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+                            <div className="flex items-center gap-3 mb-3 relative z-10">
+                              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[var(--bq26-emerald)] to-[var(--bq26-emerald-bright)] flex items-center justify-center text-[var(--bq26-app)] font-black text-lg shadow-sm">
+                                {cust.name.charAt(0).toUpperCase()}
+                              </div>
+                              <div className="font-black text-base text-theme-primary">{cust.name}</div>
+                            </div>
+                            <div className="space-y-2 ml-[3.25rem] relative z-10">
+                              {cust.phone && (
+                                <div className="text-xs text-theme-muted font-bold flex items-center gap-2">
+                                  <Phone className="w-3.5 h-3.5 text-[var(--bq26-emerald)]" /> {cust.phone}
+                                </div>
+                              )}
+                              {cust.address && (
+                                <div className="text-xs text-theme-muted font-bold flex items-start gap-2">
+                                  <MapPin className="w-3.5 h-3.5 text-[var(--bq26-emerald)] shrink-0 mt-0.5" /> 
+                                  <span>{cust.address}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </>
                   ) : (
                     <>
@@ -1132,7 +1179,10 @@ const CreateInvoice = ({
                     </>
                   )}
                 </div>
-                {voiceState.listening && (
+                
+                {/* Right Column: Invoice Meta */}
+                <div className="space-y-4">
+                  {voiceState.listening && (
                   <div className="p-2 rounded-xl bg-rose-500/10 border border-rose-500/30 text-[10px] font-bold text-rose-600 dark:text-rose-300 flex items-start gap-2">
                     <span className="w-2 h-2 mt-0.5 rounded-full bg-rose-500 animate-pulse shrink-0" />
                     <span className="min-w-0">
@@ -1141,20 +1191,23 @@ const CreateInvoice = ({
                     </span>
                   </div>
                 )}
-                <div className="form-group">
-                  <label className="text-[10px] font-bold text-theme-muted uppercase mb-1.5 block">{t('ci.invoice_number', 'Invoice Number')}</label>
-                  <input type="text" className="input-premium bg-theme-surface/50 font-mono" value={invoiceNumber} readOnly />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="form-group">
+                      <label className="text-[10px] font-bold text-theme-muted uppercase mb-1.5 block">{t('ci.invoice_number', 'Invoice Number')}</label>
+                      <input type="text" className="input-premium bg-theme-surface/50 font-mono" value={invoiceNumber} readOnly />
+                    </div>
+                    <div className="form-group">
+                      <label className="text-[10px] font-bold text-theme-muted uppercase mb-1.5 block">{t('ci.date', 'Date')}</label>
+                      <input type="date" className="input-premium bg-theme-surface" value={date} onChange={(e) => setDate(e.target.value)} />
+                    </div>
+                  </div>
+                  {flagShowDueDate && (
+                  <div className="form-group">
+                    <label className="text-[10px] font-bold text-theme-muted uppercase mb-1.5 block">{t('ci.due_date', 'Due Date')}</label>
+                    <input type="date" className="input-premium bg-theme-surface" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+                  </div>
+                  )}
                 </div>
-                <div className="form-group">
-                  <label className="text-[10px] font-bold text-theme-muted uppercase mb-1.5 block">{t('ci.date', 'Date')}</label>
-                  <input type="date" className="input-premium bg-theme-surface" value={date} onChange={(e) => setDate(e.target.value)} />
-                </div>
-                {flagShowDueDate && (
-                <div className="form-group">
-                  <label className="text-[10px] font-bold text-theme-muted uppercase mb-1.5 block">{t('ci.due_date', 'Due Date')}</label>
-                  <input type="date" className="input-premium bg-theme-surface" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
-                </div>
-                )}
               </div>
             </section>
 
@@ -1185,37 +1238,48 @@ const CreateInvoice = ({
                   </button>
                 </div>
               </div>
-              <div className="overflow-x-auto -mx-6 px-6">
-                <table className="w-full text-left border-collapse min-w-[600px]">
+              <div className="overflow-x-auto -mx-6 px-6 pb-4">
+                <table className="w-full text-left border-separate border-spacing-y-2 min-w-[600px]">
                   <thead>
-                    <tr>
+                    <tr className="bg-[var(--bq26-emerald-muted)]/30 backdrop-blur-md shadow-sm">
                       {invoiceColumns.map(c => {
                         if (!c.visible) return null;
-                        // Per-item discount/tax inputs were never part of the
-                        // totals math - hide them to avoid misleading inputs.
-                        // Use the bill-level Tax & Discount controls instead.
                         if (c.id === 'discount' || c.id === 'tax') return null;
                         const widthClass = c.id === 'sn' ? 'w-16' : c.id === 'qty' ? 'w-24' : (c.id === 'rate' || c.id === 'amount') ? 'w-32' : '';
-                        return <th key={c.id} className={`pb-3 px-2 text-[10px] font-bold text-theme-muted uppercase tracking-wider border-b border-theme-border-soft ${widthClass}`}>{c.label}</th>;
+                        const isFirst = c.id === invoiceColumns.find(col => col.visible)?.id;
+                        return <th key={c.id} className={`py-3 px-3 text-[10px] font-black text-[var(--bq26-emerald)] uppercase tracking-widest ${widthClass} ${isFirst ? 'rounded-l-xl' : ''}`}>{c.label}</th>;
                       })}
-                      <th className="pb-3 text-[10px] font-bold text-theme-muted uppercase tracking-wider border-b border-theme-border-soft w-28 text-right">Actions</th>
+                      <th className="py-3 px-3 text-[10px] font-black text-[var(--bq26-emerald)] uppercase tracking-widest w-28 text-right rounded-r-xl">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     <AnimatePresence>
+                      {items.length === 0 && (
+                        <motion.tr initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                          <td colSpan={invoiceColumns.filter(c => c.visible).length + 1} className="py-12 text-center text-theme-muted">
+                            <div className="flex flex-col items-center justify-center gap-3">
+                              <div className="w-16 h-16 rounded-full bg-[var(--bq26-emerald)]/10 flex items-center justify-center">
+                                <FileText className="w-8 h-8 text-[var(--bq26-emerald)] opacity-50" />
+                              </div>
+                              <p className="text-sm font-bold">No line items added yet</p>
+                              <p className="text-xs opacity-70">Click the button below to add your first item.</p>
+                            </div>
+                          </td>
+                        </motion.tr>
+                      )}
                       {items.map((item) => (
                         <React.Fragment key={item.id}>
                           <motion.tr 
                             initial={{ opacity: 0, y: -10 }} 
                             animate={{ opacity: 1, y: 0 }} 
-                            exit={{ opacity: 0, x: -20 }}
-                            className="group border-b border-theme-border-soft/50 last:border-0 hover:bg-theme-surface/30 transition-colors"
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="group bg-theme-surface/50 hover:bg-theme-surface hover:shadow-md transition-all duration-300"
                           >
                             {invoiceColumns.map(c => {
                               if (!c.visible) return null;
                               if (c.id === 'sn') return (
-                                <td key={c.id} className="py-2 px-2">
-                                  <input type="text" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface text-center" value={item.sNo} onChange={(e) => handleUpdateItem(item.id, 'sNo', e.target.value)} />
+                                <td key={c.id} className="py-2 px-2 rounded-l-xl border border-transparent group-hover:border-[var(--bq26-line-soft)] border-r-0">
+                                  <input type="text" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface text-center font-bold" value={item.sNo} onChange={(e) => handleUpdateItem(item.id, 'sNo', e.target.value)} />
                                 </td>
                               );
                               if (c.id === 'item') return (
@@ -1257,7 +1321,7 @@ const CreateInvoice = ({
                                 </td>
                               );
                             })}
-                            <td className="py-2 text-right">
+                            <td className="py-2 px-2 rounded-r-xl border border-transparent group-hover:border-[var(--bq26-line-soft)] border-l-0 text-right">
                               <div className="flex justify-end gap-1 items-center">
                                 {/* Expand Category Custom Fields Button */}
                                 <button 
@@ -1403,8 +1467,8 @@ const CreateInvoice = ({
                   </tbody>
                 </table>
               </div>
-              <button onClick={handleAddItem} className="w-full mt-5 flex items-center justify-center gap-2 py-3.5 border-2 border-dashed border-[var(--bq26-line-soft)] rounded-xl text-sm font-bold text-[var(--bq26-text-soft)] hover:text-[var(--bq26-emerald-bright)] hover:border-[rgba(11,143,120,0.35)] hover:bg-[var(--bq26-sunken)] transition-all">
-                <Plus className="w-4 h-4" /> Add Line Item
+              <button onClick={handleAddItem} className="w-full mt-5 flex items-center justify-center gap-2 py-4 border-2 border-dashed border-[var(--bq26-emerald)]/30 rounded-2xl text-sm font-black text-[var(--bq26-emerald)] uppercase tracking-widest hover:border-[var(--bq26-emerald)] hover:bg-[var(--bq26-emerald)]/10 transition-all group shadow-sm hover:shadow-md">
+                <Plus className="w-5 h-5 group-hover:scale-110 transition-transform" /> Add Line Item
               </button>
             </section>
 
@@ -1454,20 +1518,23 @@ const CreateInvoice = ({
                   </div>
 
                   <div>
-                    <label className="text-xs font-bold text-theme-muted uppercase block mb-1">{t('ci.payment_method', 'Payment Method')}</label>
-                    <select 
-                      value={paymentMethod}
-                      onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="input-premium w-full bg-theme-surface text-xs font-bold"
-                    >
-                      <option value="Cash">Cash</option>
-                      <option value="UPI">UPI / QR Code</option>
-                      <option value="Card">Credit / Debit Card</option>
-                      <option value="Bank Transfer">Bank Transfer / NEFT</option>
-                      <option value="bKash">bKash</option>
-                      <option value="Nagad">Nagad</option>
-                      <option value="Cheque">Cheque</option>
-                    </select>
+                    <label className="text-[10px] font-black text-[var(--bq26-text-soft)] uppercase tracking-widest block mb-2">{t('ci.payment_method', 'Payment Method')}</label>
+                    <div className="flex flex-wrap gap-2">
+                      {['Cash', 'UPI', 'Card', 'Bank Transfer', 'bKash', 'Nagad', 'Cheque'].map(method => (
+                        <button
+                          key={method}
+                          type="button"
+                          onClick={() => setPaymentMethod(method)}
+                          className={`px-3.5 py-1.5 rounded-full text-xs font-black transition-all ${
+                            paymentMethod === method 
+                              ? 'bg-[var(--bq26-emerald)] text-[var(--bq26-app)] shadow-lg shadow-[rgba(11,143,120,0.3)] scale-105' 
+                              : 'bg-theme-surface hover:bg-[var(--bq26-emerald-muted)]/20 text-theme-muted hover:text-[var(--bq26-emerald)] border border-[var(--bq26-line-soft)] hover:border-[var(--bq26-emerald)]/30'
+                          }`}
+                        >
+                          {method === 'Bank Transfer' ? 'Bank' : method}
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
                   <label className="pt-2 flex items-center justify-between text-xs font-bold cursor-pointer">
@@ -1503,9 +1570,10 @@ const CreateInvoice = ({
             </div>
 
               {/* Right Column: Invariant Totals Box */}
-              <div className="space-y-4 bq26-sunken p-5 sm:p-6 rounded-[1.5rem] border border-[var(--bq26-line-soft)] shadow-inner relative overflow-hidden h-full">
-                <div className="absolute top-0 left-0 w-32 h-32 bg-[var(--bq26-emerald)] opacity-5 rounded-full blur-2xl -translate-y-1/2 -translate-x-1/2 pointer-events-none" />
-                <div className="flex justify-between items-center text-sm font-semibold text-theme-muted">
+              <div className="space-y-5 p-6 sm:p-8 rounded-[2rem] border border-[var(--bq26-emerald)]/20 bg-gradient-to-br from-[var(--bq26-emerald)]/10 via-theme-app/80 to-theme-surface shadow-[0_16px_40px_-12px_rgba(11,143,120,0.15)] relative overflow-hidden h-full backdrop-blur-3xl ring-1 ring-white/10">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--bq26-emerald-bright)] opacity-10 rounded-full blur-3xl -translate-y-1/3 translate-x-1/3 pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-48 h-48 bg-[var(--bq26-emerald)] opacity-5 rounded-full blur-3xl translate-y-1/3 -translate-x-1/3 pointer-events-none" />
+                <div className="flex justify-between items-center text-sm font-black text-[var(--bq26-text-soft)] uppercase tracking-widest relative z-10">
                   <span>{t('ci.subtotal', 'Subtotal')}</span>
                   <span className="text-theme-primary font-bold tabular-nums">{formatCurrency(totals.subtotal)}</span>
                 </div>
@@ -1514,15 +1582,22 @@ const CreateInvoice = ({
                   <div className="flex justify-between items-center text-sm font-semibold text-theme-muted gap-4">
                     <div className="flex gap-2 items-center">
                       <span>{t('ci.discount', 'Discount')}</span>
-                      <select 
-                        className="px-2 py-1 bg-theme-surface border border-theme-border-soft rounded-lg text-[10px] font-bold uppercase tracking-wider text-theme-primary focus:outline-none focus:border-theme-accent transition-colors"
-                        value={discountType} 
-                        onChange={(e) => setDiscountType(e.target.value)}
-                      >
-                        <option value="none">{t('ci.none', 'None')}</option>
-                        <option value="flat">{t('ci.flat', 'Flat')}</option>
-                        <option value="percent">%</option>
-                      </select>
+                      <div className="flex bg-theme-surface/50 p-1 rounded-full border border-theme-border-soft backdrop-blur-sm">
+                        {['none', 'flat', 'percent'].map(type => (
+                          <button
+                            key={type}
+                            type="button"
+                            onClick={() => setDiscountType(type)}
+                            className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
+                              discountType === type 
+                                ? 'bg-[var(--bq26-emerald)] text-[var(--bq26-app)] shadow-sm' 
+                                : 'text-theme-muted hover:text-theme-primary'
+                            }`}
+                          >
+                            {type === 'none' ? 'None' : type === 'flat' ? 'Flat' : '%'}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                     {discountType !== 'none' ? (
                       <input 
@@ -1605,8 +1680,8 @@ const CreateInvoice = ({
               </div>
             </section>
 
-            {/* Bottom Actions Bar */}
-            <div className="mt-10 pt-6 border-t border-[var(--bq26-line-soft)] flex flex-col sm:flex-row items-center justify-between gap-4">
+            {/* Bottom Actions Bar (Floating Dock) */}
+            <div className="sticky bottom-4 z-40 mt-8 p-4 bg-theme-surface/60 backdrop-blur-3xl border border-[var(--bq26-emerald)]/20 shadow-[0_16px_40px_-12px_rgba(11,143,120,0.25)] ring-1 ring-white/10 rounded-[2rem] flex flex-col sm:flex-row items-center justify-between gap-4 animate-fade-in-up">
               <button
                 type="button"
                 onClick={() => onBack ? onBack() : window.history.back()}

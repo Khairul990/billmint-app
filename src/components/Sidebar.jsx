@@ -40,6 +40,7 @@ import { getCustomerLabelByType, getInvoiceLabelByType, getPortalLabelByType } f
 import Logo from './Logo';
 import WorkspaceSwitcher from './WorkspaceSwitcher';
 import { useFeatureControl } from '../hooks/useFeatureControl';
+import confetti from 'canvas-confetti';
 
 /**
  * BillQyro — Premium Command Navigation Rail
@@ -83,6 +84,33 @@ const Sidebar = ({
   const handleLogout = async () => {
     await authEngine.logout();
     window.location.reload();
+  };
+
+  const handleLogoClick = () => {
+    triggerLightHaptic();
+    const duration = 2.5 * 1000;
+    const animationEnd = Date.now() + duration;
+    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 2147483647 };
+
+    const randomInRange = (min, max) => Math.random() * (max - min) + min;
+
+    const interval = setInterval(function() {
+      const timeLeft = animationEnd - Date.now();
+      if (timeLeft <= 0) {
+        return clearInterval(interval);
+      }
+      const particleCount = 50 * (timeLeft / duration);
+      confetti({
+        ...defaults, particleCount,
+        origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
+        colors: ['#0B8F78', '#10B981', '#F59E0B', '#3B82F6', '#FFFFFF']
+      });
+      confetti({
+        ...defaults, particleCount,
+        origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
+        colors: ['#0B8F78', '#10B981', '#F59E0B', '#3B82F6', '#FFFFFF']
+      });
+    }, 250);
   };
 
   const { isFeatureEnabled, loading: featuresLoading } = useFeatureControl(activeWsId);
@@ -170,33 +198,41 @@ const Sidebar = ({
   const isPremium = subscription?.planStatus === 'premium' || (subscription?.planId && subscription.planId.toLowerCase() !== 'free');
 
   return (
-    <aside
-      className="hidden lg:flex flex-col h-full z-30 overflow-hidden shrink-0 border-r border-theme-border-soft bg-theme-surface/75 backdrop-blur-2xl select-none"
-      style={{
-        width: isCollapsed ? 72 : 240,
-        minWidth: isCollapsed ? 72 : 240,
-        transition: isMounted ? 'width 200ms cubic-bezier(0.2,0,0,1), min-width 200ms cubic-bezier(0.2,0,0,1)' : 'none',
-      }}
-    >
+    <div className="hidden lg:flex flex-col h-[calc(100vh-2rem)] my-4 ml-4 z-30 shrink-0">
+      <aside
+        className="relative flex flex-col h-full overflow-hidden rounded-[2.5rem] border border-white/60 shadow-[0_24px_64px_-12px_rgba(11,143,120,0.15),0_0_40px_rgba(255,255,255,0.9)] bg-gradient-to-b from-white/90 via-theme-surface/70 to-[var(--bq26-emerald)]/5 backdrop-blur-3xl select-none transition-all duration-300 ring-1 ring-white dark:bg-gradient-to-b dark:from-[#0B1220]/90 dark:to-[#0B1220]/70"
+        style={{
+          width: isCollapsed ? 96 : 280,
+          minWidth: isCollapsed ? 96 : 280,
+        }}
+      >
+        {/* Breathtaking Background Decor */}
+        <div className="absolute inset-0 pointer-events-none -z-0 overflow-hidden">
+          <div className="absolute -top-10 -right-10 w-48 h-48 bg-[var(--bq26-emerald-bright)] opacity-[0.15] blur-[50px] rounded-full" />
+          <div className="absolute bottom-[20%] -left-10 w-40 h-40 bg-[var(--bq26-emerald)] opacity-10 blur-[60px] rounded-full" />
+          <div className="absolute top-0 left-4 right-4 h-[1px] bg-gradient-to-r from-transparent via-white to-transparent opacity-80" />
+        </div>
+        
+        <div className="relative z-10 flex flex-col h-full">
       {/* 1. BRAND & WORKSPACE AREA */}
       <div className="shrink-0 p-3.5 pb-2 border-b border-theme-border-soft/60 space-y-3">
         <div className="flex items-center justify-between">
           {isCollapsed ? (
             <button 
-              onClick={toggleCollapsed} 
-              className="w-full flex justify-center hover:opacity-80 transition-opacity p-1 cursor-pointer" 
-              title="Expand Sidebar"
+              onClick={() => { toggleCollapsed(); handleLogoClick(); }} 
+              className="w-full flex justify-center hover:opacity-80 transition-opacity p-1 cursor-pointer hover:scale-110 active:scale-95" 
+              title="Expand Sidebar & Celebrate!"
             >
               <Logo type="icon" className="w-8 h-8" />
             </button>
           ) : (
             <>
-              <div className="min-w-0">
+              <button onClick={handleLogoClick} className="min-w-0 text-left hover:scale-105 active:scale-95 transition-transform cursor-pointer focus:outline-none group flex flex-col items-start">
                 <Logo type="horizontal" forceWhiteText={false} />
-                <p className="text-[9px] font-semibold text-theme-muted tracking-tight mt-0.5 uppercase">
+                <p className="text-[9px] font-semibold text-theme-muted tracking-tight mt-0.5 uppercase group-hover:text-[var(--bq26-emerald)] transition-colors">
                   {t('sidebar.smart_billing', 'Smart Billing Platform')}
                 </p>
-              </div>
+              </button>
               <button
                 onClick={toggleCollapsed}
                 className="w-7 h-7 rounded-xl flex items-center justify-center text-theme-muted hover:text-theme-primary hover:bg-theme-surface border border-transparent hover:border-theme-border-soft transition-all shrink-0 cursor-pointer"
@@ -241,9 +277,9 @@ const Sidebar = ({
               setCurrentTab('create-invoice');
             }}
             title="Create Invoice"
-            className="w-full h-9 rounded-xl bg-theme-accent text-white flex items-center justify-center shadow-xs hover:opacity-95 active:scale-95 transition-all cursor-pointer"
+            className="w-full h-12 rounded-full bg-[var(--bq26-emerald)] text-[var(--bq26-app)] flex items-center justify-center shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-5 h-5" />
           </button>
         ) : (
           <button
@@ -251,11 +287,10 @@ const Sidebar = ({
               triggerLightHaptic();
               setCurrentTab('create-invoice');
             }}
-            className="relative overflow-hidden w-full py-2.5 px-3 rounded-xl bg-[image:var(--accent-gradient)] text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-md hover:shadow-lg hover:brightness-110 active:scale-95 transition-all cursor-pointer group/cta"
+            className="btn-premium w-full py-3 shadow-[0_8px_24px_-6px_var(--accent-glow)]"
           >
-            <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full group-hover/cta:translate-x-full transition-transform duration-700" />
-            <Plus className="w-3.5 h-3.5 relative" />
-            <span className="relative">Create Invoice</span>
+            <Plus className="w-4 h-4" />
+            <span>Create Invoice</span>
           </button>
         )}
       </div>
@@ -286,21 +321,25 @@ const Sidebar = ({
                     triggerLightHaptic();
                     setCurrentTab(item.id);
                   }}
-                  className={`relative w-full flex items-center rounded-xl text-xs transition-colors text-left cursor-pointer group ${
-                    isCollapsed ? 'p-2 justify-center' : 'px-2.5 py-1.5 gap-2'
+                  className={`relative w-full flex items-center rounded-full text-xs transition-colors text-left cursor-pointer group ${
+                    isCollapsed ? 'p-2 justify-center' : 'px-3 py-2 gap-3'
                   } ${isActive
-                    ? 'text-theme-accent'
-                    : 'text-theme-secondary hover:text-theme-primary font-semibold'
+                    ? 'text-[var(--bq26-emerald-deep)]'
+                    : 'text-theme-secondary hover:text-[var(--bq26-emerald)] font-bold'
                   }`}
                   title={isCollapsed ? item.label : undefined}
                 >
                   {isActive && (
                     <span
-                      className="absolute inset-0 rounded-xl bg-theme-accent/10 ring-1 ring-inset ring-theme-accent/20 shadow-xs"
+                      className="absolute inset-0 rounded-full bg-gradient-to-r from-[var(--bq26-emerald)]/10 to-transparent shadow-sm border border-[var(--bq26-emerald)]/20"
                     />
                   )}
-                  <span className={`relative z-10 flex items-center justify-center w-6 h-6 rounded-lg shrink-0 transition-colors ${isActive ? 'bg-theme-accent/15 text-theme-accent' : 'text-theme-muted group-hover:text-theme-primary group-hover:bg-theme-surface/80'}`}>
-                    <Icon className="w-3.5 h-3.5" />
+                  <span className={`relative z-10 flex items-center justify-center w-8 h-8 rounded-full shrink-0 transition-all duration-300 ${
+                    isActive 
+                      ? 'bg-gradient-to-br from-[var(--bq26-emerald)] to-[var(--bq26-emerald-bright)] text-[var(--bq26-app)] shadow-[0_4px_12px_rgba(11,143,120,0.5)] ring-1 ring-white/30 scale-110' 
+                      : 'bg-theme-surface/50 group-hover:bg-white text-theme-muted group-hover:text-[var(--bq26-emerald)] shadow-inner border border-[var(--bq26-line-soft)] group-hover:border-[var(--bq26-emerald)]/40 group-hover:shadow-[0_4px_16px_rgba(11,143,120,0.15)] group-hover:scale-105'
+                  }`}>
+                    <Icon className="w-4 h-4" />
                   </span>
                   {!isCollapsed && (
                     <div className="relative z-10 flex-1 flex items-center justify-between truncate">
@@ -320,15 +359,15 @@ const Sidebar = ({
       </nav>
 
       {/* 4. ANCHORED ACCOUNT & PROFILE FOOTER */}
-      <div className="shrink-0 p-3 border-t border-theme-border-soft/60 bg-theme-surface/40">
+      <div className="shrink-0 p-3 border-t border-[var(--bq26-line-soft)] bg-theme-surface/60">
         <div className="flex items-center justify-between gap-2">
           <button 
             onClick={() => setCurrentTab('settings')}
-            className={`flex items-center gap-2.5 min-w-0 text-left rounded-xl p-1.5 hover:bg-theme-surface transition-colors flex-1 cursor-pointer ${isCollapsed ? 'justify-center' : ''}`}
+            className={`flex items-center gap-3 min-w-0 text-left rounded-full p-1.5 hover:bg-[var(--bq26-emerald-muted)]/20 hover:ring-1 hover:ring-[var(--bq26-emerald)]/30 transition-all flex-1 cursor-pointer ${isCollapsed ? 'justify-center' : ''}`}
             title={t('sidebar.business_settings', 'Business Settings')}
           >
-            <div className="w-9 h-9 rounded-xl p-[1.5px] bg-[image:var(--accent-gradient)] shrink-0 shadow-sm">
-              <div className="w-full h-full rounded-[10.5px] bg-theme-surface flex items-center justify-center text-theme-accent font-black text-xs overflow-hidden">
+            <div className="w-10 h-10 rounded-full p-[2px] bg-gradient-to-tr from-[var(--bq26-emerald)] to-[var(--bq26-emerald-bright)] shrink-0 shadow-md">
+              <div className="w-full h-full rounded-full bg-theme-surface flex items-center justify-center text-[var(--bq26-emerald)] font-black text-xs overflow-hidden">
                 {businessSettings?.logoUrl ? (
                   <img src={businessSettings.logoUrl} alt="Logo" className="w-full h-full object-cover" />
                 ) : (
@@ -338,11 +377,11 @@ const Sidebar = ({
             </div>
             {!isCollapsed && (
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-bold text-theme-primary truncate leading-tight flex items-center gap-1">
+                <p className="text-xs font-black text-theme-primary truncate leading-tight flex items-center gap-1">
                   <span className="truncate">{businessSettings?.businessName || t('sidebar.my_business', 'My Business')}</span>
-                  {isPremium && <Crown className="w-3 h-3 text-amber-500 shrink-0" />}
+                  {isPremium && <Crown className="w-3.5 h-3.5 text-amber-500 shrink-0" />}
                 </p>
-                <p className="text-[10px] text-theme-muted font-medium truncate mt-0.5">
+                <p className="text-[10px] text-theme-muted font-bold truncate mt-0.5 tracking-wider">
                   {businessSettings?.email || userEmail || t('sidebar.workspace_settings', 'Workspace Settings')}
                 </p>
               </div>
@@ -371,7 +410,9 @@ const Sidebar = ({
           )}
         </div>
       </div>
+      </div>
     </aside>
+    </div>
   );
 };
 

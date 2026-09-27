@@ -33,9 +33,9 @@ export const FinancialEquation = ({
       {...props}
     >
       {/* Horizontal Flow */}
-      <div className={`items-center justify-between gap-3 overflow-x-auto py-1 ${layoutMode === 'horizontal' ? 'flex' : layoutMode === 'vertical' ? 'hidden' : 'hidden lg:flex'}`}>
+      <div className={`items-center justify-between gap-3 overflow-x-auto py-1 custom-scrollbar ${layoutMode === 'horizontal' ? 'flex' : layoutMode === 'vertical' ? 'hidden' : 'hidden lg:flex'}`}>
         {/* Step 1: Old Due */}
-        <div className="flex-1 min-w-[110px]">
+        <div className="flex-1 min-w-[90px]">
           <FinancialValue 
             label="Old Due" 
             value={oldDue} 
@@ -48,7 +48,7 @@ export const FinancialEquation = ({
         <Plus className="w-4 h-4 text-theme-muted shrink-0 mx-1" />
 
         {/* Step 2: Current Bill */}
-        <div className="flex-1 min-w-[110px]">
+        <div className="flex-1 min-w-[90px]">
           <FinancialValue 
             label="Current Bill" 
             value={currentBill} 
@@ -61,7 +61,7 @@ export const FinancialEquation = ({
         <Equal className="w-4 h-4 text-theme-muted shrink-0 mx-1" />
 
         {/* Step 3: Total Payable */}
-        <div className="flex-1 min-w-[120px] p-2.5 rounded-xl bg-theme-surface/70 border border-theme-border-soft">
+        <div className="flex-1 min-w-[100px] p-2.5 rounded-xl bg-theme-surface/70 border border-theme-border-soft">
           <FinancialValue 
             label="Total Payable" 
             value={calcTotalPayable} 
@@ -74,7 +74,7 @@ export const FinancialEquation = ({
         <Minus className="w-4 h-4 text-theme-muted shrink-0 mx-1" />
 
         {/* Step 4: Paid Amount */}
-        <div className="flex-1 min-w-[110px]">
+        <div className="flex-1 min-w-[90px]">
           <FinancialValue 
             label="Paid" 
             value={paid} 
@@ -87,7 +87,7 @@ export const FinancialEquation = ({
         <Equal className="w-4 h-4 text-theme-muted shrink-0 mx-1" />
 
         {/* Step 5: Balance Due (Final Target) */}
-        <div className="flex-1 min-w-[130px] p-2.5 rounded-xl bg-rose-500/10 dark:bg-rose-950/20 border border-rose-500/30">
+        <div className="flex-1 min-w-[100px] p-2.5 rounded-xl bg-rose-500/10 dark:bg-rose-950/20 border border-rose-500/30">
           <FinancialValue 
             label="Balance Due" 
             value={calcBalanceDue} 
