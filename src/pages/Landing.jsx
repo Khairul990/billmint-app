@@ -1634,17 +1634,27 @@ const Landing = ({ onLoginSuccess }) => {
             </div>
 
             <div className="w-full">
-              <div className="bq26-glass-strong rounded-[2rem] p-5 sm:p-8 shadow-2xl bq26-edge-light">
-                <div className="flex bg-[var(--bq26-sunken-strong)] p-1 rounded-2xl border border-[var(--bq26-line-soft)] mb-6">
+              <div className="bq26-glass-strong rounded-[2rem] p-6 sm:p-10 shadow-[0_20px_60px_-15px_rgba(11,143,120,0.15)] ring-1 ring-inset ring-white/20 bq26-edge-light relative">
+                <div className="relative flex bg-[var(--bq26-sunken-strong)] p-1.5 rounded-2xl border border-[var(--bq26-line-soft)] mb-8">
+                  <motion.div 
+                    layoutId="tab-pill"
+                    className="absolute top-1.5 bottom-1.5 rounded-xl bg-gradient-to-r from-[#0B8F78] to-[#097a66] shadow-md"
+                    initial={false}
+                    animate={{
+                      left: portalMode === 'business' ? '0.375rem' : 'calc(50% + 0.1875rem)',
+                      width: 'calc(50% - 0.5625rem)'
+                    }}
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  />
                   <button
                     onClick={() => setPortalMode('business')}
-                    className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all ${portalMode === 'business' ? 'bg-gradient-to-r from-[#0B8F78] to-[#0B8F78] text-white shadow-md' : 'text-[var(--bq26-muted)] hover:text-[var(--bq26-text)]'}`}
+                    className={`relative flex-1 py-3 text-xs font-bold rounded-xl transition-all z-10 ${portalMode === 'business' ? 'text-white drop-shadow-sm' : 'text-[var(--bq26-muted)] hover:text-[var(--bq26-text)]'}`}
                   >
                     {tr('Business Login / Register', 'বিজনেস লগইন / রেজিস্টার')}
                   </button>
                   <button
                     onClick={() => setPortalMode('customer')}
-                    className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all ${portalMode === 'customer' ? 'bg-gradient-to-r from-[#0B8F78] to-[#0B8F78] text-white shadow-md' : 'text-[var(--bq26-muted)] hover:text-[var(--bq26-text)]'}`}
+                    className={`relative flex-1 py-3 text-xs font-bold rounded-xl transition-all z-10 ${portalMode === 'customer' ? 'text-white drop-shadow-sm' : 'text-[var(--bq26-muted)] hover:text-[var(--bq26-text)]'}`}
                   >
                     {tr('Customer Portal', 'কাস্টমার পোর্টাল')}
                   </button>
@@ -1671,20 +1681,20 @@ const Landing = ({ onLoginSuccess }) => {
                 </div>
 
                 {/* No-signup interactive demo access */}
-                <div className="mt-5 pt-5 border-t border-[var(--bq26-line-soft)]">
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3 rounded-2xl bg-[var(--bq26-sunken)] border border-dashed border-[rgba(11,143,120,0.3)] px-4 py-3.5">
-                    <div className="flex items-center gap-3 text-center sm:text-left">
-                      <div className="w-9 h-9 rounded-xl bg-[rgba(11,143,120,0.1)] border border-[rgba(11,143,120,0.25)] flex items-center justify-center shrink-0">
-                        <Zap className="w-4 h-4 text-[var(--bq26-emerald-bright)]" />
+                <div className="mt-8 pt-6 border-t border-[var(--bq26-line-soft)]">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl bg-[rgba(11,143,120,0.04)] border border-dashed border-[rgba(11,143,120,0.25)] px-5 py-4 transition-colors hover:bg-[rgba(11,143,120,0.06)]">
+                    <div className="flex items-center gap-4 text-center sm:text-left">
+                      <div className="w-10 h-10 rounded-xl bg-[rgba(11,143,120,0.12)] border border-[rgba(11,143,120,0.25)] flex items-center justify-center shrink-0">
+                        <Zap className="w-5 h-5 text-[var(--bq26-emerald-bright)]" />
                       </div>
                       <div>
-                        <p className="text-xs font-black text-[var(--bq26-text)]">{tr('Not ready to register?', 'এখনই রেজিস্টার করবেন না?')}</p>
-                        <p className="text-[11px] font-semibold text-[var(--bq26-muted)] mt-0.5">{tr('Tour the full platform with sample business data.', 'নমুনা ব্যবসার ডেটা দিয়ে পুরো প্ল্যাটফর্ম ঘুরে দেখুন।')}</p>
+                        <p className="text-[13px] font-black text-[var(--bq26-text)]">{tr('Not ready to register?', 'এখনই রেজিস্টার করবেন না?')}</p>
+                        <p className="text-[11px] font-semibold text-[var(--bq26-text-soft)] mt-0.5">{tr('Tour the full platform with sample business data.', 'নমুনা ব্যবসার ডেটা দিয়ে পুরো প্ল্যাটফর্ম ঘুরে দেখুন।')}</p>
                       </div>
                     </div>
                     <button
                       onClick={launchLiveDemo}
-                      className="shrink-0 px-4 py-2 rounded-xl bg-gradient-to-r from-[#0B8F78] to-[#0B8F78] text-white text-xs font-black hover:opacity-90 transition-opacity shadow-lg"
+                      className="shrink-0 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#0B8F78] to-[#087763] text-white text-[13px] font-black hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#0B8F78]/20 transition-all"
                     >
                       {tr('Launch Live Demo →', 'লাইভ ডেমো শুরু করুন →')}
                     </button>
