@@ -138,7 +138,7 @@ const CreateInvoice = ({
   const [aiSelected, setAiSelected] = useState([]);
   const [csvText, setCsvText] = useState('');
   const prefillAppliedRef = React.useRef(null);
-  const [showPreviewPanel, setShowPreviewPanel] = useState(false);
+  const [showPreviewPanel, setShowPreviewPanel] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 1024);
   const [isSaving, setIsSaving] = useState(false);
   const [draftBusinessSettings, setDraftBusinessSettings] = useState(businessSettings || {});
   const [invoiceNumber, setInvoiceNumber] = useState('');

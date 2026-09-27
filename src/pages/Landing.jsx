@@ -1722,7 +1722,7 @@ const Landing = ({ onLoginSuccess }) => {
                 <div className={landingMode === 'light' ? '' : 'dark'} data-theme="emerald-royal">
                   {portalMode === 'business' ? (
                     <Suspense fallback={<div className="p-10 flex justify-center"><div className="w-8 h-8 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" /></div>}>
-                      <Login onLoginSuccess={onLoginSuccess} embedded={true} />
+                      <Login onLoginSuccess={onLoginSuccess} embedded={true} tr={tr} />
                     </Suspense>
                   ) : (
                     <Suspense fallback={<div className="p-10 flex justify-center"><div className="w-8 h-8 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" /></div>}>

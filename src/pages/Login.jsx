@@ -643,7 +643,7 @@ const STEP_COMPONENTS = [
   DeliveredCard,
 ];
 
-function ShowcasePanel() {
+function ShowcasePanel({ tr = (e, b) => e }) {
   const [active, setActive] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
@@ -747,7 +747,7 @@ function ShowcasePanel() {
   );
 }
 
-function LoginPanel({ onLoginSuccess, embedded = false }) {
+function LoginPanel({ onLoginSuccess, embedded = false, tr = (e, b) => e }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
@@ -827,11 +827,11 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
       if (firebaseReady) {
         if (isLoginMode) {
           await authEngine.signIn(email.trim(), password.trim());
-          toast.success("Welcome back to BillQyro!");
+          toast.success(tr("Welcome back to BillQyro!", "BillQyro-তে আবার স্বাগতম!"));
           if (onLoginSuccess) onLoginSuccess();
         } else {
           await authEngine.register(email.trim(), password.trim(), name.trim());
-          toast.success("Account created successfully!");
+          toast.success(tr("Account created successfully!", "সফলভাবে অ্যাকাউন্ট তৈরি হয়েছে!"));
           if (onLoginSuccess) onLoginSuccess();
         }
       } else {
@@ -886,15 +886,15 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
       )}
       <div>
         <div className="badge-premium mb-2 inline-flex items-center gap-1.5 rounded-full border border-theme-border-soft bg-theme-accent-light px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-theme-accent">
-          {isLoginMode ? 'Secure Login' : 'Create Account'} <span className="h-1 w-1 rounded-full bg-theme-accent" />
+          {isLoginMode ? tr('Secure Login', 'নিরাপদ লগইন') : tr('Create Account', 'অ্যাকাউন্ট তৈরি')} <span className="h-1 w-1 rounded-full bg-theme-accent" />
         </div>
         <h2 className="text-xl sm:text-2xl font-black tracking-tight text-theme-primary">
-          {isLoginMode ? 'Welcome back' : 'Get started'}
+          {isLoginMode ? tr('Welcome back', 'আবার স্বাগতম') : tr('Get started', 'শুরু করুন')}
         </h2>
         <p className="mt-1.5 text-[11px] sm:text-xs font-medium text-theme-muted">
           {isLoginMode 
-            ? 'Sign in to manage your customers, invoices, PDFs, and collections.' 
-            : 'Create your account, then complete the 1-minute setup wizard to launch your business.'}
+            ? tr('Sign in to manage your customers, invoices, PDFs, and collections.', 'আপনার কাস্টমার, ইনভয়েস, পিডিএফ এবং কালেকশন ম্যানেজ করতে সাইন ইন করুন।') 
+            : tr('Create your account, then complete the 1-minute setup wizard to launch your business.', 'অ্যাকাউন্ট তৈরি করুন, এরপর মাত্র ১ মিনিটের সেটআপ শেষ করে ব্যবসা শুরু করুন।')}
         </p>
       </div>
 
@@ -906,7 +906,7 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
         >
           {!isLoginMode && (
             <label className="block relative group">
-              <span className="mb-2 block text-[11px] font-black uppercase tracking-[0.16em] text-theme-muted transition-colors group-focus-within:text-theme-accent pl-1">Full Name</span>
+              <span className="mb-2 block text-[11px] font-black uppercase tracking-[0.16em] text-theme-muted transition-colors group-focus-within:text-theme-accent pl-1">{tr('Full Name', 'পুরো নাম')}</span>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <UserRound className="h-3.5 w-3.5 text-theme-muted group-focus-within:text-theme-accent transition-colors duration-200" />
@@ -915,14 +915,14 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Your Full Name"
+                  placeholder={tr("Your Full Name", "আপনার পুরো নাম")}
                   className="input-premium premium-focus h-[42px] w-full rounded-xl border border-theme-border-soft bg-theme-surface pl-9 pr-3 text-[13px] font-semibold text-theme-primary outline-none transition-all duration-200 placeholder:text-theme-muted/60 focus:border-theme-accent focus:bg-theme-surface focus:ring-[2px] focus:ring-theme-accent/20 focus:shadow-sm"
                 />
               </div>
             </label>
           )}
           <label className="block relative group">
-            <span className="mb-2 block text-[11px] font-black uppercase tracking-[0.16em] text-theme-muted transition-colors group-focus-within:text-theme-accent pl-1">Email address</span>
+            <span className="mb-2 block text-[11px] font-black uppercase tracking-[0.16em] text-theme-muted transition-colors group-focus-within:text-theme-accent pl-1">{tr('Email address', 'ইমেইল অ্যাড্রেস')}</span>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                 <Mail className="h-3.5 w-3.5 text-theme-muted group-focus-within:text-theme-accent transition-colors duration-200" />
@@ -931,14 +931,14 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your@email.com"
+                  placeholder={tr("your@email.com", "আপনার@ইমেইল.কম")}
                   className="input-premium premium-focus h-[42px] w-full rounded-xl border border-theme-border-soft bg-theme-surface pl-9 pr-3 text-[13px] font-semibold text-theme-primary outline-none transition-all duration-200 placeholder:text-theme-muted/60 focus:border-theme-accent focus:bg-theme-surface focus:ring-[2px] focus:ring-theme-accent/20 focus:shadow-sm"
               />
             </div>
           </label>
 
           <label className="block relative group">
-            <span className="mb-2 block text-[11px] font-black uppercase tracking-[0.16em] text-theme-muted transition-colors group-focus-within:text-theme-accent pl-1">Password</span>
+            <span className="mb-2 block text-[11px] font-black uppercase tracking-[0.16em] text-theme-muted transition-colors group-focus-within:text-theme-accent pl-1">{tr('Password', 'পাসওয়ার্ড')}</span>
             <div className="relative">
               <input
                   type={showPassword ? "text" : "password"}
@@ -960,7 +960,7 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
 
           {!isLoginMode && (
             <label className="block relative group">
-              <span className="mb-2 block text-[11px] font-black uppercase tracking-[0.16em] text-theme-muted transition-colors group-focus-within:text-theme-accent pl-1">Confirm Password</span>
+              <span className="mb-2 block text-[11px] font-black uppercase tracking-[0.16em] text-theme-muted transition-colors group-focus-within:text-theme-accent pl-1">{tr('Confirm Password', 'পাসওয়ার্ড নিশ্চিত করুন')}</span>
               <div className="relative">
                 <input
                     type={showConfirmPassword ? "text" : "password"}
@@ -996,21 +996,21 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
               <button
                 type="button"
                 onClick={async () => {
-                  const email = prompt('Enter your email address to reset your password:');
+                  const email = prompt(tr('Enter your email address to reset your password:', 'আপনার পাসওয়ার্ড রিসেট করতে ইমেইল দিন:'));
                   if (email && email.includes('@')) {
                     try {
                       await authEngine.resetPassword(email.trim());
-                      toast.success('Password reset email sent! Check your inbox.');
+                      toast.success(tr('Password reset email sent! Check your inbox.', 'পাসওয়ার্ড রিসেট ইমেইল পাঠানো হয়েছে! ইনবক্স চেক করুন।'));
                     } catch (err) {
-                      toast.error(err.message || 'Failed to send reset email.');
+                      toast.error(err.message || tr('Failed to send reset email.', 'ইমেইল পাঠাতে ব্যর্থ হয়েছে।'));
                     }
                   } else if (email) {
-                    toast.error('Please enter a valid email address.');
+                    toast.error(tr('Please enter a valid email address.', 'সঠিক ইমেইল দিন।'));
                   }
                 }}
                 className="font-bold text-xs text-theme-accent hover:text-theme-primary transition-colors cursor-pointer"
               >
-                Forgot password?
+                {tr('Forgot password?', 'পাসওয়ার্ড ভুলে গেছেন?')}
               </button>
             </div>
           )}
@@ -1024,7 +1024,7 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
               background="var(--accent-gradient)"
             >
               <div className="flex items-center justify-center gap-2 text-[13px] font-black tracking-wide text-white drop-shadow-md">
-                {isSigningIn ? (isLoginMode ? "Signing in..." : "Creating account...") : (isLoginMode ? "Sign In to Dashboard" : "Register & Begin Setup")}
+                {isSigningIn ? (isLoginMode ? tr("Signing in...", "সাইন ইন হচ্ছে...") : tr("Creating account...", "অ্যাকাউন্ট তৈরি হচ্ছে...")) : (isLoginMode ? tr("Sign In to Dashboard", "ড্যাশবোর্ডে সাইন ইন করুন") : tr("Register & Begin Setup", "রেজিস্টার ও শুরু করুন"))}
                 {isSigningIn ? (
                   <span
                     className="h-3.5 w-3.5 rounded-full border-2 border-white/40 border-t-white animate-spin"
@@ -1038,7 +1038,7 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
 
           <div className="flex items-center gap-3">
             <div className="h-px flex-1 bg-theme-border-soft" />
-            <span className="text-xs font-bold uppercase tracking-wider text-theme-muted">or</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-theme-muted">{tr('or', 'অথবা')}</span>
             <div className="h-px flex-1 bg-theme-border-soft" />
           </div>
 
@@ -1048,16 +1048,21 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
             disabled={isSigningIn}
             className="btn-premium flex h-[44px] w-full items-center justify-center gap-2 rounded-xl border-[1.5px] border-theme-border-soft bg-theme-surface/70 text-[12px] font-black text-theme-primary transition-all hover:bg-theme-surface hover:border-theme-border hover:shadow-sm disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
           >
-            <span className="grid h-4 w-4 place-items-center rounded-full bg-[var(--bq26-sunken)] border border-theme-border-soft text-[9px] font-black text-theme-primary">G</span>
-            {isSigningIn && !email && !password ? "Connecting to Google..." : "Continue with Google"}
+            <svg viewBox="0 0 24 24" width="16" height="16" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+            {isSigningIn && !email && !password ? tr("Connecting to Google...", "Google-এ কানেক্ট হচ্ছে...") : tr("Continue with Google", "Google দিয়ে চালিয়ে যান")}
           </button>
         </form>
 
         <p className="mt-6 text-center text-sm text-theme-muted">
           {isLoginMode ? (
-            <>Need an account? <button type="button" onClick={() => { setIsLoginMode(false); setError(''); }} className="font-bold text-theme-accent hover:text-theme-primary transition-colors cursor-pointer">Create account</button></>
+            <>{tr('Need an account?', 'অ্যাকাউন্ট নেই?')} <button type="button" onClick={() => { setIsLoginMode(false); setError(''); }} className="font-bold text-theme-accent hover:text-theme-primary transition-colors cursor-pointer">{tr('Create account', 'অ্যাকাউন্ট তৈরি করুন')}</button></>
           ) : (
-            <>Already have an account? <button type="button" onClick={() => { setIsLoginMode(true); setError(''); }} className="font-bold text-theme-accent hover:text-theme-primary transition-colors cursor-pointer">Sign in instead</button></>
+            <>{tr('Already have an account?', 'অ্যাকাউন্ট আছে?')} <button type="button" onClick={() => { setIsLoginMode(true); setError(''); }} className="font-bold text-theme-accent hover:text-theme-primary transition-colors cursor-pointer">{tr('Sign in instead', 'লগইন করুন')}</button></>
           )}
         </p>
 
@@ -1065,10 +1070,10 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
           className="mt-8 flex flex-wrap items-center justify-center gap-3"
         >
           {[
-            { text: '256-bit Encryption' },
-            { text: 'SOC 2 Compliant' },
-            { text: '99.9% Uptime' },
-            { text: 'Secure Cloud' }
+            { text: tr('256-bit Encryption', '২৫৬-বিট এনক্রিপশন') },
+            { text: tr('SOC 2 Compliant', 'SOC 2 কমপ্লায়েন্ট') },
+            { text: tr('99.9% Uptime', '৯৯.৯% আপটাইম') },
+            { text: tr('Secure Cloud', 'সিকিউর ক্লাউড') }
           ].map((badge, idx) => (
             <span key={idx} className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-theme-accent/5 border border-theme-accent/10 text-[10px] font-bold tracking-wide text-theme-primary">
               <Check size={11} className="text-theme-accent" /> {badge.text}
@@ -1124,9 +1129,9 @@ function LoginPanel({ onLoginSuccess, embedded = false }) {
   );
 }
 
-export default function Login({ onLoginSuccess, embedded = false }) {
+export default function Login({ onLoginSuccess, embedded = false, tr = (e, b) => e }) {
   if (embedded) {
-    return <LoginPanel onLoginSuccess={onLoginSuccess} embedded={true} />;
+    return <LoginPanel onLoginSuccess={onLoginSuccess} embedded={true} tr={tr} />;
   }
 
   return (
@@ -1135,8 +1140,12 @@ export default function Login({ onLoginSuccess, embedded = false }) {
     >
       <div className="card-premium relative z-10 mx-auto flex w-[98%] max-w-7xl overflow-hidden rounded-[2rem] border border-theme-border-soft bg-theme-surface/60 backdrop-blur-3xl shadow-2xl shadow-theme-glow/10 min-h-[600px] lg:min-h-[680px]">
         <div className="flex w-full flex-col lg:flex-row">
-          
-          <LoginPanel onLoginSuccess={onLoginSuccess} />
+          <div className="hidden lg:flex w-full lg:w-[50%]">
+            <ShowcasePanel tr={tr} />
+          </div>
+          <div className="flex w-full lg:w-[50%]">
+            <LoginPanel onLoginSuccess={onLoginSuccess} tr={tr} />
+          </div>
         </div>
       </div>
     </div>
