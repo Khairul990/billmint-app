@@ -1005,7 +1005,7 @@ const Dashboard = ({
               {/* ========================================================================= */}
               {/* LEVEL 1: EXECUTIVE HEADER & REAL-TIME BUSINESS HEALTH COCKPIT */}
               {/* ========================================================================= */}
-              <div className="relative overflow-hidden luxury-glass-card p-4 sm:p-5 lg:p-6 rounded-3xl flex flex-col lg:flex-row lg:items-center justify-between gap-6 border border-theme-border-soft group">
+              <div className="relative overflow-hidden p-6 lg:p-8 rounded-[2.5rem] flex flex-col lg:flex-row lg:items-center justify-between gap-6 border border-white/60 shadow-[0_24px_64px_-12px_rgba(11,143,120,0.15),0_0_40px_rgba(255,255,255,0.9)] bg-gradient-to-b from-white/90 via-theme-surface/70 to-[var(--bq26-emerald)]/5 backdrop-blur-3xl ring-1 ring-white dark:bg-gradient-to-b dark:from-[#0B1220]/90 dark:to-[#0B1220]/70 group">
                 {/* Decorative Premium Glow */}
                 <div className="absolute top-0 right-1/4 -mt-10 w-40 h-40 rounded-full bg-theme-accent opacity-[0.08] blur-3xl group-hover:opacity-[0.12] transition-opacity duration-700 pointer-events-none z-0" />
                 <div className="absolute bottom-0 right-0 -mb-10 -mr-10 w-48 h-48 rounded-full bg-theme-accent opacity-[0.05] blur-3xl pointer-events-none z-0" />
@@ -1024,11 +1024,18 @@ const Dashboard = ({
                       {syncStatus}
                     </span>
                   </div>
-                  
                   <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold bq-font-display text-theme-primary tracking-tight flex items-center gap-2 mt-1 truncate">
                     <span>{greeting.text},</span>
-                    <span className="text-theme-accent truncate">{ownerName}</span>
-                    <span>👋</span>
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--bq26-emerald)] to-teal-400 truncate animate-pulse">
+                      {ownerName}
+                    </span>
+                    <motion.span 
+                      animate={{ rotate: [0, 14, -8, 14, -4, 10, 0, 0] }}
+                      transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 1 }}
+                      className="inline-block origin-bottom-right"
+                    >
+                      👋
+                    </motion.span>
                   </h1>
                   <p className="text-xs sm:text-sm text-theme-muted font-medium mt-1">
                     {t('dash.header_sub', 'Your business at a glance — Real-time revenue intelligence, collection flow, and customer ledger.')}
@@ -1165,7 +1172,7 @@ const Dashboard = ({
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
                     
                     {/* HERO FINANCIAL FOCAL POINT (7 Columns on Desktop) */}
-                    <div className="lg:col-span-7 luxury-glass-card p-6 rounded-3xl border border-theme-border-soft flex flex-col justify-between relative overflow-hidden bg-gradient-to-br from-theme-surface via-theme-surface to-theme-surface-elevated group">
+                    <div className="lg:col-span-7 p-6 sm:p-8 rounded-[2.5rem] border border-white/60 shadow-[0_24px_64px_-12px_rgba(11,143,120,0.15),0_0_40px_rgba(255,255,255,0.9)] bg-gradient-to-b from-white/90 via-theme-surface/70 to-[var(--bq26-emerald)]/5 backdrop-blur-3xl ring-1 ring-white dark:bg-gradient-to-b dark:from-[#0B1220]/90 dark:to-[#0B1220]/70 flex flex-col justify-between relative overflow-hidden group">
                       {/* Premium Decorative Background Elements */}
                       <div className="absolute -right-8 -bottom-8 w-64 h-64 bg-theme-accent/5 rounded-full blur-3xl group-hover:bg-theme-accent/10 transition-all duration-700 pointer-events-none z-0" />
                       <div className="absolute right-8 top-1/2 -translate-y-1/2 opacity-[0.03] text-theme-accent pointer-events-none transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-700 z-0">
