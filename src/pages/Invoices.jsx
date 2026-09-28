@@ -642,57 +642,67 @@ const Invoices = ({
           </div>
 
           {/* 2. KPI COMMAND STRIP */}
+          {/* 2. KPI COMMAND STRIP */}
           {viewMode === 'active' && (
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               
               {/* Total Invoices */}
-              <div className="bg-theme-card rounded-2xl p-4 border border-theme-border-soft shadow-xs space-y-1 hover:border-theme-border-strong transition-all">
-                <div className="flex items-center justify-between">
-                  <p className="text-[10px] font-extrabold uppercase tracking-wider text-theme-muted">
+              <div className="relative overflow-hidden p-5 rounded-3xl border border-white/20 bg-gradient-to-br from-white/60 to-theme-surface/30 dark:from-[#0B1220]/60 dark:to-theme-surface/40 backdrop-blur-xl shadow-[0_8px_32px_-4px_rgba(0,0,0,0.1)] ring-1 ring-white/30 group transition-all hover:shadow-premium-hover hover:border-theme-accent/50 cursor-pointer">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-theme-accent/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700 pointer-events-none" />
+                <div className="flex items-center justify-between mb-2 relative z-10">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-theme-muted">
                     Total Invoices
-                  </p>
-                  <span className="text-[10px] font-bold text-theme-muted">
+                  </span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-theme-surface/50 border border-theme-border-soft text-theme-muted">
                     {activeInvoices.length} Active
                   </span>
                 </div>
-                <p className="text-xl sm:text-2xl font-black text-theme-primary font-numbers tabular-nums">
+                <p className="text-2xl font-black text-theme-primary font-numbers tabular-nums relative z-10">
                   {summaryMetrics.totalCount}
                 </p>
               </div>
 
               {/* Invoice Revenue */}
-              <div className="bg-theme-card rounded-2xl p-4 border border-theme-border-soft shadow-xs space-y-1 hover:border-theme-border-strong transition-all">
-                <p className="text-[10px] font-extrabold uppercase tracking-wider text-theme-muted">
-                  Invoice Revenue
-                </p>
-                <p className="text-xl sm:text-2xl font-black text-theme-primary font-numbers tabular-nums">
+              <div className="relative overflow-hidden p-5 rounded-3xl border border-white/20 bg-gradient-to-br from-white/60 to-theme-surface/30 dark:from-[#0B1220]/60 dark:to-theme-surface/40 backdrop-blur-xl shadow-[0_8px_32px_-4px_rgba(0,0,0,0.1)] ring-1 ring-white/30 group transition-all hover:shadow-premium-hover hover:border-theme-accent/50 cursor-pointer">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--bq26-emerald-bright)]/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700 pointer-events-none" />
+                <div className="flex items-center justify-between mb-2 relative z-10">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-theme-muted">
+                    Invoice Revenue
+                  </span>
+                  <span className="w-6 h-6 rounded-lg bg-theme-surface/50 border border-theme-border-soft flex items-center justify-center text-theme-muted text-xs font-bold">
+                    <TrendingUp className="w-3.5 h-3.5" />
+                  </span>
+                </div>
+                <p className="text-2xl font-black text-theme-primary font-numbers tabular-nums relative z-10">
                   {formatCurrency(summaryMetrics.totalRevenue, currencySymbol)}
                 </p>
               </div>
 
               {/* Total Collected */}
-              <div className="bg-theme-card rounded-2xl p-4 border border-theme-border-soft shadow-xs space-y-1 hover:border-theme-border-strong transition-all">
-                <div className="flex items-center justify-between">
-                  <p className="text-[10px] font-extrabold uppercase tracking-wider text-theme-muted">
+              <div className="relative overflow-hidden p-5 rounded-3xl border border-emerald-500/20 bg-gradient-to-br from-white/80 to-emerald-500/5 dark:from-theme-surface dark:to-emerald-500/10 backdrop-blur-xl shadow-lg shadow-emerald-500/5 group transition-all hover:shadow-premium-hover cursor-pointer">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700 pointer-events-none" />
+                <div className="flex items-center justify-between mb-2 relative z-10">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-theme-muted">
                     {t('inv.total_collected', 'Total Collected')}
-                  </p>
-                  <span className="px-1.5 py-0.2 rounded text-[9px] font-black bg-theme-tint-bg text-theme-accent border border-theme-tint-border font-numbers">
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-theme-tint-bg text-theme-accent border border-theme-tint-border font-numbers">
                     {collectionRate}% rate
                   </span>
                 </div>
-                <p className="text-xl sm:text-2xl font-black text-theme-accent font-numbers tabular-nums">
+                <p className="text-2xl font-black text-theme-accent font-numbers tabular-nums relative z-10">
                   {formatCurrency(summaryMetrics.totalPaid, currencySymbol)}
                 </p>
               </div>
 
               {/* Outstanding Due */}
-              <div className="bg-theme-card rounded-2xl p-4 border border-theme-border-soft shadow-xs space-y-1 hover:border-theme-border-strong transition-all">
-                <div className="flex items-center justify-between">
-                  <p className="text-[10px] font-extrabold uppercase tracking-wider text-theme-muted">
+              <div className="relative overflow-hidden p-5 rounded-3xl border border-rose-500/20 bg-gradient-to-br from-white/80 to-rose-500/5 dark:from-theme-surface dark:to-rose-500/10 backdrop-blur-xl shadow-lg shadow-rose-500/5 group transition-all hover:shadow-premium-hover cursor-pointer">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700 pointer-events-none" />
+                <div className="flex items-center justify-between mb-2 relative z-10">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-theme-muted">
                     Outstanding Due
-                  </p>
+                  </span>
                   {summaryMetrics.overdueCount > 0 ? (
-                    <span className="px-1.5 py-0.2 rounded text-[9px] font-black bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
                       {summaryMetrics.overdueCount} Overdue
                     </span>
                   ) : summaryMetrics.totalDue > 0 ? (
@@ -701,8 +711,8 @@ const Invoices = ({
                     <span className="w-2 h-2 rounded-full bg-theme-accent"></span>
                   )}
                 </div>
-                <p className={`text-xl sm:text-2xl font-black font-numbers tabular-nums ${
-                  summaryMetrics.totalDue > 0 ? 'text-rose-500' : 'text-theme-muted'
+                <p className={`text-2xl font-black font-numbers tabular-nums relative z-10 ${
+                  summaryMetrics.totalDue > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-theme-muted'
                 }`}>
                   {formatCurrency(summaryMetrics.totalDue, currencySymbol)}
                 </p>
@@ -712,23 +722,24 @@ const Invoices = ({
 
           {/* 3. ATTENTION REQUIRED INTELLIGENCE STRIP */}
           {viewMode === 'active' && summaryMetrics.totalDue > 0 && (
-            <div className="bg-theme-card rounded-2xl p-4 border border-theme-border-soft flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
-              <div className="flex items-center gap-3.5 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 font-bold border border-amber-500/20">
-                  <AlertTriangle className="w-4 h-4" />
+            <div className="relative overflow-hidden bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-transparent rounded-3xl p-5 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-[0_8px_32px_-8px_rgba(245,158,11,0.2)] backdrop-blur-md group">
+              <div className="absolute top-0 left-0 w-48 h-48 bg-amber-500/20 rounded-full blur-[50px] pointer-events-none group-hover:scale-125 transition-transform duration-700" />
+              <div className="flex items-center gap-4 min-w-0 relative z-10">
+                <div className="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 font-bold border border-amber-500/30 shadow-inner">
+                  <AlertTriangle className="w-5 h-5" />
                 </div>
                 <div className="min-w-0 text-xs">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400">
                       ATTENTION REQUIRED
                     </span>
-                    <span className="text-theme-muted text-[10px]">•</span>
-                    <span className="font-bold text-theme-primary">
+                    <span className="text-amber-500/50 text-[10px]">•</span>
+                    <span className="font-bold text-theme-primary text-sm">
                       {formatCurrency(summaryMetrics.totalDue, currencySymbol)} pending across {filterCounts.pending} invoices
                     </span>
                   </div>
                   {topDueInvoice && (
-                    <p className="text-[11px] font-medium text-theme-muted truncate mt-0.5">
+                    <p className="text-[11px] font-medium text-theme-muted truncate">
                       Highest pending balance: <strong className="text-theme-secondary">{topDueInvoice.customerName || 'Customer'}</strong> ({formatCurrency(
                         calculateCanonicalInvoiceFinancials(topDueInvoice).previousDue > 0 
                           ? calculateCanonicalInvoiceFinancials(topDueInvoice).customerTotalDue 
@@ -740,43 +751,43 @@ const Invoices = ({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center gap-2 shrink-0 relative z-10">
                 <button
                   onClick={() => setStatusFilter('Pending')}
-                  className="px-3 py-1.5 rounded-xl text-xs font-bold bg-theme-surface border border-theme-border-soft hover:bg-theme-card text-theme-primary transition-all cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-white/50 dark:bg-theme-surface/50 border border-amber-500/30 hover:bg-amber-500/10 text-theme-primary transition-all cursor-pointer backdrop-blur-sm"
                 >
                   Filter Pending
                 </button>
                 <button
                   onClick={() => setCurrentTab && setCurrentTab('due-ledger')}
-                  className="px-3 py-1.5 rounded-xl text-xs font-bold bg-theme-accent text-white hover:opacity-95 transition-all cursor-pointer flex items-center gap-1"
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-amber-500 text-white hover:bg-amber-600 shadow-md shadow-amber-500/20 transition-all cursor-pointer flex items-center gap-1.5"
                 >
                   <span>Open Collections</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
           )}
 
           {/* 4. UNIFIED FINANCIAL FILTER & SEARCH TOOLBAR */}
-          <div className="bg-theme-card rounded-2xl p-3 border border-theme-border-soft shadow-xs flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+          <div className="relative overflow-hidden p-4 rounded-3xl border border-white/40 shadow-[0_8px_32px_-4px_rgba(0,0,0,0.1)] bg-gradient-to-br from-white/60 to-theme-surface/30 backdrop-blur-2xl ring-1 ring-white/30 dark:bg-gradient-to-br dark:from-[#0B1220]/60 dark:to-theme-surface/40 flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between group">
             
             {/* Filter Pills with real counts */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3 relative z-10">
               <button
                 onClick={handleSelectAll}
                 title={selectedInvoiceIds.length === filteredInvoices.length ? "Deselect All" : "Select All"}
-                className="px-2.5 py-1.5 rounded-xl text-xs font-bold bg-theme-surface border border-theme-border-soft hover:bg-theme-card text-theme-secondary transition-all cursor-pointer flex items-center gap-1.5"
+                className="px-3 py-2 rounded-xl text-xs font-bold bg-white/40 dark:bg-theme-surface/40 backdrop-blur-md border border-white/40 hover:bg-white/70 shadow-sm text-theme-secondary transition-all cursor-pointer flex items-center gap-2"
               >
                 {selectedInvoiceIds.length > 0 && selectedInvoiceIds.length === filteredInvoices.length ? (
-                  <CheckSquare className="w-3.5 h-3.5 text-theme-accent" />
+                  <CheckSquare className="w-4 h-4 text-theme-accent" />
                 ) : (
-                  <Square className="w-3.5 h-3.5 text-theme-muted" />
+                  <Square className="w-4 h-4 text-theme-muted" />
                 )}
                 <span className="hidden sm:inline">Select All</span>
               </button>
 
-              <div className="flex gap-1 bg-theme-surface/60 p-1 rounded-xl overflow-x-auto no-scrollbar border border-theme-border-soft">
+              <div className="flex gap-1.5 p-1.5 bg-white/40 dark:bg-theme-surface/40 rounded-2xl border border-white/40 shadow-inner overflow-x-auto no-scrollbar">
                 {[
                   { id: 'All', label: `${t('inv.tab_all', 'All')} (${filterCounts.all})` },
                   { id: 'Paid', label: `${t('inv.tab_paid', 'Paid')} (${filterCounts.paid})` },
@@ -787,10 +798,10 @@ const Invoices = ({
                   <button
                     key={tab.id}
                     onClick={() => setStatusFilter(tab.id)}
-                    className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-all whitespace-nowrap cursor-pointer ${
+                    className={`text-xs font-bold px-4 py-2 rounded-xl transition-all whitespace-nowrap cursor-pointer ${
                       statusFilter === tab.id
-                        ? 'bg-theme-card text-theme-primary shadow-xs border border-theme-border-soft font-bold'
-                        : 'text-theme-muted hover:text-theme-primary'
+                        ? 'bg-white dark:bg-theme-surface text-theme-primary shadow-sm border border-theme-border-soft'
+                        : 'text-theme-muted hover:text-theme-primary hover:bg-white/50 dark:hover:bg-theme-surface/50'
                     }`}
                   >
                     {tab.label}
@@ -800,24 +811,27 @@ const Invoices = ({
             </div>
 
             {/* Right: Search + Sort Dropdown */}
-            <div className="flex items-center gap-2">
-              <div className="relative flex-1 md:w-64">
-                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-theme-muted pointer-events-none">
-                  <Search className="w-3.5 h-3.5" />
-                </span>
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={t('inv.search_ph', 'Search invoices, clients, items...')}
-                  className="w-full pl-9 pr-3 py-1.5 bg-theme-surface/60 border border-theme-border-soft rounded-xl text-xs font-semibold text-theme-primary placeholder-theme-muted focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent focus:bg-theme-card transition-all"
-                />
+            <div className="flex items-center gap-3 relative z-10">
+              <div className="relative flex-1 md:w-80 group">
+                <div className="absolute -inset-1 bg-gradient-to-r from-theme-accent/20 to-[var(--bq26-emerald-bright)]/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+                <div className="relative w-full flex items-center gap-2 bg-white/60 dark:bg-[#0B1220]/60 border border-theme-border-soft rounded-xl px-2 shadow-inner backdrop-blur-md">
+                  <div className="w-8 h-8 rounded-full bg-theme-accent/10 flex items-center justify-center shrink-0">
+                    <Sparkles className="w-3.5 h-3.5 text-theme-accent" />
+                  </div>
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Ask AI or search invoices..."
+                    className="w-full py-2.5 bg-transparent border-none text-sm font-semibold focus:outline-none focus:ring-0 transition-all text-theme-primary placeholder:text-theme-muted/50"
+                  />
+                </div>
               </div>
 
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="bg-theme-surface/60 border border-theme-border-soft rounded-xl text-xs font-bold text-theme-secondary px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent cursor-pointer shrink-0"
+                className="bg-white/50 dark:bg-[#0B1220]/50 border border-theme-border-soft rounded-xl text-sm font-bold text-theme-secondary px-4 py-2.5 focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent shadow-inner transition-all backdrop-blur-md cursor-pointer shrink-0"
               >
                 <option value="date_desc">Latest First</option>
                 <option value="date_asc">Oldest First</option>

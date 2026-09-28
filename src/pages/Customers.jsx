@@ -21,7 +21,8 @@ import {
   CheckCircle2,
   X,
   Clock,
-  ArrowUpRight
+  ArrowUpRight,
+  Sparkles
 } from 'lucide-react';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { computeCustomerLedger } from '../utils/financialCalculations';
@@ -305,88 +306,97 @@ const Customers = ({
           </div>
 
           {/* 2. FINANCIAL SNAPSHOT STRIP */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            <SignatureSurface variant="neutral" className="p-4 sm:p-5">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-black uppercase tracking-wider text-theme-muted">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="relative overflow-hidden p-5 rounded-3xl border border-white/20 bg-gradient-to-br from-white/60 to-theme-surface/30 dark:from-[#0B1220]/60 dark:to-theme-surface/40 backdrop-blur-xl shadow-[0_8px_32px_-4px_rgba(0,0,0,0.1)] ring-1 ring-white/30 group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-theme-accent/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700 pointer-events-none" />
+              <div className="flex items-center justify-between mb-2 relative z-10">
+                <span className="text-[10px] font-black uppercase tracking-widest text-theme-muted">
                   {t('cust.total', 'Total')} {customerLabel}
                 </span>
-                <span className="w-6 h-6 rounded-lg bg-theme-surface border border-theme-border-soft flex items-center justify-center text-theme-muted text-xs font-bold">
+                <span className="w-6 h-6 rounded-lg bg-theme-surface/50 border border-theme-border-soft flex items-center justify-center text-theme-muted text-xs font-bold">
                   <Users className="w-3.5 h-3.5" />
                 </span>
               </div>
-              <p className="text-xl sm:text-2xl font-black text-theme-primary font-numbers">
+              <p className="text-2xl font-black text-theme-primary font-numbers relative z-10">
                 {portfolioSnapshot.totalCustomers}
               </p>
-            </SignatureSurface>
+            </div>
 
-            <SignatureSurface variant="neutral" className="p-4 sm:p-5">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-black uppercase tracking-wider text-theme-muted">
+            <div className="relative overflow-hidden p-5 rounded-3xl border border-rose-500/20 bg-gradient-to-br from-white/80 to-rose-500/5 dark:from-theme-surface dark:to-rose-500/10 backdrop-blur-xl shadow-lg shadow-rose-500/5 group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700 pointer-events-none" />
+              <div className="flex items-center justify-between mb-2 relative z-10">
+                <span className="text-[10px] font-black uppercase tracking-widest text-theme-muted">
                   {t('cust.owing', 'Owing Money')}
                 </span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
                   {portfolioSnapshot.customersWithDue} {t('cust.accounts', 'accounts')}
                 </span>
               </div>
-              <p className="text-xl sm:text-2xl font-black text-rose-600 dark:text-rose-400 font-numbers">
+              <p className="text-2xl font-black text-rose-600 dark:text-rose-400 font-numbers relative z-10">
                 {portfolioSnapshot.customersWithDue}
               </p>
-            </SignatureSurface>
+            </div>
 
-            <SignatureSurface variant="neutral" className="p-4 sm:p-5">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-black uppercase tracking-wider text-theme-muted">
+            <div className="relative overflow-hidden p-5 rounded-3xl border border-rose-500/30 bg-gradient-to-br from-rose-50 to-white dark:from-rose-900/20 dark:to-theme-surface backdrop-blur-xl shadow-lg shadow-rose-500/10 group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700 pointer-events-none" />
+              <div className="flex items-center justify-between mb-2 relative z-10">
+                <span className="text-[10px] font-black uppercase tracking-widest text-rose-600 dark:text-rose-400">
                   {t('cust.total_outstanding', 'Total Outstanding')}
                 </span>
-                <span className="w-6 h-6 rounded-lg bg-rose-500/10 text-rose-600 flex items-center justify-center text-xs font-bold">
+                <span className="w-6 h-6 rounded-lg bg-rose-500 text-white flex items-center justify-center text-xs font-bold shadow-md shadow-rose-500/40">
                   <Banknote className="w-3.5 h-3.5" />
                 </span>
               </div>
-              <FinancialValue 
-                value={portfolioSnapshot.totalOutstanding} 
-                currency={currencySymbol} 
-                intent={portfolioSnapshot.totalOutstanding > 0 ? 'balanceDue' : 'collection'} 
-                size="md" 
-              />
-            </SignatureSurface>
+              <div className="relative z-10">
+                <FinancialValue 
+                  value={portfolioSnapshot.totalOutstanding} 
+                  currency={currencySymbol} 
+                  intent={portfolioSnapshot.totalOutstanding > 0 ? 'balanceDue' : 'collection'} 
+                  size="md" 
+                />
+              </div>
+            </div>
 
-            <SignatureSurface variant="neutral" className="p-4 sm:p-5">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-black uppercase tracking-wider text-theme-muted">
+            <div className="relative overflow-hidden p-5 rounded-3xl border border-emerald-500/20 bg-gradient-to-br from-white/80 to-emerald-500/5 dark:from-theme-surface dark:to-emerald-500/10 backdrop-blur-xl shadow-lg shadow-emerald-500/5 group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700 pointer-events-none" />
+              <div className="flex items-center justify-between mb-2 relative z-10">
+                <span className="text-[10px] font-black uppercase tracking-widest text-theme-muted">
                   Settled Accounts
                 </span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-theme-tint-bg text-theme-accent border border-theme-tint-border">
                   Cleared
                 </span>
               </div>
-              <p className="text-xl sm:text-2xl font-black text-theme-accent font-numbers">
+              <p className="text-2xl font-black text-theme-accent font-numbers relative z-10">
                 {portfolioSnapshot.settledCustomers}
               </p>
-            </SignatureSurface>
+            </div>
           </div>
 
           {/* 3. PREMIUM SEARCH & TRIAGE CONTROLS */}
           <div className="space-y-3">
-            <div className="relative">
-              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-theme-muted pointer-events-none">
-                <Search className="w-4 h-4" />
-              </span>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={t('cust.search_ph', 'Search {c} by name, contact phone, ID, email, or city...').replace('{c}', customerLabel.toLowerCase())}
-                className="w-full pl-10 pr-10 py-3 bg-theme-card border border-theme-border-soft rounded-2xl text-xs sm:text-sm font-semibold text-theme-primary placeholder-theme-muted focus:outline-none focus:border-theme-accent focus:ring-2 focus:ring-theme-accent/20 transition-all shadow-xs"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-theme-muted hover:text-theme-primary"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
+            <div className="relative group overflow-hidden bg-theme-card border border-theme-border-soft rounded-2xl shadow-xs transition-all hover:shadow-premium-hover">
+              <div className="absolute -inset-1 bg-gradient-to-r from-theme-accent/20 to-[var(--bq26-emerald-bright)]/20 blur opacity-0 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+              <div className="relative flex items-center w-full px-3 py-1.5 bg-theme-card z-10">
+                <div className="w-8 h-8 rounded-full bg-theme-accent/10 flex items-center justify-center shrink-0">
+                  <Sparkles className="w-3.5 h-3.5 text-theme-accent" />
+                </div>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Ask AI or search..."
+                  className="w-full px-3 py-1.5 bg-transparent border-none text-xs sm:text-sm font-semibold text-theme-primary placeholder-theme-muted focus:outline-none focus:ring-0 transition-all"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="flex items-center justify-center w-8 h-8 rounded-full bg-theme-surface hover:bg-theme-surface-elevated text-theme-muted hover:text-theme-primary transition-colors shrink-0"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Quick Triage Tabs */}

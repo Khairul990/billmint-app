@@ -487,8 +487,11 @@ const StudioLayout = ({
               className="space-y-6 max-w-6xl mx-auto pb-16"
             >
               {/* 1. Signature Business Identity Hero Card */}
-              <div className="p-6 sm:p-7 rounded-3xl bg-theme-surface-elevated border border-theme-border-soft backdrop-blur-xl relative overflow-hidden shadow-premium">
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+              <div className="p-6 sm:p-8 rounded-[2.5rem] bg-gradient-to-br from-white/90 via-theme-surface/70 to-[var(--bq26-emerald)]/5 backdrop-blur-3xl border border-white/60 shadow-[0_24px_64px_-12px_rgba(11,143,120,0.15),0_0_40px_rgba(255,255,255,0.9)] ring-1 ring-white dark:bg-gradient-to-br dark:from-[#0B1220]/90 dark:to-theme-surface/60 relative overflow-hidden group">
+                <div className="absolute -right-16 -top-16 w-64 h-64 bg-theme-accent/10 rounded-full blur-[60px] group-hover:scale-125 transition-transform duration-700 pointer-events-none z-0" />
+                <div className="absolute bottom-0 left-10 w-40 h-40 bg-theme-accent/5 rounded-full blur-[50px] pointer-events-none z-0" />
+                
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
                   <div className="space-y-2 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-theme-accent/10 text-theme-accent border border-theme-accent/20">
@@ -551,9 +554,10 @@ const StudioLayout = ({
               </div>
 
               {/* 1.5 Workspace Readiness — completeness ring + quick actions */}
-              <div className="p-6 sm:p-7 rounded-3xl bg-theme-surface-elevated border border-theme-border-soft backdrop-blur-xl shadow-premium relative overflow-hidden">
+              <div className="p-6 sm:p-8 rounded-[2.5rem] bg-gradient-to-br from-white/90 via-theme-surface/70 to-[var(--bq26-emerald)]/5 backdrop-blur-3xl border border-white/60 shadow-[0_24px_64px_-12px_rgba(11,143,120,0.15),0_0_40px_rgba(255,255,255,0.9)] ring-1 ring-white dark:bg-gradient-to-br dark:from-[#0B1220]/90 dark:to-theme-surface/60 relative overflow-hidden group">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[var(--bq26-emerald-bright)]/5 rounded-full blur-[80px] pointer-events-none z-0" />
                 <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-theme-accent/40 to-transparent" />
-                <div className="flex flex-col lg:flex-row gap-6 lg:items-center">
+                <div className="flex flex-col lg:flex-row gap-6 lg:items-center relative z-10">
                   {/* Completeness ring */}
                   <div className="flex items-center gap-5 shrink-0">
                     <div className="relative w-24 h-24 shrink-0">
@@ -647,13 +651,14 @@ const StudioLayout = ({
                       <button
                         key={route.id}
                         onClick={() => setActiveStudio(route.id)}
-                        className="p-4 rounded-2xl bg-theme-card hover:bg-theme-surface border border-theme-border-soft hover:border-theme-border-strong text-left transition-all duration-200 group shadow-2xs hover:shadow-premium-sm cursor-pointer flex flex-col justify-between gap-4"
+                        className="p-5 rounded-3xl relative overflow-hidden bg-gradient-to-br from-white/80 to-theme-surface/50 dark:from-[#0B1220]/80 dark:to-theme-surface/50 border border-white/40 shadow-sm ring-1 ring-white/20 hover:shadow-premium hover:border-theme-accent/50 text-left transition-all duration-300 group cursor-pointer flex flex-col justify-between gap-4 backdrop-blur-xl"
                       >
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-theme-surface group-hover:bg-theme-accent/10 border border-theme-border-soft group-hover:border-theme-accent/30 text-theme-muted group-hover:text-theme-accent flex items-center justify-center transition-colors shrink-0">
-                            {Icon && <Icon className="w-5 h-5 transition-transform group-hover:scale-105" />}
+                        <div className="absolute -top-4 -right-4 w-28 h-28 bg-theme-accent/10 rounded-full blur-2xl group-hover:scale-150 group-hover:bg-theme-accent/20 transition-all duration-700 pointer-events-none" />
+                        <div className="flex items-start justify-between gap-3 relative z-10">
+                          <div className="w-12 h-12 rounded-2xl bg-white/60 dark:bg-theme-surface/60 backdrop-blur-md group-hover:bg-theme-accent/10 border border-white/60 dark:border-theme-border-soft group-hover:border-theme-accent/30 text-theme-muted group-hover:text-theme-accent flex items-center justify-center transition-colors shrink-0 shadow-sm">
+                            {Icon && <Icon className="w-5 h-5 transition-transform group-hover:scale-110" />}
                           </div>
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-theme-surface border border-theme-border-soft text-theme-muted group-hover:text-theme-primary transition-colors">
+                          <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-white/50 dark:bg-theme-surface/50 border border-white/50 dark:border-theme-border-soft text-theme-muted group-hover:text-theme-primary transition-colors shadow-xs">
                             {route.count}
                           </span>
                         </div>
@@ -689,13 +694,14 @@ const StudioLayout = ({
                       <button
                         key={route.id}
                         onClick={() => setActiveStudio(route.id)}
-                        className="p-4 rounded-2xl bg-theme-card hover:bg-theme-surface border border-theme-border-soft hover:border-theme-border-strong text-left transition-all duration-200 group shadow-2xs hover:shadow-premium-sm cursor-pointer flex flex-col justify-between gap-4"
+                        className="p-5 rounded-3xl relative overflow-hidden bg-gradient-to-br from-white/80 to-theme-surface/50 dark:from-[#0B1220]/80 dark:to-theme-surface/50 border border-white/40 shadow-sm ring-1 ring-white/20 hover:shadow-premium hover:border-theme-accent/50 text-left transition-all duration-300 group cursor-pointer flex flex-col justify-between gap-4 backdrop-blur-xl"
                       >
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-theme-surface group-hover:bg-theme-accent/10 border border-theme-border-soft group-hover:border-theme-accent/30 text-theme-muted group-hover:text-theme-accent flex items-center justify-center transition-colors shrink-0">
-                            <Icon className="w-5 h-5 transition-transform group-hover:scale-105" />
+                        <div className="absolute -top-4 -right-4 w-28 h-28 bg-theme-accent/10 rounded-full blur-2xl group-hover:scale-150 group-hover:bg-theme-accent/20 transition-all duration-700 pointer-events-none" />
+                        <div className="flex items-start justify-between gap-3 relative z-10">
+                          <div className="w-12 h-12 rounded-2xl bg-white/60 dark:bg-theme-surface/60 backdrop-blur-md group-hover:bg-theme-accent/10 border border-white/60 dark:border-theme-border-soft group-hover:border-theme-accent/30 text-theme-muted group-hover:text-theme-accent flex items-center justify-center transition-colors shrink-0 shadow-sm">
+                            <Icon className="w-5 h-5 transition-transform group-hover:scale-110" />
                           </div>
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-theme-surface border border-theme-border-soft text-theme-muted group-hover:text-theme-primary transition-colors">
+                          <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-white/50 dark:bg-theme-surface/50 border border-white/50 dark:border-theme-border-soft text-theme-muted group-hover:text-theme-primary transition-colors shadow-xs">
                             {route.count}
                           </span>
                         </div>

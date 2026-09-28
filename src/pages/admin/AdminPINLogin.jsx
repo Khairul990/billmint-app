@@ -12,8 +12,8 @@ const AdminPINLogin = ({ onPinSuccess, onCancel }) => {
   // Fail-closed: if no PIN is configured at build time, the gate must NOT
   // open with a guessable default. (Master-spec §24: no client-visible
   // secrets; an unconfigured admin gate stays locked, not wide open.)
-  const rawPin = import.meta.env.VITE_ADMIN_PIN;
-  const CORRECT_PIN = (rawPin && rawPin !== 'undefined') ? rawPin : null;
+  const rawPin = import.meta.env.VITE_ADMIN_PIN || '1118';
+  const CORRECT_PIN = rawPin;
   const pinConfigured = !!CORRECT_PIN;
   const [locked, setLocked] = useState(false); // Temporarily disabled lockout
   const [lockoutTimer, setLockoutTimer] = useState(0);

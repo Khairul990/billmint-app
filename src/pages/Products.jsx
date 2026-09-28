@@ -25,7 +25,7 @@ import PullToRefresh from '../components/PullToRefresh';
 import { invoiceEngine } from '../services/invoiceEngine';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import { getUnitsByType } from '../config/businessPresets';
-import { Loader2, ArrowLeft, Scan, Printer, QrCode, History, ShoppingCart, PackagePlus, Download, TrendingDown, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Loader2, ArrowLeft, Scan, Printer, QrCode, History, ShoppingCart, PackagePlus, Download, TrendingDown, AlertTriangle, CheckCircle2, Sparkles } from 'lucide-react';
 import BarcodeScannerModal from '../components/BarcodeScannerModal';
 import { stockEngine, MOVEMENT_TYPES } from '../services/stockEngine';
 import { downloadCSV, todayStr } from '../utils/moneyCenterReports';
@@ -388,17 +388,18 @@ const Products = ({ products = [], onSaveProduct, onDeleteProduct, onSaveExpense
         {activeTab === 'products' && (
           <>
             {/* SEARCH CARD */}
-        <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-4 md:p-5 border border-theme-border-soft dark:border-theme-border-soft shadow-premium flex items-center justify-between">
-          <div className="relative w-full">
-            <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-theme-muted pointer-events-none">
-              <Search className="w-4 h-4" />
-            </span>
+        <div className="bg-theme-card dark:bg-theme-card rounded-3xl p-4 md:p-5 border border-theme-border-soft dark:border-theme-border-soft shadow-premium flex items-center justify-between relative overflow-hidden group">
+          <div className="absolute -top-10 -right-10 w-32 h-32 bg-theme-accent/20 rounded-full blur-[40px] pointer-events-none group-hover:scale-125 transition-transform duration-700" />
+          <div className="relative w-full z-10 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-theme-accent/10 flex items-center justify-center shrink-0">
+              <Sparkles className="w-4 h-4 text-theme-accent" />
+            </div>
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={t('prod.search_ph', 'Search catalog items by description, code name...')}
-              className="w-full pl-10 pr-4 py-2.5 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft/50 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent focus:bg-theme-card dark:bg-theme-card transition-all text-theme-primary dark:text-theme-primary"
+              placeholder="Ask AI or search catalog items..."
+              className="flex-1 bg-transparent border-none outline-none text-theme-primary text-sm font-bold placeholder:text-theme-muted/50 focus:ring-0"
             />
           </div>
         </div>

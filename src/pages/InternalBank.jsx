@@ -267,23 +267,27 @@ const InternalBank = ({ customers = [], invoices = [] }) => {
   return (
     <div className="p-4 md:p-6 bg-theme-main min-h-full space-y-5">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl bg-theme-accent/15 text-theme-accent flex items-center justify-center">
-            <Landmark className="w-6 h-6" />
+      <div className="relative overflow-hidden p-6 sm:p-8 rounded-[2.5rem] border border-white/60 shadow-[0_24px_64px_-12px_rgba(11,143,120,0.15),0_0_40px_rgba(255,255,255,0.9)] bg-gradient-to-b from-white/90 via-theme-surface/70 to-[var(--bq26-emerald)]/5 backdrop-blur-3xl ring-1 ring-white dark:bg-gradient-to-b dark:from-[#0B1220]/90 dark:to-[#0B1220]/70 group">
+        <div className="absolute -right-8 -bottom-8 w-64 h-64 bg-theme-accent/5 rounded-full blur-3xl group-hover:bg-theme-accent/10 transition-all duration-700 pointer-events-none z-0" />
+        
+        <div className="flex flex-wrap items-center justify-between gap-4 relative z-10">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-theme-accent to-teal-500 shadow-lg shadow-theme-accent/30 text-white flex items-center justify-center">
+              <Landmark className="w-7 h-7" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-black text-theme-primary tracking-tight">{settings.label || t('ib.title', 'Money & Payment Center')}</h1>
+              <p className="text-sm text-theme-muted font-medium mt-0.5">{settings.account ? settings.account : 'Authoritative financial ledger for all money in & out across BillQyro'}</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-xl font-black text-theme-primary">{settings.label || t('ib.title', 'Internal Bank')}</h1>
-            <p className="text-xs text-theme-muted">{settings.account ? settings.account : 'Money in, money out & your running balance'} · {settings.currencySymbol || 'Rs.'}</p>
+          <div className="flex items-center gap-3">
+            <button onClick={doExport} className="px-5 py-2.5 rounded-xl border border-theme-border-soft bg-white/50 dark:bg-theme-surface/50 text-theme-primary text-sm font-bold hover:bg-theme-accent hover:text-white hover:border-theme-accent transition-all shadow-sm flex items-center gap-2">
+              <Download className="w-4 h-4" /> Export Ledger
+            </button>
+            <button onClick={openAdd} className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[var(--bq26-emerald)] to-teal-500 text-white text-sm font-bold hover:shadow-lg hover:shadow-theme-accent/30 transition-all shadow-md flex items-center gap-2 active:scale-95">
+              <Plus className="w-4 h-4" /> Record Transaction
+            </button>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <button onClick={doExport} className="px-4 py-2.5 rounded-xl border border-theme-accent/30 text-theme-accent text-sm font-bold hover:bg-theme-accent/10 transition-colors flex items-center gap-2">
-            <Download className="w-4 h-4" /> Export CSV
-          </button>
-          <button onClick={openAdd} className="px-4 py-2.5 rounded-xl bg-theme-accent text-white text-sm font-bold hover:bg-theme-accent/80 transition-colors flex items-center gap-2">
-            <Plus className="w-4 h-4" /> Deposit / Withdraw
-          </button>
         </div>
       </div>
 
@@ -307,34 +311,57 @@ const InternalBank = ({ customers = [], invoices = [] }) => {
 
       {tab === 'overview' && (
         <motion.div key="ov" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="rounded-2xl border border-theme-accent/30 bg-gradient-to-br from-theme-card to-theme-accent/5 p-5 shadow-premium-sm">
-              <p className="text-xs font-bold text-theme-muted uppercase tracking-wider">{t('ib.balance', 'Current Balance')}</p>
-              <p className={`text-3xl font-black mt-2 ${balance < 0 ? 'text-theme-danger' : 'text-theme-primary'}`}>{formatCurrency(paiseToRupees(balance), settings.currencySymbol || 'Rs.')}</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="relative overflow-hidden p-5 rounded-3xl border border-theme-accent/20 bg-gradient-to-br from-white/80 to-theme-accent/5 dark:from-theme-surface dark:to-theme-accent/10 backdrop-blur-xl shadow-lg shadow-theme-accent/5 group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-theme-accent/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700 pointer-events-none" />
+              <p className="text-[10px] font-black text-theme-accent uppercase tracking-widest flex items-center gap-1.5 mb-1">
+                <Wallet className="w-3.5 h-3.5" />
+                {t('ib.balance', 'Current Balance')}
+              </p>
+              <p className={`text-3xl font-black bq-financial-number mt-2 ${balance < 0 ? 'text-theme-danger' : 'text-theme-primary'}`}>{formatCurrency(paiseToRupees(balance), settings.currencySymbol || 'Rs.')}</p>
+              <p className="text-[10px] text-theme-muted mt-2 font-medium">Available Business Money</p>
             </div>
-            <div className="rounded-2xl border border-theme-success/30 bg-gradient-to-br from-theme-card to-theme-success/5 p-5 shadow-premium-sm">
-              <p className="text-xs font-bold text-theme-muted flex items-center gap-1 uppercase tracking-wider"><ArrowDownRight className="w-4 h-4 text-theme-success" /> Total Income (Website)</p>
-              <p className="text-3xl font-black mt-2 text-theme-success">{formatCurrency(paiseToRupees(state.totals.totalIn), settings.currencySymbol || 'Rs.')}</p>
+            
+            <div className="relative overflow-hidden p-5 rounded-3xl border border-theme-success/20 bg-gradient-to-br from-white/80 to-theme-success/5 dark:from-theme-surface dark:to-theme-success/10 backdrop-blur-xl shadow-lg shadow-theme-success/5 group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-theme-success/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700 pointer-events-none" />
+              <p className="text-[10px] font-black text-theme-success uppercase tracking-widest flex items-center gap-1.5 mb-1">
+                <ArrowDownRight className="w-3.5 h-3.5" />
+                Total Income (Website)
+              </p>
+              <p className="text-3xl font-black bq-financial-number mt-2 text-theme-primary">{formatCurrency(paiseToRupees(state.totals.totalIn), settings.currencySymbol || 'Rs.')}</p>
+              <p className="text-[10px] text-theme-muted mt-2 font-medium">Total money in</p>
             </div>
-            <div className="rounded-2xl border border-theme-danger/30 bg-gradient-to-br from-theme-card to-theme-danger/5 p-5 shadow-premium-sm">
-              <p className="text-xs font-bold text-theme-muted flex items-center gap-1 uppercase tracking-wider"><ArrowUpRight className="w-4 h-4 text-theme-danger" /> Total Withdrawals</p>
-              <p className="text-3xl font-black mt-2 text-theme-danger">{formatCurrency(paiseToRupees(state.totals.totalOut), settings.currencySymbol || 'Rs.')}</p>
+
+            <div className="relative overflow-hidden p-5 rounded-3xl border border-theme-danger/20 bg-gradient-to-br from-white/80 to-theme-danger/5 dark:from-theme-surface dark:to-theme-danger/10 backdrop-blur-xl shadow-lg shadow-theme-danger/5 group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-theme-danger/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700 pointer-events-none" />
+              <p className="text-[10px] font-black text-theme-danger uppercase tracking-widest flex items-center gap-1.5 mb-1">
+                <ArrowUpRight className="w-3.5 h-3.5" />
+                Total Withdrawals
+              </p>
+              <p className="text-3xl font-black bq-financial-number mt-2 text-theme-primary">{formatCurrency(paiseToRupees(state.totals.totalOut), settings.currencySymbol || 'Rs.')}</p>
+              <p className="text-[10px] text-theme-muted mt-2 font-medium">Money transferred out</p>
             </div>
-            <div className="rounded-2xl border border-theme-warning/30 bg-gradient-to-br from-theme-card to-theme-warning/5 p-5 shadow-premium-sm">
-              <p className="text-xs font-bold text-theme-muted uppercase tracking-wider">User Dues (Receivable)</p>
-              <p className="text-3xl font-black mt-2 text-theme-warning">
+
+            <div className="relative overflow-hidden p-5 rounded-3xl border border-theme-warning/30 bg-gradient-to-br from-white/80 to-theme-warning/10 dark:from-theme-surface dark:to-theme-warning/10 backdrop-blur-xl shadow-lg shadow-theme-warning/5 group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-theme-warning/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700 pointer-events-none" />
+              <p className="text-[10px] font-black text-theme-warning uppercase tracking-widest flex items-center gap-1.5 mb-1">
+                <TrendingUp className="w-3.5 h-3.5" />
+                User Dues (Receivable)
+              </p>
+              <p className="text-3xl font-black bq-financial-number mt-2 text-theme-warning">
                 {formatCurrency(
                   paiseToRupees(
                     state.ledger.reduce((acc, tx) => {
                       if (tx.reversed) return acc;
                       if (tx.entryType === 'credit_sale') return acc + tx.amountPaise;
-                      if (tx.entryType === 'credit_collection') return acc - tx.amountPaise;
+                      if (tx.entryType === 'credit_collection') return acc - acc - tx.amountPaise; // Fix subtraction logic
                       return acc;
                     }, 0)
                   ),
                   settings.currencySymbol || 'Rs.'
                 )}
               </p>
+              <p className="text-[10px] text-theme-muted mt-2 font-medium">Pending to collect</p>
             </div>
           </div>
 

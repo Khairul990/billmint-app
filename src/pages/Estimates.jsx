@@ -18,7 +18,8 @@ import {
   Check,
   Share2,
   Link,
-  ArrowRightLeft
+  ArrowRightLeft,
+  Sparkles
 } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { toast } from 'react-hot-toast';
@@ -267,17 +268,20 @@ const Estimates = ({
         </div>
 
         {/* Right Side: Search */}
-        <div className="relative w-full md:w-80">
-          <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-theme-muted pointer-events-none">
-            <Search className="w-4 h-4" />
-          </span>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={t('est.search_ph', 'Search estimate number, client...')}
-            className="w-full pl-10 pr-4 py-2.5 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft/50 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent focus:bg-theme-card dark:bg-theme-card transition-all text-theme-primary dark:text-theme-primary"
-          />
+        <div className="relative w-full md:w-80 group">
+          <div className="absolute -inset-1 bg-gradient-to-r from-theme-accent/20 to-[var(--bq26-emerald-bright)]/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+          <div className="relative w-full flex items-center gap-2 bg-theme-app dark:bg-theme-surface border border-theme-border-soft dark:border-theme-border-soft/50 rounded-xl px-2">
+            <div className="w-8 h-8 rounded-full bg-theme-accent/10 flex items-center justify-center shrink-0">
+              <Sparkles className="w-3.5 h-3.5 text-theme-accent" />
+            </div>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Ask AI or search estimates..."
+              className="w-full py-2.5 bg-transparent border-none text-xs font-semibold focus:outline-none focus:ring-0 transition-all text-theme-primary dark:text-theme-primary placeholder:text-theme-muted/50"
+            />
+          </div>
         </div>
       </div>
 

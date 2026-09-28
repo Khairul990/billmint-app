@@ -13,7 +13,7 @@ import {
   CheckCircle2, DollarSign, ArrowUp, ArrowDown, HelpCircle,
   ShoppingBag, Shield, Check, Flame, Award, Lightbulb, Zap, UserPlus,
   Heart, Coins, Smartphone, Moon, Target, X, Send, Filter, CheckCheck,
-  ExternalLink, Edit3, Banknote, Landmark, Percent, PieChart, ShieldQuestion,
+  ExternalLink, Edit3, Banknote, Landmark, Percent, ShieldQuestion,
   UserCheck, UserX, UserMinus, ArrowLeftRight
 } from 'lucide-react';
 import { paymentEngine } from '../services/paymentEngine';
@@ -21,13 +21,14 @@ import { bankEngine } from '../services/bankEngine';
 import { toast } from 'react-hot-toast';
 import { 
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, 
-  CartesianGrid, BarChart, Bar, Cell
+  CartesianGrid, BarChart, Bar, Cell, PieChart, Pie
 } from 'recharts';
 import { formatCurrency } from '../utils/invoiceUtils';
 import PullToRefresh from '../components/PullToRefresh';
 import { invoiceEngine } from '../services/invoiceEngine';
 import { analyticsEngine } from '../services/analyticsEngine';
 import AddCustomerSheet from '../components/AddCustomerSheet';
+import confetti from 'canvas-confetti';
 
 import { KPISkeleton, ChartSkeleton } from '../components/PremiumSkeleton';
 import { useFeatureControl } from '../hooks/useFeatureControl';
@@ -115,6 +116,43 @@ const AnimatedNumber = ({ value }) => {
   }, [strValue]);
 
   return <>{displayValue ?? strValue}</>;
+};
+
+// ============================================================================
+// ANIMATED STARS COMPONENT (Premium Magic Sparkles)
+// ============================================================================
+const FloatingStars = () => {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+      {[...Array(20)].map((_, i) => {
+        const left = `${Math.random() * 100}%`;
+        const top = `${Math.random() * 100}%`;
+        const delay = `${Math.random() * 5}s`;
+        const size = Math.random() * 10 + 5;
+        const color = ['#34D399', '#0B8F78', '#FCD34D', '#FFFFFF'][Math.floor(Math.random() * 4)];
+        
+        return (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ 
+              opacity: [0, 0.8, 0], 
+              scale: [0, 1, 0],
+              y: [0, -30] 
+            }}
+            transition={{
+              duration: Math.random() * 3 + 2,
+              repeat: Infinity,
+              delay: parseFloat(delay),
+              ease: "easeInOut"
+            }}
+            className="absolute rounded-full filter blur-[1px]"
+            style={{ left, top, width: size, height: size, backgroundColor: color, boxShadow: `0 0 ${size}px ${color}` }}
+          />
+        );
+      })}
+    </div>
+  );
 };
 
 // Helper for local calendar dates (YYYY-MM-DD)
@@ -1167,175 +1205,297 @@ const Dashboard = ({
               ) : (
                 <>
                   {/* ========================================================================= */}
-                  {/* LEVEL 2: TODAY'S BUSINESS SNAPSHOT */}
+                  {/* MONEY FLOW & BUDGET CHARTS (User Uploaded Reference Design) */}
                   {/* ========================================================================= */}
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-                    
-                    {/* HERO FINANCIAL FOCAL POINT (7 Columns on Desktop) */}
-                    <div className="lg:col-span-7 p-6 sm:p-8 rounded-[2.5rem] border border-white/60 shadow-[0_24px_64px_-12px_rgba(11,143,120,0.15),0_0_40px_rgba(255,255,255,0.9)] bg-gradient-to-b from-white/90 via-theme-surface/70 to-[var(--bq26-emerald)]/5 backdrop-blur-3xl ring-1 ring-white dark:bg-gradient-to-b dark:from-[#0B1220]/90 dark:to-[#0B1220]/70 flex flex-col justify-between relative overflow-hidden group">
-                      {/* Premium Decorative Background Elements */}
-                      <div className="absolute -right-8 -bottom-8 w-64 h-64 bg-theme-accent/5 rounded-full blur-3xl group-hover:bg-theme-accent/10 transition-all duration-700 pointer-events-none z-0" />
-                      <div className="absolute right-8 top-1/2 -translate-y-1/2 opacity-[0.03] text-theme-accent pointer-events-none transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-700 z-0">
-                        <TrendingUp style={{ width: '160px', height: '160px' }} />
-                      </div>
-
-                      <div className="flex items-center justify-between pb-3 border-b border-theme-border-soft/60 relative z-10">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4 text-theme-accent" />
-                          <span className="text-xs font-bold uppercase tracking-wider text-theme-muted">
-                            {t('dash.total_revenue_month', 'TOTAL REVENUE (THIS MONTH)')}
-                          </span>
-                        </div>
-                        <span className="text-2xs font-bold text-theme-muted flex items-center gap-1.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-theme-accent" />
-                          {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-                        </span>
-                      </div>
-
-                      <div className="py-5 relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                        <div className="flex-1">
-                          <FinancialValue
-                            label={t('dash.month_revenue', 'Month Revenue')}
-                            value={metrics.thisMonthRevenue > 0 ? metrics.thisMonthRevenue : metrics.totalRevenue}
-                            currency={currencySymbol}
-                            intent="sales"
-                            size="xl"
-                          />
-                          
-                          <div className="mt-3 flex items-center gap-3 flex-wrap text-xs">
-                            {metrics.todaysSales > 0 ? (
-                              <span className="inline-flex items-center gap-1 text-theme-accent font-bold">
-                                <TrendingUp className="w-3.5 h-3.5" />
-                                Today's Invoiced Volume: {formatCurrency(metrics.todaysSales, currencySymbol)} ({metrics.todaysInvoicesCount} bills)
-                              </span>
-                            ) : (
-                              <span className="text-theme-muted font-medium">
-                                Today's Invoiced Volume: {formatCurrency(0, currencySymbol)} • {scopedInvoices.length} active invoices
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Right side balanced metrics */}
-                        <div className="shrink-0 flex flex-col gap-3 md:items-end p-4 rounded-2xl bg-theme-surface/50 border border-theme-border-soft backdrop-blur-sm min-w-[220px]">
-                           <div className="flex items-center justify-between w-full gap-4">
-                             <span className="text-xs text-theme-muted font-medium">Net Cash Flow</span>
-                             <span className="font-bold text-theme-primary text-sm">{formatCurrency(metrics.thisMonthNetCash, currencySymbol)}</span>
-                           </div>
-                           <div className="w-full h-px bg-theme-border-soft/60" />
-                           <div className="flex items-center justify-between w-full gap-4">
-                             <span className="text-xs text-theme-muted font-medium">Growth</span>
-                             {metrics.revenueGrowthPercent !== null ? (
-                               <span className={`text-xs font-bold flex items-center gap-1 ${metrics.revenueGrowthPercent >= 0 ? 'text-theme-accent' : 'text-rose-600 dark:text-rose-400'}`}>
-                                 {metrics.revenueGrowthPercent >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                                 {Math.abs(metrics.revenueGrowthPercent)}%
-                               </span>
-                             ) : (
-                               <span className="text-xs font-bold text-theme-muted">—</span>
-                             )}
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 mb-8">
+                     
+                     {/* LEFT: MONEY FLOW BAR CHART */}
+                     <div className="lg:col-span-8 bg-white rounded-3xl p-5 sm:p-6 shadow-sm border border-theme-border-soft flex flex-col">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+                           <h3 className="font-bold text-theme-primary text-lg">Money flow</h3>
+                           <div className="flex items-center gap-3 self-start sm:self-auto flex-wrap">
+                              <div className="flex items-center gap-2">
+                                 <div className="w-3 h-3 rounded-full bg-indigo-500" />
+                                 <span className="text-xs font-bold text-theme-muted">Billed</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                 <div className="w-3 h-3 rounded-full bg-indigo-200" />
+                                 <span className="text-xs font-bold text-theme-muted">Collected</span>
+                              </div>
+                              <div className="flex items-center gap-2 ml-1 sm:ml-3">
+                                 <select className="text-[10px] font-bold border border-theme-border-soft rounded-full px-3 py-1.5 bg-gray-50 focus:outline-none text-theme-muted uppercase tracking-wider">
+                                    <option>This year</option>
+                                    <option>Last year</option>
+                                 </select>
+                              </div>
                            </div>
                         </div>
+
+                        <div className="h-[220px] w-full flex-1">
+                           <ResponsiveContainer width="100%" height="100%">
+                              <BarChart data={chartSeries} margin={{ top: 0, right: 0, left: -20, bottom: 0 }} barGap={2} barSize={16}>
+                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                 <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8' }} dy={10} />
+                                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8' }} tickFormatter={(val) => `₹${val / 1000}k`} />
+                                 <Tooltip cursor={{ fill: '#f8fafc' }} content={<PremiumChartTooltip currencySymbol={currencySymbol} />} />
+                                 <Bar dataKey="invoiced" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                                 <Bar dataKey="collected" fill="#c7d2fe" radius={[4, 4, 0, 0]} />
+                              </BarChart>
+                           </ResponsiveContainer>
+                        </div>
+                     </div>
+
+                     {/* RIGHT: BUDGET / EXPENSES PIE CHART */}
+                     <div className="lg:col-span-4 bg-white rounded-3xl p-5 sm:p-6 shadow-sm border border-theme-border-soft flex flex-col">
+                        <div className="flex items-center justify-between mb-4">
+                           <h3 className="font-bold text-theme-primary text-lg">Budget</h3>
+                           <button className="w-8 h-8 rounded-full border border-theme-border-soft flex items-center justify-center hover:bg-gray-50">
+                              <ArrowUpRight className="w-4 h-4 text-theme-muted" />
+                           </button>
+                        </div>
+
+                        <div className="flex-1 flex flex-col items-center justify-center">
+                           {metrics.expenseCategories && metrics.expenseCategories.length > 0 ? (
+                              <div className="flex flex-col h-full w-full">
+                                 <div className="h-[140px] w-full relative mb-4">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                       <PieChart>
+                                          <Pie
+                                             data={metrics.expenseCategories}
+                                             innerRadius={50}
+                                             outerRadius={70}
+                                             paddingAngle={5}
+                                             dataKey="amount"
+                                             stroke="none"
+                                          >
+                                             {metrics.expenseCategories.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={['#6366f1', '#a5b4fc', '#e0e7ff', '#1e1b4b', '#4338ca'][index % 5]} />
+                                             ))}
+                                          </Pie>
+                                          <Tooltip formatter={(value) => formatCurrency(value, currencySymbol)} />
+                                       </PieChart>
+                                    </ResponsiveContainer>
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                       <span className="text-[9px] text-theme-muted font-bold uppercase tracking-wider">Total</span>
+                                       <span className="text-sm font-black text-theme-primary font-numbers tracking-tight">{formatCurrency(metrics.totalExpenses, currencySymbol)}</span>
+                                    </div>
+                                 </div>
+                                 
+                                 <div className="space-y-2 overflow-y-auto scrollbar-hide max-h-[80px]">
+                                    {metrics.expenseCategories.slice(0, 4).map((cat, idx) => (
+                                       <div key={idx} className="flex items-center justify-between gap-2 px-1">
+                                          <div className="flex items-center gap-2 overflow-hidden">
+                                             <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: ['#6366f1', '#a5b4fc', '#e0e7ff', '#1e1b4b', '#4338ca'][idx % 5] }} />
+                                             <span className="text-xs font-bold text-theme-muted truncate">{cat.name}</span>
+                                          </div>
+                                          <span className="text-[10px] font-bold text-theme-primary">{formatCurrency(cat.amount, currencySymbol)}</span>
+                                       </div>
+                                    ))}
+                                 </div>
+                              </div>
+                           ) : (
+                              <div className="text-center py-8">
+                                 <PieIcon className="w-12 h-12 text-gray-200 mx-auto mb-2" />
+                                 <p className="text-xs text-theme-muted font-medium">No expenses to build budget.</p>
+                              </div>
+                           )}
+                        </div>
+                     </div>
+                  </div>
+
+                  {/* ========================================================================= */}
+                  {/* PROFESSIONAL MASTER DATA DASHBOARD */}
+                  {/* ========================================================================= */}
+                  <div className="space-y-6 mb-8">
+                    {/* ROW 1: INVOICING & CUSTOMERS SUMMARY */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      {/* Metric 1: Total Billed */}
+                      <div className="p-4 rounded-2xl bg-white border border-theme-border-soft shadow-sm hover:shadow-md transition-shadow">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-[10px] font-bold text-theme-muted uppercase">Total Updated</span>
+                          <FileText className="w-4 h-4 text-blue-500" />
+                        </div>
+                        <span className="text-xl font-black text-theme-primary font-numbers block truncate">{formatCurrency(metrics.totalRevenue, currencySymbol)}</span>
+                        <span className="text-[10px] text-theme-muted mt-1 block">Lifetime Billing</span>
                       </div>
 
-                      <div className="pt-4 border-t border-theme-border-soft/60 grid grid-cols-2 sm:grid-cols-3 gap-3">
-                        <div className="luxury-glass-subcard p-3 rounded-2xl border border-theme-border-soft">
-                          <span className="text-[10px] uppercase font-bold text-theme-muted block">{t('dash.today_inflow', "Today's Inflow")}</span>
-                          <span className="text-sm sm:text-base font-bold text-theme-accent bq-financial-number">
-                            <AnimatedNumber value={formatCurrency(metrics.todaysCollected, currencySymbol)} />
-                          </span>
+                      {/* Metric 2: Total Collected */}
+                      <div className="p-4 rounded-2xl bg-white border border-theme-border-soft shadow-sm hover:shadow-md transition-shadow">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-[10px] font-bold text-theme-muted uppercase">Total Collected</span>
+                          <CheckCircle className="w-4 h-4 text-emerald-500" />
                         </div>
-                        <div className="luxury-glass-subcard p-3 rounded-2xl border border-theme-border-soft">
-                          <span className="text-[10px] uppercase font-bold text-theme-muted block">{t('dash.today_outflow', "Today's Outflow")}</span>
-                          <span className="text-sm sm:text-base font-bold text-rose-600 dark:text-rose-400 bq-financial-number">
-                            <AnimatedNumber value={formatCurrency(metrics.todaysExpenses, currencySymbol)} />
-                          </span>
+                        <span className="text-xl font-black text-emerald-600 font-numbers block truncate">{formatCurrency(metrics.totalCollected, currencySymbol)}</span>
+                        <span className="text-[10px] text-theme-muted mt-1 block">Realized Revenue</span>
+                      </div>
+
+                      {/* Metric 3: Pending vs Completed Bills */}
+                      <div className="p-4 rounded-2xl bg-white border border-theme-border-soft shadow-sm hover:shadow-md transition-shadow">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-[10px] font-bold text-theme-muted uppercase">Bill Status</span>
+                          <Activity className="w-4 h-4 text-orange-500" />
                         </div>
-                        <div className="luxury-glass-subcard p-3 rounded-2xl border border-theme-border-soft col-span-2 sm:col-span-1">
-                          <span className="text-[10px] uppercase font-bold text-theme-muted block">{t('dash.collection_realized', 'Collection Realized')}</span>
-                          <span className="text-sm sm:text-base font-bold text-theme-primary bq-financial-number">
-                            {metrics.collectionRate}%
-                          </span>
+                        <div className="flex items-center gap-3">
+                           <div>
+                             <span className="text-lg font-black text-orange-600 font-numbers">{metrics.unpaidInvoicesCount + metrics.partialInvoicesCount}</span>
+                             <span className="text-[9px] font-bold uppercase text-theme-muted block">Pending</span>
+                           </div>
+                           <div className="w-px h-6 bg-theme-border-soft" />
+                           <div>
+                             <span className="text-lg font-black text-emerald-600 font-numbers">{metrics.paidInvoicesCount}</span>
+                             <span className="text-[9px] font-bold uppercase text-theme-muted block">Done</span>
+                           </div>
+                        </div>
+                      </div>
+
+                      {/* Metric 4: Total Customers & Bills */}
+                      <div className="p-4 rounded-2xl bg-white border border-theme-border-soft shadow-sm hover:shadow-md transition-shadow">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-[10px] font-bold text-theme-muted uppercase">Audience</span>
+                          <Users className="w-4 h-4 text-purple-500" />
+                        </div>
+                        <div className="flex items-center gap-3">
+                           <div>
+                             <span className="text-lg font-black text-purple-600 font-numbers">{customers.length}</span>
+                             <span className="text-[9px] font-bold uppercase text-theme-muted block">Clients</span>
+                           </div>
+                           <div className="w-px h-6 bg-theme-border-soft" />
+                           <div>
+                             <span className="text-lg font-black text-theme-primary font-numbers">{scopedInvoices.length}</span>
+                             <span className="text-[9px] font-bold uppercase text-theme-muted block">Bills</span>
+                           </div>
                         </div>
                       </div>
                     </div>
 
-                    {/* SUPPORTING PULSE SURFACES (5 Columns on Desktop) */}
-                    <div className="lg:col-span-5 flex flex-col gap-3">
+                    {/* ROW 2: DAILY PERFORMANCE COMPARISON */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                       <div className="p-5 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 flex items-center justify-between">
+                         <div>
+                           <span className="text-xs font-bold text-blue-800 uppercase block mb-1">Today's New Bills</span>
+                           <span className="text-2xl font-black text-blue-900 font-numbers">{formatCurrency(metrics.todaysSales, currencySymbol)}</span>
+                         </div>
+                         <div className="text-right">
+                           <span className="text-[10px] font-bold text-blue-600/70 uppercase block mb-1">Yesterday</span>
+                           <span className="text-sm font-bold text-blue-800 font-numbers">{formatCurrency(metrics.yesterdaySales, currencySymbol)}</span>
+                         </div>
+                       </div>
+                       
+                       <div className="p-5 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 flex items-center justify-between">
+                         <div>
+                           <span className="text-xs font-bold text-emerald-800 uppercase block mb-1">Today's Collection</span>
+                           <span className="text-2xl font-black text-emerald-900 font-numbers">{formatCurrency(metrics.todaysCollected, currencySymbol)}</span>
+                         </div>
+                         <div className="text-right">
+                           <span className="text-[10px] font-bold text-emerald-600/70 uppercase block mb-1">Yesterday</span>
+                           <span className="text-sm font-bold text-emerald-800 font-numbers">{formatCurrency(metrics.yesterdayCollected, currencySymbol)}</span>
+                         </div>
+                       </div>
+                    </div>
+
+                    {/* ROW 3: WEALTH DISTRIBUTION (Bank vs Cash vs UPI) */}
+                    <div className="p-6 rounded-[2rem] bg-white border border-theme-border-soft shadow-sm">
+                      <div className="flex items-center justify-between mb-6 border-b border-theme-border-soft pb-3">
+                        <div className="flex items-center gap-2">
+                          <Wallet className="w-5 h-5 text-theme-accent" />
+                          <h3 className="font-bold text-theme-primary text-sm uppercase tracking-wider">Treasury & Wealth Distribution</h3>
+                        </div>
+                        <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md">Live Balances</span>
+                      </div>
                       
-                      {/* Collected Revenue Card */}
-                      <SignatureSurface variant="success" className="p-4 rounded-2xl flex items-center justify-between">
-                        <div>
-                          <FinancialValue
-                            label={t('dash.total_collected', 'Total Collected')}
-                            value={metrics.totalCollected}
-                            currency={currencySymbol}
-                            intent="collection"
-                            size="md"
-                          />
-                          <span className="text-[10px] text-theme-muted mt-0.5 block">
-                            {metrics.totalPaymentsCount} {t('dash.confirmed_payments', 'confirmed payments received')}
-                          </span>
-                        </div>
-                        <div className="text-right">
-                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-theme-tint-bg text-theme-accent border border-theme-tint-border">
-                            {metrics.collectionRate}% {t('dash.settled_pct', 'Settled')}
-                          </span>
-                        </div>
-                      </SignatureSurface>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                         <div className="flex flex-col gap-2">
+                           <div className="flex items-center gap-2 text-emerald-600 mb-1">
+                             <Banknote className="w-5 h-5" />
+                             <span className="font-extrabold text-sm uppercase tracking-wider">Real Cash</span>
+                           </div>
+                           <span className="text-3xl font-black text-theme-primary font-numbers truncate">{formatCurrency(metrics.cashPaymentsTotal, currencySymbol)}</span>
+                           <span className="text-[10px] text-theme-muted font-bold uppercase mt-1">Physical cash collected</span>
+                         </div>
 
-                      {/* Outstanding Dues Summary Card */}
-                      <SignatureSurface variant="warning" className="p-4 rounded-2xl flex items-center justify-between">
-                        <div>
-                          <FinancialValue
-                            label={t('dash.still_to_collect', 'Still to Collect')}
-                            value={metrics.totalOutstanding}
-                            currency={currencySymbol}
-                            intent="balanceDue"
-                            size="md"
-                          />
-                          <span className="text-[10px] text-theme-muted mt-0.5 block">
-                            {metrics.overdueCount > 0 ? `${metrics.overdueCount} ${t('dash.overdue_bills_action', 'overdue bills requiring action')}` : t('dash.all_within_terms', 'All invoices within payment terms')}
-                          </span>
-                        </div>
-                        <div className="text-right">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            onClick={onOpenCollection}
-                            className="!text-xs"
-                          >
-                            {t('dash.collect_arrow', 'Collect →')}
-                          </Button>
-                        </div>
-                      </SignatureSurface>
+                         <div className="flex flex-col gap-2 sm:border-l sm:border-theme-border-soft sm:pl-6">
+                           <div className="flex items-center gap-2 text-purple-600 mb-1">
+                             <Smartphone className="w-5 h-5" />
+                             <span className="font-extrabold text-sm uppercase tracking-wider">PhonePe / UPI</span>
+                           </div>
+                           <span className="text-3xl font-black text-theme-primary font-numbers truncate">{formatCurrency(metrics.digitalPaymentsTotal, currencySymbol)}</span>
+                           <span className="text-[10px] text-theme-muted font-bold uppercase mt-1">Digital wallets & UPI</span>
+                         </div>
 
-                      {/* Operating Treasury Balance */}
-                      <SignatureSurface variant="financial" className="p-4 rounded-2xl flex items-center justify-between">
-                        <div>
-                          <FinancialValue
-                            label={t('dash.operating_capital', 'Operating Capital')}
-                            value={businessAvailableMoney}
-                            currency={currencySymbol}
-                            intent="money"
-                            size="md"
-                          />
-                          <span className="text-[10px] text-theme-muted mt-0.5 block">
-                            {t('dash.liquid_funds', 'Liquid operating funds')}
-                          </span>
-                        </div>
-                        <div className="p-2 rounded-xl bg-theme-tint-bg text-theme-accent border border-theme-tint-border">
-                          <Wallet className="w-5 h-5" />
-                        </div>
-                      </SignatureSurface>
-
+                         <div className="flex flex-col gap-2 sm:border-l sm:border-theme-border-soft sm:pl-6">
+                           <div className="flex items-center gap-2 text-blue-600 mb-1">
+                             <Landmark className="w-5 h-5" />
+                             <span className="font-extrabold text-sm uppercase tracking-wider">Bank Account</span>
+                           </div>
+                           <span className="text-3xl font-black text-theme-primary font-numbers truncate">{formatCurrency(metrics.otherPaymentsTotal, currencySymbol)}</span>
+                           <span className="text-[10px] text-theme-muted font-bold uppercase mt-1">Bank transfers & Cheques</span>
+                         </div>
+                      </div>
                     </div>
                   </div>
 
                   {/* ========================================================================= */}
+                  {/* TOP DEBTORS / HIGH RISK ALERTS */}
+                  {/* ========================================================================= */}
+                  <div className="mb-8 p-6 rounded-[2.5rem] bg-gradient-to-br from-rose-50 via-white to-orange-50 border border-rose-200/60 shadow-sm relative overflow-hidden group">
+                     <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-10 transition-opacity duration-500 pointer-events-none group-hover:scale-110 transform">
+                        <AlertTriangle className="w-48 h-48 text-rose-600" />
+                     </div>
+                     
+                     <div className="flex items-center justify-between mb-6 relative z-10 border-b border-rose-100/50 pb-4">
+                        <div className="flex items-center gap-2">
+                           <div className="w-8 h-8 rounded-full bg-rose-100 flex items-center justify-center">
+                              <ShieldAlert className="w-4 h-4 text-rose-600 animate-pulse" />
+                           </div>
+                           <h3 className="font-extrabold text-rose-900 text-sm uppercase tracking-wider">Top Debtors Alert</h3>
+                        </div>
+                        <span className="text-[10px] font-black text-rose-600 bg-rose-100 px-3 py-1 rounded-full uppercase tracking-widest">Action Required</span>
+                     </div>
+                     
+                     {customerAnalytics.topDebtors.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 relative z-10">
+                           {customerAnalytics.topDebtors.slice(0, 3).map((debtor, idx) => (
+                              <div key={idx} className="bg-white rounded-3xl p-5 shadow-[0_8px_24px_-12px_rgba(225,29,72,0.15)] border border-rose-100/50 hover:-translate-y-1 transition-all duration-300 flex flex-col">
+                                 <div className="flex items-start justify-between mb-4">
+                                    <div className="flex items-center gap-3">
+                                       <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-rose-100 to-orange-100 flex items-center justify-center text-rose-600 font-black text-sm shadow-inner">
+                                          #{idx + 1}
+                                       </div>
+                                       <div>
+                                          <span className="font-extrabold text-theme-primary block truncate max-w-[120px] sm:max-w-[140px] text-sm">{debtor.name}</span>
+                                          <span className="text-[10px] font-bold text-theme-muted">{debtor.invoicesCount} pending bills</span>
+                                       </div>
+                                    </div>
+                                 </div>
+                                 <div className="mt-auto mb-4 bg-rose-50/50 p-3 rounded-2xl">
+                                    <span className="text-[9px] uppercase font-bold text-rose-500/80 block mb-1">Total Amount Owed</span>
+                                    <span className="text-3xl font-black text-rose-600 font-numbers tracking-tight">{formatCurrency(debtor.totalDue, currencySymbol)}</span>
+                                 </div>
+                                 <Button variant="default" size="sm" onClick={onOpenCollection} className="w-full bg-rose-600 hover:bg-rose-700 text-white rounded-xl py-5 shadow-[0_4px_12px_rgba(225,29,72,0.3)] border-none">
+                                    Collect Payment Now
+                                 </Button>
+                              </div>
+                           ))}
+                        </div>
+                     ) : (
+                        <div className="bg-white/80 backdrop-blur-md rounded-3xl p-8 text-center border border-emerald-100 shadow-sm relative z-10 flex flex-col items-center justify-center">
+                           <div className="w-16 h-16 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-full flex items-center justify-center mb-4 shadow-inner">
+                              <CheckCheck className="w-8 h-8 text-emerald-600" />
+                           </div>
+                           <span className="font-black text-emerald-800 block text-lg mb-1">All Clear! No Debtors</span>
+                           <span className="text-sm font-bold text-emerald-600/70">Everyone has paid their dues. Amazing job!</span>
+                        </div>
+                     )}
+                  </div>
+
+
+                  {/* ========================================================================= */}
                   {/* Business Money Overview */}
                   {/* ========================================================================= */}
-                  <div className="luxury-glass-card p-5 sm:p-6 rounded-3xl border border-theme-border-soft space-y-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-theme-border-soft/60">
+                  <div className="relative overflow-hidden p-6 sm:p-8 rounded-[2.5rem] border border-white/60 shadow-[0_24px_64px_-12px_rgba(11,143,120,0.15),0_0_40px_rgba(255,255,255,0.9)] bg-gradient-to-b from-white/90 via-theme-surface/70 to-[var(--bq26-emerald)]/5 backdrop-blur-3xl ring-1 ring-white dark:bg-gradient-to-b dark:from-[#0B1220]/90 dark:to-[#0B1220]/70 group space-y-6">
+                    <div className="absolute top-1/2 left-0 -translate-y-1/2 -ml-10 w-48 h-48 bg-theme-accent/5 rounded-full blur-3xl pointer-events-none z-0" />
+                    
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-theme-border-soft/60 relative z-10">
                       <div>
                         <h2 className="text-sm sm:text-base font-bold bq-font-display text-theme-primary flex items-center gap-2">
                           <Landmark className="w-4 h-4 text-theme-accent" />
@@ -1396,8 +1556,10 @@ const Dashboard = ({
                   {/* ========================================================================= */}
                   {/* LEVEL 4: REVENUE & COLLECTION INTELLIGENCE */}
                   {/* ========================================================================= */}
-                  <div className="luxury-glass-card p-5 sm:p-6 rounded-3xl border border-theme-border-soft space-y-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-theme-border-soft/60">
+                  <div className="relative overflow-hidden p-6 sm:p-8 rounded-[2.5rem] border border-white/60 shadow-[0_24px_64px_-12px_rgba(11,143,120,0.15),0_0_40px_rgba(255,255,255,0.9)] bg-gradient-to-b from-white/90 via-theme-surface/70 to-[var(--bq26-emerald)]/5 backdrop-blur-3xl ring-1 ring-white dark:bg-gradient-to-b dark:from-[#0B1220]/90 dark:to-[#0B1220]/70 group space-y-6">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-theme-accent/5 rounded-full blur-3xl pointer-events-none z-0" />
+                    
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-theme-border-soft/60 relative z-10">
                       <div>
                         <h2 className="text-sm sm:text-base font-bold bq-font-display text-theme-primary flex items-center gap-2">
                           <BarChart3 className="w-4 h-4 text-theme-accent" />

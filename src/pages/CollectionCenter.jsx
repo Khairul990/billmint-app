@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useI18n } from '../utils/i18n';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -797,16 +797,18 @@ const CollectionCenter = ({
 
           {/* 1. TOP HEADER & MAIN NAVIGATION SEGMENT */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-theme-accent/10 text-theme-accent border border-theme-accent/20">
-                  <DollarSign className="w-6 h-6" />
+            <div className="relative overflow-hidden p-6 sm:p-8 rounded-[2.5rem] border border-white/60 shadow-[0_24px_64px_-12px_rgba(11,143,120,0.15),0_0_40px_rgba(255,255,255,0.9)] bg-gradient-to-b from-white/90 via-theme-surface/70 to-[var(--bq26-emerald)]/5 backdrop-blur-3xl ring-1 ring-white dark:bg-gradient-to-b dark:from-[#0B1220]/90 dark:to-[#0B1220]/70 group mb-6">
+              <div className="absolute -right-8 -bottom-8 w-64 h-64 bg-theme-accent/5 rounded-full blur-3xl group-hover:bg-theme-accent/10 transition-all duration-700 pointer-events-none z-0" />
+              
+              <div className="flex items-center gap-4 relative z-10">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-theme-accent to-teal-500 shadow-lg shadow-theme-accent/30 text-white flex items-center justify-center">
+                  <DollarSign className="w-7 h-7" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-black text-theme-primary flex items-center gap-2">
+                  <h1 className="text-2xl font-black text-theme-primary tracking-tight flex items-center gap-2">
                     {t('cc.title', 'Money & Payment Center')}
                   </h1>
-                  <p className="text-xs text-theme-muted">
+                  <p className="text-sm text-theme-muted font-medium mt-0.5">
                     {t('cc.subtitle', 'Authoritative financial ledger for all money in & out across BillQyro')}
                   </p>
                 </div>
@@ -873,65 +875,70 @@ const CollectionCenter = ({
           {/* ========================================================================= */}
           {/* FINANCIAL BUCKETS SUMMARY STRIP (Cream / Terracotta Visuals) */}
           {/* ========================================================================= */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {/* 1. Website Income */}
-            <div className="card-premium p-3.5 border-l-4 border-l-emerald-500 relative overflow-hidden">
-              <div className="flex items-center justify-between text-2xs font-bold text-theme-muted uppercase mb-1">
+            <div className="relative overflow-hidden p-5 rounded-3xl border border-emerald-500/20 bg-gradient-to-br from-white/80 to-emerald-500/5 dark:from-theme-surface dark:to-emerald-500/10 backdrop-blur-xl shadow-lg shadow-emerald-500/5 group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700 pointer-events-none" />
+              <div className="flex items-center justify-between text-[10px] font-black text-theme-muted uppercase tracking-widest mb-2 relative z-10">
                 <span>Website Income</span>
-                <Receipt className="w-3.5 h-3.5 text-theme-accent" />
+                <Receipt className="w-4 h-4 text-emerald-500" />
               </div>
-              <div className="text-lg font-black text-theme-accent tabular-nums">
+              <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 tabular-nums relative z-10 bq-financial-number">
                 {formatCurrency(bucketFinancials.websiteIncomeAvailable, currencySymbol)}
               </div>
-              <div className="text-[10px] text-theme-muted mt-0.5">Available Business Money</div>
+              <div className="text-[10px] font-medium text-theme-muted mt-1 relative z-10">Available Business Money</div>
             </div>
 
             {/* 2. My Cash */}
-            <div className="card-premium p-3.5 border-l-4 border-l-amber-500 relative overflow-hidden">
-              <div className="flex items-center justify-between text-2xs font-bold text-theme-muted uppercase mb-1">
+            <div className="relative overflow-hidden p-5 rounded-3xl border border-amber-500/20 bg-gradient-to-br from-white/80 to-amber-500/5 dark:from-theme-surface dark:to-amber-500/10 backdrop-blur-xl shadow-lg shadow-amber-500/5 group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700 pointer-events-none" />
+              <div className="flex items-center justify-between text-[10px] font-black text-theme-muted uppercase tracking-widest mb-2 relative z-10">
                 <span>My Cash</span>
-                <Coins className="w-3.5 h-3.5 text-amber-500" />
+                <Coins className="w-4 h-4 text-amber-500" />
               </div>
-              <div className="text-lg font-black text-amber-600 tabular-nums">
+              <div className="text-2xl font-black text-amber-600 dark:text-amber-400 tabular-nums relative z-10 bq-financial-number">
                 {formatCurrency(bucketFinancials.myCashBalance, currencySymbol)}
               </div>
-              <div className="text-[10px] text-theme-muted mt-0.5">Physical Cash in Hand</div>
+              <div className="text-[10px] font-medium text-theme-muted mt-1 relative z-10">Physical Cash in Hand</div>
             </div>
 
             {/* 3. PhonePe */}
-            <div className="card-premium p-3.5 border-l-4 border-l-indigo-500 relative overflow-hidden">
-              <div className="flex items-center justify-between text-2xs font-bold text-theme-muted uppercase mb-1">
+            <div className="relative overflow-hidden p-5 rounded-3xl border border-indigo-500/20 bg-gradient-to-br from-white/80 to-indigo-500/5 dark:from-theme-surface dark:to-indigo-500/10 backdrop-blur-xl shadow-lg shadow-indigo-500/5 group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700 pointer-events-none" />
+              <div className="flex items-center justify-between text-[10px] font-black text-theme-muted uppercase tracking-widest mb-2 relative z-10">
                 <span>PhonePe</span>
-                <Smartphone className="w-3.5 h-3.5 text-indigo-500" />
+                <Smartphone className="w-4 h-4 text-indigo-500" />
               </div>
-              <div className="text-lg font-black text-indigo-600 tabular-nums">
+              <div className="text-2xl font-black text-indigo-600 dark:text-indigo-400 tabular-nums relative z-10 bq-financial-number">
                 {formatCurrency(bucketFinancials.phonePeBalance, currencySymbol)}
               </div>
-              <div className="text-[10px] text-theme-muted mt-0.5">Online Personal Money</div>
+              <div className="text-[10px] font-medium text-theme-muted mt-1 relative z-10">Online Personal Money</div>
             </div>
 
             {/* 4. My Dream */}
-            <div className="card-premium p-3.5 border-l-4 border-l-pink-500 relative overflow-hidden">
-              <div className="flex items-center justify-between text-2xs font-bold text-theme-muted uppercase mb-1">
+            <div className="relative overflow-hidden p-5 rounded-3xl border border-pink-500/20 bg-gradient-to-br from-white/80 to-pink-500/5 dark:from-theme-surface dark:to-pink-500/10 backdrop-blur-xl shadow-lg shadow-pink-500/5 group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700 pointer-events-none" />
+              <div className="flex items-center justify-between text-[10px] font-black text-theme-muted uppercase tracking-widest mb-2 relative z-10">
                 <span>My Dream</span>
-                <Heart className="w-3.5 h-3.5 text-pink-500" />
+                <Heart className="w-4 h-4 text-pink-500" />
               </div>
-              <div className="text-lg font-black text-pink-600 tabular-nums">
+              <div className="text-2xl font-black text-pink-600 dark:text-pink-400 tabular-nums relative z-10 bq-financial-number">
                 {formatCurrency(bucketFinancials.myDreamBalance, currencySymbol)}
               </div>
-              <div className="text-[10px] text-theme-muted mt-0.5">Allocated Savings Goals</div>
+              <div className="text-[10px] font-medium text-theme-muted mt-1 relative z-10">Allocated Savings Goals</div>
             </div>
 
             {/* 5. Personal Available Total */}
-            <div className="card-premium p-3.5 border-l-4 border-l-theme-accent col-span-2 md:col-span-3 lg:col-span-1 bg-theme-accent/5">
-              <div className="flex items-center justify-between text-2xs font-bold text-theme-muted uppercase mb-1">
+            <div className="relative overflow-hidden p-5 rounded-3xl border border-theme-accent/30 bg-gradient-to-br from-white/90 to-theme-accent/10 dark:from-theme-surface dark:to-theme-accent/20 backdrop-blur-xl shadow-lg shadow-theme-accent/10 group col-span-2 md:col-span-3 lg:col-span-1">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-theme-accent/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700 pointer-events-none" />
+              <div className="flex items-center justify-between text-[10px] font-black text-theme-muted uppercase tracking-widest mb-2 relative z-10">
                 <span>Personal Available</span>
-                <Sparkles className="w-3.5 h-3.5 text-theme-accent" />
+                <Sparkles className="w-4 h-4 text-theme-accent" />
               </div>
-              <div className="text-lg font-black text-theme-accent tabular-nums">
+              <div className="text-2xl font-black text-theme-accent tabular-nums relative z-10 bq-financial-number">
                 {formatCurrency(bucketFinancials.personalAvailableTotal, currencySymbol)}
               </div>
-              <div className="text-[10px] text-theme-muted mt-0.5">Cash + PhonePe + Dream</div>
+              <div className="text-[10px] font-medium text-theme-muted mt-1 relative z-10">Cash + PhonePe + Dream</div>
             </div>
           </div>
 
@@ -942,12 +949,12 @@ const CollectionCenter = ({
             <div className="space-y-6">
 
               {/* Transaction Type Picker Bar (Redesigned) */}
-              <div className="card-premium p-6 overflow-hidden relative">
+              <div className="relative overflow-hidden p-6 sm:p-8 rounded-[2.5rem] border border-white/60 shadow-[0_8px_32px_-4px_rgba(0,0,0,0.1)] bg-gradient-to-br from-white/80 to-theme-surface/30 backdrop-blur-3xl ring-1 ring-white/50 dark:bg-gradient-to-br dark:from-[#0B1220]/80 dark:to-theme-surface/50 group">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-theme-accent/5 rounded-full blur-3xl -z-10 translate-x-1/2 -translate-y-1/2 pointer-events-none" />
                 
-                <div className="text-xs uppercase tracking-wider font-black text-theme-muted mb-6 flex items-center justify-between border-b border-theme-border-soft pb-4">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-lg bg-theme-accent/10">
+                <div className="text-xs uppercase tracking-widest font-black text-theme-muted mb-8 flex items-center justify-between border-b border-theme-border-soft pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-xl bg-theme-accent/10 border border-theme-accent/20">
                       <SlidersHorizontal className="w-4 h-4 text-theme-accent" />
                     </div>
                     <span>Select Transaction Category</span>
@@ -980,18 +987,18 @@ const CollectionCenter = ({
                             key={t.id}
                             type="button"
                             onClick={() => { setSelectedTxType(t.id); setAmountInput(''); }}
-                            className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all duration-300 ${
+                            className={`w-full flex items-center gap-3 p-3 rounded-2xl border transition-all duration-300 ${
                               isSelected
-                                ? `${t.color} border-current shadow-md shadow-theme-glow scale-[1.02]`
-                                : 'bg-theme-surface/50 border-theme-border-soft text-theme-muted hover:text-theme-primary hover:border-theme-border hover:bg-theme-surface'
+                                ? `${t.color} border-current shadow-lg shadow-theme-glow scale-[1.02] bg-white/90 dark:bg-theme-surface`
+                                : 'bg-white/40 dark:bg-theme-surface/40 backdrop-blur-md border-white/40 shadow-sm text-theme-muted hover:text-theme-primary hover:border-theme-accent/30 hover:bg-white/70 hover:shadow-md'
                             }`}
                           >
-                            <div className={`p-2 rounded-lg ${isSelected ? 'bg-current/10' : 'bg-theme-surface border border-theme-border-soft'}`}>
+                            <div className={`p-2.5 rounded-xl ${isSelected ? 'bg-current/10' : 'bg-theme-main border border-theme-border-soft shadow-inner'}`}>
                               <Icon className="w-4 h-4" />
                             </div>
                             <div className="text-left flex-1 min-w-0">
-                              <div className={`text-xs font-bold truncate ${isSelected ? '' : 'text-theme-primary'}`}>{t.label}</div>
-                              <div className="text-[10px] font-mono opacity-80 mt-0.5 truncate">{t.bucket}</div>
+                              <div className={`text-sm font-bold truncate ${isSelected ? '' : 'text-theme-primary'}`}>{t.label}</div>
+                              <div className="text-[10px] font-medium opacity-80 mt-0.5 truncate tracking-wide">{t.bucket}</div>
                             </div>
                           </button>
                         );
@@ -1014,18 +1021,18 @@ const CollectionCenter = ({
                             key={t.id}
                             type="button"
                             onClick={() => { setSelectedTxType(t.id); setAmountInput(''); }}
-                            className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all duration-300 ${
+                            className={`w-full flex items-center gap-3 p-3 rounded-2xl border transition-all duration-300 ${
                               isSelected
-                                ? `${t.color} border-current shadow-md scale-[1.02]`
-                                : 'bg-theme-surface/50 border-theme-border-soft text-theme-muted hover:text-theme-primary hover:border-theme-border hover:bg-theme-surface'
+                                ? `${t.color} border-current shadow-lg shadow-theme-glow scale-[1.02] bg-white/90 dark:bg-theme-surface`
+                                : 'bg-white/40 dark:bg-theme-surface/40 backdrop-blur-md border-white/40 shadow-sm text-theme-muted hover:text-theme-primary hover:border-theme-accent/30 hover:bg-white/70 hover:shadow-md'
                             }`}
                           >
-                            <div className={`p-2 rounded-lg ${isSelected ? 'bg-current/10' : 'bg-theme-surface border border-theme-border-soft'}`}>
+                            <div className={`p-2.5 rounded-xl ${isSelected ? 'bg-current/10' : 'bg-theme-main border border-theme-border-soft shadow-inner'}`}>
                               <Icon className="w-4 h-4" />
                             </div>
                             <div className="text-left flex-1 min-w-0">
-                              <div className={`text-xs font-bold truncate ${isSelected ? '' : 'text-theme-primary'}`}>{t.label}</div>
-                              <div className="text-[10px] font-mono opacity-80 mt-0.5 truncate">{t.bucket}</div>
+                              <div className={`text-sm font-bold truncate ${isSelected ? '' : 'text-theme-primary'}`}>{t.label}</div>
+                              <div className="text-[10px] font-medium opacity-80 mt-0.5 truncate tracking-wide">{t.bucket}</div>
                             </div>
                           </button>
                         );
@@ -1048,18 +1055,18 @@ const CollectionCenter = ({
                             key={t.id}
                             type="button"
                             onClick={() => { setSelectedTxType(t.id); setAmountInput(''); }}
-                            className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all duration-300 ${
+                            className={`w-full flex items-center gap-3 p-3 rounded-2xl border transition-all duration-300 ${
                               isSelected
-                                ? `${t.color} border-current shadow-md scale-[1.02]`
-                                : 'bg-theme-surface/50 border-theme-border-soft text-theme-muted hover:text-theme-primary hover:border-theme-border hover:bg-theme-surface'
+                                ? `${t.color} border-current shadow-lg shadow-theme-glow scale-[1.02] bg-white/90 dark:bg-theme-surface`
+                                : 'bg-white/40 dark:bg-theme-surface/40 backdrop-blur-md border-white/40 shadow-sm text-theme-muted hover:text-theme-primary hover:border-theme-accent/30 hover:bg-white/70 hover:shadow-md'
                             }`}
                           >
-                            <div className={`p-2 rounded-lg ${isSelected ? 'bg-current/10' : 'bg-theme-surface border border-theme-border-soft'}`}>
+                            <div className={`p-2.5 rounded-xl ${isSelected ? 'bg-current/10' : 'bg-theme-main border border-theme-border-soft shadow-inner'}`}>
                               <Icon className="w-4 h-4" />
                             </div>
                             <div className="text-left flex-1 min-w-0">
-                              <div className={`text-xs font-bold truncate ${isSelected ? '' : 'text-theme-primary'}`}>{t.label}</div>
-                              <div className="text-[10px] font-mono opacity-80 mt-0.5 truncate">{t.bucket}</div>
+                              <div className={`text-sm font-bold truncate ${isSelected ? '' : 'text-theme-primary'}`}>{t.label}</div>
+                              <div className="text-[10px] font-medium opacity-80 mt-0.5 truncate tracking-wide">{t.bucket}</div>
                             </div>
                           </button>
                         );
@@ -1082,18 +1089,18 @@ const CollectionCenter = ({
                             key={t.id}
                             type="button"
                             onClick={() => { setSelectedTxType(t.id); setAmountInput(''); }}
-                            className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all duration-300 ${
+                            className={`w-full flex items-center gap-3 p-3 rounded-2xl border transition-all duration-300 ${
                               isSelected
-                                ? `${t.color} border-current shadow-md scale-[1.02]`
-                                : 'bg-theme-surface/50 border-theme-border-soft text-theme-muted hover:text-theme-primary hover:border-theme-border hover:bg-theme-surface'
+                                ? `${t.color} border-current shadow-lg shadow-theme-glow scale-[1.02] bg-white/90 dark:bg-theme-surface`
+                                : 'bg-white/40 dark:bg-theme-surface/40 backdrop-blur-md border-white/40 shadow-sm text-theme-muted hover:text-theme-primary hover:border-theme-accent/30 hover:bg-white/70 hover:shadow-md'
                             }`}
                           >
-                            <div className={`p-2 rounded-lg ${isSelected ? 'bg-current/10' : 'bg-theme-surface border border-theme-border-soft'}`}>
+                            <div className={`p-2.5 rounded-xl ${isSelected ? 'bg-current/10' : 'bg-theme-main border border-theme-border-soft shadow-inner'}`}>
                               <Icon className="w-4 h-4" />
                             </div>
                             <div className="text-left flex-1 min-w-0">
-                              <div className={`text-xs font-bold truncate ${isSelected ? '' : 'text-theme-primary'}`}>{t.label}</div>
-                              <div className="text-[10px] font-mono opacity-80 mt-0.5 truncate">{t.bucket}</div>
+                              <div className={`text-sm font-bold truncate ${isSelected ? '' : 'text-theme-primary'}`}>{t.label}</div>
+                              <div className="text-[10px] font-medium opacity-80 mt-0.5 truncate tracking-wide">{t.bucket}</div>
                             </div>
                           </button>
                         );

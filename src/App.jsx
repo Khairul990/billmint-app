@@ -58,6 +58,7 @@ import AdminPINLogin from './pages/admin/AdminPINLogin';
 import AdminErrorBoundary from './components/AdminErrorBoundary';
 import Confetti from 'react-confetti';
 import CommandPalette from './components/CommandPalette';
+import { AIChatAssistant } from './components/AIChatAssistant';
 import { pageVariants } from './utils/animations';
 import Landing from './pages/Landing';
 import About from './pages/About';
@@ -271,6 +272,20 @@ function App() {
     try { return sessionStorage.getItem('billqyro_demo_import_later') === '1' ? 'later' : 'offer'; } catch { return 'offer'; }
   });
   const [showCommandPalette, setShowCommandPalette] = useState(false);
+  const [isPrivacyBlurred, setIsPrivacyBlurred] = useState(false);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        setIsPrivacyBlurred(true);
+      } else {
+        // slight delay to unblur for dramatic bank-level effect
+        setTimeout(() => setIsPrivacyBlurred(false), 300);
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, []);
 
   useEffect(() => {
     const handleConfetti = () => {
@@ -280,11 +295,33 @@ function App() {
     const handleCommandPalette = () => {
       setShowCommandPalette(true);
     };
+
+    // App Security: Anti-Theft & Privacy Shield
+    const handleContextMenu = (e) => {
+      e.preventDefault();
+      toast.error('Privacy Shield: Action Blocked 🛡️', { id: 'security-toast' });
+    };
+    const handleKeyDown = (e) => {
+      if (
+        e.key === 'F12' || 
+        (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'C' || e.key === 'J')) || 
+        (e.ctrlKey && e.key === 'U')
+      ) {
+        e.preventDefault();
+        toast.error('Privacy Shield: Inspect Blocked 🛡️', { id: 'security-toast' });
+      }
+    };
+    
     window.addEventListener('trigger-confetti', handleConfetti);
     window.addEventListener('open-command-palette', handleCommandPalette);
+    window.addEventListener('contextmenu', handleContextMenu);
+    window.addEventListener('keydown', handleKeyDown);
+
     return () => {
       window.removeEventListener('trigger-confetti', handleConfetti);
       window.removeEventListener('open-command-palette', handleCommandPalette);
+      window.removeEventListener('contextmenu', handleContextMenu);
+      window.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
 
@@ -3092,6 +3129,35 @@ function App() {
           }
         }} 
       />
+      {isAuthenticated && !isDemoModeActive() && <AIChatAssistant onNavigate={setCurrentTab} />}
+      
+      {/* 🛡️ BANK-LEVEL PRIVACY SHIELD OVERLAY 🛡️ */}
+      <AnimatePresence>
+        {isPrivacyBlurred && (
+          <motion.div 
+            initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+            animate={{ opacity: 1, backdropFilter: 'blur(40px)' }}
+            exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-[100000] flex flex-col items-center justify-center bg-white/40 dark:bg-slate-950/40"
+          >
+            <motion.div
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+              className="bg-white/90 dark:bg-slate-900/90 p-8 rounded-[2rem] shadow-[0_24px_64px_-12px_rgba(11,143,120,0.3)] border border-emerald-500/20 text-center max-w-sm w-full mx-4"
+            >
+              <div className="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center mb-6 shadow-lg shadow-emerald-500/30">
+                <Lock className="w-10 h-10 text-white" />
+              </div>
+              <h2 className="text-2xl font-black text-slate-800 dark:text-white mb-2">Privacy Lock Active</h2>
+              <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
+                Your data is hidden while you are away. Click or return to this tab to resume.
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </ErrorBoundary>
   );
 }

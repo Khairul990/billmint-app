@@ -36,27 +36,35 @@ export const Button = React.forwardRef(({
     'icon-sm': 'h-7 w-7 p-0 rounded-lg',
   };
 
+  const isPremiumVariant = variant === 'primary' || variant === 'financial';
+
   return (
     <button
       ref={ref}
       type={type}
       disabled={disabled || isLoading}
-      className={`${baseStyles} ${variants[variant] || variants.primary} ${sizes[size] || sizes.md} ${className}`}
+      className={`${baseStyles} ${variants[variant] || variants.primary} ${sizes[size] || sizes.md} ${className} ${isPremiumVariant ? 'relative overflow-hidden group' : ''}`}
       {...props}
     >
-      {isLoading ? (
-        <Loader2 className="w-4 h-4 animate-spin shrink-0" />
-      ) : isSuccess ? (
-        <Check className="w-4 h-4 text-theme-accent shrink-0" />
-      ) : (
-        LeftIcon && <LeftIcon className={`${size === 'sm' || size === 'icon-sm' ? 'w-3.5 h-3.5' : 'w-4 h-4'} shrink-0`} />
+      {isPremiumVariant && (
+        <span className="absolute top-0 left-[-100%] w-[100%] h-full bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-[-20deg] group-hover:animate-[premium-shimmer_2s_infinite] pointer-events-none z-0" />
       )}
       
-      {children}
-      
-      {!isLoading && !isSuccess && RightIcon && (
-        <RightIcon className={`${size === 'sm' || size === 'icon-sm' ? 'w-3.5 h-3.5' : 'w-4 h-4'} shrink-0`} />
-      )}
+      <span className="relative z-10 flex items-center justify-center gap-inherit">
+        {isLoading ? (
+          <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+        ) : isSuccess ? (
+          <Check className="w-4 h-4 text-theme-accent shrink-0" />
+        ) : (
+          LeftIcon && <LeftIcon className={`${size === 'sm' || size === 'icon-sm' ? 'w-3.5 h-3.5' : 'w-4 h-4'} shrink-0`} />
+        )}
+        
+        {children}
+        
+        {!isLoading && !isSuccess && RightIcon && (
+          <RightIcon className={`${size === 'sm' || size === 'icon-sm' ? 'w-3.5 h-3.5' : 'w-4 h-4'} shrink-0`} />
+        )}
+      </span>
     </button>
   );
 });
