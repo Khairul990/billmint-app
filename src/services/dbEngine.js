@@ -17,7 +17,7 @@ export const getStaffs = async (includeDeleted = false) => {
         filtered = data.filter(c => !c.isDeleted);
       }
       if (userId) filtered = filtered.filter(c => c.userId === userId || c.userId === 'local-user');
-      if (workspaceId) filtered = filtered.filter(c => c.workspaceId === workspaceId);
+      // Removed workspace isolation per user request to ensure all data is visible
       return filtered.sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
     }
   } catch (e) { console.warn('Ignored error in dbEngine.js:', e); }
@@ -2207,7 +2207,7 @@ export const getExpenses = async (includeDeleted = false) => {
         filtered = data.filter(e => !e.isDeleted);
       }
       if (userId) filtered = filtered.filter(e => e.userId === userId || e.userId === 'local-user');
-      if (workspaceId) filtered = filtered.filter(e => e.workspaceId === workspaceId);
+      // Removed workspace isolation per user request to ensure all data is visible
       return filtered.sort((a,b) => new Date(b.date||0) - new Date(a.date||0));
     }
   } catch (e) { console.warn('Ignored error in dbEngine.js:', e); }
@@ -2323,7 +2323,7 @@ export const getCustomers = async (includeDeleted = false) => {
         filtered = data.filter(c => !c.isDeleted);
       }
       if (userId) filtered = filtered.filter(c => c.userId === userId || c.userId === 'local-user');
-      if (workspaceId) filtered = filtered.filter(c => c.workspaceId === workspaceId);
+      // Removed workspace isolation per user request to ensure all data is visible
       return filtered.sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
     }
   } catch (e) { console.warn('Ignored error in dbEngine.js:', e); }
@@ -2491,7 +2491,7 @@ export const getProducts = async (includeDeleted = false) => {
         filtered = data.filter(p => !p.isDeleted);
       }
       if (userId) filtered = filtered.filter(p => p.userId === userId || p.userId === 'local-user');
-      if (workspaceId) filtered = filtered.filter(p => p.workspaceId === workspaceId);
+      // Removed workspace isolation per user request to ensure all data is visible
       return filtered.sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
     }
   } catch (e) { console.warn('Ignored error in dbEngine.js:', e); }
@@ -2628,7 +2628,7 @@ export const getStudents = async (includeDeleted = false) => {
       let filtered = data;
       if (!includeDeleted) filtered = data.filter(s => !s.isDeleted);
       if (userId) filtered = filtered.filter(s => s.userId === userId || s.userId === 'local-user');
-      if (workspaceId) filtered = filtered.filter(s => s.workspaceId === workspaceId);
+      // Removed workspace isolation per user request to ensure all data is visible
       return filtered.sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
     }
   } catch (e) { console.warn('Ignored error in dbEngine.js:', e); }
@@ -2735,7 +2735,7 @@ export const getInvoices = async (includeDeleted = false, targetWorkspaceId = nu
         filtered = data.filter(inv => !inv.isDeleted);
       }
       if (userId) filtered = filtered.filter(inv => inv.userId === userId || inv.userId === 'local-user');
-      if (workspaceId) filtered = filtered.filter(inv => inv.workspaceId === workspaceId);
+      // Removed workspace isolation per user request to ensure all data is visible
       return filtered.sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
     }
   } catch (e) { console.warn('Ignored error in dbEngine.js:', e); }
