@@ -1,4 +1,4 @@
-﻿import { invoiceEngine } from './invoiceEngine.js';
+import { invoiceEngine } from './invoiceEngine.js';
 import { 
   getInvoicePaymentStatus, 
   calculateCanonicalInvoiceFinancials, 
@@ -372,7 +372,9 @@ class PaymentEngine {
   }
 
   /**
-   * CANONICAL STAFFSALARY / ADVANCE RECORDING  async recordStaffPayment({
+   * CANONICAL STAFFSALARY / ADVANCE RECORDING
+   */
+  async recordStaffPayment({
     staffId,
     staffName = '',
     amount,

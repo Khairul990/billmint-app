@@ -275,16 +275,16 @@ function App() {
   const [isPrivacyBlurred, setIsPrivacyBlurred] = useState(false);
 
   useEffect(() => {
+    // Privacy Lock feature disabled as per user request
     const handleVisibilityChange = () => {
-      if (document.hidden) {
-        setIsPrivacyBlurred(true);
-      } else {
-        // slight delay to unblur for dramatic bank-level effect
-        setTimeout(() => setIsPrivacyBlurred(false), 300);
-      }
+      // if (document.hidden) {
+      //   setIsPrivacyBlurred(true);
+      // } else {
+      //   setTimeout(() => setIsPrivacyBlurred(false), 300);
+      // }
     };
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+    // document.addEventListener("visibilitychange", handleVisibilityChange);
+    // return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, []);
 
   useEffect(() => {
@@ -296,32 +296,12 @@ function App() {
       setShowCommandPalette(true);
     };
 
-    // App Security: Anti-Theft & Privacy Shield
-    const handleContextMenu = (e) => {
-      e.preventDefault();
-      toast.error('Privacy Shield: Action Blocked 🛡️', { id: 'security-toast' });
-    };
-    const handleKeyDown = (e) => {
-      if (
-        e.key === 'F12' || 
-        (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'C' || e.key === 'J')) || 
-        (e.ctrlKey && e.key === 'U')
-      ) {
-        e.preventDefault();
-        toast.error('Privacy Shield: Inspect Blocked 🛡️', { id: 'security-toast' });
-      }
-    };
-    
     window.addEventListener('trigger-confetti', handleConfetti);
     window.addEventListener('open-command-palette', handleCommandPalette);
-    window.addEventListener('contextmenu', handleContextMenu);
-    window.addEventListener('keydown', handleKeyDown);
 
     return () => {
       window.removeEventListener('trigger-confetti', handleConfetti);
       window.removeEventListener('open-command-palette', handleCommandPalette);
-      window.removeEventListener('contextmenu', handleContextMenu);
-      window.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
 

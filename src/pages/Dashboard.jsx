@@ -1313,59 +1313,63 @@ const Dashboard = ({
                     {/* ROW 1: INVOICING & CUSTOMERS SUMMARY */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       {/* Metric 1: Total Billed */}
-                      <div className="p-4 rounded-2xl bg-white border border-theme-border-soft shadow-sm hover:shadow-md transition-shadow">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-[10px] font-bold text-theme-muted uppercase">Total Updated</span>
-                          <FileText className="w-4 h-4 text-blue-500" />
+                      <div className="relative overflow-hidden p-5 rounded-3xl bg-gradient-to-br from-white/90 to-white/40 dark:from-slate-800/90 dark:to-slate-900/50 border border-white/60 dark:border-slate-700/50 backdrop-blur-2xl shadow-[0_8px_32px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_16px_48px_-12px_rgba(0,0,0,0.15)] hover:-translate-y-1.5 hover:border-blue-500/40 transition-all duration-500 group">
+                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700 pointer-events-none" />
+                        <div className="flex items-center justify-between mb-3 relative z-10">
+                          <span className="text-[10px] font-bold text-theme-muted uppercase tracking-widest">Total Updated</span>
+                          <FileText className="w-5 h-5 text-blue-500 drop-shadow-sm" />
                         </div>
-                        <span className="text-xl font-black text-theme-primary font-numbers block truncate">{formatCurrency(metrics.totalRevenue, currencySymbol)}</span>
-                        <span className="text-[10px] text-theme-muted mt-1 block">Lifetime Billing</span>
+                        <span className="text-2xl font-black text-theme-primary font-numbers block truncate relative z-10">{formatCurrency(metrics.totalRevenue, currencySymbol)}</span>
+                        <span className="text-[10px] font-medium text-theme-muted mt-1.5 block relative z-10">Lifetime Billing</span>
                       </div>
 
                       {/* Metric 2: Total Collected */}
-                      <div className="p-4 rounded-2xl bg-white border border-theme-border-soft shadow-sm hover:shadow-md transition-shadow">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-[10px] font-bold text-theme-muted uppercase">Total Collected</span>
-                          <CheckCircle className="w-4 h-4 text-emerald-500" />
+                      <div className="relative overflow-hidden p-5 rounded-3xl bg-gradient-to-br from-white/90 to-white/40 dark:from-slate-800/90 dark:to-slate-900/50 border border-white/60 dark:border-slate-700/50 backdrop-blur-2xl shadow-[0_8px_32px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_16px_48px_-12px_rgba(0,0,0,0.15)] hover:-translate-y-1.5 hover:border-emerald-500/40 transition-all duration-500 group">
+                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700 pointer-events-none" />
+                        <div className="flex items-center justify-between mb-3 relative z-10">
+                          <span className="text-[10px] font-bold text-theme-muted uppercase tracking-widest">Total Collected</span>
+                          <CheckCircle className="w-5 h-5 text-emerald-500 drop-shadow-sm" />
                         </div>
-                        <span className="text-xl font-black text-emerald-600 font-numbers block truncate">{formatCurrency(metrics.totalCollected, currencySymbol)}</span>
-                        <span className="text-[10px] text-theme-muted mt-1 block">Realized Revenue</span>
+                        <span className="text-2xl font-black text-emerald-600 font-numbers block truncate relative z-10">{formatCurrency(metrics.totalCollected, currencySymbol)}</span>
+                        <span className="text-[10px] font-medium text-theme-muted mt-1.5 block relative z-10">Realized Revenue</span>
                       </div>
 
                       {/* Metric 3: Pending vs Completed Bills */}
-                      <div className="p-4 rounded-2xl bg-white border border-theme-border-soft shadow-sm hover:shadow-md transition-shadow">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-[10px] font-bold text-theme-muted uppercase">Bill Status</span>
-                          <Activity className="w-4 h-4 text-orange-500" />
+                      <div className="relative overflow-hidden p-5 rounded-3xl bg-gradient-to-br from-white/90 to-white/40 dark:from-slate-800/90 dark:to-slate-900/50 border border-white/60 dark:border-slate-700/50 backdrop-blur-2xl shadow-[0_8px_32px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_16px_48px_-12px_rgba(0,0,0,0.15)] hover:-translate-y-1.5 hover:border-orange-500/40 transition-all duration-500 group">
+                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-orange-500/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700 pointer-events-none" />
+                        <div className="flex items-center justify-between mb-3 relative z-10">
+                          <span className="text-[10px] font-bold text-theme-muted uppercase tracking-widest">Bill Status</span>
+                          <Activity className="w-5 h-5 text-orange-500 drop-shadow-sm" />
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-4 relative z-10">
                            <div>
-                             <span className="text-lg font-black text-orange-600 font-numbers">{metrics.unpaidInvoicesCount + metrics.partialInvoicesCount}</span>
-                             <span className="text-[9px] font-bold uppercase text-theme-muted block">Pending</span>
+                             <span className="text-xl font-black text-orange-600 font-numbers block leading-none">{metrics.unpaidInvoicesCount + metrics.partialInvoicesCount}</span>
+                             <span className="text-[9px] font-bold uppercase tracking-wider text-theme-muted block mt-1">Pending</span>
                            </div>
-                           <div className="w-px h-6 bg-theme-border-soft" />
+                           <div className="w-px h-8 bg-theme-border-soft/60" />
                            <div>
-                             <span className="text-lg font-black text-emerald-600 font-numbers">{metrics.paidInvoicesCount}</span>
-                             <span className="text-[9px] font-bold uppercase text-theme-muted block">Done</span>
+                             <span className="text-xl font-black text-emerald-600 font-numbers block leading-none">{metrics.paidInvoicesCount}</span>
+                             <span className="text-[9px] font-bold uppercase tracking-wider text-theme-muted block mt-1">Done</span>
                            </div>
                         </div>
                       </div>
 
                       {/* Metric 4: Total Customers & Bills */}
-                      <div className="p-4 rounded-2xl bg-white border border-theme-border-soft shadow-sm hover:shadow-md transition-shadow">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-[10px] font-bold text-theme-muted uppercase">Audience</span>
-                          <Users className="w-4 h-4 text-purple-500" />
+                      <div className="relative overflow-hidden p-5 rounded-3xl bg-gradient-to-br from-white/90 to-white/40 dark:from-slate-800/90 dark:to-slate-900/50 border border-white/60 dark:border-slate-700/50 backdrop-blur-2xl shadow-[0_8px_32px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_16px_48px_-12px_rgba(0,0,0,0.15)] hover:-translate-y-1.5 hover:border-purple-500/40 transition-all duration-500 group">
+                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700 pointer-events-none" />
+                        <div className="flex items-center justify-between mb-3 relative z-10">
+                          <span className="text-[10px] font-bold text-theme-muted uppercase tracking-widest">Audience</span>
+                          <Users className="w-5 h-5 text-purple-500 drop-shadow-sm" />
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-4 relative z-10">
                            <div>
-                             <span className="text-lg font-black text-purple-600 font-numbers">{customers.length}</span>
-                             <span className="text-[9px] font-bold uppercase text-theme-muted block">Clients</span>
+                             <span className="text-xl font-black text-purple-600 font-numbers block leading-none">{customers.length}</span>
+                             <span className="text-[9px] font-bold uppercase tracking-wider text-theme-muted block mt-1">Clients</span>
                            </div>
-                           <div className="w-px h-6 bg-theme-border-soft" />
+                           <div className="w-px h-8 bg-theme-border-soft/60" />
                            <div>
-                             <span className="text-lg font-black text-theme-primary font-numbers">{scopedInvoices.length}</span>
-                             <span className="text-[9px] font-bold uppercase text-theme-muted block">Bills</span>
+                             <span className="text-xl font-black text-theme-primary font-numbers block leading-none">{scopedInvoices.length}</span>
+                             <span className="text-[9px] font-bold uppercase tracking-wider text-theme-muted block mt-1">Bills</span>
                            </div>
                         </div>
                       </div>
@@ -1373,25 +1377,29 @@ const Dashboard = ({
 
                     {/* ROW 2: DAILY PERFORMANCE COMPARISON */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                       <div className="p-5 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 flex items-center justify-between">
-                         <div>
-                           <span className="text-xs font-bold text-blue-800 uppercase block mb-1">Today's New Bills</span>
-                           <span className="text-2xl font-black text-blue-900 font-numbers">{formatCurrency(metrics.todaysSales, currencySymbol)}</span>
+                       <div className="relative overflow-hidden p-6 rounded-3xl bg-gradient-to-br from-blue-500/10 to-indigo-500/10 border border-blue-500/20 flex items-center justify-between backdrop-blur-xl shadow-lg shadow-blue-500/5 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-blue-500/20 hover:border-blue-500/40 transition-all duration-500 group">
+                         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPjxjaXJjbGUgY3g9IjEiIGN5PSIxIiByPSIxIiBmaWxsPSJjdXJyZW50Q29sb3IiLz48L3N2Zz4=')] opacity-0 group-hover:opacity-5 transition-opacity duration-700 pointer-events-none mix-blend-overlay"></div>
+                         <div className="absolute -right-12 -top-12 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000 pointer-events-none" />
+                         <div className="relative z-10">
+                           <span className="text-xs font-black tracking-widest text-blue-700 dark:text-blue-400 uppercase block mb-1">Today's New Bills</span>
+                           <span className="text-3xl font-black text-blue-900 dark:text-blue-100 font-numbers drop-shadow-sm">{formatCurrency(metrics.todaysSales, currencySymbol)}</span>
                          </div>
-                         <div className="text-right">
-                           <span className="text-[10px] font-bold text-blue-600/70 uppercase block mb-1">Yesterday</span>
-                           <span className="text-sm font-bold text-blue-800 font-numbers">{formatCurrency(metrics.yesterdaySales, currencySymbol)}</span>
+                         <div className="text-right relative z-10">
+                           <span className="text-[10px] font-bold text-blue-600/70 dark:text-blue-400/70 uppercase tracking-widest block mb-1">Yesterday</span>
+                           <span className="text-sm font-bold text-blue-800 dark:text-blue-300 font-numbers">{formatCurrency(metrics.yesterdaySales, currencySymbol)}</span>
                          </div>
                        </div>
                        
-                       <div className="p-5 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 flex items-center justify-between">
-                         <div>
-                           <span className="text-xs font-bold text-emerald-800 uppercase block mb-1">Today's Collection</span>
-                           <span className="text-2xl font-black text-emerald-900 font-numbers">{formatCurrency(metrics.todaysCollected, currencySymbol)}</span>
+                       <div className="relative overflow-hidden p-6 rounded-3xl bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 flex items-center justify-between backdrop-blur-xl shadow-lg shadow-emerald-500/5 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-emerald-500/20 hover:border-emerald-500/40 transition-all duration-500 group">
+                         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPjxjaXJjbGUgY3g9IjEiIGN5PSIxIiByPSIxIiBmaWxsPSJjdXJyZW50Q29sb3IiLz48L3N2Zz4=')] opacity-0 group-hover:opacity-5 transition-opacity duration-700 pointer-events-none mix-blend-overlay"></div>
+                         <div className="absolute -right-12 -top-12 w-40 h-40 bg-emerald-500/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000 pointer-events-none" />
+                         <div className="relative z-10">
+                           <span className="text-xs font-black tracking-widest text-emerald-700 dark:text-emerald-400 uppercase block mb-1">Today's Collection</span>
+                           <span className="text-3xl font-black text-emerald-900 dark:text-emerald-100 font-numbers drop-shadow-sm">{formatCurrency(metrics.todaysCollected, currencySymbol)}</span>
                          </div>
-                         <div className="text-right">
-                           <span className="text-[10px] font-bold text-emerald-600/70 uppercase block mb-1">Yesterday</span>
-                           <span className="text-sm font-bold text-emerald-800 font-numbers">{formatCurrency(metrics.yesterdayCollected, currencySymbol)}</span>
+                         <div className="text-right relative z-10">
+                           <span className="text-[10px] font-bold text-emerald-600/70 dark:text-emerald-400/70 uppercase tracking-widest block mb-1">Yesterday</span>
+                           <span className="text-sm font-bold text-emerald-800 dark:text-emerald-300 font-numbers">{formatCurrency(metrics.yesterdayCollected, currencySymbol)}</span>
                          </div>
                        </div>
                     </div>

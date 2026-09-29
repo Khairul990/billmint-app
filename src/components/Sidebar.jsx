@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-
+import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, 
   FileSpreadsheet, 
@@ -330,14 +330,17 @@ const Sidebar = ({
                   title={isCollapsed ? item.label : undefined}
                 >
                   {isActive && (
-                    <span
-                      className="absolute inset-0 rounded-full bg-gradient-to-r from-[var(--bq26-emerald)]/10 to-transparent shadow-sm border border-[var(--bq26-emerald)]/20"
+                    <motion.span
+                      layoutId="sidebar-active-indicator"
+                      className="absolute inset-0 rounded-full bg-gradient-to-r from-emerald-500/10 to-transparent shadow-[inset_1px_0_0_0_#10b981] border border-emerald-500/10"
+                      initial={false}
+                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     />
                   )}
                   <span className={`relative z-10 flex items-center justify-center w-8 h-8 rounded-full shrink-0 transition-all duration-300 ${
                     isActive 
-                      ? 'bg-gradient-to-br from-[var(--bq26-emerald)] to-[var(--bq26-emerald-bright)] text-[var(--bq26-app)] shadow-[0_4px_12px_rgba(11,143,120,0.5)] ring-1 ring-white/30 scale-110' 
-                      : 'bg-theme-surface/50 group-hover:bg-white text-theme-muted group-hover:text-[var(--bq26-emerald)] shadow-inner border border-[var(--bq26-line-soft)] group-hover:border-[var(--bq26-emerald)]/40 group-hover:shadow-[0_4px_16px_rgba(11,143,120,0.15)] group-hover:scale-105'
+                      ? 'bg-gradient-to-br from-emerald-500 to-emerald-400 text-white shadow-[0_4px_12px_rgba(16,185,129,0.4)] ring-2 ring-white/50 scale-105' 
+                      : 'bg-theme-surface/50 group-hover:bg-white text-theme-muted group-hover:text-emerald-500 shadow-inner border border-theme-border-soft group-hover:border-emerald-500/30 group-hover:shadow-[0_4px_12px_rgba(16,185,129,0.1)] group-hover:scale-105'
                   }`}>
                     <Icon className="w-4 h-4" />
                   </span>

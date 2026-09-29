@@ -877,8 +877,9 @@ const CollectionCenter = ({
           {/* ========================================================================= */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {/* 1. Website Income */}
-            <div className="relative overflow-hidden p-5 rounded-3xl border border-emerald-500/20 bg-gradient-to-br from-white/80 to-emerald-500/5 dark:from-theme-surface dark:to-emerald-500/10 backdrop-blur-xl shadow-lg shadow-emerald-500/5 group">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700 pointer-events-none" />
+            <div className="relative overflow-hidden p-5 rounded-3xl border border-emerald-500/20 bg-gradient-to-br from-white/90 to-emerald-500/5 dark:from-theme-surface dark:to-emerald-500/10 backdrop-blur-xl shadow-lg shadow-emerald-500/5 transition-all duration-500 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-emerald-500/20 hover:border-emerald-500/40 group">
+              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPjxjaXJjbGUgY3g9IjEiIGN5PSIxIiByPSIxIiBmaWxsPSJjdXJyZW50Q29sb3IiLz48L3N2Zz4=')] opacity-0 group-hover:opacity-[0.03] transition-opacity duration-700 pointer-events-none mix-blend-overlay text-emerald-500 dark:hidden"></div>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/15 rounded-full blur-2xl group-hover:scale-[2] transition-transform duration-1000 pointer-events-none" />
               <div className="flex items-center justify-between text-[10px] font-black text-theme-muted uppercase tracking-widest mb-2 relative z-10">
                 <span>Website Income</span>
                 <Receipt className="w-4 h-4 text-emerald-500" />
@@ -890,8 +891,9 @@ const CollectionCenter = ({
             </div>
 
             {/* 2. My Cash */}
-            <div className="relative overflow-hidden p-5 rounded-3xl border border-amber-500/20 bg-gradient-to-br from-white/80 to-amber-500/5 dark:from-theme-surface dark:to-amber-500/10 backdrop-blur-xl shadow-lg shadow-amber-500/5 group">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700 pointer-events-none" />
+            <div className="relative overflow-hidden p-5 rounded-3xl border border-amber-500/20 bg-gradient-to-br from-white/90 to-amber-500/5 dark:from-theme-surface dark:to-amber-500/10 backdrop-blur-xl shadow-lg shadow-amber-500/5 transition-all duration-500 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-amber-500/20 hover:border-amber-500/40 group">
+              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPjxjaXJjbGUgY3g9IjEiIGN5PSIxIiByPSIxIiBmaWxsPSJjdXJyZW50Q29sb3IiLz48L3N2Zz4=')] opacity-0 group-hover:opacity-[0.03] transition-opacity duration-700 pointer-events-none mix-blend-overlay text-amber-500 dark:hidden"></div>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/15 rounded-full blur-2xl group-hover:scale-[2] transition-transform duration-1000 pointer-events-none" />
               <div className="flex items-center justify-between text-[10px] font-black text-theme-muted uppercase tracking-widest mb-2 relative z-10">
                 <span>My Cash</span>
                 <Coins className="w-4 h-4 text-amber-500" />
@@ -903,8 +905,9 @@ const CollectionCenter = ({
             </div>
 
             {/* 3. PhonePe */}
-            <div className="relative overflow-hidden p-5 rounded-3xl border border-indigo-500/20 bg-gradient-to-br from-white/80 to-indigo-500/5 dark:from-theme-surface dark:to-indigo-500/10 backdrop-blur-xl shadow-lg shadow-indigo-500/5 group">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700 pointer-events-none" />
+            <div className="relative overflow-hidden p-5 rounded-3xl border border-indigo-500/20 bg-gradient-to-br from-white/90 to-indigo-500/5 dark:from-theme-surface dark:to-indigo-500/10 backdrop-blur-xl shadow-lg shadow-indigo-500/5 transition-all duration-500 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-indigo-500/20 hover:border-indigo-500/40 group">
+              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPjxjaXJjbGUgY3g9IjEiIGN5PSIxIiByPSIxIiBmaWxsPSJjdXJyZW50Q29sb3IiLz48L3N2Zz4=')] opacity-0 group-hover:opacity-[0.03] transition-opacity duration-700 pointer-events-none mix-blend-overlay text-indigo-500 dark:hidden"></div>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/15 rounded-full blur-2xl group-hover:scale-[2] transition-transform duration-1000 pointer-events-none" />
               <div className="flex items-center justify-between text-[10px] font-black text-theme-muted uppercase tracking-widest mb-2 relative z-10">
                 <span>PhonePe</span>
                 <Smartphone className="w-4 h-4 text-indigo-500" />
@@ -916,8 +919,9 @@ const CollectionCenter = ({
             </div>
 
             {/* 4. My Dream */}
-            <div className="relative overflow-hidden p-5 rounded-3xl border border-pink-500/20 bg-gradient-to-br from-white/80 to-pink-500/5 dark:from-theme-surface dark:to-pink-500/10 backdrop-blur-xl shadow-lg shadow-pink-500/5 group">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700 pointer-events-none" />
+            <div className="relative overflow-hidden p-5 rounded-3xl border border-pink-500/20 bg-gradient-to-br from-white/90 to-pink-500/5 dark:from-theme-surface dark:to-pink-500/10 backdrop-blur-xl shadow-lg shadow-pink-500/5 transition-all duration-500 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-pink-500/20 hover:border-pink-500/40 group">
+              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPjxjaXJjbGUgY3g9IjEiIGN5PSIxIiByPSIxIiBmaWxsPSJjdXJyZW50Q29sb3IiLz48L3N2Zz4=')] opacity-0 group-hover:opacity-[0.03] transition-opacity duration-700 pointer-events-none mix-blend-overlay text-pink-500 dark:hidden"></div>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500/15 rounded-full blur-2xl group-hover:scale-[2] transition-transform duration-1000 pointer-events-none" />
               <div className="flex items-center justify-between text-[10px] font-black text-theme-muted uppercase tracking-widest mb-2 relative z-10">
                 <span>My Dream</span>
                 <Heart className="w-4 h-4 text-pink-500" />
@@ -929,8 +933,9 @@ const CollectionCenter = ({
             </div>
 
             {/* 5. Personal Available Total */}
-            <div className="relative overflow-hidden p-5 rounded-3xl border border-theme-accent/30 bg-gradient-to-br from-white/90 to-theme-accent/10 dark:from-theme-surface dark:to-theme-accent/20 backdrop-blur-xl shadow-lg shadow-theme-accent/10 group col-span-2 md:col-span-3 lg:col-span-1">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-theme-accent/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700 pointer-events-none" />
+            <div className="relative overflow-hidden p-5 rounded-3xl border border-theme-accent/30 bg-gradient-to-br from-white/90 to-theme-accent/10 dark:from-theme-surface dark:to-theme-accent/20 backdrop-blur-xl shadow-lg shadow-theme-accent/10 transition-all duration-500 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-theme-accent/30 hover:border-theme-accent/60 group col-span-2 md:col-span-3 lg:col-span-1">
+              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPjxjaXJjbGUgY3g9IjEiIGN5PSIxIiByPSIxIiBmaWxsPSJjdXJyZW50Q29sb3IiLz48L3N2Zz4=')] opacity-0 group-hover:opacity-[0.04] transition-opacity duration-700 pointer-events-none mix-blend-overlay text-theme-accent dark:hidden"></div>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-theme-accent/20 rounded-full blur-2xl group-hover:scale-[2] transition-transform duration-1000 pointer-events-none" />
               <div className="flex items-center justify-between text-[10px] font-black text-theme-muted uppercase tracking-widest mb-2 relative z-10">
                 <span>Personal Available</span>
                 <Sparkles className="w-4 h-4 text-theme-accent" />
@@ -987,18 +992,21 @@ const CollectionCenter = ({
                             key={t.id}
                             type="button"
                             onClick={() => { setSelectedTxType(t.id); setAmountInput(''); }}
-                            className={`w-full flex items-center gap-3 p-3 rounded-2xl border transition-all duration-300 ${
+                            className={`w-full flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 rounded-3xl border transition-all duration-500 relative overflow-hidden group/cat ${
                               isSelected
-                                ? `${t.color} border-current shadow-lg shadow-theme-glow scale-[1.02] bg-white/90 dark:bg-theme-surface`
-                                : 'bg-white/40 dark:bg-theme-surface/40 backdrop-blur-md border-white/40 shadow-sm text-theme-muted hover:text-theme-primary hover:border-theme-accent/30 hover:bg-white/70 hover:shadow-md'
+                                ? `${t.color} border-current shadow-2xl shadow-current/20 scale-[1.02] bg-white dark:bg-slate-900 ring-2 ring-current/30`
+                                : 'bg-white/40 dark:bg-slate-800/40 backdrop-blur-xl border-white/60 dark:border-slate-700/60 shadow-sm text-theme-muted hover:text-theme-primary hover:border-theme-accent/40 hover:bg-white/90 dark:hover:bg-slate-800 hover:shadow-xl hover:-translate-y-1'
                             }`}
                           >
-                            <div className={`p-2.5 rounded-xl ${isSelected ? 'bg-current/10' : 'bg-theme-main border border-theme-border-soft shadow-inner'}`}>
-                              <Icon className="w-4 h-4" />
+                            <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent pointer-events-none z-0 dark:hidden"></div>
+                            {isSelected && <div className="absolute inset-0 bg-current/5 pointer-events-none z-0"></div>}
+                            
+                            <div className={`relative z-10 p-3 rounded-2xl transition-transform duration-500 group-hover/cat:scale-110 group-hover/cat:rotate-3 ${isSelected ? 'bg-current/10 shadow-inner' : 'bg-theme-main dark:bg-slate-900 border border-theme-border-soft shadow-inner group-hover/cat:border-current/30 group-hover/cat:bg-current/5 group-hover/cat:text-current'}`}>
+                              <Icon className="w-5 h-5" />
                             </div>
-                            <div className="text-left flex-1 min-w-0">
-                              <div className={`text-sm font-bold truncate ${isSelected ? '' : 'text-theme-primary'}`}>{t.label}</div>
-                              <div className="text-[10px] font-medium opacity-80 mt-0.5 truncate tracking-wide">{t.bucket}</div>
+                            <div className="text-left flex-1 min-w-0 relative z-10 mt-1 sm:mt-0">
+                              <div className={`text-sm font-black truncate tracking-tight transition-colors ${isSelected ? '' : 'text-theme-primary group-hover/cat:text-current'}`}>{t.label}</div>
+                              <div className="text-[10px] font-bold opacity-70 mt-0.5 truncate tracking-wide uppercase">{t.bucket}</div>
                             </div>
                           </button>
                         );
@@ -1021,18 +1029,21 @@ const CollectionCenter = ({
                             key={t.id}
                             type="button"
                             onClick={() => { setSelectedTxType(t.id); setAmountInput(''); }}
-                            className={`w-full flex items-center gap-3 p-3 rounded-2xl border transition-all duration-300 ${
+                            className={`w-full flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 rounded-3xl border transition-all duration-500 relative overflow-hidden group/cat ${
                               isSelected
-                                ? `${t.color} border-current shadow-lg shadow-theme-glow scale-[1.02] bg-white/90 dark:bg-theme-surface`
-                                : 'bg-white/40 dark:bg-theme-surface/40 backdrop-blur-md border-white/40 shadow-sm text-theme-muted hover:text-theme-primary hover:border-theme-accent/30 hover:bg-white/70 hover:shadow-md'
+                                ? `${t.color} border-current shadow-2xl shadow-current/20 scale-[1.02] bg-white dark:bg-slate-900 ring-2 ring-current/30`
+                                : 'bg-white/40 dark:bg-slate-800/40 backdrop-blur-xl border-white/60 dark:border-slate-700/60 shadow-sm text-theme-muted hover:text-theme-primary hover:border-theme-accent/40 hover:bg-white/90 dark:hover:bg-slate-800 hover:shadow-xl hover:-translate-y-1'
                             }`}
                           >
-                            <div className={`p-2.5 rounded-xl ${isSelected ? 'bg-current/10' : 'bg-theme-main border border-theme-border-soft shadow-inner'}`}>
-                              <Icon className="w-4 h-4" />
+                            <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent pointer-events-none z-0 dark:hidden"></div>
+                            {isSelected && <div className="absolute inset-0 bg-current/5 pointer-events-none z-0"></div>}
+                            
+                            <div className={`relative z-10 p-3 rounded-2xl transition-transform duration-500 group-hover/cat:scale-110 group-hover/cat:rotate-3 ${isSelected ? 'bg-current/10 shadow-inner' : 'bg-theme-main dark:bg-slate-900 border border-theme-border-soft shadow-inner group-hover/cat:border-current/30 group-hover/cat:bg-current/5 group-hover/cat:text-current'}`}>
+                              <Icon className="w-5 h-5" />
                             </div>
-                            <div className="text-left flex-1 min-w-0">
-                              <div className={`text-sm font-bold truncate ${isSelected ? '' : 'text-theme-primary'}`}>{t.label}</div>
-                              <div className="text-[10px] font-medium opacity-80 mt-0.5 truncate tracking-wide">{t.bucket}</div>
+                            <div className="text-left flex-1 min-w-0 relative z-10 mt-1 sm:mt-0">
+                              <div className={`text-sm font-black truncate tracking-tight transition-colors ${isSelected ? '' : 'text-theme-primary group-hover/cat:text-current'}`}>{t.label}</div>
+                              <div className="text-[10px] font-bold opacity-70 mt-0.5 truncate tracking-wide uppercase">{t.bucket}</div>
                             </div>
                           </button>
                         );
@@ -1055,18 +1066,21 @@ const CollectionCenter = ({
                             key={t.id}
                             type="button"
                             onClick={() => { setSelectedTxType(t.id); setAmountInput(''); }}
-                            className={`w-full flex items-center gap-3 p-3 rounded-2xl border transition-all duration-300 ${
+                            className={`w-full flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 rounded-3xl border transition-all duration-500 relative overflow-hidden group/cat ${
                               isSelected
-                                ? `${t.color} border-current shadow-lg shadow-theme-glow scale-[1.02] bg-white/90 dark:bg-theme-surface`
-                                : 'bg-white/40 dark:bg-theme-surface/40 backdrop-blur-md border-white/40 shadow-sm text-theme-muted hover:text-theme-primary hover:border-theme-accent/30 hover:bg-white/70 hover:shadow-md'
+                                ? `${t.color} border-current shadow-2xl shadow-current/20 scale-[1.02] bg-white dark:bg-slate-900 ring-2 ring-current/30`
+                                : 'bg-white/40 dark:bg-slate-800/40 backdrop-blur-xl border-white/60 dark:border-slate-700/60 shadow-sm text-theme-muted hover:text-theme-primary hover:border-theme-accent/40 hover:bg-white/90 dark:hover:bg-slate-800 hover:shadow-xl hover:-translate-y-1'
                             }`}
                           >
-                            <div className={`p-2.5 rounded-xl ${isSelected ? 'bg-current/10' : 'bg-theme-main border border-theme-border-soft shadow-inner'}`}>
-                              <Icon className="w-4 h-4" />
+                            <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent pointer-events-none z-0 dark:hidden"></div>
+                            {isSelected && <div className="absolute inset-0 bg-current/5 pointer-events-none z-0"></div>}
+                            
+                            <div className={`relative z-10 p-3 rounded-2xl transition-transform duration-500 group-hover/cat:scale-110 group-hover/cat:rotate-3 ${isSelected ? 'bg-current/10 shadow-inner' : 'bg-theme-main dark:bg-slate-900 border border-theme-border-soft shadow-inner group-hover/cat:border-current/30 group-hover/cat:bg-current/5 group-hover/cat:text-current'}`}>
+                              <Icon className="w-5 h-5" />
                             </div>
-                            <div className="text-left flex-1 min-w-0">
-                              <div className={`text-sm font-bold truncate ${isSelected ? '' : 'text-theme-primary'}`}>{t.label}</div>
-                              <div className="text-[10px] font-medium opacity-80 mt-0.5 truncate tracking-wide">{t.bucket}</div>
+                            <div className="text-left flex-1 min-w-0 relative z-10 mt-1 sm:mt-0">
+                              <div className={`text-sm font-black truncate tracking-tight transition-colors ${isSelected ? '' : 'text-theme-primary group-hover/cat:text-current'}`}>{t.label}</div>
+                              <div className="text-[10px] font-bold opacity-70 mt-0.5 truncate tracking-wide uppercase">{t.bucket}</div>
                             </div>
                           </button>
                         );
@@ -1089,18 +1103,21 @@ const CollectionCenter = ({
                             key={t.id}
                             type="button"
                             onClick={() => { setSelectedTxType(t.id); setAmountInput(''); }}
-                            className={`w-full flex items-center gap-3 p-3 rounded-2xl border transition-all duration-300 ${
+                            className={`w-full flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 rounded-3xl border transition-all duration-500 relative overflow-hidden group/cat ${
                               isSelected
-                                ? `${t.color} border-current shadow-lg shadow-theme-glow scale-[1.02] bg-white/90 dark:bg-theme-surface`
-                                : 'bg-white/40 dark:bg-theme-surface/40 backdrop-blur-md border-white/40 shadow-sm text-theme-muted hover:text-theme-primary hover:border-theme-accent/30 hover:bg-white/70 hover:shadow-md'
+                                ? `${t.color} border-current shadow-2xl shadow-current/20 scale-[1.02] bg-white dark:bg-slate-900 ring-2 ring-current/30`
+                                : 'bg-white/40 dark:bg-slate-800/40 backdrop-blur-xl border-white/60 dark:border-slate-700/60 shadow-sm text-theme-muted hover:text-theme-primary hover:border-theme-accent/40 hover:bg-white/90 dark:hover:bg-slate-800 hover:shadow-xl hover:-translate-y-1'
                             }`}
                           >
-                            <div className={`p-2.5 rounded-xl ${isSelected ? 'bg-current/10' : 'bg-theme-main border border-theme-border-soft shadow-inner'}`}>
-                              <Icon className="w-4 h-4" />
+                            <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent pointer-events-none z-0 dark:hidden"></div>
+                            {isSelected && <div className="absolute inset-0 bg-current/5 pointer-events-none z-0"></div>}
+                            
+                            <div className={`relative z-10 p-3 rounded-2xl transition-transform duration-500 group-hover/cat:scale-110 group-hover/cat:rotate-3 ${isSelected ? 'bg-current/10 shadow-inner' : 'bg-theme-main dark:bg-slate-900 border border-theme-border-soft shadow-inner group-hover/cat:border-current/30 group-hover/cat:bg-current/5 group-hover/cat:text-current'}`}>
+                              <Icon className="w-5 h-5" />
                             </div>
-                            <div className="text-left flex-1 min-w-0">
-                              <div className={`text-sm font-bold truncate ${isSelected ? '' : 'text-theme-primary'}`}>{t.label}</div>
-                              <div className="text-[10px] font-medium opacity-80 mt-0.5 truncate tracking-wide">{t.bucket}</div>
+                            <div className="text-left flex-1 min-w-0 relative z-10 mt-1 sm:mt-0">
+                              <div className={`text-sm font-black truncate tracking-tight transition-colors ${isSelected ? '' : 'text-theme-primary group-hover/cat:text-current'}`}>{t.label}</div>
+                              <div className="text-[10px] font-bold opacity-70 mt-0.5 truncate tracking-wide uppercase">{t.bucket}</div>
                             </div>
                           </button>
                         );
