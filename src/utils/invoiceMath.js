@@ -1,4 +1,4 @@
-﻿/**
+/**
  * BillQyro Centralized Canonical Financial Math Engine
  *
  * Single Source of Truth for all financial calculations across:
@@ -836,7 +836,19 @@ export const computeCustomerLedger = (customer, invoices = [], excludeInvoiceId 
     return false;
   });
 
-  const openingDue = roundTo2(parseFloat(customer.previousDue ?? customer.openingDue ?? customer.openingBalance) || 0);
+  let openingDue = roundTo2(parseFloat(customer.previousDue ?? customer.openingDue ?? customer.openingBalance) || 0);
+
+  // If the very first invoice has a manually entered old due that is higher than the customer's record,
+  // we must honor it as the canonical starting point to prevent dropping manually injected balances.
+  const sortedByDateAsc = [...customerInvoices].sort((a, b) => new Date(a.date || a.createdAt) - new Date(b.date || b.createdAt));
+  if (sortedByDateAsc.length > 0) {
+    const firstInv = sortedByDateAsc[0];
+    const firstOldDue = roundTo2(parseFloat(firstInv.totals?.oldDue ?? firstInv.oldDue ?? firstInv.previousDue) || 0);
+    if (firstOldDue > openingDue) {
+      openingDue = firstOldDue;
+    }
+  }
+
   let totalBilled = 0;
   let totalPaid = 0;
   const paymentHistory = [];
