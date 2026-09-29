@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { 
   ArrowLeft, Save, LayoutTemplate, Plus, Trash2, Copy, FileText, 
   Eye, EyeOff, Maximize, X, Check, ChevronDown, Palette, Columns, 
-  DollarSign, UserPlus, CreditCard, Layers, Tag, ChevronUp, AlertCircle, Scan, Sparkles, Wand2, Loader2, Mic, Phone, MapPin
+  DollarSign, UserPlus, CreditCard, Layers, Tag, ChevronUp, AlertCircle, Scan, Sparkles, Wand2, Loader2, Mic, Phone, MapPin, Lock, Unlock
 } from 'lucide-react';
 import BarcodeScannerModal from '../components/BarcodeScannerModal';
 import { analyzeCustomerHistory, buildSmartBillDraft, generateLocalInsight, generateGeminiInsight } from '../utils/aiBillCreator';
@@ -149,6 +149,20 @@ const CreateInvoice = ({
   const [items, setItems] = useState([
     { id: Date.now().toString(), sNo: '1', name: '', qty: 1, price: 0, customFields: {} }
   ]);
+  const [lockedColumns, setLockedColumns] = useState({});
+
+  const incrementAlphanumeric = (str) => {
+    if (!str || typeof str !== 'string') return str;
+    const match = str.match(/^(.*?)(\d+)$/);
+    if (match) {
+      const prefix = match[1];
+      const numStr = match[2];
+      const num = parseInt(numStr, 10) + 1;
+      const paddedNum = num.toString().padStart(numStr.length, '0');
+      return `${prefix}${paddedNum}`;
+    }
+    return str;
+  };
   const [discountType, setDiscountType] = useState('none');
   const [discountAmount, setDiscountAmount] = useState(0);
   const [taxPercent, setTaxPercent] = useState(0);
@@ -562,7 +576,24 @@ const CreateInvoice = ({
 
   const handleAddItem = () => {
     const sNo = items.length > 0 ? (parseInt(items[items.length-1].sNo) + 1).toString() : '1';
-    setItems([...items, { id: Date.now().toString(), sNo: isNaN(sNo) ? '' : sNo, name: '', qty: 1, price: 0, customFields: {} }]);
+    const newItem = { id: Date.now().toString(), sNo: isNaN(sNo) ? '' : sNo, name: '', qty: 1, price: 0, customFields: {} };
+    
+    // Auto-fill locked columns from the last item
+    if (items.length > 0) {
+      const lastItem = items[items.length - 1];
+      invoiceColumns.forEach(c => {
+        if (lockedColumns[c.id]) {
+          if (c.id === 'item') newItem.name = incrementAlphanumeric(lastItem.name);
+          else if (c.id === 'hsn') newItem.hsn = lastItem.hsn;
+          else if (c.id === 'qty') newItem.qty = lastItem.qty;
+          else if (c.id === 'rate') newItem.price = lastItem.price;
+          else if (c.id !== 'sn' && c.id !== 'amount') {
+            newItem.customFields[c.id] = incrementAlphanumeric(lastItem.customFields?.[c.id] || '');
+          }
+        }
+      });
+    }
+    setItems([...items, newItem]);
   };
 
   const handleUpdateItem = (id, field, value, isCustom = false) => {
@@ -602,7 +633,18 @@ const CreateInvoice = ({
   const handleDuplicateItem = (id) => {
     const itemToDuplicate = items.find(item => item.id === id);
     if (itemToDuplicate) {
-      const copiedItem = { ...itemToDuplicate, id: Date.now().toString() };
+      const copiedItem = { ...itemToDuplicate, id: Date.now().toString(), customFields: { ...itemToDuplicate.customFields } };
+      
+      // Auto-increment logic for locked columns upon duplication
+      invoiceColumns.forEach(c => {
+        if (lockedColumns[c.id]) {
+          if (c.id === 'item') copiedItem.name = incrementAlphanumeric(copiedItem.name);
+          else if (c.id !== 'sn' && c.id !== 'amount' && c.id !== 'qty' && c.id !== 'rate' && c.id !== 'hsn') {
+            copiedItem.customFields[c.id] = incrementAlphanumeric(copiedItem.customFields[c.id] || '');
+          }
+        }
+      });
+
       setItems([...items, copiedItem].map((it, idx) => ({ ...it, sNo: (idx + 1).toString() })));
     }
   };
@@ -1239,17 +1281,32 @@ const CreateInvoice = ({
                 </div>
               </div>
               <div className="overflow-x-auto -mx-6 px-6 pb-4">
-                <table className="w-full text-left border-separate border-spacing-y-2 min-w-[600px]">
+                <table className="w-full text-left border-collapse min-w-[700px]">
                   <thead>
-                    <tr className="bg-[var(--bq26-emerald-muted)]/30 backdrop-blur-md shadow-sm">
+                    <tr className="border-b-2 border-theme-border-soft">
                       {invoiceColumns.map(c => {
                         if (!c.visible) return null;
                         if (c.id === 'discount' || c.id === 'tax') return null;
                         const widthClass = c.id === 'sn' ? 'w-16' : c.id === 'qty' ? 'w-24' : (c.id === 'rate' || c.id === 'amount') ? 'w-32' : '';
-                        const isFirst = c.id === invoiceColumns.find(col => col.visible)?.id;
-                        return <th key={c.id} className={`py-3 px-3 text-[10px] font-black text-[var(--bq26-emerald)] uppercase tracking-widest ${widthClass} ${isFirst ? 'rounded-l-xl' : ''}`}>{c.label}</th>;
+                        const canLock = c.id !== 'sn' && c.id !== 'amount';
+                        return (
+                          <th key={c.id} className={`py-4 px-3 text-[10px] font-black text-theme-muted uppercase tracking-widest select-none ${widthClass}`}>
+                            <div 
+                              className={`flex items-center gap-1.5 group ${canLock ? 'cursor-pointer hover:text-theme-primary transition-colors' : ''}`}
+                              onClick={() => canLock && setLockedColumns(prev => ({...prev, [c.id]: !prev[c.id]}))}
+                              title={canLock ? "Toggle auto-increment/lock for new rows" : ""}
+                            >
+                              {c.label}
+                              {canLock && (
+                                lockedColumns[c.id] 
+                                  ? <Lock className="w-3 h-3 text-[var(--bq26-emerald)] shrink-0" /> 
+                                  : <Unlock className="w-3 h-3 opacity-0 group-hover:opacity-40 transition-opacity shrink-0" />
+                              )}
+                            </div>
+                          </th>
+                        );
                       })}
-                      <th className="py-3 px-3 text-[10px] font-black text-[var(--bq26-emerald)] uppercase tracking-widest w-28 text-right rounded-r-xl">Actions</th>
+                      <th className="py-4 px-3 text-[10px] font-black text-theme-muted uppercase tracking-widest w-28 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1273,20 +1330,23 @@ const CreateInvoice = ({
                             initial={{ opacity: 0, y: -10 }} 
                             animate={{ opacity: 1, y: 0 }} 
                             exit={{ opacity: 0, scale: 0.95 }}
-                            className="group bg-theme-surface/50 hover:bg-theme-surface hover:shadow-md transition-all duration-300"
+                            className="group border-b border-theme-border-soft/60 hover:bg-theme-surface transition-colors duration-200"
                           >
                             {invoiceColumns.map(c => {
                               if (!c.visible) return null;
+                              
+                              const inputBaseClass = "w-full bg-transparent border border-transparent hover:border-gray-300 hover:bg-white focus:bg-white focus:border-theme-primary focus:shadow-[0_0_0_2px_rgba(11,143,120,0.1)] px-3 py-2.5 rounded-xl transition-all text-sm font-semibold outline-none";
+                              
                               if (c.id === 'sn') return (
-                                <td key={c.id} className="py-2 px-2 rounded-l-xl border border-transparent group-hover:border-[var(--bq26-line-soft)] border-r-0">
-                                  <input type="text" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface text-center font-bold" value={item.sNo} onChange={(e) => handleUpdateItem(item.id, 'sNo', e.target.value)} />
+                                <td key={c.id} className="py-2 px-2 align-middle">
+                                  <input type="text" className={`${inputBaseClass} text-center font-bold text-theme-primary`} value={item.sNo} onChange={(e) => handleUpdateItem(item.id, 'sNo', e.target.value)} />
                                 </td>
                               );
                               if (c.id === 'item') return (
-                                <td key={c.id} className="py-2 px-2">
+                                <td key={c.id} className="py-2 px-2 align-middle">
                                   <input 
                                     type="text" 
-                                    className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" 
+                                    className={inputBaseClass} 
                                     placeholder={t('ci.item_ph', 'Item or service description')} 
                                     value={item.name} 
                                     onChange={(e) => handleUpdateItem(item.id, 'name', e.target.value)} 
@@ -1295,45 +1355,45 @@ const CreateInvoice = ({
                                 </td>
                               );
                               if (c.id === 'hsn') return (
-                                <td key={c.id} className="py-2 px-2">
-                                  <input type="text" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" placeholder="HSN/SAC" value={item.hsn || ''} onChange={(e) => handleUpdateItem(item.id, 'hsn', e.target.value)} />
+                                <td key={c.id} className="py-2 px-2 align-middle">
+                                  <input type="text" className={inputBaseClass} placeholder="HSN/SAC" value={item.hsn || ''} onChange={(e) => handleUpdateItem(item.id, 'hsn', e.target.value)} />
                                 </td>
                               );
                               if (c.id === 'qty') return (
-                                <td key={c.id} className="py-2 px-2">
-                                  <input type="number" min="1" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" value={item.qty} onChange={(e) => handleUpdateItem(item.id, 'qty', e.target.value)} />
+                                <td key={c.id} className="py-2 px-2 align-middle">
+                                  <input type="number" min="1" className={inputBaseClass} value={item.qty} onChange={(e) => handleUpdateItem(item.id, 'qty', e.target.value)} />
                                 </td>
                               );
                               if (c.id === 'rate') return (
-                                <td key={c.id} className="py-2 px-2">
-                                  <input type="number" min="0" step="0.01" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" value={item.price} onChange={(e) => handleUpdateItem(item.id, 'price', e.target.value)} />
+                                <td key={c.id} className="py-2 px-2 align-middle">
+                                  <input type="number" min="0" step="0.01" className={inputBaseClass} value={item.price} onChange={(e) => handleUpdateItem(item.id, 'price', e.target.value)} />
                                 </td>
                               );
                               if (c.id === 'amount') return (
-                                <td key={c.id} className="py-2 px-2 font-bold tabular-nums text-theme-primary">
+                                <td key={c.id} className="py-2 px-4 align-middle font-black tabular-nums text-theme-primary">
                                   {formatCurrency(item.qty * item.price)}
                                 </td>
                               );
                               // custom column
                               return (
-                                <td key={c.id} className="py-2 px-2">
-                                  <input type="text" className="input-premium w-full bg-transparent border-transparent hover:border-theme-border-soft focus:bg-theme-surface" value={item.customFields?.[c.id] || ''} onChange={(e) => handleUpdateItem(item.id, c.id, e.target.value, true)} />
+                                <td key={c.id} className="py-2 px-2 align-middle">
+                                  <input type="text" className={inputBaseClass} value={item.customFields?.[c.id] || ''} onChange={(e) => handleUpdateItem(item.id, c.id, e.target.value, true)} />
                                 </td>
                               );
                             })}
-                            <td className="py-2 px-2 rounded-r-xl border border-transparent group-hover:border-[var(--bq26-line-soft)] border-l-0 text-right">
+                            <td className="py-2 px-2 align-middle text-right">
                               <div className="flex justify-end gap-1 items-center">
                                 {/* Expand Category Custom Fields Button */}
                                 <button 
                                   type="button"
                                   onClick={() => setExpandedCategoryItemId(expandedCategoryItemId === item.id ? null : item.id)}
                                   title="Category Custom Fields"
-                                  className={`tap-target p-1.5 rounded-lg transition-colors text-2xs font-bold flex items-center gap-0.5 ${expandedCategoryItemId === item.id ? 'bg-theme-accent text-white' : 'text-theme-muted hover:text-theme-accent hover:bg-theme-surface'}`}
+                                  className={`tap-target p-2 rounded-xl transition-all flex items-center gap-0.5 ${expandedCategoryItemId === item.id ? 'bg-theme-accent text-white shadow-md' : 'text-theme-muted hover:text-theme-accent hover:bg-white border border-transparent hover:border-gray-200'}`}
                                 >
-                                  <Tag className="w-3.5 h-3.5" />
+                                  <Tag className="w-4 h-4" />
                                 </button>
-                                <button onClick={() => handleDuplicateItem(item.id)} className="tap-target p-1.5 text-theme-muted hover:text-theme-accent hover:bg-theme-accent/10 rounded-lg transition-colors"><Copy className="w-3.5 h-3.5" /></button>
-                                <button onClick={() => handleDeleteItem(item.id)} className="tap-target p-1.5 text-theme-muted hover:text-theme-danger hover:bg-theme-danger/10 rounded-lg transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
+                                <button onClick={() => handleDuplicateItem(item.id)} className="tap-target p-2 text-theme-muted hover:text-theme-accent hover:bg-white border border-transparent hover:border-gray-200 rounded-xl transition-all"><Copy className="w-4 h-4" /></button>
+                                <button onClick={() => handleDeleteItem(item.id)} className="tap-target p-2 text-theme-muted hover:text-rose-500 hover:bg-white border border-transparent hover:border-rose-200 rounded-xl transition-all"><Trash2 className="w-4 h-4" /></button>
                               </div>
                             </td>
                           </motion.tr>

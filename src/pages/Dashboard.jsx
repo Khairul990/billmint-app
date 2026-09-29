@@ -1256,17 +1256,32 @@ const Dashboard = ({
 
                         <div className="flex-1 flex flex-col items-center justify-center">
                            {metrics.expenseCategories && metrics.expenseCategories.length > 0 ? (
-                              <div className="flex flex-col h-full w-full">
-                                 <div className="h-[140px] w-full relative mb-4">
+                              <div className="flex items-center h-full w-full gap-2 sm:gap-4">
+                                 {/* LEFT: Legend */}
+                                 <div className="flex-1 space-y-3 overflow-y-auto scrollbar-hide max-h-[140px] pr-2">
+                                    {metrics.expenseCategories.slice(0, 5).map((cat, idx) => (
+                                       <div key={idx} className="flex items-center gap-2">
+                                          <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ['#6366f1', '#a5b4fc', '#e0e7ff', '#1e1b4b', '#4338ca'][idx % 5] }} />
+                                          <span className="text-xs font-bold text-theme-muted truncate">{cat.name}</span>
+                                       </div>
+                                    ))}
+                                 </div>
+                                 
+                                 {/* RIGHT: Donut Chart */}
+                                 <div className="w-[120px] h-[120px] sm:w-[140px] sm:h-[140px] shrink-0 relative">
+                                    <div className="absolute -top-4 -left-4 bg-white border border-theme-border-soft rounded-lg px-2 py-1 shadow-sm z-10 hidden sm:block">
+                                       <span className="text-[10px] font-bold text-theme-primary">{formatCurrency(metrics.expenseCategories[0]?.amount || 0, currencySymbol)}</span>
+                                    </div>
                                     <ResponsiveContainer width="100%" height="100%">
                                        <PieChart>
                                           <Pie
                                              data={metrics.expenseCategories}
-                                             innerRadius={50}
-                                             outerRadius={70}
-                                             paddingAngle={5}
+                                             innerRadius={45}
+                                             outerRadius={58}
+                                             paddingAngle={4}
                                              dataKey="amount"
                                              stroke="none"
+                                             cornerRadius={4}
                                           >
                                              {metrics.expenseCategories.map((entry, index) => (
                                                 <Cell key={`cell-${index}`} fill={['#6366f1', '#a5b4fc', '#e0e7ff', '#1e1b4b', '#4338ca'][index % 5]} />
@@ -1276,21 +1291,9 @@ const Dashboard = ({
                                        </PieChart>
                                     </ResponsiveContainer>
                                     <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                                       <span className="text-[9px] text-theme-muted font-bold uppercase tracking-wider">Total</span>
-                                       <span className="text-sm font-black text-theme-primary font-numbers tracking-tight">{formatCurrency(metrics.totalExpenses, currencySymbol)}</span>
+                                       <span className="text-[9px] text-theme-muted/80 font-bold tracking-tight mb-0.5">Total for month</span>
+                                       <span className="text-[11px] sm:text-xs font-black text-theme-primary font-numbers tracking-tight">{formatCurrency(metrics.totalExpenses, currencySymbol)}</span>
                                     </div>
-                                 </div>
-                                 
-                                 <div className="space-y-2 overflow-y-auto scrollbar-hide max-h-[80px]">
-                                    {metrics.expenseCategories.slice(0, 4).map((cat, idx) => (
-                                       <div key={idx} className="flex items-center justify-between gap-2 px-1">
-                                          <div className="flex items-center gap-2 overflow-hidden">
-                                             <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: ['#6366f1', '#a5b4fc', '#e0e7ff', '#1e1b4b', '#4338ca'][idx % 5] }} />
-                                             <span className="text-xs font-bold text-theme-muted truncate">{cat.name}</span>
-                                          </div>
-                                          <span className="text-[10px] font-bold text-theme-primary">{formatCurrency(cat.amount, currencySymbol)}</span>
-                                       </div>
-                                    ))}
                                  </div>
                               </div>
                            ) : (

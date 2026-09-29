@@ -144,11 +144,11 @@ export const getItemValue = (item, colId, bType) => {
   switch (colId) {
     case 'item':
     case 'col1':
-      if (bType === 'grocery') return item.description || item.itemService || 'Product';
-      if (bType === 'retail') return item.productName || item.itemService || 'Product';
-      if (bType === 'repair') return item.designNo || item.itemService || 'Service';
-      if (bType === 'default' || bType === 'embroidery') return item.designNo || item.itemService || '—';
-      return item.itemService || 'Item';
+      if (bType === 'grocery') return item.name || item.description || item.itemService || 'Product';
+      if (bType === 'retail') return item.name || item.productName || item.itemService || 'Product';
+      if (bType === 'repair') return item.name || item.designNo || item.itemService || 'Service';
+      if (bType === 'default' || bType === 'embroidery') return item.name || item.designNo || item.itemService || '—';
+      return item.name || item.itemService || 'Item';
     
     case 'description':
       if (bType === 'retail') return item.sizeVariant || item.description || '';
