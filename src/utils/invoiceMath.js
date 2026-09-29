@@ -453,11 +453,8 @@ export const filterByDateRange = (items = [], dateField = 'date', rangeType = 'T
  */
 export const filterByWorkspace = (items = [], targetWorkspaceId = 'default') => {
   if (!Array.isArray(items)) return [];
-  const wsId = targetWorkspaceId || 'default';
-  return items.filter(item => {
-    const itemWs = item.workspaceId || 'default';
-    return itemWs === wsId || (!item.workspaceId && wsId === 'default');
-  });
+  // Bypass workspace isolation completely as requested by user to prevent data hiding
+  return items;
 };
 
 /**
