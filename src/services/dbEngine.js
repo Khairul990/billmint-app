@@ -1524,7 +1524,7 @@ export const getAuthSession = () => {
       localStorage.removeItem(KEYS.AUTH);
       return null;
     }
-    if (!data.uid || data.uid === 'demo-user' || !data.userEmail || data.userEmail === 'No email') {
+    if (!data.uid || data.uid === 'demo-user') {
       localStorage.removeItem(KEYS.AUTH);
       return null;
     }

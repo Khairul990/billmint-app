@@ -83,6 +83,13 @@ export const firebaseInitPromise = (async () => {
     }
 
     auth = getAuth(app);
+    try {
+      const { setPersistence, browserLocalPersistence } = await import('firebase/auth');
+      await setPersistence(auth, browserLocalPersistence);
+    } catch (e) {
+      console.warn('Failed to set explicit auth persistence:', e);
+    }
+    
     db = getFirestore(app);
     storage = getStorage(app);
     firebaseReady = true;
