@@ -416,5 +416,28 @@
       </div>
     </div>
     <script type="module" src="/src/main.jsx"></script>
+    <script>
+      // Self-healing watchdog: If an old Service Worker or CDN cache keeps the initial loader stuck
+      setTimeout(function() {
+        var loader = document.getElementById('bq-initial-loader');
+        if (loader && document.body.contains(loader)) {
+          var lastRecover = parseInt(sessionStorage.getItem('bq_loader_recover') || '0', 10);
+          if (Date.now() - lastRecover > 20000) {
+            sessionStorage.setItem('bq_loader_recover', String(Date.now()));
+            if ('serviceWorker' in navigator) {
+              navigator.serviceWorker.getRegistrations().then(function(regs) {
+                regs.forEach(function(r) { r.unregister(); });
+              });
+            }
+            if ('caches' in window) {
+              caches.keys().then(function(keys) {
+                keys.forEach(function(k) { caches.delete(k); });
+              });
+            }
+            window.location.reload();
+          }
+        }
+      }, 5000);
+    </script>
   </body>
 </html>
