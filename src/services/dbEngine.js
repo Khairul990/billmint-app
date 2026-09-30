@@ -3866,7 +3866,7 @@ export const syncFromFirestore = async (force = false) => {
       }
       
       const activeItems = finalItems.filter(item => !item.workspaceId || item.workspaceId === activeWorkspaceId);
-      updateLocalCache(storageKey, activeItems);
+      updateLocalCache(storageKey, finalItems);
       return finalItems;
     };
 
