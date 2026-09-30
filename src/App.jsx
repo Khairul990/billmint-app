@@ -834,11 +834,17 @@ function App() {
   // --- Phase 24: monthly data-health check + backup nudge (real accounts) ---
   useEffect(() => {
     if (!isAuthenticated || isDemoSessionActive || isDataHydrating) return;
+    
+    // Suppress repeated spam on every page reload within the same browser session
+    if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('billqyro_health_nudge_shown')) return;
+    if (typeof sessionStorage !== 'undefined') sessionStorage.setItem('billqyro_health_nudge_shown', '1');
+
     // Give freshly-imported / just-loaded state a beat to settle.
     const t = setTimeout(() => {
       try {
         const health = runDataHealthCheck({ invoices, customers, products, expenses });
-        if (health.status !== 'healthy' && health.counts.totalRecords > 0) {
+        // Only trigger warning toast if health is critical (score < 80)
+        if (health.status === 'critical' && health.counts.totalRecords > 0) {
           const total = health.issues.reduce((s, i) => s + i.count, 0);
           toast.custom((tt) => (
             <div className={`luxury-glass-card flex items-center gap-4 px-4 py-3 pointer-events-auto shadow-2xl transition-all duration-300 ${tt.visible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'} rounded-[1rem] border-amber-500/30 dark:border-amber-500/20 max-w-sm`}>
@@ -875,7 +881,7 @@ function App() {
           ), { duration: 12000, id: 'monthly-backup-nudge' });
         }
       } catch (e) { console.warn('Health check failed', e); }
-    }, 2500);
+    }, 4500);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, isDemoSessionActive, isDataHydrating]);

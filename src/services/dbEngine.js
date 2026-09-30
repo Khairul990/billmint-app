@@ -3778,7 +3778,22 @@ export const syncFromFirestore = async (force = false) => {
       return;
     }
 
-    // 2. Fetch all cloud data first (from SERVER explicitly) to prevent stale cache serving
+    // 2. Ensure Firebase & Firestore are ready
+    let currentDb = getDb();
+    if (!currentDb) {
+      try {
+        const { firebaseInitPromise } = await import('./firebaseConfig.js');
+        if (firebaseInitPromise) await firebaseInitPromise;
+        const { fsReady } = await import('./fsHelpers.js');
+        if (fsReady) await fsReady;
+        currentDb = getDb();
+      } catch (e) { /* ignore */ }
+    }
+
+    if (!currentDb || (typeof navigator !== 'undefined' && !navigator.onLine)) {
+      return;
+    }
+
     // Use parallel fetching with safe fallbacks to prevent permission errors from crashing the sync
     const safeFetch = async (promise, fallback, collectionName = 'unknown') => {
       try { return await promise; }
@@ -3794,14 +3809,14 @@ export const syncFromFirestore = async (force = false) => {
     const [
       settingsDoc, customersSnap, staffSnap, invoicesSnap, productsSnap, expensesSnap, studentsSnap, subDoc
     ] = await Promise.all([
-      safeFetch(getDocFromServer(doc(getDb(), 'settings', userId)), emptyDoc, 'settings'),
-      safeFetch(getDocsFromServer(collection(getDb(), 'customers', userId, 'items')), emptySnap, 'customers'),
-      safeFetch(getDocsFromServer(collection(getDb(), 'staff', userId, 'items')), emptySnap, 'staff'),
-      safeFetch(getDocsFromServer(collection(getDb(), 'invoices', userId, 'items')), emptySnap, 'invoices'),
-      safeFetch(getDocsFromServer(collection(getDb(), 'products', userId, 'items')), emptySnap, 'products'),
-      safeFetch(getDocsFromServer(collection(getDb(), 'expenses', userId, 'items')), emptySnap, 'expenses'),
-      safeFetch(getDocsFromServer(collection(getDb(), 'students', userId, 'items')), emptySnap, 'students'),
-      safeFetch(getDocFromServer(doc(getDb(), 'subscription', userId)), emptyDoc, 'subscription')
+      safeFetch(getDocFromServer(doc(currentDb, 'settings', userId)), emptyDoc, 'settings'),
+      safeFetch(getDocsFromServer(collection(currentDb, 'customers', userId, 'items')), emptySnap, 'customers'),
+      safeFetch(getDocsFromServer(collection(currentDb, 'staff', userId, 'items')), emptySnap, 'staff'),
+      safeFetch(getDocsFromServer(collection(currentDb, 'invoices', userId, 'items')), emptySnap, 'invoices'),
+      safeFetch(getDocsFromServer(collection(currentDb, 'products', userId, 'items')), emptySnap, 'products'),
+      safeFetch(getDocsFromServer(collection(currentDb, 'expenses', userId, 'items')), emptySnap, 'expenses'),
+      safeFetch(getDocsFromServer(collection(currentDb, 'students', userId, 'items')), emptySnap, 'students'),
+      safeFetch(getDocFromServer(doc(currentDb, 'subscription', userId)), emptyDoc, 'subscription')
     ]);
 
     // 3. We will no longer clear the entire cache blindly.
@@ -3928,22 +3943,21 @@ export const syncFromFirestore = async (force = false) => {
       return { settings: null, customers: [], products: [], invoices: [], expenses: [], students: [], subscription: null };
     }
     
-    toast.error('Sync failed: ' + error.message);
-    // Restore from backup
-    try {
-      const backupKeys = ['settings', 'customers', 'staff', 'products', 'invoices', 'expenses', 'students', 'subscription'].map(k => `billqyro_${k}_backup`);
-      backupKeys.forEach(k => {
-        const backup = localStorage.getItem(k);
-        if (backup) {
-          const orig = k.replace('_backup', '');
-          localStorage.setItem(orig, backup);
-        }
-      });
-      toast.error('Restored local data from backup after sync failure');
-    } catch (restoreErr) {
-      console.error('Failed to restore from backup:', restoreErr);
+    if (force) {
+      toast.error('Cloud sync notice: ' + (error.message || 'Offline mode'));
+    } else {
+      console.warn('[dbEngine] Background sync notice:', error.message || error);
     }
-    throw error;
+    return {
+      settings: getSettings() || JSON.parse(localStorage.getItem(KEYS.SETTINGS) || 'null'),
+      customers: await getCustomers(),
+      staff: await getStaffs(),
+      products: await getProducts(),
+      invoices: await getInvoices(),
+      expenses: await getExpenses(),
+      students: await getStudents(),
+      subscription: JSON.parse(localStorage.getItem(KEYS.SUBSCRIPTION) || 'null') || DEFAULT_SUBSCRIPTION
+    };
   }
 };
 
