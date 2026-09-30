@@ -918,14 +918,16 @@ function App() {
 
   // Safety timeout to ensure app never gets stuck on boot screen
   useEffect(() => {
-    if (isAppBooting) {
+    if (isAppBooting || isDataHydrating) {
       const timeout = setTimeout(() => {
-        console.warn('[BOOT TIMEOUT] 3000ms reached, forcing app load.');
+        console.warn('[BOOT TIMEOUT] 2000ms reached, forcing app load.');
         setIsAppBooting(false);
-      }, 3000);
+        setIsDataHydrating(false);
+        setCloudSyncDone(true);
+      }, 2000);
       return () => clearTimeout(timeout);
     }
-  }, [isAppBooting]);
+  }, [isAppBooting, isDataHydrating]);
 
   const loadLocalData = useCallback(async () => {
     try {
@@ -953,6 +955,7 @@ function App() {
     } finally {
       setIsDataHydrating(false);
       setIsAppBooting(false);
+      setCloudSyncDone(true);
     }
   }, []);
 
@@ -2815,8 +2818,8 @@ function App() {
   const path = window.location.pathname;
   const showAdminRoute = path === '/km-admin' || currentTab === 'admin-panel';
 
-  // Enterprise Route Gate - Wait for Auth, Workspace, and Sync to resolve
-  const isAppReady = !isAppBooting && (!isAuthenticated || cloudSyncDone || isDemoSessionActive);
+  // Enterprise Route Gate - App is ready once local boot and hydration complete (offline-first)
+  const isAppReady = !isAppBooting && !isDataHydrating;
   const isSetupIncomplete = isAuthenticated && !isDemoSessionActive && !isDataHydrating && (
     !(activeSettings?.setupCompleted === true || activeSettings?.profileSetupCompleted === true || activeSettings?.businessSetupCompleted === true) &&
     !(
