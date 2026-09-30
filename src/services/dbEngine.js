@@ -3686,8 +3686,18 @@ export const enableRealTimeSync = () => {
         items.push(data);
       });
       localStorage.setItem(storageKey, JSON.stringify(items));
-      // Update IndexedDB to keep it consistent
-      await BillQyroDB.clear(collectionName);
+      // Prevent empty cloud states from wiping out local un-synced data
+      const localItems = await BillQyroDB.getAll(collectionName);
+      const cloudIds = new Set(items.map(i => i.id));
+      
+      for (const localItem of localItems) {
+        // If it exists locally but not in cloud, and it was previously synced, it must have been deleted remotely.
+        // If it was never synced, keep it locally so it can be uploaded later.
+        if (!cloudIds.has(localItem.id) && localItem.syncStatus === 'synced') {
+          await BillQyroDB.delete(collectionName, localItem.id);
+        }
+      }
+      
       for (const item of items) {
         await BillQyroDB.put(collectionName, item);
       }

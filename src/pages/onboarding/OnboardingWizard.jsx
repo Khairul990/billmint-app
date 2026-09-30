@@ -153,6 +153,48 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, onComplete, s
 
   const isAddWorkspaceMode = businessSettings?.setupCompleted === true;
 
+  const handleSkip = async () => {
+    if (isSaving) return;
+    setIsSaving(true);
+    try {
+      const defaultWs = {
+        id: 'ws_' + Date.now(),
+        name: 'Default Workspace',
+        type: 'general',
+        enabledModules: ['invoice', 'expense'],
+        archived: false,
+        createdAt: Date.now()
+      };
+      
+      const skippedSettings = {
+        ...businessSettings,
+        businessWorkspaces: [defaultWs],
+        activeWorkspaceId: defaultWs.id,
+        ownerName: 'Admin',
+        businessName: 'My Business',
+        phone: '0000000000',
+        setupCompleted: true,
+        profileSetupCompleted: true,
+        businessSetupCompleted: true,
+        legalAccepted: true,
+      };
+
+      if (typeof onComplete === 'function') {
+        await onComplete(skippedSettings);
+      } else if (typeof onSaveSettings === 'function') {
+        await onSaveSettings(skippedSettings);
+      }
+
+      if (typeof setCurrentTab === 'function') {
+        setCurrentTab('dashboard');
+      }
+    } catch (err) {
+      console.error('Skip failed:', err);
+      toast.error('Failed to skip onboarding.');
+      setIsSaving(false);
+    }
+  };
+
   const handleFinish = async () => {
     if (isSaving) return;
     setIsSaving(true);
@@ -482,39 +524,50 @@ return (
         </AnimatePresence>
 
         {/* Footer Navigation */}
-        <div className="mt-10 flex items-center gap-4 max-w-2xl w-full mx-auto">
-          {step > 1 && step < 4 && (
-            <button 
-              type="button"
-              onClick={() => { soundEngine.playClick(); prevStep(); }}
-              className="py-4 px-6 bg-theme-card text-theme-primary font-black rounded-2xl border border-theme-border-soft hover:bg-theme-surface transition-colors"
-            >
-              Back
-            </button>
-          )}
-          {step < 4 ? (
-            <button 
-              type="button"
-              onClick={() => { soundEngine.playClick(); nextStep(); }}
-              disabled={
-                (step === 1 && (!formData.ownerName.trim() || !formData.phone.trim())) ||
-                (step === 2 && !formData.businessName.trim()) ||
-                (step === 3 && !formData.businessType)
-              }
-              className="flex-1 py-4 bg-theme-accent text-white font-black rounded-2xl shadow-lg shadow-theme-accent/30 flex items-center justify-center gap-2 disabled:opacity-50 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-            >
-              Continue <ChevronRight className="w-5 h-5" />
-            </button>
-          ) : (
-            <button 
-              type="button"
-              onClick={() => { soundEngine.playClick(); handleFinish(); }}
-              disabled={isSaving}
-              className="w-full py-4 bg-theme-success text-white font-black rounded-2xl shadow-premium flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50"
-            >
-              {isSaving ? "Saving Workspace..." : <> <Play className="w-5 h-5 fill-current" /> Go To Dashboard </>}
-            </button>
-          )}
+        <div className="mt-10 flex flex-col items-center gap-4 max-w-2xl w-full mx-auto">
+          <div className="flex items-center gap-4 w-full">
+            {step > 1 && step < 4 && (
+              <button 
+                type="button"
+                onClick={() => { soundEngine.playClick(); prevStep(); }}
+                className="py-4 px-6 bg-theme-card text-theme-primary font-black rounded-2xl border border-theme-border-soft hover:bg-theme-surface transition-colors"
+              >
+                Back
+              </button>
+            )}
+            {step < 4 ? (
+              <button 
+                type="button"
+                onClick={() => { soundEngine.playClick(); nextStep(); }}
+                disabled={
+                  (step === 1 && (!formData.ownerName.trim() || !formData.phone.trim())) ||
+                  (step === 2 && !formData.businessName.trim()) ||
+                  (step === 3 && !formData.businessType)
+                }
+                className="flex-1 py-4 bg-theme-accent text-white font-black rounded-2xl shadow-lg shadow-theme-accent/30 flex items-center justify-center gap-2 disabled:opacity-50 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+              >
+                Continue <ChevronRight className="w-5 h-5" />
+              </button>
+            ) : (
+              <button 
+                type="button"
+                onClick={() => { soundEngine.playClick(); handleFinish(); }}
+                disabled={isSaving}
+                className="w-full py-4 bg-theme-success text-white font-black rounded-2xl shadow-premium flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50"
+              >
+                {isSaving ? "Saving Workspace..." : <> <Play className="w-5 h-5 fill-current" /> Go To Dashboard </>}
+              </button>
+            )}
+          </div>
+          
+          <button
+            type="button"
+            onClick={() => { soundEngine.playClick(); handleSkip(); }}
+            disabled={isSaving}
+            className="text-sm font-bold text-theme-muted hover:text-theme-accent transition-colors underline decoration-dotted underline-offset-4 mt-2"
+          >
+            I have a backup file (Skip Setup & Import)
+          </button>
         </div>
       </div>
     </div>
