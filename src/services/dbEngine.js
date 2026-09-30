@@ -1,4 +1,6 @@
-import { db, firebaseReady, auth } from './firebaseConfig.js';
+import { db as originalDb, firebaseReady, auth } from './firebaseConfig.js';
+import * as fbConfig from './firebaseConfig.js';
+const db = fbConfig.db || originalDb;
 
 
 // ==========================================
@@ -463,22 +465,22 @@ export const retryDeadLetterTransaction = async (dlqId) => {
 
     let docRef;
     if (entry.storeName === 'settings' || entry.storeName === 'subscription') {
-      docRef = doc(db, entry.storeName, entry.userId);
+      docRef = doc(getDb(), entry.storeName, entry.userId);
     } else {
-      docRef = doc(db, entry.storeName, entry.userId, 'items', entry.docId);
+      docRef = doc(getDb(), entry.storeName, entry.userId, 'items', entry.docId);
     }
 
     if (entry.operation === 'delete') {
       await deleteDoc(docRef);
       if (entry.storeName === 'invoices' && entry.payload?.publicToken) {
-        await deleteDoc(doc(db, 'publicInvoices', entry.payload.publicToken));
+        await deleteDoc(doc(getDb(), 'publicInvoices', entry.payload.publicToken));
       }
     } else {
       const cleanData = cleanUndefined(entry.payload);
       await setDoc(docRef, cleanData, { merge: true });
       if (entry.storeName === 'invoices' && cleanData.publicToken) {
         try {
-          await setDoc(doc(db, 'publicInvoices', cleanData.publicToken), cleanData, { merge: true });
+          await setDoc(doc(getDb(), 'publicInvoices', cleanData.publicToken), cleanData, { merge: true });
         } catch (pubErr) {
           console.warn('[DLQ RETRY] Public invoice sync warning:', pubErr);
         }
@@ -802,9 +804,9 @@ const _runSyncOfflineTransactions = async () => {
         if (tx.action === 'save') {
           let docRef;
           if (tx.storeName === 'settings' || tx.storeName === 'subscription') {
-            docRef = doc(db, tx.storeName, tx.userId);
+            docRef = doc(getDb(), tx.storeName, tx.userId);
           } else {
-            docRef = doc(db, tx.storeName, tx.userId, 'items', tx.docId);
+            docRef = doc(getDb(), tx.storeName, tx.userId, 'items', tx.docId);
           }
           
           // Check cloud version before overwriting (Cloud-wins for newer remote versions)
@@ -843,7 +845,7 @@ const _runSyncOfflineTransactions = async () => {
 
           if (tx.storeName === 'invoices' && cleanData.publicToken) {
             try {
-              const publicDocRef = doc(db, 'publicInvoices', cleanData.publicToken);
+              const publicDocRef = doc(getDb(), 'publicInvoices', cleanData.publicToken);
               await setDoc(publicDocRef, cleanData, { merge: true });
             } catch (pubErr) {
               console.warn('[SYNC QUEUE] Failed to update publicInvoice:', pubErr);
@@ -856,13 +858,13 @@ const _runSyncOfflineTransactions = async () => {
         } else if (tx.action === 'delete') {
           let docRef;
           if (tx.storeName === 'settings' || tx.storeName === 'subscription') {
-            docRef = doc(db, tx.storeName, tx.userId);
+            docRef = doc(getDb(), tx.storeName, tx.userId);
           } else {
-            docRef = doc(db, tx.storeName, tx.userId, 'items', tx.docId);
+            docRef = doc(getDb(), tx.storeName, tx.userId, 'items', tx.docId);
           }
           await deleteDoc(docRef);
           if (tx.storeName === 'invoices' && tx.data?.publicToken) {
-            await deleteDoc(doc(db, 'publicInvoices', tx.data.publicToken));
+            await deleteDoc(doc(getDb(), 'publicInvoices', tx.data.publicToken));
           }
           syncSuccess = true;
         }
@@ -1313,7 +1315,7 @@ const firestoreSave = async (collectionName, docId, data) => {
   if (collectionName === 'auditLogs' || collectionName === 'usersList') {
     // Audit logs bypass the new Sync Engine Queue because we don't care if they drop offline
     try {
-      let docRef = (collectionName === 'auditLogs') ? doc(db, collectionName, userId, 'items', docId) : doc(db, collectionName, userId);
+      let docRef = (collectionName === 'auditLogs') ? doc(getDb(), collectionName, userId, 'items', docId) : doc(getDb(), collectionName, userId);
       await setDoc(docRef, data);
       return { status: 'success' };
     } catch (e) {
@@ -1343,11 +1345,11 @@ const firestoreDelete = async (collectionName, docId) => {
     }
     let docRef;
     if (collectionName === 'settings' || collectionName === 'subscription' || collectionName === 'users') {
-      docRef = doc(db, collectionName, userId);
+      docRef = doc(getDb(), collectionName, userId);
     } else if (collectionName === 'publicInvoices') {
-      docRef = doc(db, 'publicInvoices', docId);
+      docRef = doc(getDb(), 'publicInvoices', docId);
     } else {
-      docRef = doc(db, collectionName, userId, 'items', docId);
+      docRef = doc(getDb(), collectionName, userId, 'items', docId);
     }
     await deleteDoc(docRef);
 
@@ -1681,7 +1683,7 @@ export const wipeUserFirestoreData = async (userId) => {
   try {
     const collectionsToEmpty = ['invoices', 'customers', 'staff', 'products', 'expenses', 'students'];
     for (const colName of collectionsToEmpty) {
-      const itemsRef = collection(db, colName, userId, 'items');
+      const itemsRef = collection(getDb(), colName, userId, 'items');
       const snapshot = await getDocs(itemsRef);
       
       const deletePromises = [];
@@ -1692,7 +1694,7 @@ export const wipeUserFirestoreData = async (userId) => {
         if (colName === 'invoices') {
           const data = d.data();
           if (data.publicToken) {
-            deletePromises.push(deleteDoc(doc(db, 'publicInvoices', data.publicToken)));
+            deletePromises.push(deleteDoc(doc(getDb(), 'publicInvoices', data.publicToken)));
           }
         }
       });
@@ -1700,10 +1702,10 @@ export const wipeUserFirestoreData = async (userId) => {
     }
     
     // Also delete the main user documents
-    await deleteDoc(doc(db, 'settings', userId));
-    await deleteDoc(doc(db, 'subscription', userId));
-    await deleteDoc(doc(db, 'users', userId));
-    await deleteDoc(doc(db, 'usersList', userId));
+    await deleteDoc(doc(getDb(), 'settings', userId));
+    await deleteDoc(doc(getDb(), 'subscription', userId));
+    await deleteDoc(doc(getDb(), 'users', userId));
+    await deleteDoc(doc(getDb(), 'usersList', userId));
     
 
   } catch (error) {
@@ -1771,9 +1773,9 @@ export const getSubscriptionStatus = () => {
       // Silently update Firestore to free/expired as well
       if (firebaseReady) {
         const userId = getRealUserId();
-        setDoc(doc(db, 'subscription', userId), expiredSub, { merge: true });
-        setDoc(doc(db, 'usersList', userId), { planStatus: 'free' }, { merge: true });
-        setDoc(doc(db, 'settings', userId), { planStatus: 'free' }, { merge: true });
+        setDoc(doc(getDb(), 'subscription', userId), expiredSub, { merge: true });
+        setDoc(doc(getDb(), 'usersList', userId), { planStatus: 'free' }, { merge: true });
+        setDoc(doc(getDb(), 'settings', userId), { planStatus: 'free' }, { merge: true });
       }
       return expiredSub;
     }
@@ -1816,7 +1818,7 @@ export const registerOrUpdateUserList = async (activeSettings) => {
   };
 
   try {
-    await setDoc(doc(db, 'usersList', userId), userRecord);
+    await setDoc(doc(getDb(), 'usersList', userId), userRecord);
 
   } catch (e) {
     console.error('[ERROR] Failed to update usersList:', e);
@@ -1859,7 +1861,7 @@ export const submitPremiumRequest = async (plan, paidAmount, paymentMethod, tran
 
   // Check for existing pending request to prevent duplicates
   const q = query(
-    collection(db, 'premiumRequests'),
+    collection(getDb(), 'premiumRequests'),
     where('userId', '==', userId),
     where('status', '==', 'Pending')
   );
@@ -1868,7 +1870,7 @@ export const submitPremiumRequest = async (plan, paidAmount, paymentMethod, tran
     throw new Error('You already have a pending premium activation request. Please wait for it to be processed.');
   }
 
-  await setDoc(doc(db, 'premiumRequests', requestId), payload);
+  await setDoc(doc(getDb(), 'premiumRequests', requestId), payload);
   return payload;
 };
 
@@ -1876,7 +1878,7 @@ export const submitPremiumRequest = async (plan, paidAmount, paymentMethod, tran
 export const getGlobalAdminSettings = async () => {
   if (!firebaseReady) return null;
   try {
-    const docSnap = await getDoc(doc(db, 'adminSettings', 'global'));
+    const docSnap = await getDoc(doc(getDb(), 'adminSettings', 'global'));
     if (docSnap.exists()) return docSnap.data();
     return null;
   } catch (e) {
@@ -1888,7 +1890,7 @@ export const getGlobalAdminSettings = async () => {
 export const updateGlobalAdminSettings = async (payload) => {
   if (!firebaseReady) return false;
   try {
-    await setDoc(doc(db, 'adminSettings', 'global'), payload, { merge: true });
+    await setDoc(doc(getDb(), 'adminSettings', 'global'), payload, { merge: true });
     return true;
   } catch (e) {
     console.error("Error updating global admin settings", e);
@@ -1899,7 +1901,7 @@ export const updateGlobalAdminSettings = async (payload) => {
 export const getAdminUsersList = async () => {
   if (!firebaseReady) return [];
   try {
-    const snap = await getDocs(collection(db, 'usersList'));
+    const snap = await getDocs(collection(getDb(), 'usersList'));
     const list = [];
     snap.forEach(d => list.push(d.data()));
     return list;
@@ -1912,8 +1914,8 @@ export const getAdminUsersList = async () => {
 export const getAdminTotalStats = async () => {
   if (!firebaseReady) return { invoices: 0, customers: 0, products: 0, expenses: 0 };
   try {
-    const invSnap = await getCountFromServer(collection(db, 'publicInvoices'));
-    const custSnap = await getCountFromServer(collection(db, 'usersList'));
+    const invSnap = await getCountFromServer(collection(getDb(), 'publicInvoices'));
+    const custSnap = await getCountFromServer(collection(getDb(), 'usersList'));
     
     return {
       invoices: invSnap.data().count || 0,
@@ -1934,17 +1936,17 @@ export const deleteEnterpriseUser = async (targetUserId) => {
     const collectionsToClear = ['invoices', 'customers', 'staff', 'products', 'expenses', 'students'];
     for (const coll of collectionsToClear) {
       try {
-        const snap = await getDocs(collection(db, coll, targetUserId, 'items'));
+        const snap = await getDocs(collection(getDb(), coll, targetUserId, 'items'));
         const deletePromises = [];
         snap.forEach(d => deletePromises.push(deleteDoc(d.ref)));
         await Promise.all(deletePromises);
       } catch { console.warn(`Skipped deleting ${coll} for ${targetUserId}`); }
     }
     
-    await deleteDoc(doc(db, 'settings', targetUserId));
-    await deleteDoc(doc(db, 'subscription', targetUserId));
-    await deleteDoc(doc(db, 'usersList', targetUserId));
-    await deleteDoc(doc(db, 'platformRevenue', targetUserId));
+    await deleteDoc(doc(getDb(), 'settings', targetUserId));
+    await deleteDoc(doc(getDb(), 'subscription', targetUserId));
+    await deleteDoc(doc(getDb(), 'usersList', targetUserId));
+    await deleteDoc(doc(getDb(), 'platformRevenue', targetUserId));
     
     return true;
   } catch (e) {
@@ -1959,7 +1961,7 @@ export const resetEnterpriseWorkspace = async (targetUserId) => {
     const collectionsToClear = ['invoices', 'customers', 'staff', 'products', 'expenses', 'students'];
     for (const coll of collectionsToClear) {
       try {
-        const snap = await getDocs(collection(db, coll, targetUserId, 'items'));
+        const snap = await getDocs(collection(getDb(), coll, targetUserId, 'items'));
         const deletePromises = [];
         snap.forEach(d => deletePromises.push(deleteDoc(d.ref)));
         await Promise.all(deletePromises);
@@ -1978,7 +1980,7 @@ export const getAdminPremiumRequests = async () => {
 
   if (firebaseReady) {
     try {
-      const snap = await getDocs(collection(db, 'premiumRequests'));
+      const snap = await getDocs(collection(getDb(), 'premiumRequests'));
       snap.forEach(d => list.push({ id: d.id, ...d.data() }));
     } catch (e) {
       console.error('Failed to getAdminPremiumRequests:', e);
@@ -2006,7 +2008,7 @@ export const updatePremiumRequestStatus = async (requestId, status, targetUserId
   const isSandbox = localStorage.getItem('billqyro_demo_session_active') === 'true';
 
   let reqData = null;
-  const reqRef = doc(db, 'premiumRequests', requestId);
+  const reqRef = doc(getDb(), 'premiumRequests', requestId);
 
   if (firebaseReady) {
     try {
@@ -2078,18 +2080,18 @@ export const updatePremiumRequestStatus = async (requestId, status, targetUserId
         plan
       };
 
-      await setDoc(doc(db, 'subscription', targetUserId), sub);
-      await setDoc(doc(db, 'usersList', targetUserId), { planStatus: 'premium' }, { merge: true });
-      await setDoc(doc(db, 'settings', targetUserId), { planStatus: 'premium' }, { merge: true });
+      await setDoc(doc(getDb(), 'subscription', targetUserId), sub);
+      await setDoc(doc(getDb(), 'usersList', targetUserId), { planStatus: 'premium' }, { merge: true });
+      await setDoc(doc(getDb(), 'settings', targetUserId), { planStatus: 'premium' }, { merge: true });
     } else if (status === 'Rejected') {
       const sub = {
         status: 'free',
         activatedAt: null,
         expiresAt: null
       };
-      await setDoc(doc(db, 'subscription', targetUserId), sub);
-      await setDoc(doc(db, 'usersList', targetUserId), { planStatus: 'free' }, { merge: true });
-      await setDoc(doc(db, 'settings', targetUserId), { planStatus: 'free' }, { merge: true });
+      await setDoc(doc(getDb(), 'subscription', targetUserId), sub);
+      await setDoc(doc(getDb(), 'usersList', targetUserId), { planStatus: 'free' }, { merge: true });
+      await setDoc(doc(getDb(), 'settings', targetUserId), { planStatus: 'free' }, { merge: true });
     }
     return true;
 };
@@ -2097,8 +2099,8 @@ export const updatePremiumRequestStatus = async (requestId, status, targetUserId
 export const updateUserBlockStatus = async (targetUserId, blocked) => {
   if (!firebaseReady) return false;
   try {
-    await setDoc(doc(db, 'usersList', targetUserId), { blocked }, { merge: true });
-    await setDoc(doc(db, 'settings', targetUserId), { blocked }, { merge: true });
+    await setDoc(doc(getDb(), 'usersList', targetUserId), { blocked }, { merge: true });
+    await setDoc(doc(getDb(), 'settings', targetUserId), { blocked }, { merge: true });
     return true;
   } catch (e) {
     console.error('Failed to updateUserBlockStatus:', e);
@@ -3238,7 +3240,7 @@ export const getInvoiceByPublicToken = async (token) => {
   if (firebaseReady) {
     try {
       // 1. Try publicInvoices first
-      let docRef = doc(db, 'publicInvoices', token);
+      let docRef = doc(getDb(), 'publicInvoices', token);
       let snap = await getDoc(docRef);
 
 
@@ -3251,7 +3253,7 @@ export const getInvoiceByPublicToken = async (token) => {
 
       // 2. Try legacy public_invoices for compatibility with older links
 
-      docRef = doc(db, 'public_invoices', token);
+      docRef = doc(getDb(), 'public_invoices', token);
       snap = await getDoc(docRef);
 
 
@@ -3337,7 +3339,7 @@ export const saveInvoicePublicly = async (invoice) => {
   if (firebaseReady) {
     try {
       // Unauthenticated customer ONLY writes to publicInvoices to avoid private write permission failure!
-      await setDoc(doc(db, 'publicInvoices', invoice.publicToken), invoice);
+      await setDoc(doc(getDb(), 'publicInvoices', invoice.publicToken), invoice);
       return { status: 'success' };
     } catch (e) {
       console.error('Failed to save invoice publicly to Firestore:', e);
@@ -3677,7 +3679,7 @@ export const enableRealTimeSync = () => {
   // Clear any existing listeners
   unsubscribes.forEach(unsub => unsub());
   const syncCollection = (collectionName, storageKey) => {
-    const colRef = collection(db, collectionName, userId, 'items');
+    const colRef = collection(getDb(), collectionName, userId, 'items');
     const unsub = onSnapshot(colRef, async (snapshot) => {
       const items = [];
       snapshot.forEach(doc => {
@@ -3707,7 +3709,7 @@ export const enableRealTimeSync = () => {
   };
 
   const syncDoc = (collectionName, storageKey) => {
-    const dRef = doc(db, collectionName, userId);
+    const dRef = doc(getDb(), collectionName, userId);
     const unsub = onSnapshot(dRef, (snapshot) => {
       if (snapshot.exists()) {
         localStorage.setItem(storageKey, JSON.stringify(snapshot.data()));
@@ -3783,14 +3785,14 @@ export const syncFromFirestore = async (force = false) => {
     const [
       settingsDoc, customersSnap, staffSnap, invoicesSnap, productsSnap, expensesSnap, studentsSnap, subDoc
     ] = await Promise.all([
-      safeFetch(getDocFromServer(doc(db, 'settings', userId)), emptyDoc, 'settings'),
-      safeFetch(getDocsFromServer(collection(db, 'customers', userId, 'items')), emptySnap, 'customers'),
-      safeFetch(getDocsFromServer(collection(db, 'staff', userId, 'items')), emptySnap, 'staff'),
-      safeFetch(getDocsFromServer(collection(db, 'invoices', userId, 'items')), emptySnap, 'invoices'),
-      safeFetch(getDocsFromServer(collection(db, 'products', userId, 'items')), emptySnap, 'products'),
-      safeFetch(getDocsFromServer(collection(db, 'expenses', userId, 'items')), emptySnap, 'expenses'),
-      safeFetch(getDocsFromServer(collection(db, 'students', userId, 'items')), emptySnap, 'students'),
-      safeFetch(getDocFromServer(doc(db, 'subscription', userId)), emptyDoc, 'subscription')
+      safeFetch(getDocFromServer(doc(getDb(), 'settings', userId)), emptyDoc, 'settings'),
+      safeFetch(getDocsFromServer(collection(getDb(), 'customers', userId, 'items')), emptySnap, 'customers'),
+      safeFetch(getDocsFromServer(collection(getDb(), 'staff', userId, 'items')), emptySnap, 'staff'),
+      safeFetch(getDocsFromServer(collection(getDb(), 'invoices', userId, 'items')), emptySnap, 'invoices'),
+      safeFetch(getDocsFromServer(collection(getDb(), 'products', userId, 'items')), emptySnap, 'products'),
+      safeFetch(getDocsFromServer(collection(getDb(), 'expenses', userId, 'items')), emptySnap, 'expenses'),
+      safeFetch(getDocsFromServer(collection(getDb(), 'students', userId, 'items')), emptySnap, 'students'),
+      safeFetch(getDocFromServer(doc(getDb(), 'subscription', userId)), emptyDoc, 'subscription')
     ]);
 
     // 3. We will no longer clear the entire cache blindly.
@@ -4110,7 +4112,7 @@ export const startRealTimeSync = (userId) => {
   // 1. Settings Listener
   // [COST AWARENESS] Real-time listener for critical collections only.
   // Estimated Read Source: 1 read per settings update. Keeps UI perfectly synced without refresh.
-  const settingsUnsub = onSnapshot(doc(db, 'settings', userId), (docSnap) => {
+  const settingsUnsub = onSnapshot(doc(getDb(), 'settings', userId), (docSnap) => {
     if (docSnap.exists()) {
       const cloudSettings = docSnap.data();
       
@@ -4138,7 +4140,7 @@ export const startRealTimeSync = (userId) => {
   // They only sync on explicit actions (create/update/delete) or app boot.
   // This massively reduces document reads during normal operation.
   const syncCollection = (collectionName) => {
-    const colRef = collection(db, collectionName, userId, 'items');
+    const colRef = collection(getDb(), collectionName, userId, 'items');
     const unsub = onSnapshot(colRef, async (snapshot) => {
       let changed = false;
       const promises = [];
@@ -4183,7 +4185,7 @@ export const startRealTimeSync = (userId) => {
   syncCollection('bankCredit');
 
   // 3. Internal Bank settings listener (single doc: bankMeta/{userId}/items/settings)
-  const bankMetaUnsub = onSnapshot(doc(db, 'bankMeta', userId, 'items', 'settings'), (docSnap) => {
+  const bankMetaUnsub = onSnapshot(doc(getDb(), 'bankMeta', userId, 'items', 'settings'), (docSnap) => {
     if (docSnap.exists()) {
       const cloudSettings = docSnap.data();
       if (cloudSettings.updatedByDeviceId === deviceId && cloudSettings.source === 'localUserAction') {
@@ -4247,7 +4249,7 @@ export const getStudentInvoices = async (studentId, studentEmail) => {
   if (!firebaseReady) return [];
   try {
     const q = query(
-      collection(db, 'publicInvoices'),
+      collection(getDb(), 'publicInvoices'),
       where('customerId', '==', studentId),
       where('customerEmail', '==', studentEmail)
     );
@@ -4284,7 +4286,7 @@ export const getCustomerPortalInvoices = async (customerId, phone) => {
   if (!firebaseReady) return [];
   try {
     const q = query(
-      collection(db, 'publicInvoices'),
+      collection(getDb(), 'publicInvoices'),
       where('customerId', '==', customerId)
     );
     const snap = await getDocs(q);
@@ -4327,7 +4329,7 @@ export const verifyCustomerPortal = async (customerId, phone) => {
 
     // 3. Fallback: Try querying Firestore customers (may fail if rules are strict, but worth a shot)
     try {
-      const q = query(collection(db, 'customers'), where('id', '==', customerId));
+      const q = query(collection(getDb(), 'customers'), where('id', '==', customerId));
       const snap = await getDocs(q);
       if (!snap.empty) {
         const custData = snap.docs[0].data();
