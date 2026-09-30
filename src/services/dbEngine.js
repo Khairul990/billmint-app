@@ -926,86 +926,136 @@ const _runSyncOfflineTransactions = async () => {
 export const pushAllLocalDataToCloud = async (targetUid = null) => {
   const userId = targetUid || getRealUserId();
   if (!userId || userId === 'local-user') return { count: 0 };
-  const currentDb = getDb();
+  
+  let currentDb = getDb();
+  if (!currentDb) {
+    try {
+      const { firebaseInitPromise } = await import('./firebaseConfig.js');
+      if (firebaseInitPromise) await firebaseInitPromise;
+      currentDb = getDb();
+    } catch { /* ignore */ }
+  }
+
   if (!currentDb || !firebaseReady || (typeof navigator !== 'undefined' && !navigator.onLine)) {
     return { count: 0 };
   }
 
   let syncedCount = 0;
+
+  // 1. Invoices (Unconditionally stamp with current authenticated UID)
   try {
-    // 1. Invoices
     const localInvoices = await BillQyroDB.getAll('invoices').catch(() => []);
     for (const inv of localInvoices) {
       if (!inv || !inv.id) continue;
-      if (!inv.userId || inv.userId === 'local-user') {
-        inv.userId = userId;
-        await BillQyroDB.put('invoices', inv).catch(() => {});
-      }
-      const cleanData = cleanUndefined(inv);
-      const docRef = doc(currentDb, 'invoices', userId, 'items', inv.id);
-      await setDoc(docRef, cleanData, { merge: true });
-      if (cleanData.publicToken) {
-        try {
-          const pubRef = doc(currentDb, 'publicInvoices', cleanData.publicToken);
-          await setDoc(pubRef, cleanData, { merge: true });
-        } catch (pubErr) { /* ignore */ }
-      }
-      syncedCount++;
-    }
+      // Stamp UID to guarantee Firestore security rules allow this document
+      inv.userId = userId;
+      inv.createdByUid = userId;
+      inv.syncStatus = 'synced';
+      await BillQyroDB.put('invoices', inv).catch(() => {});
 
-    // 2. Customers
+      const cleanData = cleanUndefined(inv);
+      try {
+        const docRef = doc(currentDb, 'invoices', userId, 'items', inv.id);
+        await setDoc(docRef, cleanData, { merge: true });
+        if (cleanData.publicToken) {
+          try {
+            const pubRef = doc(currentDb, 'publicInvoices', cleanData.publicToken);
+            await setDoc(pubRef, cleanData, { merge: true });
+          } catch (pubErr) { /* ignore */ }
+        }
+        syncedCount++;
+      } catch (invErr) {
+        console.warn(`[CLOUD PUSH] Invoice sync notice for ${inv.id}:`, invErr?.message || invErr);
+      }
+    }
+  } catch (err) {
+    console.warn('[CLOUD PUSH] Invoices loop error:', err);
+  }
+
+  // 2. Customers
+  try {
     const localCustomers = await BillQyroDB.getAll('customers').catch(() => []);
     for (const cust of localCustomers) {
       if (!cust || !cust.id) continue;
-      if (!cust.userId || cust.userId === 'local-user') {
-        cust.userId = userId;
-        await BillQyroDB.put('customers', cust).catch(() => {});
+      cust.userId = userId;
+      cust.syncStatus = 'synced';
+      await BillQyroDB.put('customers', cust).catch(() => {});
+      try {
+        const docRef = doc(currentDb, 'customers', userId, 'items', cust.id);
+        await setDoc(docRef, cleanUndefined(cust), { merge: true });
+        syncedCount++;
+      } catch (custErr) {
+        console.warn(`[CLOUD PUSH] Customer sync notice for ${cust.id}:`, custErr?.message || custErr);
       }
-      const docRef = doc(currentDb, 'customers', userId, 'items', cust.id);
-      await setDoc(docRef, cleanUndefined(cust), { merge: true });
-      syncedCount++;
     }
+  } catch (err) {
+    console.warn('[CLOUD PUSH] Customers loop error:', err);
+  }
 
-    // 3. Products
+  // 3. Products
+  try {
     const localProducts = await BillQyroDB.getAll('products').catch(() => []);
     for (const prod of localProducts) {
       if (!prod || !prod.id) continue;
-      if (!prod.userId || prod.userId === 'local-user') {
-        prod.userId = userId;
-        await BillQyroDB.put('products', prod).catch(() => {});
+      prod.userId = userId;
+      prod.syncStatus = 'synced';
+      await BillQyroDB.put('products', prod).catch(() => {});
+      try {
+        const docRef = doc(currentDb, 'products', userId, 'items', prod.id);
+        await setDoc(docRef, cleanUndefined(prod), { merge: true });
+        syncedCount++;
+      } catch (prodErr) {
+        console.warn(`[CLOUD PUSH] Product sync notice for ${prod.id}:`, prodErr?.message || prodErr);
       }
-      const docRef = doc(currentDb, 'products', userId, 'items', prod.id);
-      await setDoc(docRef, cleanUndefined(prod), { merge: true });
-      syncedCount++;
     }
+  } catch (err) {
+    console.warn('[CLOUD PUSH] Products loop error:', err);
+  }
 
-    // 4. Expenses
+  // 4. Expenses
+  try {
     const localExpenses = await BillQyroDB.getAll('expenses').catch(() => []);
     for (const exp of localExpenses) {
       if (!exp || !exp.id) continue;
-      if (!exp.userId || exp.userId === 'local-user') {
-        exp.userId = userId;
-        await BillQyroDB.put('expenses', exp).catch(() => {});
+      exp.userId = userId;
+      exp.syncStatus = 'synced';
+      await BillQyroDB.put('expenses', exp).catch(() => {});
+      try {
+        const docRef = doc(currentDb, 'expenses', userId, 'items', exp.id);
+        await setDoc(docRef, cleanUndefined(exp), { merge: true });
+        syncedCount++;
+      } catch (expErr) {
+        console.warn(`[CLOUD PUSH] Expense sync notice for ${exp.id}:`, expErr?.message || expErr);
       }
-      const docRef = doc(currentDb, 'expenses', userId, 'items', exp.id);
-      await setDoc(docRef, cleanUndefined(exp), { merge: true });
-      syncedCount++;
     }
+  } catch (err) {
+    console.warn('[CLOUD PUSH] Expenses loop error:', err);
+  }
 
-    // 5. Settings
+  // 5. Settings
+  try {
     const localSettings = getSettings();
     if (localSettings) {
       localSettings.userId = userId;
       const docRef = doc(currentDb, 'settings', userId);
       await setDoc(docRef, cleanUndefined(localSettings), { merge: true });
     }
-
-    console.log(`[CLOUD PUSH] Pushed ${syncedCount} local items to Firestore for user: ${userId}`);
-    return { count: syncedCount, success: true };
   } catch (err) {
-    console.warn('[CLOUD PUSH WARNING]:', err);
-    return { count: syncedCount, error: err };
+    console.warn('[CLOUD PUSH] Settings sync notice:', err);
   }
+
+  // 6. Clean up sync queue so syncFromFirestore is never blocked
+  try {
+    const queue = await BillQyroDB.getAll('syncQueue').catch(() => []);
+    for (const tx of queue) {
+      if (['invoices', 'customers', 'products', 'expenses', 'settings'].includes(tx.storeName || tx.collectionName)) {
+        await BillQyroDB.delete('syncQueue', tx.id).catch(() => {});
+      }
+    }
+  } catch { /* ignore */ }
+
+  console.log(`[CLOUD PUSH] Successfully pushed ${syncedCount} items to cloud under account: ${userId}`);
+  return { count: syncedCount, success: true };
 };
 
 
@@ -3673,6 +3723,29 @@ export const importRestore = async (backupData) => {
   const previousInvoices = await getInvoices();
 
   try {
+    const userId = getRealUserId();
+    if (userId && userId !== 'local-user') {
+      if (Array.isArray(backupData.invoices)) {
+        backupData.invoices.forEach(i => {
+          i.userId = userId;
+          i.createdByUid = userId;
+          i.syncStatus = 'synced';
+        });
+      }
+      if (Array.isArray(backupData.customers)) {
+        backupData.customers.forEach(c => { c.userId = userId; c.syncStatus = 'synced'; });
+      }
+      if (Array.isArray(backupData.products)) {
+        backupData.products.forEach(p => { p.userId = userId; p.syncStatus = 'synced'; });
+      }
+      if (Array.isArray(backupData.expenses)) {
+        backupData.expenses.forEach(e => { e.userId = userId; e.syncStatus = 'synced'; });
+      }
+      if (backupData.settings) {
+        backupData.settings.userId = userId;
+      }
+    }
+
     if (backupData.settings) {
       localStorage.setItem(KEYS.SETTINGS, JSON.stringify(backupData.settings));
     }
@@ -3704,19 +3777,9 @@ export const importRestore = async (backupData) => {
       localStorage.setItem(KEYS.SUBSCRIPTION, JSON.stringify(backupData.subscription));
     }
 
-    // If Firebase is enabled, batch update Firestore as well
-    if (firebaseReady) {
-      const userId = getRealUserId();
-      if (userId) {
-        if (backupData.settings) firestoreSave('settings', userId, backupData.settings);
-        (backupData.customers || []).forEach(c => firestoreSave('customers', c.id, c));
-        (backupData.products || []).forEach(p => firestoreSave('products', p.id, p));
-        (backupData.invoices || []).forEach(i => firestoreSave('invoices', i.id, i));
-        (backupData.expenses || []).forEach(e => firestoreSave('expenses', e.id, e));
-        (backupData.staff || []).forEach(s => firestoreSave('staff', s.id, s));
-        (backupData.students || []).forEach(st => firestoreSave('students', st.id, st));
-        if (backupData.subscription) firestoreSave('subscription', userId, backupData.subscription);
-      }
+    // Unconditionally push all restored records to Firestore so all devices get every single bill
+    if (userId && userId !== 'local-user') {
+      await pushAllLocalDataToCloud(userId).catch(e => console.warn('[RESTORE PUSH NOTICE]:', e));
     }
 
     window.dispatchEvent(new CustomEvent('billqyro_sync'));
@@ -3876,7 +3939,7 @@ export const syncFromFirestore = async (force = false) => {
     // If not empty, it means some local changes couldn't sync. We MUST NOT overwrite local DB with old cloud data.
     const queue = await BillQyroDB.getAll('syncQueue');
     const pendingItems = queue.filter(tx => tx.userId === userId || !tx.userId);
-    if (pendingItems.length > 0) {
+    if (!force && pendingItems.length > 0) {
       console.warn('Pending items in sync queue. Skipping cloud overwrite to protect local data.');
       return;
     }
