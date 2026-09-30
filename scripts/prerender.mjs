@@ -209,13 +209,8 @@ function prerender() {
     console.log(`Successfully pre-rendered dist/${page.route}/index.html with BreadcrumbList schema`);
   }
 
-  // 2. Finally, inject pre-rendered landing page into dist/index.html
-  const updatedRootIndex = rawIndexContent.replace(
-    rootTargetRegex,
-    `<div id="root">${landingRootHtml}</div>`
-  );
-  fs.writeFileSync(indexPath, updatedRootIndex, 'utf8');
-  console.log('Successfully injected pre-rendered landing page into dist/index.html');
+  // dist/index.html remains the pristine SPA shell with React root
+  console.log('Static routes pre-rendered successfully without polluting root index.html');
 }
 
 prerender();
