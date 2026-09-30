@@ -179,8 +179,6 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
         return 'Product & Service Catalog';
       case 'expenses':
         return 'Overhead Expense Logger';
-      case 'outsource':
-        return 'Outsource & Vendor Hub';
       case 'subscription':
         return 'Subscription Plan';
       case 'reports':

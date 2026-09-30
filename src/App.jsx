@@ -373,7 +373,7 @@ function App() {
     const saved = localStorage.getItem('billqyro_last_route');
     const isAuth = !!authEngine.getAuthSession() || (localStorage.getItem('billqyro_demo_session_active') === 'true' && localStorage.getItem('billqyro_demo_journey_mode') === 'true' && localStorage.getItem('billqyro_demo_logged_in') === 'true');
     if (isAuth) {
-      if (saved && saved !== 'admin-panel' && saved !== 'landing') {
+      if (saved && saved !== 'admin-panel' && saved !== 'landing' && saved !== 'outsource') {
         return saved;
       }
       return 'dashboard';
@@ -2456,12 +2456,29 @@ function App() {
         return <Delivery />;
       case 'outsource':
         return (
-          <OutsourceVendors
+          <Dashboard
             invoices={activeInvoices}
-            currentTab={currentTab}
+            customers={activeCustomers}
+            staffs={activeStaffs}
+            products={activeProducts}
+            expenses={activeExpenses}
+            onViewInvoice={(inv) => {
+              setEditingInvoice(inv);
+              setCurrentTab('invoices');
+            }}
+            onEditInvoice={(inv) => {
+              setEditingInvoice(inv);
+              setCurrentTab('create-invoice');
+            }}
+            onNewInvoice={() => {
+              setEditingInvoice(null);
+              setCurrentTab('create-invoice');
+            }}
+            onQuickAddCustomer={() => {
+              setCustomerDrawerOpen(true);
+            }}
+            onOpenStaffLedger={() => setCurrentTab('staff-ledger')}
             setCurrentTab={setCurrentTab}
-            onRecordVendorPayment={handleOpenCollectionCenter}
-            onOpenCollection={handleOpenCollectionCenter}
           />
         );
       case 'premium-upgrade':
