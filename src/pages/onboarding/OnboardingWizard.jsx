@@ -4,12 +4,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Store, CheckCircle2, ChevronRight, ChevronLeft, Building2, User, Paintbrush, Play,
   ShoppingBag, Stethoscope, Wrench, GraduationCap, Scissors, Briefcase, FileText,
-  CreditCard, ShieldCheck, Globe, Coffee, Settings, Info, Monitor, Phone, Mail, MapPin, Smartphone, Check
+  CreditCard, ShieldCheck, Globe, Coffee, Settings, Info, Monitor, Phone, Mail, MapPin, Smartphone, Check, Upload
 } from 'lucide-react';
 import { BUSINESS_PRESETS, ALL_MODULES } from '../../config/businessPresets';
 import { authEngine } from '../../services/authEngine';
 import { featureControlEngine } from '../../services/featureControlEngine';
 import { soundEngine } from '../../utils/soundEngine';
+import { importRestore } from '../../services/dbEngine';
 
 const iconMap = {
   ShoppingBag, Stethoscope, Wrench, GraduationCap, Scissors, Briefcase, FileText, Store, Palette: Paintbrush, Coffee, Settings, Monitor
@@ -153,46 +154,37 @@ const OnboardingWizard = ({ businessSettings = {}, onSaveSettings, onComplete, s
 
   const isAddWorkspaceMode = businessSettings?.setupCompleted === true;
 
-  const handleSkip = async () => {
+  const handleBackupUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
     if (isSaving) return;
     setIsSaving(true);
-    try {
-      const defaultWs = {
-        id: 'ws_' + Date.now(),
-        name: 'Default Workspace',
-        type: 'general',
-        enabledModules: ['invoice', 'expense'],
-        archived: false,
-        createdAt: Date.now()
-      };
-      
-      const skippedSettings = {
-        ...businessSettings,
-        businessWorkspaces: [defaultWs],
-        activeWorkspaceId: defaultWs.id,
-        ownerName: 'Admin',
-        businessName: 'My Business',
-        phone: '0000000000',
-        setupCompleted: true,
-        profileSetupCompleted: true,
-        businessSetupCompleted: true,
-        legalAccepted: true,
-      };
-
-      if (typeof onComplete === 'function') {
-        await onComplete(skippedSettings);
-      } else if (typeof onSaveSettings === 'function') {
-        await onSaveSettings(skippedSettings);
+    
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const backupData = JSON.parse(event.target.result);
+        if (!backupData.settings) throw new Error("Invalid backup format");
+        
+        await importRestore(backupData);
+        toast.success("Backup restored successfully!");
+        
+        // Hard reload to initialize everything with restored data
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      } catch (err) {
+        console.error("Direct import failed:", err);
+        toast.error("Failed to restore from backup file.");
+        setIsSaving(false);
       }
-
-      if (typeof setCurrentTab === 'function') {
-        setCurrentTab('dashboard');
-      }
-    } catch (err) {
-      console.error('Skip failed:', err);
-      toast.error('Failed to skip onboarding.');
+    };
+    reader.onerror = () => {
+      toast.error("Could not read file.");
       setIsSaving(false);
-    }
+    };
+    reader.readAsText(file);
   };
 
   const handleFinish = async () => {
@@ -560,14 +552,23 @@ return (
             )}
           </div>
           
-          <button
-            type="button"
-            onClick={() => { soundEngine.playClick(); handleSkip(); }}
-            disabled={isSaving}
-            className="text-sm font-bold text-theme-muted hover:text-theme-accent transition-colors underline decoration-dotted underline-offset-4 mt-2"
-          >
-            I have a backup file (Skip Setup & Import)
-          </button>
+          <div className="mt-4 flex flex-col items-center">
+            <input 
+              type="file"
+              id="onboarding-backup-upload"
+              accept=".json"
+              className="hidden"
+              onChange={handleBackupUpload}
+              disabled={isSaving}
+            />
+            <label
+              htmlFor="onboarding-backup-upload"
+              className={`flex items-center gap-2 px-6 py-3 rounded-xl border border-dashed border-theme-border hover:border-theme-accent text-sm font-bold text-theme-muted hover:text-theme-accent transition-colors cursor-pointer ${isSaving ? 'opacity-50 pointer-events-none' : ''}`}
+            >
+              <Upload className="w-4 h-4" />
+              I have a backup file (Direct Import)
+            </label>
+          </div>
         </div>
       </div>
     </div>
