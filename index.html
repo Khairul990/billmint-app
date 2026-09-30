@@ -233,6 +233,38 @@
             document.documentElement.classList.remove('dark');
           }
 
+
+          var THEME_MAP = {
+            'sapphire-noir': { accent: '#2563EB', darkAccent: '#4F8EF7', bg: '#EEF4FF', darkBg: '#0B1118', grad: 'linear-gradient(135deg, #2563EB, #1E3A8A)' },
+            'emerald-royal': { accent: '#0B8F78', darkAccent: '#10B981', bg: '#F0FDF4', darkBg: '#0B1613', grad: 'linear-gradient(135deg, #0B8F78, #056152)' },
+            'brand-premium': { accent: '#0B8F78', darkAccent: '#10B981', bg: '#F4FBF9', darkBg: '#0D1714', grad: 'linear-gradient(135deg, #0B8F78, #056152)' },
+            'obsidian-gold': { accent: '#D97706', darkAccent: '#F59E0B', bg: '#FFFBEB', darkBg: '#0F0F11', grad: 'linear-gradient(135deg, #D97706, #B45309)' },
+            'rose-platinum': { accent: '#E11D48', darkAccent: '#FB7185', bg: '#FFF1F2', darkBg: '#180D11', grad: 'linear-gradient(135deg, #E11D48, #BE123C)' },
+            'graphite-copper': { accent: '#EA580C', darkAccent: '#FB923C', bg: '#FFF7ED', darkBg: '#16110F', grad: 'linear-gradient(135deg, #EA580C, #C2410C)' },
+            'midnight-ruby': { accent: '#DC2626', darkAccent: '#F87171', bg: '#FEF2F2', darkBg: '#180B0B', grad: 'linear-gradient(135deg, #DC2626, #B91C1C)' },
+            'ocean-waves': { accent: '#0284C7', darkAccent: '#38BDF8', bg: '#F0F9FF', darkBg: '#08141F', grad: 'linear-gradient(135deg, #0284C7, #0369A1)' },
+            'sunset-orange': { accent: '#F97316', darkAccent: '#FB923C', bg: '#FFF7ED', darkBg: '#18110B', grad: 'linear-gradient(135deg, #F97316, #EA580C)' },
+            'royal-purple': { accent: '#9333EA', darkAccent: '#C084FC', bg: '#FAF5FF', darkBg: '#140B1A', grad: 'linear-gradient(135deg, #9333EA, #7E22CE)' },
+            'cyber-teal': { accent: '#0D9488', darkAccent: '#2DD4BF', bg: '#F0FDFA', darkBg: '#0B1616', grad: 'linear-gradient(135deg, #0D9488, #0F766E)' },
+            'gold-coast': { accent: '#CA8A04', darkAccent: '#FACC15', bg: '#FEFCE8', darkBg: '#161408', grad: 'linear-gradient(135deg, #CA8A04, #A16207)' },
+            'crimson-red': { accent: '#E11D48', darkAccent: '#F43F5E', bg: '#FFF1F2', darkBg: '#180B0F', grad: 'linear-gradient(135deg, #E11D48, #BE123C)' },
+            'cherry-blossom': { accent: '#DB2777', darkAccent: '#F472B6', bg: '#FDF2F8', darkBg: '#180B13', grad: 'linear-gradient(135deg, #DB2777, #BE185D)' },
+            'obsidian-black': { accent: '#64748B', darkAccent: '#94A3B8', bg: '#F8FAFC', darkBg: '#090D14', grad: 'linear-gradient(135deg, #475569, #1E293B)' }
+          };
+          var tData = THEME_MAP[activeTheme] || THEME_MAP['sapphire-noir'];
+          var customBrand = localStorage.getItem('billqyro_brand_color');
+          var curAccent = (customBrand && activeTheme === 'custom') ? customBrand : (isDark ? tData.darkAccent : tData.accent);
+          var curBg = isDark ? tData.darkBg : tData.bg;
+          var curText = isDark ? '#F9FAFB' : '#0F172A';
+          var curGrad = (customBrand && activeTheme === 'custom') ? ('linear-gradient(135deg, ' + customBrand + ', #1E3A8A)') : tData.grad;
+
+          document.documentElement.style.setProperty('--splash-bg', curBg);
+          document.documentElement.style.setProperty('--splash-text', curText);
+          document.documentElement.style.setProperty('--splash-accent', curAccent);
+          document.documentElement.style.setProperty('--splash-accent-grad', curGrad);
+          document.documentElement.style.setProperty('--splash-ring', isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)');
+          document.documentElement.style.setProperty('--splash-glow', isDark ? 'rgba(0,0,0,0.5)' : 'rgba(37,99,235,0.25)');
+
           var themeFolderMap = {
             classic: 'billqyro-classic',
             'brand-premium': 'billqyro-classic',
@@ -328,21 +360,59 @@
         } catch (e) {}
       })();
     </script>
+  
+    <style id="splash-styles">
+      #bq-initial-loader {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: var(--splash-bg, #EEF4FF);
+        color: var(--splash-text, #0F172A);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        transition: background-color 0.2s ease;
+      }
+      #bq-initial-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        background: var(--splash-accent-grad, linear-gradient(135deg, #2563EB, #1E3A8A));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 10px 25px var(--splash-glow, rgba(37, 99, 235, 0.25));
+      }
+      #bq-initial-spinner {
+        width: 32px;
+        height: 32px;
+        border: 3px solid var(--splash-ring, rgba(0, 0, 0, 0.08));
+        border-top-color: var(--splash-accent, #2563EB);
+        border-radius: 50%;
+        animation: bq_spin 0.8s linear infinite;
+      }
+      @keyframes bq_spin { to { transform: rotate(360deg); } }
+    </style>
   </head>
   <body class="transition-colors duration-300">
     
 
 
     <div id="root">
-      <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0B101B; color: #FFFFFF; font-family: 'Inter', -apple-system, sans-serif;">
+      <div id="bq-initial-loader">
         <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
-          <div style="width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, #10B981, #059669); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          <div id="bq-initial-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
           </div>
-          <span style="font-size: 26px; font-weight: 800; letter-spacing: -0.5px;">BillQyro</span>
+          <span style="font-size: 26px; font-weight: 800; letter-spacing: -0.5px; color: var(--splash-text, #0F172A);">BillQyro</span>
         </div>
-        <div style="width: 32px; height: 32px; border: 3px solid rgba(16, 185, 129, 0.2); border-top-color: #10B981; border-radius: 50%; animation: bq_spin 0.8s linear infinite;"></div>
-        <style>@keyframes bq_spin { to { transform: rotate(360deg); } }</style>
+        <div id="bq-initial-spinner"></div>
       </div>
     </div>
     <script type="module" src="/src/main.jsx"></script>
