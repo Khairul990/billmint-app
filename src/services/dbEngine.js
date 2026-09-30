@@ -1528,21 +1528,34 @@ export const resetToDemoData = () => {
 // --- AUTHENTICATION ---
 export const getAuthSession = () => {
   const session = localStorage.getItem(KEYS.AUTH);
-  if (!session) return null;
-  try {
-    const data = JSON.parse(session);
-    if (Date.now() - data.timestamp > 24 * 60 * 60 * 1000) {
-      localStorage.removeItem(KEYS.AUTH);
-      return null;
+  if (session) {
+    try {
+      const data = JSON.parse(session);
+      if (data && data.uid && data.uid !== 'demo-user') {
+        return data;
+      }
+    } catch {
+      // JSON parse issue, continue to fallback
     }
-    if (!data.uid || data.uid === 'demo-user') {
-      localStorage.removeItem(KEYS.AUTH);
-      return null;
-    }
-    return data;
-  } catch {
-    return null;
   }
+
+  // Fallback: If user restored backup or already has business settings configured, keep session active
+  const settings = getSettings();
+  if (settings && (settings.setupCompleted || settings.businessName || settings.ownerName || settings.userId)) {
+    const fallbackSession = {
+      timestamp: Date.now(),
+      token: 'billqyro-persistent-session',
+      userEmail: settings.email || settings.contactEmail || 'user@billqyro.local',
+      uid: settings.userId || localStorage.getItem('billqyro_last_uid') || 'local-user',
+      isSuperAdmin: false
+    };
+    try {
+      localStorage.setItem(KEYS.AUTH, JSON.stringify(fallbackSession));
+    } catch { /* ignore */ }
+    return fallbackSession;
+  }
+
+  return null;
 };
 
 

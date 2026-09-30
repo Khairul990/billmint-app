@@ -372,11 +372,13 @@ function App() {
     }
     const saved = localStorage.getItem('billqyro_last_route');
     const isAuth = !!authEngine.getAuthSession() || (localStorage.getItem('billqyro_demo_session_active') === 'true' && localStorage.getItem('billqyro_demo_journey_mode') === 'true' && localStorage.getItem('billqyro_demo_logged_in') === 'true');
-    if (isAuth && saved && saved !== 'admin-panel') {
-      return saved;
+    if (isAuth) {
+      if (saved && saved !== 'admin-panel' && saved !== 'landing') {
+        return saved;
+      }
+      return 'dashboard';
     }
-    if (!isAuth) return 'landing';
-    return null; // Neutral boot state - resolved centrally by the app gate
+    return 'landing';
   });
 
   useEffect(() => {
@@ -1174,9 +1176,16 @@ function App() {
             setUserPermissions(null);
           }
         } else {
-          setIsAuthenticated(false);
-          setWorkspaceVerified(false);
-          setUserPermissions(null);
+          // Check if local session or business settings exist before discarding auth
+          const localSession = authEngine.getAuthSession();
+          if (localSession) {
+            setIsAuthenticated(true);
+            setWorkspaceVerified(true);
+          } else {
+            setIsAuthenticated(false);
+            setWorkspaceVerified(false);
+            setUserPermissions(null);
+          }
           setIsAppBooting(false);
           setIsDataHydrating(false);
         }
