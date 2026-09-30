@@ -3,6 +3,7 @@ import {
   enqueueSync,
   flushSyncQueue,
   syncOfflineTransactions,
+  pushAllLocalDataToCloud,
   isSyncInProgress,
   startRealTimeSync as dbStartRealTimeSync,
   stopRealTimeSync as dbStopRealTimeSync,
@@ -63,6 +64,7 @@ export const offlineEngine = {
   async syncNow() {
     if (typeof navigator !== 'undefined' && !navigator.onLine) return { status: 'offline', message: 'Device is offline' };
     try {
+      await pushAllLocalDataToCloud();
       await syncOfflineTransactions();
       await startBackgroundSync();
       return { status: 'synced' };

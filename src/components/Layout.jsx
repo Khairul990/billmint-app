@@ -69,6 +69,8 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
       toast.loading('Syncing records with cloud database...', { id: 'manual-cloud-sync' });
       const { offlineEngine } = await import('../services/offlineEngine');
       const { invoiceEngine } = await import('../services/invoiceEngine');
+      const { pushAllLocalDataToCloud } = await import('../services/dbEngine');
+      await pushAllLocalDataToCloud();
       await offlineEngine.syncNow();
       await invoiceEngine.syncFromCloud(true);
       window.dispatchEvent(new CustomEvent('billqyro_sync'));

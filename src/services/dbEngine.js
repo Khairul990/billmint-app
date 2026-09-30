@@ -919,6 +919,96 @@ const _runSyncOfflineTransactions = async () => {
   }
 };
 
+/**
+ * Reconciles and pushes all local IndexedDB records (invoices, customers, products, settings)
+ * up to Firebase Firestore so they are accessible on any other computer/device.
+ */
+export const pushAllLocalDataToCloud = async (targetUid = null) => {
+  const userId = targetUid || getRealUserId();
+  if (!userId || userId === 'local-user') return { count: 0 };
+  const currentDb = getDb();
+  if (!currentDb || !firebaseReady || (typeof navigator !== 'undefined' && !navigator.onLine)) {
+    return { count: 0 };
+  }
+
+  let syncedCount = 0;
+  try {
+    // 1. Invoices
+    const localInvoices = await BillQyroDB.getAll('invoices').catch(() => []);
+    for (const inv of localInvoices) {
+      if (!inv || !inv.id) continue;
+      if (!inv.userId || inv.userId === 'local-user') {
+        inv.userId = userId;
+        await BillQyroDB.put('invoices', inv).catch(() => {});
+      }
+      const cleanData = cleanUndefined(inv);
+      const docRef = doc(currentDb, 'invoices', userId, 'items', inv.id);
+      await setDoc(docRef, cleanData, { merge: true });
+      if (cleanData.publicToken) {
+        try {
+          const pubRef = doc(currentDb, 'publicInvoices', cleanData.publicToken);
+          await setDoc(pubRef, cleanData, { merge: true });
+        } catch (pubErr) { /* ignore */ }
+      }
+      syncedCount++;
+    }
+
+    // 2. Customers
+    const localCustomers = await BillQyroDB.getAll('customers').catch(() => []);
+    for (const cust of localCustomers) {
+      if (!cust || !cust.id) continue;
+      if (!cust.userId || cust.userId === 'local-user') {
+        cust.userId = userId;
+        await BillQyroDB.put('customers', cust).catch(() => {});
+      }
+      const docRef = doc(currentDb, 'customers', userId, 'items', cust.id);
+      await setDoc(docRef, cleanUndefined(cust), { merge: true });
+      syncedCount++;
+    }
+
+    // 3. Products
+    const localProducts = await BillQyroDB.getAll('products').catch(() => []);
+    for (const prod of localProducts) {
+      if (!prod || !prod.id) continue;
+      if (!prod.userId || prod.userId === 'local-user') {
+        prod.userId = userId;
+        await BillQyroDB.put('products', prod).catch(() => {});
+      }
+      const docRef = doc(currentDb, 'products', userId, 'items', prod.id);
+      await setDoc(docRef, cleanUndefined(prod), { merge: true });
+      syncedCount++;
+    }
+
+    // 4. Expenses
+    const localExpenses = await BillQyroDB.getAll('expenses').catch(() => []);
+    for (const exp of localExpenses) {
+      if (!exp || !exp.id) continue;
+      if (!exp.userId || exp.userId === 'local-user') {
+        exp.userId = userId;
+        await BillQyroDB.put('expenses', exp).catch(() => {});
+      }
+      const docRef = doc(currentDb, 'expenses', userId, 'items', exp.id);
+      await setDoc(docRef, cleanUndefined(exp), { merge: true });
+      syncedCount++;
+    }
+
+    // 5. Settings
+    const localSettings = getSettings();
+    if (localSettings) {
+      localSettings.userId = userId;
+      const docRef = doc(currentDb, 'settings', userId);
+      await setDoc(docRef, cleanUndefined(localSettings), { merge: true });
+    }
+
+    console.log(`[CLOUD PUSH] Pushed ${syncedCount} local items to Firestore for user: ${userId}`);
+    return { count: syncedCount, success: true };
+  } catch (err) {
+    console.warn('[CLOUD PUSH WARNING]:', err);
+    return { count: syncedCount, error: err };
+  }
+};
+
+
 
 
 // LocalStorage Global Keys

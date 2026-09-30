@@ -1170,6 +1170,9 @@ function App() {
             const permissions = await securityEngine.getPermissions(user.uid);
             setUserPermissions(permissions);
             localStorage.setItem('billqyro_user_permissions', JSON.stringify(permissions));
+
+            // Seamless Multi-Device Cloud Sync: Push any un-uploaded local records (e.g. from restore or offline bills) to Firestore
+            import('./services/dbEngine').then(m => m.pushAllLocalDataToCloud(user.uid)).catch(e => console.warn('[AuthFlow] Auto-push notice:', e));
           } catch (e) {
             console.warn('[AuthFlow] Workspace/perm check failed:', e);
             setWorkspaceVerified(true);
