@@ -166,6 +166,25 @@ export class BillQyroDB {
     });
   }
 
+  static async bulkPut(storeName, items) {
+    if (!items || !items.length) return items || [];
+    if (typeof localStorage !== 'undefined' && localStorage.getItem('billqyro_demo_session_active') === 'true') return items;
+    const db = await this.open();
+    return new Promise((resolve, reject) => {
+      try {
+        const tx = db.transaction(storeName, 'readwrite');
+        const store = tx.objectStore(storeName);
+        for (let i = 0; i < items.length; i++) {
+          const it = items[i];
+          if (it) store.put(it);
+        }
+        tx.oncomplete = () => resolve(items);
+        tx.onerror = () => reject(tx.error);
+        tx.onabort = () => reject(tx.error || new Error('bulkPut transaction aborted'));
+      } catch (error) { reject(error); }
+    });
+  }
+
   static async delete(storeName, id) {
     if (typeof localStorage !== 'undefined' && localStorage.getItem('billqyro_demo_session_active') === 'true') return true;
     const db = await this.open();
@@ -174,6 +193,25 @@ export class BillQyroDB {
         const request = db.transaction(storeName, 'readwrite').objectStore(storeName).delete(id);
         request.onsuccess = () => resolve(true);
         request.onerror = () => reject(request.error);
+      } catch (error) { reject(error); }
+    });
+  }
+
+  static async bulkDelete(storeName, ids) {
+    if (!ids || !ids.length) return true;
+    if (typeof localStorage !== 'undefined' && localStorage.getItem('billqyro_demo_session_active') === 'true') return true;
+    const db = await this.open();
+    return new Promise((resolve, reject) => {
+      try {
+        const tx = db.transaction(storeName, 'readwrite');
+        const store = tx.objectStore(storeName);
+        for (let i = 0; i < ids.length; i++) {
+          const id = ids[i];
+          if (id) store.delete(id);
+        }
+        tx.oncomplete = () => resolve(true);
+        tx.onerror = () => reject(tx.error);
+        tx.onabort = () => reject(tx.error || new Error('bulkDelete transaction aborted'));
       } catch (error) { reject(error); }
     });
   }

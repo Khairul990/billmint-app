@@ -16,7 +16,7 @@
 
 let doc, setDoc, deleteDoc, getDoc, getDocs, collection, query, where,
     orderBy, limit, onSnapshot, getDocFromServer, getDocsFromServer,
-    getCountFromServer, runTransaction, updateDoc, addDoc, serverTimestamp;
+    getCountFromServer, runTransaction, updateDoc, addDoc, serverTimestamp, writeBatch;
 
 // Kicked off at module evaluation; the promise resolves with the SDK
 // module (or null when it cannot load, e.g. fully offline first boot).
@@ -25,7 +25,7 @@ export const fsReady = import('firebase/firestore').then((fs) => {
     {
       doc, setDoc, deleteDoc, getDoc, getDocs, collection, query, where,
       orderBy, limit, onSnapshot, getDocFromServer, getDocsFromServer,
-      getCountFromServer, runTransaction, updateDoc, addDoc, serverTimestamp
+      getCountFromServer, runTransaction, updateDoc, addDoc, serverTimestamp, writeBatch
     } = fs
   );
   return fs;
@@ -37,5 +37,5 @@ export const fsReady = import('firebase/firestore').then((fs) => {
 export {
   doc, setDoc, deleteDoc, getDoc, getDocs, collection, query, where,
   orderBy, limit, onSnapshot, getDocFromServer, getDocsFromServer,
-  getCountFromServer, runTransaction, updateDoc, addDoc, serverTimestamp
+  getCountFromServer, runTransaction, updateDoc, addDoc, serverTimestamp, writeBatch
 };

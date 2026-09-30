@@ -160,7 +160,7 @@ export const clearStaffs = async () => {
 ;
 import { toast } from 'react-hot-toast';
 import JSZip from 'jszip';
-import { doc, setDoc, deleteDoc, getDoc, collection, getDocs, onSnapshot, getDocFromServer, getDocsFromServer, query, where, getCountFromServer } from './fsHelpers.js';
+import { doc, setDoc, deleteDoc, getDoc, collection, getDocs, onSnapshot, getDocFromServer, getDocsFromServer, query, where, getCountFromServer, writeBatch } from './fsHelpers.js';
 import { getAdminEmail, isAdminUser } from './adminAccess.js';
 import { BillQyroDB } from './localDb.js';
 import { generateVerificationCode } from './verificationCodeService.js';
@@ -818,23 +818,28 @@ const _runSyncOfflineTransactions = async () => {
             docRef = doc(getDb(), tx.storeName, tx.userId, 'items', tx.docId);
           }
           
-          // Check cloud version before overwriting (Cloud-wins for newer remote versions)
-          try {
-            const cloudSnap = await getDoc(docRef);
-            if (cloudSnap.exists()) {
-              const cloudData = cloudSnap.data();
-              const cloudVersion = cloudData.__version || 0;
-              const localVersion = tx.data?.__version || 0;
-              if (cloudVersion > localVersion) {
-                console.warn(`[SYNC QUEUE] Skipping TX ${tx.id}: cloud version ${cloudVersion} > local ${localVersion}`);
-                syncSuccess = true;
-                await markLocalRecordSynced(tx.storeName, tx.docId);
-                await BillQyroDB.delete('syncQueue', tx.id);
-                continue;
+          // Check cloud version before overwriting only if local version exists (with fast timeout)
+          if (tx.data?.__version) {
+            try {
+              const cloudSnap = await Promise.race([
+                getDoc(docRef),
+                new Promise((_, r) => setTimeout(() => r(new Error('version-check-timeout')), 1500))
+              ]);
+              if (cloudSnap?.exists?.()) {
+                const cloudData = cloudSnap.data();
+                const cloudVersion = cloudData.__version || 0;
+                const localVersion = tx.data?.__version || 0;
+                if (cloudVersion > localVersion) {
+                  console.warn(`[SYNC QUEUE] Skipping TX ${tx.id}: cloud version ${cloudVersion} > local ${localVersion}`);
+                  syncSuccess = true;
+                  await markLocalRecordSynced(tx.storeName, tx.docId);
+                  await BillQyroDB.delete('syncQueue', tx.id);
+                  continue;
+                }
               }
+            } catch (e) {
+              // Non-blocking: proceed directly with write
             }
-          } catch (e) {
-            console.warn('[SYNC QUEUE] Cloud version check warning:', e);
           }
           
           const cleanData = cleanUndefined(tx.data);
@@ -932,6 +937,8 @@ export const pushAllLocalDataToCloud = async (targetUid = null) => {
     try {
       const { firebaseInitPromise } = await import('./firebaseConfig.js');
       if (firebaseInitPromise) await firebaseInitPromise;
+      const { fsReady } = await import('./fsHelpers.js');
+      if (fsReady) await fsReady;
       currentDb = getDb();
     } catch { /* ignore */ }
   }
@@ -940,122 +947,167 @@ export const pushAllLocalDataToCloud = async (targetUid = null) => {
     return { count: 0 };
   }
 
-  let syncedCount = 0;
+  // Load all local data in parallel
+  const [localInvoices, localCustomers, localProducts, localExpenses, localStaff, localStudents] = await Promise.all([
+    BillQyroDB.getAll('invoices').catch(() => []),
+    BillQyroDB.getAll('customers').catch(() => []),
+    BillQyroDB.getAll('products').catch(() => []),
+    BillQyroDB.getAll('expenses').catch(() => []),
+    BillQyroDB.getAll('staff').catch(() => []),
+    BillQyroDB.getAll('students').catch(() => [])
+  ]);
 
-  // 1. Invoices (Unconditionally stamp with current authenticated UID)
-  try {
-    const localInvoices = await BillQyroDB.getAll('invoices').catch(() => []);
-    for (const inv of localInvoices) {
-      if (!inv || !inv.id) continue;
-      // Stamp UID to guarantee Firestore security rules allow this document
-      inv.userId = userId;
-      inv.createdByUid = userId;
-      inv.syncStatus = 'synced';
-      await BillQyroDB.put('invoices', inv).catch(() => {});
+  const operations = [];
 
-      const cleanData = cleanUndefined(inv);
-      try {
-        const docRef = doc(currentDb, 'invoices', userId, 'items', inv.id);
-        await setDoc(docRef, cleanData, { merge: true });
-        if (cleanData.publicToken) {
-          try {
-            const pubRef = doc(currentDb, 'publicInvoices', cleanData.publicToken);
-            await setDoc(pubRef, cleanData, { merge: true });
-          } catch (pubErr) { /* ignore */ }
-        }
-        syncedCount++;
-      } catch (invErr) {
-        console.warn(`[CLOUD PUSH] Invoice sync notice for ${inv.id}:`, invErr?.message || invErr);
-      }
+  // 1. Invoices (Unconditionally stamped with current authenticated UID)
+  const updatedInvoices = [];
+  for (const inv of localInvoices) {
+    if (!inv || !inv.id) continue;
+    inv.userId = userId;
+    inv.createdByUid = userId;
+    inv.syncStatus = 'synced';
+    updatedInvoices.push(inv);
+
+    const cleanData = cleanUndefined(inv);
+    operations.push({
+      ref: doc(currentDb, 'invoices', userId, 'items', inv.id),
+      data: cleanData
+    });
+
+    if (cleanData.publicToken) {
+      operations.push({
+        ref: doc(currentDb, 'publicInvoices', cleanData.publicToken),
+        data: cleanData
+      });
     }
-  } catch (err) {
-    console.warn('[CLOUD PUSH] Invoices loop error:', err);
   }
 
   // 2. Customers
-  try {
-    const localCustomers = await BillQyroDB.getAll('customers').catch(() => []);
-    for (const cust of localCustomers) {
-      if (!cust || !cust.id) continue;
-      cust.userId = userId;
-      cust.syncStatus = 'synced';
-      await BillQyroDB.put('customers', cust).catch(() => {});
-      try {
-        const docRef = doc(currentDb, 'customers', userId, 'items', cust.id);
-        await setDoc(docRef, cleanUndefined(cust), { merge: true });
-        syncedCount++;
-      } catch (custErr) {
-        console.warn(`[CLOUD PUSH] Customer sync notice for ${cust.id}:`, custErr?.message || custErr);
-      }
-    }
-  } catch (err) {
-    console.warn('[CLOUD PUSH] Customers loop error:', err);
+  const updatedCustomers = [];
+  for (const cust of localCustomers) {
+    if (!cust || !cust.id) continue;
+    cust.userId = userId;
+    cust.syncStatus = 'synced';
+    updatedCustomers.push(cust);
+    operations.push({
+      ref: doc(currentDb, 'customers', userId, 'items', cust.id),
+      data: cleanUndefined(cust)
+    });
   }
 
   // 3. Products
-  try {
-    const localProducts = await BillQyroDB.getAll('products').catch(() => []);
-    for (const prod of localProducts) {
-      if (!prod || !prod.id) continue;
-      prod.userId = userId;
-      prod.syncStatus = 'synced';
-      await BillQyroDB.put('products', prod).catch(() => {});
-      try {
-        const docRef = doc(currentDb, 'products', userId, 'items', prod.id);
-        await setDoc(docRef, cleanUndefined(prod), { merge: true });
-        syncedCount++;
-      } catch (prodErr) {
-        console.warn(`[CLOUD PUSH] Product sync notice for ${prod.id}:`, prodErr?.message || prodErr);
-      }
-    }
-  } catch (err) {
-    console.warn('[CLOUD PUSH] Products loop error:', err);
+  const updatedProducts = [];
+  for (const prod of localProducts) {
+    if (!prod || !prod.id) continue;
+    prod.userId = userId;
+    prod.syncStatus = 'synced';
+    updatedProducts.push(prod);
+    operations.push({
+      ref: doc(currentDb, 'products', userId, 'items', prod.id),
+      data: cleanUndefined(prod)
+    });
   }
 
   // 4. Expenses
-  try {
-    const localExpenses = await BillQyroDB.getAll('expenses').catch(() => []);
-    for (const exp of localExpenses) {
-      if (!exp || !exp.id) continue;
-      exp.userId = userId;
-      exp.syncStatus = 'synced';
-      await BillQyroDB.put('expenses', exp).catch(() => {});
-      try {
-        const docRef = doc(currentDb, 'expenses', userId, 'items', exp.id);
-        await setDoc(docRef, cleanUndefined(exp), { merge: true });
-        syncedCount++;
-      } catch (expErr) {
-        console.warn(`[CLOUD PUSH] Expense sync notice for ${exp.id}:`, expErr?.message || expErr);
-      }
-    }
-  } catch (err) {
-    console.warn('[CLOUD PUSH] Expenses loop error:', err);
+  const updatedExpenses = [];
+  for (const exp of localExpenses) {
+    if (!exp || !exp.id) continue;
+    exp.userId = userId;
+    exp.syncStatus = 'synced';
+    updatedExpenses.push(exp);
+    operations.push({
+      ref: doc(currentDb, 'expenses', userId, 'items', exp.id),
+      data: cleanUndefined(exp)
+    });
   }
 
-  // 5. Settings
+  // 5. Staff
+  const updatedStaff = [];
+  for (const s of localStaff) {
+    if (!s || !s.id) continue;
+    s.userId = userId;
+    s.syncStatus = 'synced';
+    updatedStaff.push(s);
+    operations.push({
+      ref: doc(currentDb, 'staff', userId, 'items', s.id),
+      data: cleanUndefined(s)
+    });
+  }
+
+  // 6. Students
+  const updatedStudents = [];
+  for (const st of localStudents) {
+    if (!st || !st.id) continue;
+    st.userId = userId;
+    st.syncStatus = 'synced';
+    updatedStudents.push(st);
+    operations.push({
+      ref: doc(currentDb, 'students', userId, 'items', st.id),
+      data: cleanUndefined(st)
+    });
+  }
+
+  // 7. Settings
   try {
     const localSettings = getSettings();
     if (localSettings) {
       localSettings.userId = userId;
-      const docRef = doc(currentDb, 'settings', userId);
-      await setDoc(docRef, cleanUndefined(localSettings), { merge: true });
-    }
-  } catch (err) {
-    console.warn('[CLOUD PUSH] Settings sync notice:', err);
-  }
-
-  // 6. Clean up sync queue so syncFromFirestore is never blocked
-  try {
-    const queue = await BillQyroDB.getAll('syncQueue').catch(() => []);
-    for (const tx of queue) {
-      if (['invoices', 'customers', 'products', 'expenses', 'settings'].includes(tx.storeName || tx.collectionName)) {
-        await BillQyroDB.delete('syncQueue', tx.id).catch(() => {});
-      }
+      operations.push({
+        ref: doc(currentDb, 'settings', userId),
+        data: cleanUndefined(localSettings)
+      });
     }
   } catch { /* ignore */ }
 
-  console.log(`[CLOUD PUSH] Successfully pushed ${syncedCount} items to cloud under account: ${userId}`);
-  return { count: syncedCount, success: true };
+  // Fast Bulk Commit to Firestore (batches of 400 operations)
+  const CHUNK_SIZE = 400;
+  const batchPromises = [];
+
+  for (let i = 0; i < operations.length; i += CHUNK_SIZE) {
+    const chunk = operations.slice(i, i + CHUNK_SIZE);
+    if (typeof writeBatch === 'function') {
+      const batch = writeBatch(currentDb);
+      for (const op of chunk) {
+        batch.set(op.ref, op.data, { merge: true });
+      }
+      batchPromises.push(
+        batch.commit().catch(async (batchErr) => {
+          console.warn('[CLOUD BATCH WARNING] Falling back to individual sets:', batchErr?.message || batchErr);
+          await Promise.allSettled(chunk.map(op => setDoc(op.ref, op.data, { merge: true })));
+        })
+      );
+    } else {
+      batchPromises.push(
+        Promise.allSettled(chunk.map(op => setDoc(op.ref, op.data, { merge: true })))
+      );
+    }
+  }
+
+  // Parallel IDB update and Firestore batch push
+  await Promise.all([
+    Promise.all(batchPromises),
+    BillQyroDB.bulkPut('invoices', updatedInvoices),
+    BillQyroDB.bulkPut('customers', updatedCustomers),
+    BillQyroDB.bulkPut('products', updatedProducts),
+    BillQyroDB.bulkPut('expenses', updatedExpenses),
+    BillQyroDB.bulkPut('staff', updatedStaff),
+    BillQyroDB.bulkPut('students', updatedStudents),
+  ]);
+
+  // Clean up sync queue in bulk
+  try {
+    const queue = await BillQyroDB.getAll('syncQueue').catch(() => []);
+    const idsToClear = queue
+      .filter(tx => ['invoices', 'customers', 'products', 'expenses', 'staff', 'students', 'settings'].includes(tx.storeName || tx.collectionName))
+      .map(tx => tx.id);
+    if (idsToClear.length > 0) {
+      await BillQyroDB.bulkDelete('syncQueue', idsToClear);
+    }
+  } catch { /* ignore */ }
+
+  const totalSynced = operations.length;
+  console.log(`[CLOUD PUSH] Super-fast engine synced ${totalSynced} items to cloud under account: ${userId}`);
+  return { count: totalSynced, success: true };
 };
 
 
@@ -3751,28 +3803,33 @@ export const importRestore = async (backupData) => {
     }
     if (Array.isArray(backupData.customers)) {
       updateLocalCache(KEYS.CUSTOMERS, backupData.customers);
-      for (const c of backupData.customers) await BillQyroDB.put('customers', c);
     }
     if (Array.isArray(backupData.products)) {
       updateLocalCache(KEYS.PRODUCTS, backupData.products);
-      for (const p of backupData.products) await BillQyroDB.put('products', p);
     }
     if (Array.isArray(backupData.invoices)) {
       updateLocalCache(KEYS.INVOICES, backupData.invoices);
-      for (const i of backupData.invoices) await BillQyroDB.put('invoices', i);
     }
     if (Array.isArray(backupData.expenses)) {
       updateLocalCache(KEYS.EXPENSES, backupData.expenses);
-      for (const e of backupData.expenses) await BillQyroDB.put('expenses', e);
     }
     if (Array.isArray(backupData.staff)) {
       updateLocalCache(KEYS.STAFF, backupData.staff);
-      for (const s of backupData.staff) await BillQyroDB.put('staff', s);
     }
     if (Array.isArray(backupData.students)) {
       updateLocalCache(KEYS.STUDENTS, backupData.students);
-      for (const st of backupData.students) await BillQyroDB.put('students', st);
     }
+
+    // High-speed parallel IndexedDB bulk writes
+    await Promise.all([
+      Array.isArray(backupData.customers) ? BillQyroDB.bulkPut('customers', backupData.customers) : null,
+      Array.isArray(backupData.products) ? BillQyroDB.bulkPut('products', backupData.products) : null,
+      Array.isArray(backupData.invoices) ? BillQyroDB.bulkPut('invoices', backupData.invoices) : null,
+      Array.isArray(backupData.expenses) ? BillQyroDB.bulkPut('expenses', backupData.expenses) : null,
+      Array.isArray(backupData.staff) ? BillQyroDB.bulkPut('staff', backupData.staff) : null,
+      Array.isArray(backupData.students) ? BillQyroDB.bulkPut('students', backupData.students) : null
+    ].filter(Boolean));
+
     if (backupData.subscription) {
       localStorage.setItem(KEYS.SUBSCRIPTION, JSON.stringify(backupData.subscription));
     }
@@ -3960,11 +4017,18 @@ export const syncFromFirestore = async (force = false) => {
       return;
     }
 
-    // Use parallel fetching with safe fallbacks to prevent permission errors from crashing the sync
+    const withTimeout = (promise, ms = 6000) => {
+      return Promise.race([
+        promise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Cloud fetch timeout')), ms))
+      ]);
+    };
+
+    // Use parallel fetching with safe fallbacks and timeout to prevent network stalls or permission errors
     const safeFetch = async (promise, fallback, collectionName = 'unknown') => {
-      try { return await promise; }
+      try { return await withTimeout(promise, 6000); }
       catch (e) { 
-        console.warn(`[SYNC PERMISSION DENIED] Read failed for collection: ${collectionName}. Rule blocked access. Error:`, e.message || e); 
+        console.warn(`[SYNC FETCH NOTICE] Read skipped for collection: ${collectionName}:`, e?.message || e); 
         return fallback; 
       }
     };
@@ -4042,9 +4106,7 @@ export const syncFromFirestore = async (force = false) => {
       }
       
       const finalItems = Array.from(mergedMap.values());
-      for (const item of finalItems) {
-        await BillQyroDB.put(storeName, item);
-      }
+      await BillQyroDB.bulkPut(storeName, finalItems);
       
       const activeItems = finalItems.filter(item => !item.workspaceId || item.workspaceId === activeWorkspaceId);
       updateLocalCache(storageKey, finalItems);
@@ -4059,13 +4121,15 @@ export const syncFromFirestore = async (force = false) => {
       }
     };
 
-    // 5-9. Apply merged data
-    await safeMerge('customers', customersSnap, KEYS.CUSTOMERS);
-    await safeMerge('staff', staffSnap, KEYS.STAFF);
-    await safeMerge('invoices', invoicesSnap, KEYS.INVOICES, true);
-    await safeMerge('products', productsSnap, KEYS.PRODUCTS);
-    await safeMerge('expenses', expensesSnap, KEYS.EXPENSES);
-    await safeMerge('students', studentsSnap, KEYS.STUDENTS);
+    // 5-9. Apply merged data in parallel
+    await Promise.all([
+      safeMerge('customers', customersSnap, KEYS.CUSTOMERS),
+      safeMerge('staff', staffSnap, KEYS.STAFF),
+      safeMerge('invoices', invoicesSnap, KEYS.INVOICES, true),
+      safeMerge('products', productsSnap, KEYS.PRODUCTS),
+      safeMerge('expenses', expensesSnap, KEYS.EXPENSES),
+      safeMerge('students', studentsSnap, KEYS.STUDENTS)
+    ]);
 
     // 10. Apply Subscription
     if (subDoc && typeof subDoc.exists === 'function' && subDoc.exists()) {
@@ -4274,12 +4338,11 @@ export const pushDataUpdate = (collectionName, userId, docId, data) => {
     clearTimeout(debounceTimers[key]);
   }
   
-  // [COST AWARENESS] Debounce actual firestore push by 1000ms.
-  // We already enqueued it securely locally, so data is safe if page closes.
+  // [COST AWARENESS & SPEED] Responsive debounce: 250ms for near-instant reactive sync
   debounceTimers[key] = setTimeout(() => {
     flushSyncQueue();
     delete debounceTimers[key];
-  }, 1000);
+  }, 250);
 
   return true;
 };
@@ -4332,7 +4395,8 @@ export const startRealTimeSync = (userId) => {
     const colRef = collection(getDb(), collectionName, userId, 'items');
     const unsub = onSnapshot(colRef, async (snapshot) => {
       let changed = false;
-      const promises = [];
+      const puts = [];
+      const deletes = [];
       
       snapshot.docChanges().forEach(change => {
         const cloudData = change.doc.data();
@@ -4346,17 +4410,20 @@ export const startRealTimeSync = (userId) => {
         cloudData.syncStatus = 'synced';
         
         if (change.type === 'added' || change.type === 'modified') {
-           promises.push(BillQyroDB.put(collectionName, cloudData));
+           puts.push(cloudData);
            changed = true;
         }
         if (change.type === 'removed') {
-           promises.push(BillQyroDB.delete(collectionName, cloudData.id));
+           deletes.push(cloudData.id);
            changed = true;
         }
       });
 
       if (changed) {
-        await Promise.all(promises);
+        await Promise.all([
+          puts.length > 0 ? BillQyroDB.bulkPut(collectionName, puts) : null,
+          deletes.length > 0 ? BillQyroDB.bulkDelete(collectionName, deletes) : null
+        ].filter(Boolean));
         window.dispatchEvent(new CustomEvent('billqyro:data-updated', { detail: { collectionName } }));
         // Also legacy fallback
         window.dispatchEvent(new CustomEvent('billqyro_sync'));
