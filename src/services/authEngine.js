@@ -1,12 +1,16 @@
-import { auth, db } from './firebaseConfig.js';
+import { auth, db, getDb, getAuthInstance } from './firebaseConfig.js';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail, signOut } from './fbAuthHelpers.js';
 import { doc, setDoc, getDoc } from './fsHelpers.js';
 import { getAuthSession as dbGetAuthSession, getRealUserId as dbGetRealUserId, logout as dbLogout } from './dbEngine.js';
 import { deviceSessionEngine } from './deviceSessionEngine.js';
 
+const resolveDb = () => getDb() || db || (typeof window !== 'undefined' ? window.__billqyro_db : null);
+const resolveAuth = () => getAuthInstance() || auth || (typeof window !== 'undefined' ? window.__billqyro_auth : null);
+
 const enforceDeviceApproval = async (session) => {
   if (!session?.isNewDevice || !session?.approvalRequired || session?.status !== 'pending') return session;
-  await signOut(auth);
+  const currentAuth = resolveAuth();
+  if (currentAuth) await signOut(currentAuth);
   deviceSessionEngine.clearLocalSession();
   const error = new Error('NEW_DEVICE_APPROVAL_REQUIRED');
   error.code = 'new-device-approval-required';
@@ -15,7 +19,8 @@ const enforceDeviceApproval = async (session) => {
 
 export const authEngine = {
   async signIn(email, password) {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const currentAuth = resolveAuth();
+    const userCredential = await signInWithEmailAndPassword(currentAuth, email, password);
     const user = userCredential.user;
     const requireApproval = await deviceSessionEngine.getNewDeviceApproval().catch(() => false);
     const session = await deviceSessionEngine.registerCurrentSession({ requireApproval });
@@ -24,7 +29,8 @@ export const authEngine = {
   },
 
   async register(email, password, name) {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const currentAuth = resolveAuth();
+    const userCredential = await createUserWithEmailAndPassword(currentAuth, email, password);
     const user = userCredential.user;
     await this.initializeUserProfile(user, name);
     await deviceSessionEngine.registerCurrentSession({ requireApproval: false });
@@ -33,9 +39,11 @@ export const authEngine = {
 
   async signInWithGoogle(name) {
     const provider = new GoogleAuthProvider();
-    const result = await signInWithPopup(auth, provider);
+    const currentAuth = resolveAuth();
+    const currentDb = resolveDb();
+    const result = await signInWithPopup(currentAuth, provider);
     const user = result.user;
-    const userDocRef = doc(db, 'usersList', user.uid);
+    const userDocRef = doc(currentDb, 'usersList', user.uid);
     const userDocSnap = await getDoc(userDocRef);
     if (!userDocSnap.exists()) await this.initializeUserProfile(user, name || user.displayName || '');
     const requireApproval = await deviceSessionEngine.getNewDeviceApproval().catch(() => false);
@@ -45,18 +53,20 @@ export const authEngine = {
   },
 
   async resetPassword(email) {
-    await sendPasswordResetEmail(auth, email);
+    const currentAuth = resolveAuth();
+    await sendPasswordResetEmail(currentAuth, email);
   },
 
   async initializeUserProfile(user, name) {
-    const userDocRef = doc(db, 'usersList', user.uid);
+    const currentDb = resolveDb();
+    const userDocRef = doc(currentDb, 'usersList', user.uid);
     await setDoc(userDocRef, {
       userId: user.uid,
       email: user.email,
       createdAt: new Date().toISOString(),
       role: 'user'
     }, { merge: true });
-    const settingsRef = doc(db, 'settings', user.uid);
+    const settingsRef = doc(currentDb, 'settings', user.uid);
     const settingsSnap = await getDoc(settingsRef);
     if (!settingsSnap.exists()) {
       await setDoc(settingsRef, {
@@ -87,10 +97,11 @@ export const authEngine = {
   },
 
   async hasCompletedOnboarding() {
-    const user = auth?.currentUser;
+    const user = resolveAuth()?.currentUser;
     if (!user) return false;
     try {
-      const settingsSnap = await getDoc(doc(db, 'settings', user.uid));
+      const currentDb = resolveDb();
+      const settingsSnap = await getDoc(doc(currentDb, 'settings', user.uid));
       if (!settingsSnap.exists()) return false;
       const data = settingsSnap.data();
       if (data.setupCompleted === true) return true;

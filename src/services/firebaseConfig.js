@@ -93,7 +93,11 @@ export const firebaseInitPromise = (async () => {
     db = getFirestore(app);
     storage = getStorage(app);
     firebaseReady = true;
-    if (typeof window !== 'undefined') window.billqyro_firebaseReady = true;
+    if (typeof window !== 'undefined') {
+      window.billqyro_firebaseReady = true;
+      window.__billqyro_db = db;
+      window.__billqyro_auth = auth;
+    }
     return true;
   } catch (error) {
     if (typeof window !== 'undefined') window.billqyro_firebaseReady = false;
@@ -102,4 +106,8 @@ export const firebaseInitPromise = (async () => {
   }
 })();
 
+export const getDb = () => db || (typeof window !== 'undefined' ? window.__billqyro_db : null);
+export const getAuthInstance = () => auth || (typeof window !== 'undefined' ? window.__billqyro_auth : null);
+
 export { app, auth, db, storage, firebaseReady };
+

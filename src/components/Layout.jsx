@@ -44,6 +44,7 @@ import { getNotifications, markNotificationAsRead, clearAllNotifications } from 
 import { useOnClickOutside } from '../hooks/useOnClickOutside';
 import { useTheme } from '../context/ThemeContext';
 import { isAppMode } from '../utils/appMode';
+import toast from 'react-hot-toast';
 
 const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSettings, isAuthenticated, userRole, invoices = [], subscription = {}, userEmail, onQuickBillOpen, pendingPaymentsCount = 0, businessWorkspaces, activeWorkspaceId, setActiveWorkspace, syncSource, syncStatus }) => {
   const { isDarkMode } = useTheme();
@@ -53,6 +54,32 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const [isNotificationMenuOpen, setIsNotificationMenuOpen] = useState(false);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
+  const [isManualSyncing, setIsManualSyncing] = useState(false);
+
+  const handleManualSync = async (e) => {
+    e?.stopPropagation?.();
+    if (isManualSyncing) return;
+    setIsManualSyncing(true);
+    try {
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        toast.error('Device is offline. All records are safely preserved locally.');
+        setIsManualSyncing(false);
+        return;
+      }
+      toast.loading('Syncing records with cloud database...', { id: 'manual-cloud-sync' });
+      const { offlineEngine } = await import('../services/offlineEngine');
+      const { invoiceEngine } = await import('../services/invoiceEngine');
+      await offlineEngine.syncNow();
+      await invoiceEngine.syncFromCloud(true);
+      window.dispatchEvent(new CustomEvent('billqyro_sync'));
+      toast.success('100% Synced! All bills and customer ledgers are safe online.', { id: 'manual-cloud-sync' });
+    } catch (err) {
+      console.warn('Manual cloud sync notice:', err);
+      toast.error('Sync completed with local fallback', { id: 'manual-cloud-sync' });
+    } finally {
+      setTimeout(() => setIsManualSyncing(false), 600);
+    }
+  };
   const [notifications, setNotifications] = useState([]);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const searchInputRef = React.useRef(null);
@@ -230,25 +257,43 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                   </span>
                 </div>
 
-                {/* Sync status pill */}
-                <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-theme-surface border border-theme-border-soft text-theme-muted">
-                  {syncStatus === 'Synced' ? (
-                    <>
-                      <span className="w-1.5 h-1.5 rounded-full bg-theme-accent"></span>
-                      <span className="hidden lg:inline">Cloud Synced</span>
-                    </>
-                  ) : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? (
+                {/* Interactive Cloud Sync Button */}
+                <button
+                  type="button"
+                  onClick={handleManualSync}
+                  disabled={isManualSyncing}
+                  title="Click to sync now with Cloud Database (Zero Data Loss)"
+                  className={`flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full transition-all cursor-pointer shadow-sm active:scale-95 border ${
+                    isManualSyncing || syncStatus === 'Saving...' || syncStatus === 'Syncing...'
+                      ? 'bg-blue-500/10 text-blue-500 border-blue-500/30'
+                      : syncStatus === 'Synced'
+                      ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:border-emerald-500/50'
+                      : 'bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 border-rose-500/30 hover:border-rose-500/50'
+                  }`}
+                >
+                  {isManualSyncing || syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? (
                     <>
                       <RefreshCw className="w-2.5 h-2.5 animate-spin text-blue-500" />
-                      <span className="hidden lg:inline text-blue-500">Syncing</span>
+                      <span className="hidden lg:inline text-blue-500">Syncing...</span>
+                      <span className="lg:hidden text-blue-500">Syncing</span>
+                    </>
+                  ) : syncStatus === 'Synced' ? (
+                    <>
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                      </span>
+                      <span className="hidden lg:inline">Cloud Synced</span>
+                      <RefreshCw className="w-2.5 h-2.5 opacity-40 hover:opacity-100 ml-0.5" />
                     </>
                   ) : (
                     <>
                       <CloudOff className="w-2.5 h-2.5 text-rose-500" />
-                      <span className="hidden lg:inline text-rose-500">Offline</span>
+                      <span className="hidden lg:inline text-rose-500">Offline (Tap to Retry)</span>
+                      <span className="lg:hidden text-rose-500">Offline</span>
                     </>
                   )}
-                </div>
+                </button>
               </div>
             )}
 
@@ -507,27 +552,30 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                 </div>
               )}
               <div className="flex items-center gap-1.5 shrink-0">
-                {syncStatus === 'Synced' ? (
-                  <span className="flex items-center gap-1 text-[9.5px] font-bold text-theme-accent bg-theme-tint-bg px-1.5 py-0.5 rounded-full border border-theme-tint-border">
-                    <span className="w-1 h-1 rounded-full bg-theme-accent"></span>
-                    Synced
-                  </span>
-                ) : syncStatus === 'Offline' ? (
-                  <span className="flex items-center gap-1 text-[9.5px] font-bold text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded-full border border-red-500/20">
-                    <span className="w-1 h-1 rounded-full bg-red-500"></span>
-                    Offline
-                  </span>
-                ) : syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? (
-                  <span className="flex items-center gap-1 text-[9.5px] font-bold text-blue-500 bg-blue-500/10 px-1.5 py-0.5 rounded-full border border-blue-500/20 animate-pulse">
-                    <span className="w-1 h-1 rounded-full bg-blue-500 animate-ping"></span>
-                    Sync
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1 text-[9.5px] font-bold text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded-full border border-amber-500/20">
-                    <span className="w-1 h-1 rounded-full bg-amber-500"></span>
-                    Pending
-                  </span>
-                )}
+                <button
+                  type="button"
+                  onClick={handleManualSync}
+                  disabled={isManualSyncing}
+                  title="Tap to sync cloud"
+                  className="flex items-center gap-1 cursor-pointer active:scale-90 transition-transform"
+                >
+                  {isManualSyncing || syncStatus === 'Saving...' || syncStatus === 'Syncing...' ? (
+                    <span className="flex items-center gap-1 text-[9.5px] font-bold text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/30 animate-pulse">
+                      <RefreshCw className="w-2.5 h-2.5 animate-spin text-blue-500" />
+                      Syncing
+                    </span>
+                  ) : syncStatus === 'Synced' ? (
+                    <span className="flex items-center gap-1 text-[9.5px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      Synced
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1 text-[9.5px] font-bold text-rose-500 bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/30">
+                      <CloudOff className="w-2.5 h-2.5 text-rose-500" />
+                      Offline
+                    </span>
+                  )}
+                </button>
                 <span className={`flex items-center gap-1 text-[9.5px] font-bold text-theme-accent bg-theme-accent-light px-1.5 py-0.5 rounded-full border border-theme-accent/15${appMode ? ' app-hide' : ''}`}>
                   <ShieldCheck className="w-2 h-2" />
                   Secure

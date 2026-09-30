@@ -1,6 +1,15 @@
-import { db as originalDb, firebaseReady, auth } from './firebaseConfig.js';
+import { db as originalDb, firebaseReady, auth, getDb as fbGetDb, getAuthInstance as fbGetAuth } from './firebaseConfig.js';
 import * as fbConfig from './firebaseConfig.js';
-const db = fbConfig.db || originalDb;
+
+export const getDb = () => {
+  return fbConfig.db || originalDb || fbGetDb?.() || (typeof window !== 'undefined' ? window.__billqyro_db : null);
+};
+
+export const getAuthInstance = () => {
+  return fbConfig.auth || auth || fbGetAuth?.() || (typeof window !== 'undefined' ? window.__billqyro_auth : null);
+};
+
+const db = getDb();
 
 
 // ==========================================
