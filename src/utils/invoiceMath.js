@@ -454,6 +454,25 @@ export const filterByDateRange = (items = [], dateField = 'date', rangeType = 'T
 };
 
 /**
+ * Checks if two workspace identifiers are compatible (including default workspace aliases and demo/empty states).
+ */
+export const isWorkspaceCompatible = (targetWsId, activeWsId) => {
+  if (!activeWsId || activeWsId === 'all') return true;
+  if (targetWsId === activeWsId) return true;
+
+  const defaultAliases = ['default', 'ws_default', 'ws_default_001'];
+  const isActiveDefault = defaultAliases.includes(activeWsId) || (typeof activeWsId === 'string' && activeWsId.startsWith('ws_default'));
+  
+  if (!targetWsId) {
+    return isActiveDefault;
+  }
+
+  const isTargetDefault = defaultAliases.includes(targetWsId) || (typeof targetWsId === 'string' && targetWsId.startsWith('ws_default'));
+  if (isTargetDefault && isActiveDefault) return true;
+  return false;
+};
+
+/**
  * Filter items by workspace ID.
  */
 export const filterByWorkspace = (items = [], targetWorkspaceId = 'default') => {
@@ -461,9 +480,7 @@ export const filterByWorkspace = (items = [], targetWorkspaceId = 'default') => 
   if (!targetWorkspaceId || targetWorkspaceId === 'all') return items;
   return items.filter(item => {
     if (!item) return false;
-    if (item.workspaceId === targetWorkspaceId) return true;
-    if (!item.workspaceId && (targetWorkspaceId === 'default' || targetWorkspaceId === 'ws_default')) return true;
-    return false;
+    return isWorkspaceCompatible(item.workspaceId, targetWorkspaceId);
   });
 };
 

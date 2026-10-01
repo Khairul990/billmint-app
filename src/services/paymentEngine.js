@@ -3,7 +3,8 @@ import {
   getInvoicePaymentStatus, 
   calculateCanonicalInvoiceFinancials, 
   allocatePayment, 
-  roundTo2 
+  roundTo2,
+  isWorkspaceCompatible
 } from '../utils/invoiceMath.js';
 import { db, firebaseReady } from './firebaseConfig.js';
 import { doc, runTransaction } from './fsHelpers.js';
@@ -84,7 +85,11 @@ class PaymentEngine {
     }
 
     // Workspace Isolation Check
-    if (workspaceId && targetInvoice.workspaceId && targetInvoice.workspaceId !== workspaceId) {
+    const isDemo = typeof window !== 'undefined' && (
+      localStorage.getItem('billqyro_demo_session_active') === 'true' ||
+      sessionStorage.getItem('billqyro_demo_session_active') === 'true'
+    );
+    if (!isDemo && workspaceId && targetInvoice.workspaceId && !isWorkspaceCompatible(targetInvoice.workspaceId, workspaceId)) {
       throw new Error('Access denied: Invoice does not belong to the active workspace.');
     }
 
@@ -213,7 +218,11 @@ class PaymentEngine {
     }
 
     affectedInvoices.forEach(inv => {
-      if (workspaceId && inv.workspaceId && inv.workspaceId !== workspaceId) {
+      const isDemo = typeof window !== 'undefined' && (
+        localStorage.getItem('billqyro_demo_session_active') === 'true' ||
+        sessionStorage.getItem('billqyro_demo_session_active') === 'true'
+      );
+      if (!isDemo && workspaceId && inv.workspaceId && !isWorkspaceCompatible(inv.workspaceId, workspaceId)) {
         throw new Error('Access denied: Payment belongs to another workspace.');
       }
       if (inv.paymentHistory.some(p => p.type === 'payment_reversal' && p.originalPaymentId === paymentId)) {
