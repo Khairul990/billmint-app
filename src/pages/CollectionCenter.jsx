@@ -189,6 +189,7 @@ const CollectionCenter = ({
   const [amountInput, setAmountInput] = useState('');
   const [selectedPreset, setSelectedPreset] = useState('total_due');
   const [paymentMethod, setPaymentMethod] = useState('Cash');
+  const [customPaymentMethod, setCustomPaymentMethod] = useState('');
   const [transferSource, setTransferSource] = useState('my_cash');
   const [transferDest, setTransferDest] = useState('phonepe');
   const [withdrawDest, setWithdrawDest] = useState('my_cash');
@@ -222,6 +223,7 @@ const CollectionCenter = ({
     if (initialInvoice) {
       const inv = scopedInvoices.find(i => i.id === initialInvoice.id) || initialInvoice;
       setSelectedInvoice(inv);
+      if (inv.paymentMethod) setPaymentMethod(inv.paymentMethod);
       const cust = scopedCustomers.find(c => c.id === inv.customer?.id || c.name === inv.customerName) || {
         id: inv.customer?.id || inv.customerId || 'cust_temp',
         name: inv.customerName || inv.customer?.name || 'Walk-in Customer',
@@ -517,7 +519,7 @@ const CollectionCenter = ({
 
   // Payment Methods Available
   const paymentMethods = useMemo(() => {
-    const defaults = ['Cash', 'UPI', 'PhonePe', 'Bank Transfer', 'Card', 'Other'];
+    const defaults = ['Cash', 'UPI', 'PhonePe', 'Google Pay', 'Paytm', 'Bank Transfer', 'Card', 'Cheque', 'bKash', 'Nagad', 'Other'];
     const custom = businessSettings?.paymentMethods || [];
     return Array.from(new Set([...defaults, ...custom]));
   }, [businessSettings]);
@@ -529,6 +531,8 @@ const CollectionCenter = ({
     setNote('');
     setTitleInput('');
     setRefundReason('');
+    setPaymentMethod('Cash');
+    setCustomPaymentMethod('');
     setSelectedInvoice(null);
     setSelectedCustomer(null);
     setSelectedStaff(null);
@@ -544,6 +548,10 @@ const CollectionCenter = ({
       toast.error('Please enter a valid amount greater than zero.');
       return;
     }
+
+    const effectivePaymentMethod = (paymentMethod === 'Other' && customPaymentMethod.trim()) 
+      ? customPaymentMethod.trim() 
+      : (paymentMethod || 'Cash');
 
     setIsSubmitting(true);
     try {
@@ -569,7 +577,7 @@ const CollectionCenter = ({
           customerId: selectedCustomer?.id || selectedInvoice.customer?.id || null,
           invoiceId: selectedInvoice.id,
           amount: amt,
-          paymentMethod,
+          paymentMethod: effectivePaymentMethod,
           paymentDate,
           reference,
           note,
@@ -1231,7 +1239,11 @@ const CollectionCenter = ({
                                   <button
                                     key={inv.id}
                                     type="button"
-                                    onClick={() => setSelectedInvoice(inv)}
+                                    onClick={() => {
+                                      setSelectedInvoice(inv);
+                                      setSelectedPreset('total_due');
+                                      if (inv.paymentMethod) setPaymentMethod(inv.paymentMethod);
+                                    }}
                                     className={`w-full text-left p-4 rounded-xl border transition-all flex items-center justify-between ${
                                       isSelected
                                         ? 'bg-theme-accent/10 border-theme-accent shadow-sm'
@@ -1879,7 +1891,10 @@ const CollectionCenter = ({
                           min="0.01"
                           placeholder="0.00"
                           value={amountInput}
-                          onChange={(e) => setAmountInput(e.target.value)}
+                          onChange={(e) => {
+                            setAmountInput(e.target.value);
+                            setSelectedPreset('custom');
+                          }}
                           className="input-premium pl-8 w-full text-lg font-black tabular-nums text-theme-primary"
                         />
                       </div>
@@ -1975,8 +1990,8 @@ const CollectionCenter = ({
                         <label className="text-2xs font-bold text-theme-muted uppercase block mb-1.5">
                           Payment Method / Account
                         </label>
-                        <div className="grid grid-cols-3 gap-1.5">
-                          {paymentMethods.slice(0, 6).map(m => (
+                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5">
+                          {paymentMethods.map(m => (
                             <button
                               key={m}
                               type="button"
@@ -1991,6 +2006,18 @@ const CollectionCenter = ({
                             </button>
                           ))}
                         </div>
+                        {paymentMethod === 'Other' && (
+                          <div className="mt-2">
+                            <input
+                              type="text"
+                              placeholder="Enter custom payment method (e.g. IMPS, RTGS, Rocket, Voucher)"
+                              value={customPaymentMethod}
+                              onChange={(e) => setCustomPaymentMethod(e.target.value)}
+                              className="input-premium w-full text-xs font-bold"
+                              autoFocus
+                            />
+                          </div>
+                        )}
                       </div>
                     )}
 
@@ -2535,6 +2562,12 @@ const CollectionCenter = ({
                   <div className="flex justify-between pt-1.5">
                     <span className="text-theme-muted font-bold">Date:</span>
                     <span className="font-mono text-theme-primary">{paymentDate}</span>
+                  </div>
+                  <div className="flex justify-between pt-1.5">
+                    <span className="text-theme-muted font-bold">Method:</span>
+                    <span className="font-bold text-theme-accent">
+                      {(paymentMethod === 'Other' && customPaymentMethod.trim()) ? customPaymentMethod.trim() : (paymentMethod || 'Cash')}
+                    </span>
                   </div>
                 </div>
               </div>

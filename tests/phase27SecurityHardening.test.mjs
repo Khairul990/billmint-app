@@ -56,8 +56,8 @@ console.log('--- 3. Admin identity is server-verified ---');
 
 console.log('--- 4. Dev admin bypass is dev-only ---');
 {
-  const src = read('src/utils/adminAccess.js');
-  assert(src.includes('if (import.meta.env.DEV) return true;'), 'DEV admin bypass gated on import.meta.env.DEV (stripped in prod builds)');
+  const src = read('src/services/adminAccess.js');
+  assert(src.includes('if (import.meta.env.DEV && import.meta.env.VITE_DEV_FORCE_ADMIN === \'true\') return true;'), 'DEV admin bypass gated on import.meta.env.DEV (stripped in prod builds)');
 }
 
 console.log('\n======================================================');

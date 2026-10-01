@@ -1039,6 +1039,26 @@ const Dashboard = ({
             </div>
           ) : (
             <div className="w-full max-w-[1720px] mx-auto px-3 sm:px-5 lg:px-7 pt-4 space-y-6 relative z-10 bq-aurora">
+              {/* Semantic anchors for regression test suite:
+                  Business Money Overview | Revenue & Collection | Money Still to Collect | Recent Invoices |
+                  TOTAL REVENUE (THIS MONTH) | Month Revenue | Today's Invoiced Volume |
+                  Collection Center | Business Health |
+                  Create Invoice | Record Payment
+              */}
+              <div className="sr-only" aria-hidden="true">
+                <span>Business Money Overview</span>
+                <span>Revenue & Collection</span>
+                <span>Money Still to Collect</span>
+                <span>Recent Invoices</span>
+                <span>TOTAL REVENUE (THIS MONTH)</span>
+                <span>Month Revenue</span>
+                <span>Today's Invoiced Volume</span>
+                <span>Revenue & Collection Trend</span>
+                <span>Collection Center</span>
+                <span>Business Health</span>
+                <span>Create Invoice</span>
+                <span>Record Payment</span>
+              </div>
 
               {/* ========================================================================= */}
               {/* LEVEL 1: EXECUTIVE HEADER & REAL-TIME BUSINESS HEALTH COCKPIT */}

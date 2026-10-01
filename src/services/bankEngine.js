@@ -562,12 +562,26 @@ class BankEngine {
     const amount = Number(paymentInfo.amountPaise !== undefined ? paymentInfo.amountPaise : rupeesToPaise(paymentInfo.amount));
     if (!Number.isFinite(amount) || amount <= 0) return null;
 
+    let resolvedAccount = paymentInfo.account;
+    if (!resolvedAccount) {
+      const method = (paymentInfo.method || '').toLowerCase();
+      if (method.includes('phonepe')) resolvedAccount = 'PhonePe';
+      else if (method.includes('cash')) resolvedAccount = 'Cash';
+      else if (method.includes('gpay') || method.includes('google pay')) resolvedAccount = 'Google Pay';
+      else if (method.includes('paytm')) resolvedAccount = 'Paytm';
+      else if (method.includes('upi') || method.includes('qr')) resolvedAccount = 'UPI';
+      else if (method.includes('bank') || method.includes('transfer') || method.includes('neft') || method.includes('rtgs') || method.includes('cheque')) resolvedAccount = 'Bank Account';
+      else if (method.includes('bkash')) resolvedAccount = 'bKash';
+      else if (method.includes('nagad')) resolvedAccount = 'Nagad';
+      else resolvedAccount = settings.defaultAccount || 'Cash';
+    }
+
     return this.addTransaction({
       type: 'moneyIn',
       amountRupees: paiseToRupees(amount),
       category: 'Sale / Invoice Payment',
       title: (paymentInfo.invoiceNumber ? `Invoice ${paymentInfo.invoiceNumber}` : 'Invoice payment') + (paymentInfo.customerName ? ` · ${paymentInfo.customerName}` : ''),
-      account: paymentInfo.account || settings.defaultAccount || '',
+      account: resolvedAccount,
       customerId: paymentInfo.customerId || null,
       customerName: paymentInfo.customerName || '',
       invoiceId: paymentInfo.invoiceId || null,

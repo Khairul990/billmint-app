@@ -239,8 +239,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
             <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>
             SYSTEM MAINTENANCE ACTIVE — Invoice creation, live links, and premium upgrades are temporarily disabled.
           </div>
-        )}        {/* ===== ULTRA LUXURY COMMAND TOPBAR ===== */}
-        <header className={`sticky top-4 z-40 mx-4 lg:mx-6 rounded-[1.5rem] transition-all select-none ${appMode ? 'app-chrome' : 'bg-white/50 dark:bg-[#0B1220]/50 backdrop-blur-[24px] border border-white/40 dark:border-white/10 shadow-[0_4px_24px_0_rgba(11,143,120,0.1)]'}`}>
+        )}        <header className={`sticky top-4 z-40 mx-4 lg:mx-6 rounded-[1.5rem] transition-all select-none ${appMode ? 'app-chrome' : 'bg-theme-app/80 backdrop-blur-2xl border-b border-theme-border-soft/70'}`}>
           <div className="max-w-full w-full mx-auto px-4 lg:px-5 hidden md:flex items-center justify-between gap-4 py-2">
             
             {['settings', 'create-invoice'].includes(currentTab) ? (
@@ -892,6 +891,16 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                       <div className="flex items-center gap-2.5">
                         <TrendingDown className="w-4 h-4" />
                         <span>Expenses</span>
+                      </div>
+                      <ChevronRight className="w-3.5 h-3.5 opacity-60" />
+                    </button>
+                    <button
+                      onClick={() => { setCurrentTab('work-cost'); setIsMobileDrawerOpen(false); }}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all ${['outsource', 'contractors', 'work-partners', 'work-cost'].includes(currentTab) ? 'bg-theme-accent text-white' : 'text-theme-primary hover:bg-theme-surface'}`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <Briefcase className="w-4 h-4" />
+                        <span>Work Cost</span>
                       </div>
                       <ChevronRight className="w-3.5 h-3.5 opacity-60" />
                     </button>

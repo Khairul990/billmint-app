@@ -1,8 +1,17 @@
 import * as pdfjsLib from 'pdfjs-dist';
-import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.js?url';
 
-// Set up the worker for pdfjs using local file
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
+// Avoid standard ?url import as Vite dev server injects ESM HMR code into it, causing a classic web worker syntax error.
+if (typeof window !== 'undefined' && 'Worker' in window) {
+  try {
+    const worker = new Worker(new URL('pdfjs-dist/build/pdf.worker.min.js', import.meta.url), {
+      type: 'module'
+    });
+    pdfjsLib.GlobalWorkerOptions.workerPort = worker;
+  } catch (e) {
+    // Fallback if worker instantiation fails (e.g. cross-origin, standard worker mode etc)
+    pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.js', import.meta.url).toString();
+  }
+}
 
 export const extractTextFromPdf = async (file) => {
   return new Promise((resolve, reject) => {

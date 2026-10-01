@@ -12,11 +12,13 @@ import assert from 'node:assert';
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+
+import os from 'node:os';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO = path.resolve(__dirname, '..');
-const TMP = '/tmp/bq-premium-test';
+const TMP = path.join(os.tmpdir(), 'bq-premium-test');
 fs.mkdirSync(TMP, { recursive: true });
 
 console.log('\n======================================================');
@@ -71,28 +73,35 @@ global.window = {
   dispatchEvent: () => true, addEventListener: () => {}, removeEventListener: () => {},
   location: { href: 'http://localhost/', pathname: '/' }
 };
-global.navigator = { userAgent: 'node-test', onLine: true };
+try {
+  Object.defineProperty(global, 'navigator', {
+    value: { userAgent: 'node-test', onLine: true },
+    configurable: true,
+    writable: true
+  });
+} catch (e) {}
 
 // ── Bundle the real services with esbuild ─────────────────────────────────
 const stub = path.join(TMP, 'rhtStub.mjs');
 fs.writeFileSync(stub, `export const toast = Object.assign(() => {}, { success: () => {}, error: () => {}, loading: () => {}, dismiss: () => {} });\nexport const Toaster = () => null;\nexport default { toast };\n`);
 
+const repoPosix = REPO.replace(/\\/g, '/');
 const entry = path.join(TMP, 'entry.mjs');
 fs.writeFileSync(entry, `
-export { subscriptionEngine } from '${REPO}/src/services/subscriptionEngine.js';
-export { adminEngine } from '${REPO}/src/services/adminEngine.js';
-export { getGlobalRevenueSettings } from '${REPO}/src/services/platformRevenueService.js';
+export { subscriptionEngine } from '${repoPosix}/src/services/subscriptionEngine.js';
+export { adminEngine } from '${repoPosix}/src/services/adminEngine.js';
+export { getGlobalRevenueSettings } from '${repoPosix}/src/services/platformRevenueService.js';
 `);
 
 const out = path.join(TMP, 'bundle.cjs');
-const esbuildBin = path.join(REPO, 'node_modules', '.bin', 'esbuild');
+const esbuildBin = path.join(REPO, 'node_modules', '.bin', process.platform === 'win32' ? 'esbuild.cmd' : 'esbuild');
 execFileSync(esbuildBin, [
   entry, '--bundle', '--platform=node', '--format=cjs',
   `--alias:react-hot-toast=${stub}`,
   `--outfile=${out}`
-], { stdio: 'pipe' });
+], { stdio: 'pipe', shell: process.platform === 'win32' });
 
-const _mod = await import(out);
+const _mod = await import(pathToFileURL(out).href);
 const { subscriptionEngine, adminEngine, getGlobalRevenueSettings } = _mod.default || _mod;
 
 // ── 1. Plan catalog invariants ─────────────────────────────────────────────

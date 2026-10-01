@@ -36,7 +36,7 @@ export function isAdminUser(user) {
   if (!user) return false;
   if (user.isSuperAdmin === true || user.role === 'superadmin') return true;
   if (user.customClaims?.role === 'superadmin' || user.claims?.role === 'superadmin') return true;
-  if (import.meta.env.VITE_DEV_FORCE_ADMIN === 'true') return true;
+  if (import.meta.env.DEV && import.meta.env.VITE_DEV_FORCE_ADMIN === 'true') return true;
   return false;
 }
 

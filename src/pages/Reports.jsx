@@ -10,7 +10,7 @@ import {
   TrendingUp, TrendingDown, DollarSign, FileText, CheckCircle2, 
   AlertCircle, Clock, Users, Package, Wallet, ArrowUpRight,
   WifiOff, BarChart3, AlertTriangle, ChevronRight, Layers, Tag,
-  Banknote, ArrowRight, Sparkles, ShieldCheck
+  Banknote, ArrowRight, Sparkles, ShieldCheck, Briefcase
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { formatCurrency } from '../utils/invoiceUtils';
@@ -110,6 +110,74 @@ const Reports = ({
   const wsCustomers = useMemo(() => filterByWorkspace(customers, activeWorkspaceId), [customers, activeWorkspaceId]);
   const wsProducts = useMemo(() => filterByWorkspace(products, activeWorkspaceId), [products, activeWorkspaceId]);
   const wsExpenses = useMemo(() => filterByWorkspace(expenses, activeWorkspaceId), [expenses, activeWorkspaceId]);
+
+  // Outsource Jobs & Workers for Reports
+  const [outsourceJobsList, setOutsourceJobsList] = useState([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadOutsourceData = async () => {
+      try {
+        const { getOutsourceJobs } = await import('../services/outsourceEngine');
+        const jobsData = await getOutsourceJobs();
+        if (!cancelled && Array.isArray(jobsData)) {
+          setOutsourceJobsList(jobsData);
+        }
+      } catch (e) {
+        console.warn('Failed to load outsource jobs in reports:', e);
+      }
+    };
+    loadOutsourceData();
+    const handleUpdate = () => loadOutsourceData();
+    window.addEventListener('billqyro_outsource_updated', handleUpdate);
+    return () => {
+      cancelled = true;
+      window.removeEventListener('billqyro_outsource_updated', handleUpdate);
+    };
+  }, []);
+
+  const outsourceSummary = useMemo(() => {
+    const wsJobs = filterByWorkspace(outsourceJobsList, activeWorkspaceId);
+    const totalOutsourcedCost = wsJobs.reduce((sum, j) => sum + (Number(j.totalContractorCost !== undefined ? j.totalContractorCost : j.agreedCost) || 0), 0);
+    const totalPaid = wsJobs.reduce((sum, j) => sum + (Number(j.paidAmount !== undefined ? j.paidAmount : j.totalPaid) || 0), 0);
+    const pending = Math.max(0, totalOutsourcedCost - totalPaid);
+
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
+    const thisMonthCost = wsJobs.filter(j => {
+      const d = new Date(j.assignedAt || j.createdAt || 0);
+      return d.getFullYear() === currentYear && d.getMonth() === currentMonth;
+    }).reduce((sum, j) => sum + (Number(j.totalContractorCost !== undefined ? j.totalContractorCost : j.agreedCost) || 0), 0);
+
+    const workerMap = {};
+    wsJobs.forEach(j => {
+      const wName = j.contractorName || j.vendorName || 'Other Worker';
+      const cost = Number(j.totalContractorCost !== undefined ? j.totalContractorCost : j.agreedCost) || 0;
+      const paid = Number(j.paidAmount !== undefined ? j.paidAmount : j.totalPaid) || 0;
+      if (!workerMap[wName]) {
+        workerMap[wName] = { name: wName, totalCost: 0, totalPaid: 0, count: 0 };
+      }
+      workerMap[wName].totalCost += cost;
+      workerMap[wName].totalPaid += paid;
+      workerMap[wName].count += 1;
+    });
+
+    const workerWiseCost = Object.values(workerMap).map(w => ({
+      ...w,
+      pending: Math.max(0, w.totalCost - w.totalPaid)
+    })).sort((a, b) => b.totalCost - a.totalCost);
+
+    return {
+      totalOutsourcedCost,
+      totalPaid,
+      pending,
+      thisMonthCost,
+      workerWiseCost,
+      jobsCount: wsJobs.length,
+      wsJobs
+    };
+  }, [outsourceJobsList, activeWorkspaceId]);
 
   // 2. Filter by date range
   const dateFilteredInvoices = useMemo(() => {
@@ -461,6 +529,17 @@ const Reports = ({
           }`}
         >
           <FileText className="w-3.5 h-3.5" /> Document Ledger
+        </button>
+
+        <button
+          onClick={() => setActiveReportTab('outsource')}
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl font-black whitespace-nowrap transition-all cursor-pointer ${
+            activeReportTab === 'outsource'
+              ? 'bg-theme-accent text-white shadow-premium-sm'
+              : 'bg-theme-card hover:bg-theme-surface border border-theme-border-soft text-theme-muted'
+          }`}
+        >
+          <Briefcase className="w-3.5 h-3.5" /> Outsourced Work Cost
         </button>
       </div>
 
@@ -1263,6 +1342,167 @@ const Reports = ({
                     <tr>
                       <td colSpan="8" className="text-center empty-state-text py-8 text-theme-muted">
                         No documents found for the selected filters.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </SignatureSurface>
+        </motion.div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* SECTION: OUTSOURCED WORK COST */}
+      {/* ========================================================================= */}
+      {(activeReportTab === 'outsource') && (
+        <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="space-y-6">
+          {/* Summary KPI Cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            {/* Total Outsourced Cost */}
+            <SignatureSurface variant="neutral" className="p-4 sm:p-5">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] font-black uppercase tracking-wider text-theme-muted">
+                  Total Outsourced Cost
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-theme-surface border border-theme-border-soft text-theme-primary font-numbers">
+                  {outsourceSummary.jobsCount} tasks
+                </span>
+              </div>
+              <FinancialValue 
+                value={outsourceSummary.totalOutsourcedCost} 
+                currency={currencySymbol} 
+                intent="neutral" 
+                size="md" 
+              />
+              <p className="text-[11px] text-theme-muted font-medium mt-1">
+                Internal work liabilities
+              </p>
+            </SignatureSurface>
+
+            {/* Paid */}
+            <SignatureSurface variant="neutral" className="p-4 sm:p-5">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] font-black uppercase tracking-wider text-theme-accent">
+                  Paid
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-theme-tint-bg text-theme-accent border border-theme-tint-border font-numbers">
+                  Disbursed
+                </span>
+              </div>
+              <FinancialValue 
+                value={outsourceSummary.totalPaid} 
+                currency={currencySymbol} 
+                intent="sales" 
+                size="md" 
+              />
+              <p className="text-[11px] text-theme-muted font-medium mt-1">
+                Settled with workers
+              </p>
+            </SignatureSurface>
+
+            {/* Pending */}
+            <SignatureSurface variant="neutral" className="p-4 sm:p-5">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] font-black uppercase tracking-wider text-rose-500">
+                  Pending
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-500/10 text-rose-500 border border-rose-500/20 font-numbers">
+                  Payable
+                </span>
+              </div>
+              <FinancialValue 
+                value={outsourceSummary.pending} 
+                currency={currencySymbol} 
+                intent="danger" 
+                size="md" 
+              />
+              <p className="text-[11px] text-rose-400 font-medium mt-1">
+                Remaining due
+              </p>
+            </SignatureSurface>
+
+            {/* This Month */}
+            <SignatureSurface variant="neutral" className="p-4 sm:p-5">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] font-black uppercase tracking-wider text-amber-500">
+                  This Month
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-500/10 text-amber-500 border border-amber-500/20 font-numbers">
+                  {new Date().toLocaleString('default', { month: 'short' })}
+                </span>
+              </div>
+              <FinancialValue 
+                value={outsourceSummary.thisMonthCost} 
+                currency={currencySymbol} 
+                intent="warning" 
+                size="md" 
+              />
+              <p className="text-[11px] text-theme-muted font-medium mt-1">
+                Current month work cost
+              </p>
+            </SignatureSurface>
+          </div>
+
+          {/* Worker-wise Cost Breakdown Table */}
+          <SignatureSurface variant="neutral" className="overflow-hidden">
+            <div className="flex items-center justify-between p-4 sm:p-5 border-b border-theme-border-soft no-print">
+              <div>
+                <h3 className="text-sm font-black text-theme-primary">Worker-wise Cost Breakdown</h3>
+                <p className="text-xs text-theme-muted font-medium">Aggregated outsourced work costs and payments by partner</p>
+              </div>
+              <span className="badge-premium badge-info text-2xs font-numbers">
+                {outsourceSummary.workerWiseCost.length} workers
+              </span>
+            </div>
+
+            <div className="overflow-x-auto scroll-premium">
+              <table className="table-premium min-w-[700px] w-full text-xs">
+                <thead>
+                  <tr>
+                    <th>Worker Name</th>
+                    <th className="text-center">Assigned Tasks</th>
+                    <th className="text-right">Total Cost</th>
+                    <th className="text-right">Paid</th>
+                    <th className="text-right">Pending Due</th>
+                    <th className="text-center">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {outsourceSummary.workerWiseCost.map(w => (
+                    <tr key={w.name}>
+                      <td className="font-bold text-theme-primary">
+                        {w.name}
+                      </td>
+                      <td className="text-center font-mono font-bold text-theme-secondary">
+                        {w.count}
+                      </td>
+                      <td className="text-right font-black text-theme-primary font-mono tabular-nums">
+                        {formatCurrency(w.totalCost, currencySymbol)}
+                      </td>
+                      <td className="text-right font-bold text-theme-accent font-mono tabular-nums">
+                        {formatCurrency(w.totalPaid, currencySymbol)}
+                      </td>
+                      <td className="text-right font-black text-rose-500 font-mono tabular-nums">
+                        {formatCurrency(w.pending, currencySymbol)}
+                      </td>
+                      <td className="text-center">
+                        <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-black uppercase border ${
+                          w.pending === 0 && w.totalCost > 0
+                            ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                            : w.totalPaid > 0
+                            ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                            : 'bg-rose-500/10 text-rose-500 border-rose-500/20'
+                        }`}>
+                          {w.pending === 0 && w.totalCost > 0 ? 'Settled' : w.totalPaid > 0 ? 'Partial' : 'Pending'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                  {outsourceSummary.workerWiseCost.length === 0 && (
+                    <tr>
+                      <td colSpan="6" className="text-center empty-state-text py-8 text-theme-muted">
+                        No outsourced worker records available yet.
                       </td>
                     </tr>
                   )}

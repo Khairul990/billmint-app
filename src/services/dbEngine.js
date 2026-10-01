@@ -818,30 +818,6 @@ const _runSyncOfflineTransactions = async () => {
             docRef = doc(getDb(), tx.storeName, tx.userId, 'items', tx.docId);
           }
           
-          // Check cloud version before overwriting only if local version exists (with fast timeout)
-          if (tx.data?.__version) {
-            try {
-              const cloudSnap = await Promise.race([
-                getDoc(docRef),
-                new Promise((_, r) => setTimeout(() => r(new Error('version-check-timeout')), 1500))
-              ]);
-              if (cloudSnap?.exists?.()) {
-                const cloudData = cloudSnap.data();
-                const cloudVersion = cloudData.__version || 0;
-                const localVersion = tx.data?.__version || 0;
-                if (cloudVersion > localVersion) {
-                  console.warn(`[SYNC QUEUE] Skipping TX ${tx.id}: cloud version ${cloudVersion} > local ${localVersion}`);
-                  syncSuccess = true;
-                  await markLocalRecordSynced(tx.storeName, tx.docId);
-                  await BillQyroDB.delete('syncQueue', tx.id);
-                  continue;
-                }
-              }
-            } catch (e) {
-              // Non-blocking: proceed directly with write
-            }
-          }
-          
           const cleanData = cleanUndefined(tx.data);
           
           try {
@@ -2964,6 +2940,9 @@ export const getInvoices = async (includeDeleted = false, targetWorkspaceId = nu
 export const getInvoicesPaged = async ({ workspaceId = null, limit = 25, offset = 0, status = null, search = '', includeDeleted = false } = {}) => {
   const allInvoices = await getInvoices(includeDeleted, workspaceId);
   let filtered = allInvoices;
+  if (workspaceId) {
+    filtered = filtered.filter(inv => inv.workspaceId === workspaceId);
+  }
   if (status) {
     filtered = filtered.filter(inv => (inv.status || '').toLowerCase() === status.toLowerCase());
   }
@@ -3281,16 +3260,46 @@ export const saveInvoice = async (invoice) => {
 
     // Re-verify canonical financial parity with preserved payments
     let paidVal = 0;
+    const incomingPaid = invoice.paidAmount !== undefined ? Number(invoice.paidAmount) : (invoice.amountPaid !== undefined ? Number(invoice.amountPaid) : null);
+    
     if (Array.isArray(invoice.paymentHistory) && invoice.paymentHistory.length > 0) {
-      paidVal = invoice.paymentHistory.reduce((s, p) => s + (Number(p.amount) || 0), 0);
+      const historySum = invoice.paymentHistory.reduce((s, p) => s + (Number(p.amount) || 0), 0);
+      if (incomingPaid !== null && !isNaN(incomingPaid) && incomingPaid >= 0 && Math.abs(incomingPaid - historySum) > 0.001) {
+        // User explicitly updated the paid amount via bill edit
+        if (invoice.paymentHistory.length === 1) {
+          invoice.paymentHistory[0].amount = incomingPaid;
+          invoice.paymentHistory[0].method = invoice.paymentMethod || invoice.paymentHistory[0].method || 'Cash';
+        } else if (incomingPaid > historySum) {
+          invoice.paymentHistory.push({
+            id: 'pmt_adj_' + Date.now(),
+            amount: Math.round((incomingPaid - historySum) * 100) / 100,
+            method: invoice.paymentMethod || 'Cash',
+            date: invoice.updatedAt || new Date().toISOString(),
+            note: 'Payment adjustment'
+          });
+        }
+        paidVal = incomingPaid;
+      } else {
+        paidVal = historySum;
+      }
     } else {
-      paidVal = Number(invoice.paidAmount ?? invoice.amountPaid ?? existing.amountPaid ?? 0);
+      paidVal = incomingPaid !== null && !isNaN(incomingPaid) ? incomingPaid : Number(existing.amountPaid ?? 0);
+      if (paidVal > 0) {
+        invoice.paymentHistory = [{
+          id: 'pmt_init_' + invoice.id,
+          amount: paidVal,
+          method: invoice.paymentMethod || 'Cash',
+          date: invoice.updatedAt || new Date().toISOString(),
+          note: 'Initial payment'
+        }];
+      }
     }
     paidVal = Math.round(paidVal * 100) / 100;
     invoice.paidAmount = paidVal;
     invoice.amountPaid = paidVal;
     invoice.balanceDue = Math.max(0, Math.round((invoice.grandTotal - paidVal) * 100) / 100);
     invoice.dueAmount = invoice.balanceDue;
+    invoice.paymentMethod = invoice.paymentMethod || existing.paymentMethod || (invoice.paymentHistory?.[0]?.method) || 'Cash';
 
     if (invoice.status !== 'Cancelled' && invoice.status !== 'Void' && invoice.paymentStatus !== 'Pending Verification') {
       if (paidVal >= invoice.grandTotal && invoice.grandTotal > 0) {
@@ -3316,19 +3325,7 @@ export const saveInvoice = async (invoice) => {
     logAudit('invoice_created', 'invoice', invoice.id, null, invoice);
   }
 
-  // Double-save corresponding Customer to DB as well
-  if (invoice.customerId) {
-    const customerPayload = {
-      id: invoice.customerId,
-      name: invoice.customerName,
-      phone: invoice.customerPhone || '',
-      email: invoice.customerEmail || '',
-      address: invoice.customerAddress || '',
-    };
-    await saveCustomer(customerPayload);
-  }
-
-  // Sync / queue + syncStatus tracking
+  // Instant local cache + IndexedDB write for sub-50ms save latency
   const stamped = invoices.find(inv => inv.id === invoice.id);
   if (stamped) {
     stamped.syncStatus = 'pending';
@@ -3338,13 +3335,23 @@ export const saveInvoice = async (invoice) => {
   }
   window.dispatchEvent(new CustomEvent('billqyro_sync'));
 
+  // Non-blocking background customer synchronization
+  if (invoice.customerId && invoice.customerName) {
+    const customerPayload = {
+      id: invoice.customerId,
+      name: invoice.customerName,
+      phone: invoice.customerPhone || '',
+      email: invoice.customerEmail || '',
+      address: invoice.customerAddress || '',
+    };
+    saveCustomer(customerPayload).catch(e => console.warn('Background customer save notice:', e));
+  }
+
   let firebaseStatus = 'pending';
   if (firebaseReady) {
     if (navigator.onLine) {
       // Fire and forget via flush queue
-      syncOfflineTransactions().then(() => {
-        // Will dispatch its own events and clean queue
-      }).catch(err => console.error('Firestore async save error:', err));
+      syncOfflineTransactions().catch(err => console.error('Firestore async save error:', err));
     } else {
       firebaseStatus = 'failed';
     }
@@ -3352,15 +3359,17 @@ export const saveInvoice = async (invoice) => {
     firebaseStatus = 'offline';
   }
 
-  // Recalculate platform dues/monetization state
-  try {
-    const subStatus = getSubscriptionStatus();
-    const globalRevSettings = await getGlobalRevenueSettings();
-    const calculatedState = calculateUserRevenueState(invoice.userId, invoices, globalRevSettings, subStatus);
-    await saveUserRevenueState(invoice.userId, calculatedState);
-  } catch (e) {
-    console.error('Error updating platform revenue state in saveInvoice:', e);
-  }
+  // Recalculate platform dues/monetization state non-blocking
+  Promise.resolve().then(async () => {
+    try {
+      const subStatus = getSubscriptionStatus();
+      const globalRevSettings = await getGlobalRevenueSettings();
+      const calculatedState = calculateUserRevenueState(invoice.userId, invoices, globalRevSettings, subStatus);
+      await saveUserRevenueState(invoice.userId, calculatedState);
+    } catch (e) {
+      console.warn('Error updating platform revenue state in saveInvoice:', e);
+    }
+  });
 
   return {
     updatedInvoices: invoices,
@@ -3688,13 +3697,23 @@ export const deleteInvoice = async (id, permanent = false) => {
 
 // --- BACKUP & RESTORE DATABASE ---
 export const exportBackup = async () => {
-  const invoices = await getInvoices();
-  const customers = await getCustomers();
-  const products = await getProducts();
-  const expenses = await getExpenses();
-  const students = await getStudents();
-  const staff = await getStaffs();
-  const settings = getSettings();
+  const [
+    invoices,
+    customers,
+    products,
+    expenses,
+    students,
+    staff,
+    settings
+  ] = await Promise.all([
+    getInvoices(),
+    getCustomers(),
+    getProducts(),
+    getExpenses(),
+    getStudents(),
+    getStaffs(),
+    Promise.resolve(getSettings())
+  ]);
 
   localStorage.setItem('billqyro_last_backup_time', new Date().toISOString());
 
@@ -3759,76 +3778,76 @@ export const unzipBackup = async (fileBlob) => {
   return JSON.parse(dbString);
 };
 
-export const importRestore = async (backupData) => {
-  if (!backupData || typeof backupData !== 'object') {
+export const importRestore = async (rawBackupData) => {
+  if (!rawBackupData || typeof rawBackupData !== 'object') {
     throw new Error('Invalid backup file structure.');
   }
 
-  const requiredKeys = ['settings', 'customers', 'products', 'invoices', 'expenses'];
-  for (const k of requiredKeys) {
-    if (!Object.prototype.hasOwnProperty.call(backupData, k)) {
-      throw new Error(`Missing database key: ${k}`);
-    }
+  // Unwrap potential envelope structures (e.g. { data: ... } or { backup: ... })
+  let backupData = rawBackupData;
+  if (backupData.data && typeof backupData.data === 'object' && !Array.isArray(backupData.data)) {
+    backupData = backupData.data;
+  } else if (backupData.backup && typeof backupData.backup === 'object' && !Array.isArray(backupData.backup)) {
+    backupData = backupData.backup;
   }
 
+  // Support direct array of invoices or single invoice object
+  if (Array.isArray(backupData)) {
+    backupData = { invoices: backupData };
+  } else if (backupData.invoiceNumber && !backupData.invoices) {
+    backupData = { invoices: [backupData] };
+  }
+
+  // Gracefully fallback missing collections rather than rejecting
+  const customers = Array.isArray(backupData.customers) ? backupData.customers : [];
+  const products = Array.isArray(backupData.products) ? backupData.products : [];
+  const invoices = Array.isArray(backupData.invoices) ? backupData.invoices : [];
+  const expenses = Array.isArray(backupData.expenses) ? backupData.expenses : [];
+  const staff = Array.isArray(backupData.staff) ? backupData.staff : [];
+  const students = Array.isArray(backupData.students) ? backupData.students : [];
   const previousSettings = getSettings();
   const previousInvoices = await getInvoices();
+  const settings = backupData.settings || previousSettings || {};
 
   try {
     const userId = getRealUserId();
     if (userId && userId !== 'local-user') {
-      if (Array.isArray(backupData.invoices)) {
-        backupData.invoices.forEach(i => {
-          i.userId = userId;
-          i.createdByUid = userId;
-          i.syncStatus = 'synced';
-        });
-      }
-      if (Array.isArray(backupData.customers)) {
-        backupData.customers.forEach(c => { c.userId = userId; c.syncStatus = 'synced'; });
-      }
-      if (Array.isArray(backupData.products)) {
-        backupData.products.forEach(p => { p.userId = userId; p.syncStatus = 'synced'; });
-      }
-      if (Array.isArray(backupData.expenses)) {
-        backupData.expenses.forEach(e => { e.userId = userId; e.syncStatus = 'synced'; });
-      }
-      if (backupData.settings) {
-        backupData.settings.userId = userId;
+      invoices.forEach(i => {
+        i.userId = userId;
+        i.createdByUid = userId;
+        i.syncStatus = 'synced';
+      });
+      customers.forEach(c => { c.userId = userId; c.syncStatus = 'synced'; });
+      products.forEach(p => { p.userId = userId; p.syncStatus = 'synced'; });
+      expenses.forEach(e => { e.userId = userId; e.syncStatus = 'synced'; });
+      if (settings) {
+        settings.userId = userId;
       }
     }
 
-    if (backupData.settings) {
-      localStorage.setItem(KEYS.SETTINGS, JSON.stringify(backupData.settings));
+    if (settings && Object.keys(settings).length > 0) {
+      localStorage.setItem(KEYS.SETTINGS, JSON.stringify(settings));
     }
-    if (Array.isArray(backupData.customers)) {
-      updateLocalCache(KEYS.CUSTOMERS, backupData.customers);
-    }
-    if (Array.isArray(backupData.products)) {
-      updateLocalCache(KEYS.PRODUCTS, backupData.products);
-    }
-    if (Array.isArray(backupData.invoices)) {
-      updateLocalCache(KEYS.INVOICES, backupData.invoices);
-    }
-    if (Array.isArray(backupData.expenses)) {
-      updateLocalCache(KEYS.EXPENSES, backupData.expenses);
-    }
-    if (Array.isArray(backupData.staff)) {
-      updateLocalCache(KEYS.STAFF, backupData.staff);
-    }
-    if (Array.isArray(backupData.students)) {
-      updateLocalCache(KEYS.STUDENTS, backupData.students);
-    }
+    if (customers.length > 0) updateLocalCache(KEYS.CUSTOMERS, customers);
+    if (products.length > 0) updateLocalCache(KEYS.PRODUCTS, products);
+    if (invoices.length > 0) updateLocalCache(KEYS.INVOICES, invoices);
+    if (expenses.length > 0) updateLocalCache(KEYS.EXPENSES, expenses);
+    if (staff.length > 0) updateLocalCache(KEYS.STAFF, staff);
+    if (students.length > 0) updateLocalCache(KEYS.STUDENTS, students);
 
     // High-speed parallel IndexedDB bulk writes
-    await Promise.all([
-      Array.isArray(backupData.customers) ? BillQyroDB.bulkPut('customers', backupData.customers) : null,
-      Array.isArray(backupData.products) ? BillQyroDB.bulkPut('products', backupData.products) : null,
-      Array.isArray(backupData.invoices) ? BillQyroDB.bulkPut('invoices', backupData.invoices) : null,
-      Array.isArray(backupData.expenses) ? BillQyroDB.bulkPut('expenses', backupData.expenses) : null,
-      Array.isArray(backupData.staff) ? BillQyroDB.bulkPut('staff', backupData.staff) : null,
-      Array.isArray(backupData.students) ? BillQyroDB.bulkPut('students', backupData.students) : null
-    ].filter(Boolean));
+    try {
+      await Promise.all([
+        customers.length > 0 ? BillQyroDB.bulkPut('customers', customers) : null,
+        products.length > 0 ? BillQyroDB.bulkPut('products', products) : null,
+        invoices.length > 0 ? BillQyroDB.bulkPut('invoices', invoices) : null,
+        expenses.length > 0 ? BillQyroDB.bulkPut('expenses', expenses) : null,
+        staff.length > 0 ? BillQyroDB.bulkPut('staff', staff) : null,
+        students.length > 0 ? BillQyroDB.bulkPut('students', students) : null
+      ].filter(Boolean));
+    } catch (idbErr) {
+      console.warn('[RESTORE IDB NOTICE]: IndexedDB write fallback to cache:', idbErr?.message);
+    }
 
     if (backupData.subscription) {
       localStorage.setItem(KEYS.SUBSCRIPTION, JSON.stringify(backupData.subscription));

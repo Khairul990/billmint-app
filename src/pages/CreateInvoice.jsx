@@ -1388,7 +1388,7 @@ const CreateInvoice = ({
                                   type="button"
                                   onClick={() => setExpandedCategoryItemId(expandedCategoryItemId === item.id ? null : item.id)}
                                   title="Category Custom Fields"
-                                  className={`tap-target p-2 rounded-xl transition-all flex items-center gap-0.5 ${expandedCategoryItemId === item.id ? 'bg-theme-accent text-white shadow-md' : 'text-theme-muted hover:text-theme-accent hover:bg-white border border-transparent hover:border-gray-200'}`}
+                                  className={`tap-target p-1.5 rounded-lg transition-all flex items-center gap-0.5 ${expandedCategoryItemId === item.id ? 'bg-theme-accent text-white shadow-md' : 'text-theme-muted hover:text-theme-accent hover:bg-white border border-transparent hover:border-gray-200'}`}
                                 >
                                   <Tag className="w-4 h-4" />
                                 </button>

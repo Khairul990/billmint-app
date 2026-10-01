@@ -37,7 +37,9 @@ import {
   DollarSign,
   TrendingUp,
   RotateCcw,
-  Repeat
+  Repeat,
+  Scissors,
+  Briefcase
 } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { formatCurrency } from '../utils/invoiceUtils';
@@ -88,7 +90,8 @@ const Invoices = ({
   onOpenCollection,
   onDuplicate,
   onToggleRecurring,
-  onGenerateRecurring
+  onGenerateRecurring,
+  products = []
 }) => {
   const { t } = useI18n();
   const [searchQuery, setSearchQuery] = useState('');
@@ -107,6 +110,23 @@ const Invoices = ({
   const [paidDeleteTarget, setPaidDeleteTarget] = useState(null);
   const [permanentDeleteTarget, setPermanentDeleteTarget] = useState(null);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
+
+  // Outsource Work Assignment Quick Modal States
+  const [outsourceModalOpen, setOutsourceModalOpen] = useState(false);
+  const [outsourceTargetInvoice, setOutsourceTargetInvoice] = useState(null);
+  const [availablePartners, setAvailablePartners] = useState([]);
+  const [selectedPartnerId, setSelectedPartnerId] = useState('');
+  const [designNumberInput, setDesignNumberInput] = useState('');
+  const [productNameInput, setProductNameInput] = useState('');
+  const [workDetailsInput, setWorkDetailsInput] = useState('');
+  const [totalCostInput, setTotalCostInput] = useState('');
+  const [paidNowInput, setPaidNowInput] = useState('0');
+  const [paymentMethodInput, setPaymentMethodInput] = useState('UPI');
+  const [bankAccountInput, setBankAccountInput] = useState('Cash');
+  const [bankAccountsList, setBankAccountsList] = useState(['Cash', 'Bank Account', 'UPI']);
+  const [quickPartnerName, setQuickPartnerName] = useState('');
+  const [showQuickAddPartner, setShowQuickAddPartner] = useState(false);
+  const [invoiceOutsourceJobs, setInvoiceOutsourceJobs] = useState([]);
   
   const currencySymbol = businessSettings?.currency || '₹';
   const portalLabel = getPortalLabelByType(businessSettings?.businessType);
@@ -184,6 +204,34 @@ const Invoices = ({
 
     return () => { cancelled = true; };
   }, [viewingInvoice?.id, invoices]);
+
+  // Load Outsourced Work records linked to currently viewed invoice
+  useEffect(() => {
+    if (!viewingInvoice) {
+      setInvoiceOutsourceJobs([]);
+      return;
+    }
+    const loadJobsForInvoice = async () => {
+      try {
+        const { getOutsourceJobs } = await import('../services/outsourceEngine');
+        const allJobs = await getOutsourceJobs();
+        const invId = viewingInvoice.id;
+        const invNum = viewingInvoice.invoiceNumber;
+        const linked = allJobs.filter(j => 
+          (j.invoiceId && (j.invoiceId === invId || j.invoiceId === invNum)) ||
+          (j.invoiceNumber && invNum && j.invoiceNumber === invNum)
+        );
+        setInvoiceOutsourceJobs(linked);
+      } catch (e) {
+        console.warn('Failed to load linked outsource jobs for invoice:', e);
+      }
+    };
+    loadJobsForInvoice();
+
+    const handleUpdate = () => loadJobsForInvoice();
+    window.addEventListener('billqyro_outsource_updated', handleUpdate);
+    return () => window.removeEventListener('billqyro_outsource_updated', handleUpdate);
+  }, [viewingInvoice?.id, viewingInvoice?.invoiceNumber]);
 
   // Handle Proof Approval
   const handleApproveProof = async (proof) => {
@@ -263,6 +311,114 @@ const Invoices = ({
     setViewingInvoice(updatedInvoice);
     triggerPaymentSuccessFeedback();
     toast.success('Payment proof successfully APPROVED!');
+  };
+
+  const handleOpenAddOutsource = async (inv) => {
+    setOutsourceTargetInvoice(inv);
+    setShowQuickAddPartner(false);
+    setQuickPartnerName('');
+    try {
+      const { getVendors } = await import('../services/outsourceEngine');
+      const vList = await getVendors();
+      setAvailablePartners(vList);
+      if (vList.length > 0) {
+        setSelectedPartnerId(vList[0].id);
+      } else {
+        setSelectedPartnerId('');
+        setShowQuickAddPartner(true);
+      }
+      
+      const { bankEngine } = await import('../services/bankEngine');
+      const bSet = await bankEngine.getBankSettings().catch(() => ({ accounts: ['Cash', 'Main Bank', 'UPI'] }));
+      setBankAccountsList(bSet?.accounts || ['Cash', 'Main Bank', 'UPI']);
+    } catch (e) {
+      console.warn('Failed to load partners for outsource modal:', e);
+    }
+    
+    // Auto-prefill product/design from first item if present
+    if (inv?.items && inv.items.length > 0) {
+      const first = inv.items[0];
+      const dNo = first.designNumber || first.sku || first.itemCode || first.code || '';
+      setDesignNumberInput(dNo);
+      setProductNameInput(first.name || '');
+      setWorkDetailsInput(first.name ? `Outsourced work for ${first.name}` : 'Custom Design');
+      setTotalCostInput(first.rate ? String(Math.round(first.rate * 0.4)) : '600');
+    } else {
+      setDesignNumberInput('');
+      setProductNameInput('');
+      setWorkDetailsInput('Custom Design');
+      setTotalCostInput('600');
+    }
+    setPaidNowInput('0');
+    setPaymentMethodInput('UPI');
+    setBankAccountInput('Cash');
+    setOutsourceModalOpen(true);
+  };
+
+  const handleSubmitOutsource = async (e) => {
+    e.preventDefault();
+    if (!outsourceTargetInvoice) return;
+    const cost = parseFloat(totalCostInput) || 0;
+    const paid = parseFloat(paidNowInput) || 0;
+    if (cost <= 0) {
+      toast.error('Please enter a valid total cost.');
+      return;
+    }
+    let partnerId = selectedPartnerId;
+    let partner = availablePartners.find(p => p.id === partnerId);
+    
+    if (showQuickAddPartner || !partnerId) {
+      if (!quickPartnerName.trim()) {
+        toast.error('Please enter contractor / work partner name.');
+        return;
+      }
+      const { saveVendor } = await import('../services/outsourceEngine');
+      const newV = await saveVendor({ name: quickPartnerName.trim(), specialization: 'Specialist' });
+      partnerId = newV.id;
+      partner = newV;
+    }
+
+    try {
+      const { saveOutsourceJob, recordOutsourcePayment } = await import('../services/outsourceEngine');
+      const savedJob = await saveOutsourceJob({
+        contractorId: partnerId,
+        contractorName: partner?.name || 'Partner',
+        customerId: outsourceTargetInvoice.customerId || null,
+        customerName: outsourceTargetInvoice.customerName || 'Customer',
+        invoiceId: outsourceTargetInvoice.id,
+        invoiceNumber: outsourceTargetInvoice.invoiceNumber,
+        designNumber: designNumberInput.trim(),
+        productName: productNameInput.trim() || 'Custom Work',
+        workDescription: workDetailsInput.trim() || 'Outsource Task',
+        assignedQuantity: 1,
+        contractorRate: cost,
+        totalContractorCost: cost,
+        ownerWorkPercentage: 50,
+        contractorWorkPercentage: 50,
+        workStatus: 'Assigned',
+        assignedAt: new Date().toISOString()
+      });
+
+      if (paid > 0) {
+        await recordOutsourcePayment({
+          contractorBillId: savedJob.id,
+          contractorBillNumber: savedJob.contractorBillNumber,
+          contractorId: partnerId,
+          contractorName: partner?.name || 'Partner',
+          amount: paid,
+          paymentMethod: paymentMethodInput,
+          bankAccount: bankAccountInput,
+          note: `Advance for Bill ${savedJob.contractorBillNumber}`,
+          syncWithBank: true
+        });
+      }
+
+      toast.success(`Work assigned to ${partner?.name || 'Partner'} (Bill ${savedJob.contractorBillNumber}). Customer invoice total remains unchanged.`);
+      setOutsourceModalOpen(false);
+      setOutsourceTargetInvoice(null);
+    } catch (err) {
+      toast.error('Failed to assign work: ' + err.message);
+    }
   };
 
   // Handle Proof Rejection
@@ -537,15 +693,34 @@ const Invoices = ({
       reader.onload = async (event) => {
         try {
           const parsed = JSON.parse(event.target.result);
-          const invoiceData = Array.isArray(parsed) ? parsed[0] : parsed;
-          if (!invoiceData || !invoiceData.invoiceNumber) {
-            toast.error('Invalid invoice format.');
+          let listToImport = [];
+          if (Array.isArray(parsed)) {
+            listToImport = parsed;
+          } else if (Array.isArray(parsed?.invoices)) {
+            listToImport = parsed.invoices;
+          } else if (Array.isArray(parsed?.data?.invoices)) {
+            listToImport = parsed.data.invoices;
+          } else if (parsed && (parsed.invoiceNumber || parsed.id)) {
+            listToImport = [parsed];
+          }
+
+          if (listToImport.length === 0) {
+            toast.error('No valid invoices found in the imported file.');
             return;
           }
-          await invoiceEngine.saveInvoice(invoiceData);
-          toast.success(`Invoice ${invoiceData.invoiceNumber} imported!`);
+
+          let importedCount = 0;
+          for (const inv of listToImport) {
+            if (inv && (inv.invoiceNumber || inv.id)) {
+              await invoiceEngine.saveInvoice(inv);
+              importedCount++;
+            }
+          }
+
+          toast.success(importedCount === 1 ? `Invoice ${listToImport[0].invoiceNumber || 'file'} imported!` : `${importedCount} invoices imported successfully!`);
           window.dispatchEvent(new Event('billqyro_sync'));
-        } catch {
+        } catch (err) {
+          console.error('Import file error:', err);
           toast.error('Could not import invoice file.');
         }
       };
@@ -948,7 +1123,10 @@ const Invoices = ({
                   isSelected={selectedInvoiceIds.includes(invoice.id)}
                   onToggleSelect={handleToggleSelect}
                   onView={(inv) => setViewingInvoice(inv)}
-                  onRecordPayment={(inv) => onOpenCollection ? onOpenCollection({ invoice: inv, customer: inv.customer }) : (onRecordPayment && onRecordPayment({ invoice: inv, customer: inv.customer }))}
+                  onRecordPayment={(inv) => {
+                    const cust = inv.customer || { id: inv.customerId, name: inv.customerName, phone: inv.customerPhone, email: inv.customerEmail, address: inv.customerAddress };
+                    return onOpenCollection ? onOpenCollection({ invoice: inv, customer: cust }) : (onRecordPayment && onRecordPayment({ invoice: inv, customer: cust }));
+                  }}
                   onEdit={(inv) => {
                     onEditInvoice(inv);
                     setCurrentTab('create-invoice');
@@ -976,6 +1154,7 @@ const Invoices = ({
                   onDownloadBackup={() => handleDownloadBackup(invoice)}
                   onDuplicate={onDuplicate}
                   onToggleRecurring={onToggleRecurring}
+                  onAddOutsourcedWork={(inv) => handleOpenAddOutsource(inv)}
                   isDeleted={viewMode === 'trash'}
                 />
               </motion.div>
@@ -1122,10 +1301,11 @@ const Invoices = ({
                     onClick={() => {
                       const inv = viewingInvoice;
                       setViewingInvoice(null);
+                      const cust = inv.customer || { id: inv.customerId, name: inv.customerName, phone: inv.customerPhone, email: inv.customerEmail, address: inv.customerAddress };
                       if (onOpenCollection) {
-                        onOpenCollection({ invoice: inv, customer: inv.customer });
+                        onOpenCollection({ invoice: inv, customer: cust });
                       } else if (onRecordPayment) {
-                        onRecordPayment({ invoice: inv, customer: inv.customer });
+                        onRecordPayment({ invoice: inv, customer: cust });
                       }
                     }}
                     className="px-3 py-1.5 bg-theme-accent hover:opacity-90 text-white rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer shadow-xs mr-1"
@@ -1192,6 +1372,15 @@ const Invoices = ({
                   disabled={generatingLink}
                 >
                   {generatingLink ? <span className="w-4 h-4 border-2 border-theme-accent/30 border-t-theme-accent rounded-full animate-spin block" /> : <Link className="w-4 h-4" />}
+                </button>
+
+                <button
+                  onClick={() => handleOpenAddOutsource(viewingInvoice)}
+                  className="tap-target px-2.5 py-1.5 text-xs font-bold text-theme-accent bg-theme-accent/10 hover:bg-theme-accent/20 border border-theme-accent/30 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  title="Add Outsourced Work / Contractor Assignment"
+                >
+                  <Scissors className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Add Outsourced Work</span>
                 </button>
 
                 <div className="w-px h-6 bg-theme-border-soft mx-1" />
@@ -1272,10 +1461,11 @@ const Invoices = ({
                           onClick={() => {
                             const inv = viewingInvoice;
                             setViewingInvoice(null);
+                            const cust = inv.customer || { id: inv.customerId, name: inv.customerName, phone: inv.customerPhone, email: inv.customerEmail, address: inv.customerAddress };
                             if (onOpenCollection) {
-                              onOpenCollection({ invoice: inv, customer: inv.customer });
+                              onOpenCollection({ invoice: inv, customer: cust });
                             } else if (onRecordPayment) {
-                              onRecordPayment({ invoice: inv, customer: inv.customer });
+                              onRecordPayment({ invoice: inv, customer: cust });
                             }
                           }}
                           className="px-3 py-1 bg-theme-accent hover:opacity-90 text-white rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
@@ -1287,6 +1477,75 @@ const Invoices = ({
                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Internal Outsourced Work & Net Margin Card (Owner Only) */}
+              <div className="bg-theme-card rounded-2xl p-4 border border-theme-border-soft shadow-xs space-y-3 no-print">
+                <div className="flex items-center justify-between border-b border-theme-border-soft pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <Briefcase className="w-4 h-4 text-theme-accent" />
+                    <h4 className="text-xs font-black text-theme-primary uppercase tracking-wider">Outsourced Work (Internal Cost)</h4>
+                  </div>
+                  <button
+                    onClick={() => handleOpenAddOutsource(viewingInvoice)}
+                    className="text-[11px] font-bold text-theme-accent hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Add Work</span>
+                  </button>
+                </div>
+
+                {invoiceOutsourceJobs.length === 0 ? (
+                  <div className="text-center py-2 text-xs text-theme-muted">
+                    No outsourced work assigned to this invoice yet.
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {invoiceOutsourceJobs.map((oj, idx) => {
+                      const cost = Number(oj.totalContractorCost !== undefined ? oj.totalContractorCost : oj.agreedCost) || 0;
+                      return (
+                        <div key={oj.id || idx} className="flex items-center justify-between p-2.5 rounded-xl bg-theme-surface border border-theme-border-soft text-xs">
+                          <div className="space-y-0.5">
+                            <span className="font-bold text-theme-primary">
+                              {oj.contractorName || oj.vendorName || 'Worker'}
+                            </span>
+                            <div className="text-[11px] text-theme-secondary flex items-center gap-1.5 font-mono">
+                              {oj.designNumber && (
+                                <span className="px-1.5 py-0.5 rounded bg-theme-accent/10 text-theme-accent font-bold">
+                                  {oj.designNumber}
+                                </span>
+                              )}
+                              <span>{oj.productName || oj.workDescription || 'Work'}</span>
+                            </div>
+                          </div>
+                          <div className="text-right font-mono">
+                            <div className="font-black text-rose-400">
+                              {formatCurrency(cost, currencySymbol)}
+                            </div>
+                            <span className="text-[10px] text-theme-muted uppercase">
+                              {oj.paymentStatus || 'Pending'}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    {/* Total Work Cost & Net Margin Calculation */}
+                    <div className="pt-2 border-t border-theme-border-soft flex items-center justify-between text-xs font-bold">
+                      <span className="text-theme-muted">Total Outsourced Cost:</span>
+                      <span className="font-mono font-black text-rose-500">
+                        {formatCurrency(invoiceOutsourceJobs.reduce((sum, j) => sum + (Number(j.totalContractorCost !== undefined ? j.totalContractorCost : j.agreedCost) || 0), 0), currencySymbol)}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs font-bold">
+                      <span className="text-theme-muted">Net Profit Contribution:</span>
+                      <span className="font-mono font-black text-emerald-500">
+                        {formatCurrency(Math.max(0, (parseFloat(viewingInvoice.grandTotal || viewingInvoice.total) || 0) - invoiceOutsourceJobs.reduce((sum, j) => sum + (Number(j.totalContractorCost !== undefined ? j.totalContractorCost : j.agreedCost) || 0), 0)), currencySymbol)}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Pending Payment Verification Panel */}
@@ -1367,6 +1626,270 @@ const Invoices = ({
           </div>
         </div>,
         document.body
+      )}
+
+      {/* ========================================================================= */}
+      {/* ADD OUTSOURCED WORK MODAL */}
+      {/* ========================================================================= */}
+      {outsourceModalOpen && outsourceTargetInvoice && (
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
+          <div className="bg-theme-surface border border-theme-border-soft rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150 my-6">
+            <div className="px-5 py-4 border-b border-theme-border-soft flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-extrabold text-theme-primary flex items-center gap-2">
+                  <Scissors className="w-4 h-4 text-theme-accent" />
+                  Add Outsourced Work
+                </h3>
+                <span className="text-[11px] text-theme-secondary">
+                  Invoice #{outsourceTargetInvoice.invoiceNumber} · {outsourceTargetInvoice.customerName || 'Customer'}
+                </span>
+              </div>
+              <button
+                onClick={() => {
+                  setOutsourceModalOpen(false);
+                  setOutsourceTargetInvoice(null);
+                }}
+                className="p-1 rounded-lg hover:bg-theme-surface-hover text-theme-muted hover:text-theme-primary"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmitOutsource} className="p-5 space-y-3.5 text-xs">
+              {/* 1. Worker Selection */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[10px] font-black text-theme-muted uppercase">
+                    Worker / Work Partner *
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setShowQuickAddPartner(!showQuickAddPartner)}
+                    className="text-[10px] font-bold text-theme-accent hover:underline"
+                  >
+                    {showQuickAddPartner ? 'Select Existing Partner' : '+ New Contractor'}
+                  </button>
+                </div>
+
+                {showQuickAddPartner ? (
+                  <input
+                    type="text"
+                    value={quickPartnerName}
+                    onChange={(e) => setQuickPartnerName(e.target.value)}
+                    placeholder="Enter worker / contractor name (e.g. Rahim)"
+                    className="w-full px-3 py-2 rounded-lg bg-theme-surface-elevated border border-theme-border-soft text-theme-primary focus:outline-none focus:border-theme-accent font-bold"
+                    autoFocus
+                  />
+                ) : (
+                  <select
+                    value={selectedPartnerId}
+                    onChange={(e) => setSelectedPartnerId(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg bg-theme-surface-elevated border border-theme-border-soft text-theme-primary focus:outline-none focus:border-theme-accent font-bold"
+                    required
+                  >
+                    <option value="">-- Select Worker / Contractor --</option>
+                    {availablePartners.map(p => (
+                      <option key={p.id} value={p.id}>
+                        {p.name} ({p.specialization || p.category || 'Specialist'})
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
+              {/* 2. Product / Design Selection & Autofill from Invoice Items */}
+              {outsourceTargetInvoice.items && outsourceTargetInvoice.items.length > 0 && (
+                <div className="p-2.5 rounded-xl bg-theme-surface-elevated border border-theme-border-soft space-y-1.5">
+                  <span className="text-[10px] font-bold text-theme-muted uppercase block">
+                    Pick item from Invoice #{outsourceTargetInvoice.invoiceNumber}:
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {outsourceTargetInvoice.items.map((itm, idx) => {
+                      const dNo = itm.designNumber || itm.sku || itm.itemCode || itm.code || '';
+                      return (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => {
+                            setDesignNumberInput(dNo);
+                            setProductNameInput(itm.name || '');
+                            setWorkDetailsInput(itm.name ? `Outsourced work for ${itm.name}` : 'Custom Design');
+                            if (itm.rate) {
+                              setTotalCostInput(String(Math.round(itm.rate * 0.4)));
+                            }
+                          }}
+                          className="px-2 py-1 rounded-md bg-theme-surface border border-theme-border-soft hover:border-theme-accent/50 text-[10px] font-bold text-theme-secondary hover:text-theme-primary flex items-center gap-1"
+                        >
+                          {dNo && <span className="font-mono text-amber-500">[{dNo}]</span>}
+                          <span>{itm.name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* 3. Product / Design Number & Name */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[10px] font-black text-theme-muted uppercase block mb-1">
+                    Design / Product Number
+                  </label>
+                  <input
+                    type="text"
+                    value={designNumberInput}
+                    onChange={(e) => setDesignNumberInput(e.target.value)}
+                    placeholder="e.g. GK-115"
+                    className="w-full px-3 py-2 rounded-lg bg-theme-surface-elevated border border-theme-border-soft text-theme-primary font-mono font-bold focus:outline-none focus:border-theme-accent"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-black text-theme-muted uppercase block mb-1">
+                    Product / Design Name
+                  </label>
+                  <input
+                    type="text"
+                    value={productNameInput}
+                    onChange={(e) => setProductNameInput(e.target.value)}
+                    placeholder="e.g. Custom Embroidered Kurti"
+                    className="w-full px-3 py-2 rounded-lg bg-theme-surface-elevated border border-theme-border-soft text-theme-primary focus:outline-none focus:border-theme-accent font-bold"
+                  />
+                </div>
+              </div>
+
+              {/* 4. Work Details */}
+              <div>
+                <label className="text-[10px] font-black text-theme-muted uppercase block mb-1">
+                  Work Details *
+                </label>
+                <input
+                  type="text"
+                  value={workDetailsInput}
+                  onChange={(e) => setWorkDetailsInput(e.target.value)}
+                  placeholder="e.g. Custom Neck Embroidery Work"
+                  className="w-full px-3 py-2 rounded-lg bg-theme-surface-elevated border border-theme-border-soft text-theme-primary focus:outline-none focus:border-theme-accent"
+                  required
+                />
+              </div>
+
+              {/* 5. Financials: Total Cost, Paid, Due */}
+              <div className="grid grid-cols-3 gap-2.5 p-3 rounded-xl bg-theme-surface-elevated border border-theme-border-soft">
+                <div>
+                  <label className="text-[9px] font-black text-theme-muted uppercase block mb-1">
+                    Total Cost (₹) *
+                  </label>
+                  <input
+                    type="number"
+                    value={totalCostInput}
+                    onChange={(e) => setTotalCostInput(e.target.value)}
+                    placeholder="600"
+                    min="1"
+                    className="w-full px-2.5 py-1.5 rounded-lg bg-theme-surface border border-theme-border-soft text-theme-primary font-black text-sm focus:outline-none focus:border-theme-accent"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[9px] font-black text-theme-muted uppercase block mb-1">
+                    Paid Now (₹)
+                  </label>
+                  <input
+                    type="number"
+                    value={paidNowInput}
+                    onChange={(e) => setPaidNowInput(e.target.value)}
+                    placeholder="300"
+                    min="0"
+                    max={totalCostInput || undefined}
+                    className="w-full px-2.5 py-1.5 rounded-lg bg-theme-surface border border-theme-border-soft text-theme-accent font-black text-sm focus:outline-none focus:border-theme-accent"
+                  />
+                </div>
+
+                <div>
+                  <span className="text-[9px] font-black text-theme-muted uppercase block mb-1">
+                    Due Balance (₹)
+                  </span>
+                  <div className="px-2.5 py-1.5 rounded-lg bg-theme-surface border border-theme-border-soft font-black text-sm text-rose-500">
+                    {formatCurrency(Math.max(0, (parseFloat(totalCostInput) || 0) - (parseFloat(paidNowInput) || 0)), currencySymbol)}
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Details if Paid > 0 */}
+              {(parseFloat(paidNowInput) || 0) > 0 && (
+                <div className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-theme-accent/5 border border-theme-accent/20">
+                  <div>
+                    <label className="text-[10px] font-bold text-theme-muted uppercase block mb-1">
+                      Payment Method
+                    </label>
+                    <select
+                      value={paymentMethodInput}
+                      onChange={(e) => setPaymentMethodInput(e.target.value)}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-theme-surface border border-theme-border-soft text-theme-primary font-bold text-xs"
+                    >
+                      <option value="UPI">UPI / GPay / PhonePe</option>
+                      <option value="Cash">Cash</option>
+                      <option value="Bank Transfer">Bank Transfer</option>
+                      <option value="Cheque">Cheque</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-bold text-theme-muted uppercase block mb-1">
+                      Internal Bank Outflow Account
+                    </label>
+                    <select
+                      value={bankAccountInput}
+                      onChange={(e) => setBankAccountInput(e.target.value)}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-theme-surface border border-theme-border-soft text-theme-primary font-bold text-xs"
+                    >
+                      {bankAccountsList.map(acc => (
+                        <option key={acc} value={acc}>{acc}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )}
+
+              {/* Invariant Financial Truth Banner */}
+              {(() => {
+                const invTotal = parseFloat(outsourceTargetInvoice.grandTotal || outsourceTargetInvoice.total) || 0;
+                const cost = parseFloat(totalCostInput) || 0;
+                const margin = Math.max(0, invTotal - cost);
+                return (
+                  <div className="p-3 rounded-xl bg-theme-surface-elevated border border-theme-border-soft space-y-1">
+                    <div className="flex items-center justify-between text-xs font-black">
+                      <span className="text-theme-primary">Customer Invoice: {formatCurrency(invTotal, currencySymbol)}</span>
+                      <span className="text-theme-accent">Net Margin: {formatCurrency(margin, currencySymbol)}</span>
+                    </div>
+                    <p className="text-[10px] text-theme-muted">
+                      Customer invoice amount remains untouched. Contractor cost is an internal business expense.
+                    </p>
+                  </div>
+                );
+              })()}
+
+              <div className="flex justify-end gap-2.5 pt-3 border-t border-theme-border-soft">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOutsourceModalOpen(false);
+                    setOutsourceTargetInvoice(null);
+                  }}
+                  className="px-4 py-2 rounded-lg bg-theme-surface-elevated hover:bg-theme-surface-hover text-xs font-bold text-theme-secondary"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-lg bg-theme-accent hover:opacity-90 text-theme-accent-contrast text-xs font-extrabold shadow-sm"
+                >
+                  Assign Work & Generate Bill
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
 
     </AnimatedPage>

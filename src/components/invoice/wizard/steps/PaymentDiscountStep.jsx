@@ -161,10 +161,15 @@ const PaymentDiscountStep = () => {
                 className="w-full px-4 py-3 bg-theme-surface border border-theme-border-soft rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent transition-all text-theme-primary appearance-none"
               >
                 <option value="Cash">Cash</option>
+                <option value="UPI">UPI / QR</option>
+                <option value="PhonePe">PhonePe</option>
+                <option value="Google Pay">Google Pay</option>
+                <option value="Paytm">Paytm</option>
                 <option value="Bank Transfer">Bank Transfer</option>
-                <option value="UPI / QR">UPI / QR</option>
+                <option value="Cheque">Cheque</option>
                 <option value="Credit Card">Credit Card</option>
-                <option value="Check">Check</option>
+                <option value="bKash">bKash</option>
+                <option value="Nagad">Nagad</option>
                 <option value="Other">Other</option>
               </select>
             </div>

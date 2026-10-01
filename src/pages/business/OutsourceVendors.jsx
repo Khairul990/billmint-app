@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Users, Briefcase, IndianRupee, CreditCard, TrendingUp, TrendingDown,
-  Plus, Search, Filter, Phone, MessageSquare, Mail, MapPin, CheckCircle2,
-  Clock, AlertCircle, Trash2, Edit3, Eye, FileText, ChevronRight,
-  ExternalLink, ArrowUpRight, ArrowDownLeft, Sliders, ShieldCheck, Download,
-  Printer, X, RefreshCw, Landmark, Sparkles
+  Briefcase, Users, Plus, Search, Filter, Phone, CheckCircle2,
+  Clock, Trash2, Edit3, Eye, Printer, X, DollarSign, Calendar,
+  CreditCard, ChevronDown, ChevronUp, AlertCircle, Sparkles, Check,
+  ArrowRight, ShieldCheck, UserCheck, RefreshCw, FileText, ArrowLeft,
+  Receipt, Wallet
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { formatCurrency } from '../../utils/invoiceUtils.js';
@@ -13,64 +13,100 @@ import {
   getVendors, saveVendor, deleteVendor,
   getOutsourceJobs, saveOutsourceJob, deleteOutsourceJob,
   getOutsourcePayments, recordOutsourcePayment, deleteOutsourcePayment,
-  calculateJobFinancials, calculateVendor360, getVendorLedger, calculateOutsourceProfitability
+  calculateVendor360, getVendorLedger, generateNextContractorBillNumber
 } from '../../services/outsourceEngine.js';
 import { bankEngine } from '../../services/bankEngine.js';
 
-const VENDOR_CATEGORIES = [
-  'Graphic Designer',
-  'UI/UX Designer',
-  'Web Developer',
-  'Mobile App Developer',
-  'Video Editor & Animator',
-  'Content Writer & Copywriter',
-  'SEO & Digital Marketer',
-  'Photographer / Videographer',
-  'Tailoring & Embroidery Artisan',
-  'Hardware / Repair Technician',
-  'Printing & Production Vendor',
-  'Voiceover & Audio Engineer',
-  'Other Specialist'
-];
-
-const JOB_STATUSES = [
-  { id: 'Draft', label: 'Draft', color: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20' },
-  { id: 'Assigned', label: 'Assigned', color: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
-  { id: 'In Progress', label: 'In Progress', color: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
-  { id: 'Submitted', label: 'Submitted / Review', color: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
-  { id: 'Revision', label: 'Revision', color: 'bg-orange-500/10 text-orange-400 border-orange-500/20' },
-  { id: 'Approved', label: 'Approved', color: 'bg-theme-tint-bg text-theme-accent border-theme-tint-border' },
-  { id: 'Completed', label: 'Completed', color: 'bg-theme-tint-bg text-theme-accent border-theme-tint-border' },
-  { id: 'Cancelled', label: 'Cancelled', color: 'bg-rose-500/10 text-rose-400 border-rose-500/20' }
-];
-
-const OutsourceVendors = ({ invoices = [], currentTab, setCurrentTab }) => {
-  const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'vendors', 'jobs', 'payables', 'profit', 'settings'
+/**
+ * BillQyro — Work Cost & Contractor Bill System (FINAL STABLE VERSION)
+ * 
+ * CORE DESIGN PRINCIPLE:
+ * Feels like creating a normal BILL / VOUCHER, NOT filling out a tedious 13-field form.
+ * 
+ * 1. ONE-PAGE & EXTREMELY SIMPLE:
+ *    - Select/add Worker
+ *    - Select Customer / Invoice if needed (optional)
+ *    - Enter Design/Product Number (e.g. GK-115)
+ *    - Enter Work Description
+ *    - Enter Work Amount (e.g. ₹600)
+ *    - Enter Paid amount (e.g. ₹300) -> Remaining becomes Due automatically (₹300)
+ *    - Save the Work Bill (Generates WB-0001, WB-0002...)
+ * 
+ * 2. STRICT INVARIANTS:
+ *    - Customer Invoice total is 100% untouched.
+ *    - Work Cost is an internal expenditure.
+ *    - Payments deduct moneyOut from internal bank/cash exactly once (no double-deduction).
+ */
+const OutsourceVendors = ({
+  invoices = [],
+  customers = [],
+  products = [],
+  businessSettings = {},
+  currentTab,
+  setCurrentTab
+}) => {
+  // Core data states
   const [vendors, setVendors] = useState([]);
   const [jobs, setJobs] = useState([]);
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [bankAccounts, setBankAccounts] = useState([]);
+  const [bankAccounts, setBankAccounts] = useState(['Cash', 'Bank Account', 'UPI']);
+  const [isSubmittingPayment, setIsSubmittingPayment] = useState(false);
 
-  // Modals state
-  const [vendorModalOpen, setVendorModalOpen] = useState(false);
-  const [editingVendor, setEditingVendor] = useState(null);
-
-  const [jobModalOpen, setJobModalOpen] = useState(false);
+  // Bill Creator Slip State
+  const [isBillSlipOpen, setIsBillSlipOpen] = useState(true);
   const [editingJob, setEditingJob] = useState(null);
+  const billSlipRef = useRef(null);
+  const workersSectionRef = useRef(null);
 
-  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  // Bill Slip Field States (Fast, auto-populated, only Worker and Amount are mandatory)
+  const [billWorkerId, setBillWorkerId] = useState('');
+  const [billWorkerName, setBillWorkerName] = useState('');
+  const [showAddWorkerInline, setShowAddWorkerInline] = useState(false);
+  const [newWorkerPhone, setNewWorkerPhone] = useState('');
+
+  const [billDesignNumber, setBillDesignNumber] = useState('');
+  const [billWorkDescription, setBillWorkDescription] = useState('');
+  const [billAmount, setBillAmount] = useState('');
+  const [billPaid, setBillPaid] = useState('0');
+  const [billPaymentMethod, setBillPaymentMethod] = useState('Cash');
+  const [billBankAccount, setBillBankAccount] = useState('Cash');
+  const [billDate, setBillDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [billNotes, setBillNotes] = useState('');
+
+  // Optional Invoice & Customer Link
+  const [showInvoiceLink, setShowInvoiceLink] = useState(false);
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState('');
+  const [linkedCustomerName, setLinkedCustomerName] = useState('');
+  const [linkedCustomerId, setLinkedCustomerId] = useState('');
+  const [linkedInvoiceNumber, setLinkedInvoiceNumber] = useState('');
+
+  // Modals & Panels
+  const [billModalOpen, setBillModalOpen] = useState(false);
+  const [selectedJobForBill, setSelectedJobForBill] = useState(null);
+
+  const [partialPayModalOpen, setPartialPayModalOpen] = useState(false);
   const [paymentTargetJob, setPaymentTargetJob] = useState(null);
-  const [paymentTargetVendor, setPaymentTargetVendor] = useState(null);
 
-  const [ledgerModalOpen, setLedgerModalOpen] = useState(false);
-  const [selectedVendorForLedger, setSelectedVendorForLedger] = useState(null);
+  const [workerModalOpen, setWorkerModalOpen] = useState(false);
+  const [editingWorker, setEditingWorker] = useState(null);
 
-  // Search & Filters
+  const [selectedWorkerFilter, setSelectedWorkerFilter] = useState(null);
+  const [workerLedgerModalOpen, setWorkerLedgerModalOpen] = useState(false);
+  const [selectedWorkerForLedger, setSelectedWorkerForLedger] = useState(null);
+
+  const [deleteConfirmJob, setDeleteConfirmJob] = useState(null);
+
+  // Search & Status Filter
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('ALL');
-  const [categoryFilter, setCategoryFilter] = useState('ALL');
+  const [statusFilter, setStatusFilter] = useState('ALL'); // ALL, Pending, Partial, Paid
 
+  // Next Bill Number Preview
+  const nextBillNumberPreview = useMemo(() => {
+    return generateNextContractorBillNumber(jobs);
+  }, [jobs]);
+
+  // Load Data
   const loadAllData = async () => {
     try {
       setLoading(true);
@@ -80,13 +116,15 @@ const OutsourceVendors = ({ invoices = [], currentTab, setCurrentTab }) => {
         getOutsourcePayments(),
         bankEngine.getBankSettings().catch(() => ({ accounts: ['Cash', 'Bank Account', 'UPI'] }))
       ]);
-      setVendors(vData);
-      setJobs(jData);
-      setPayments(pData);
-      setBankAccounts(bSettings?.accounts || ['Cash', 'Main Bank', 'UPI Account']);
+      setVendors(vData || []);
+      setJobs(jData || []);
+      setPayments(pData || []);
+      if (bSettings?.accounts && Array.isArray(bSettings.accounts) && bSettings.accounts.length > 0) {
+        setBankAccounts(bSettings.accounts);
+      }
     } catch (e) {
-      console.error('Error loading Outsource data:', e);
-      toast.error('Failed to load Outsource & Vendor records.');
+      console.error('Error loading Work Cost data:', e);
+      toast.error('Failed to load Work Cost records.');
     } finally {
       setLoading(false);
     }
@@ -96,1477 +134,1906 @@ const OutsourceVendors = ({ invoices = [], currentTab, setCurrentTab }) => {
     loadAllData();
     const handleUpdate = () => loadAllData();
     window.addEventListener('billqyro_outsource_updated', handleUpdate);
-    return () => window.removeEventListener('billqyro_outsource_updated', handleUpdate);
+    window.addEventListener('billqyro_bank_updated', handleUpdate);
+    return () => {
+      window.removeEventListener('billqyro_outsource_updated', handleUpdate);
+      window.removeEventListener('billqyro_bank_updated', handleUpdate);
+    };
   }, []);
 
-  // Profitability and Totals Calculation
-  const profitability = useMemo(() => {
-    return calculateOutsourceProfitability(invoices, jobs, payments);
-  }, [invoices, jobs, payments]);
-
-  const totalOutstandingPayable = useMemo(() => {
-    return vendors.reduce((acc, v) => {
-      const v360 = calculateVendor360(v, jobs, payments);
-      return acc + v360.payable;
+  // Summary Metrics
+  const summary = useMemo(() => {
+    const totalWorkCost = jobs.reduce((sum, j) => {
+      return sum + (Number(j.totalContractorCost !== undefined ? j.totalContractorCost : j.agreedCost) || 0);
     }, 0);
-  }, [vendors, jobs, payments]);
 
-  const activeJobsCount = useMemo(() => {
-    return jobs.filter(j => j.status !== 'Completed' && j.status !== 'Cancelled').length;
+    const totalPaid = jobs.reduce((sum, j) => {
+      return sum + (Number(j.paidAmount !== undefined ? j.paidAmount : j.totalPaid) || 0);
+    }, 0);
+
+    const pendingPayment = Math.max(0, totalWorkCost - totalPaid);
+
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
+
+    const thisMonthCost = jobs.filter(j => {
+      const d = new Date(j.assignedAt || j.createdAt || j.date || 0);
+      return d.getFullYear() === currentYear && d.getMonth() === currentMonth;
+    }).reduce((sum, j) => {
+      return sum + (Number(j.totalContractorCost !== undefined ? j.totalContractorCost : j.agreedCost) || 0);
+    }, 0);
+
+    return {
+      totalWorkCost,
+      totalPaid,
+      pendingPayment,
+      thisMonthCost,
+      totalJobsCount: jobs.length
+    };
   }, [jobs]);
 
-  // Handlers for Vendor Actions
-  const handleSaveVendor = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const vendorPayload = {
-      id: editingVendor?.id,
-      name: formData.get('name')?.trim(),
-      phone: formData.get('phone')?.trim(),
-      whatsapp: formData.get('whatsapp')?.trim(),
-      email: formData.get('email')?.trim(),
-      category: formData.get('category'),
-      address: formData.get('address')?.trim(),
-      paymentPreference: formData.get('paymentPreference'),
-      upiId: formData.get('upiId')?.trim(),
-      bankDetails: formData.get('bankDetails')?.trim(),
-      defaultRate: Number(formData.get('defaultRate')) || 0,
-      openingBalance: Number(formData.get('openingBalance')) || 0,
-      notes: formData.get('notes')?.trim(),
-      isActive: formData.get('isActive') === 'on'
-    };
+  // Live Auto-Calculation for the Bill Slip
+  const numAmount = Math.max(0, Number(billAmount) || 0);
+  const numPaid = Math.max(0, Math.min(numAmount, Number(billPaid) || 0));
+  const autoCalculatedDue = Math.max(0, numAmount - numPaid);
 
-    if (!vendorPayload.name) {
-      toast.error('Please enter the vendor / freelancer name.');
+  // Selected Invoice Object
+  const selectedInvoiceObj = useMemo(() => {
+    if (!selectedInvoiceId) return null;
+    return invoices.find(i => i.id === selectedInvoiceId || i.invoiceNumber === selectedInvoiceId) || null;
+  }, [invoices, selectedInvoiceId]);
+
+  // When an Invoice is selected, automatically carry customer, product, and design information
+  const handleInvoiceSelect = (invId) => {
+    setSelectedInvoiceId(invId);
+    if (!invId) {
+      setLinkedInvoiceNumber('');
+      return;
+    }
+    const inv = invoices.find(i => i.id === invId || i.invoiceNumber === invId);
+    if (inv) {
+      setLinkedInvoiceNumber(inv.invoiceNumber || '');
+      setLinkedCustomerName(inv.customerName || '');
+      setLinkedCustomerId(inv.customerId || '');
+
+      // Auto-carry product / design details if available
+      if (Array.isArray(inv.items) && inv.items.length > 0) {
+        const item = inv.items[0];
+        if (item.designNumber || item.sku) {
+          setBillDesignNumber(item.designNumber || item.sku);
+        }
+        if (!billWorkDescription) {
+          setBillWorkDescription(`Outsource work for ${item.name || item.description || 'item'}`);
+        }
+      }
+    }
+  };
+
+  // Filtered Jobs / Work Bills
+  const filteredJobs = useMemo(() => {
+    return jobs.filter(j => {
+      // If filtered by a specific worker
+      if (selectedWorkerFilter) {
+        const matchesWorker = (j.contractorId === selectedWorkerFilter.id || j.vendorId === selectedWorkerFilter.id);
+        if (!matchesWorker) return false;
+      }
+
+      const query = searchQuery.trim().toLowerCase();
+      const matchesSearch = !query ||
+        j.customerName?.toLowerCase().includes(query) ||
+        j.invoiceNumber?.toLowerCase().includes(query) ||
+        j.designNumber?.toLowerCase().includes(query) ||
+        j.productName?.toLowerCase().includes(query) ||
+        j.contractorName?.toLowerCase().includes(query) ||
+        j.contractorBillNumber?.toLowerCase().includes(query) ||
+        j.workDescription?.toLowerCase().includes(query);
+
+      const cost = Number(j.totalContractorCost !== undefined ? j.totalContractorCost : j.agreedCost) || 0;
+      const paid = Number(j.paidAmount !== undefined ? j.paidAmount : j.totalPaid) || 0;
+      const due = Math.max(0, cost - paid);
+
+      let matchesStatus = true;
+      if (statusFilter === 'Pending') {
+        matchesStatus = due > 0 && paid === 0;
+      } else if (statusFilter === 'Partial') {
+        matchesStatus = due > 0 && paid > 0;
+      } else if (statusFilter === 'Paid') {
+        matchesStatus = due === 0 && cost > 0;
+      }
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [jobs, searchQuery, statusFilter, selectedWorkerFilter]);
+
+  // Reset Bill Slip to blank state
+  const resetBillSlip = () => {
+    setEditingJob(null);
+    setBillWorkerId('');
+    setBillWorkerName('');
+    setShowAddWorkerInline(false);
+    setNewWorkerPhone('');
+    setBillDesignNumber('');
+    setBillWorkDescription('');
+    setBillAmount('');
+    setBillPaid('0');
+    setBillPaymentMethod('Cash');
+    setBillBankAccount(bankAccounts[0] || 'Cash');
+    setBillDate(new Date().toISOString().split('T')[0]);
+    setBillNotes('');
+    setShowInvoiceLink(false);
+    setSelectedInvoiceId('');
+    setLinkedCustomerName('');
+    setLinkedCustomerId('');
+    setLinkedInvoiceNumber('');
+  };
+
+  // Populate Bill Slip for Editing
+  const handleEditJob = (job) => {
+    setEditingJob(job);
+    setBillWorkerId(job.contractorId || job.vendorId || '');
+    setBillWorkerName(job.contractorName || job.vendorName || '');
+    setShowAddWorkerInline(false);
+    setBillDesignNumber(job.designNumber || '');
+    setBillWorkDescription(job.workDescription || job.productName || '');
+    const cost = job.totalContractorCost !== undefined ? job.totalContractorCost : job.agreedCost;
+    setBillAmount(cost ? String(cost) : '');
+    setBillPaid(String(job.paidAmount || job.totalPaid || 0));
+    setBillDate(job.assignedAt ? job.assignedAt.split('T')[0] : new Date().toISOString().split('T')[0]);
+    setBillNotes(job.notes || '');
+
+    if (job.invoiceNumber || job.invoiceId || job.customerName) {
+      setShowInvoiceLink(true);
+      setSelectedInvoiceId(job.invoiceId || job.relatedInvoiceId || '');
+      setLinkedInvoiceNumber(job.invoiceNumber || job.relatedInvoiceNumber || '');
+      setLinkedCustomerName(job.customerName || '');
+      setLinkedCustomerId(job.customerId || '');
+    } else {
+      setShowInvoiceLink(false);
+      setSelectedInvoiceId('');
+      setLinkedInvoiceNumber('');
+      setLinkedCustomerName('');
+      setLinkedCustomerId('');
+    }
+
+    setIsBillSlipOpen(true);
+    if (billSlipRef.current) {
+      billSlipRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  // Save Work Bill (Create or Update)
+  const handleSaveWorkBill = async (e) => {
+    e.preventDefault();
+
+    let workerId = billWorkerId;
+    let workerName = billWorkerName.trim();
+
+    if (!workerId && !workerName) {
+      toast.error('Please select or enter a Worker / Work Partner.');
       return;
     }
 
-    try {
-      await saveVendor(vendorPayload);
-      toast.success(editingVendor ? 'Vendor profile updated.' : 'New vendor registered.');
-      setVendorModalOpen(false);
-      setEditingVendor(null);
-      loadAllData();
-    } catch (err) {
-      toast.error('Failed to save vendor: ' + err.message);
+    if (numAmount <= 0) {
+      toast.error('Please enter a valid Work Amount.');
+      return;
     }
-  };
 
-  const handleDeleteVendor = async (id, name) => {
-    if (!window.confirm(`Are you sure you want to delete vendor "${name}"?`)) return;
-    try {
-      await deleteVendor(id);
-      toast.success('Vendor deleted.');
-      loadAllData();
-    } catch (err) {
-      toast.error('Failed to delete vendor: ' + err.message);
+    // Auto-create worker if typed inline
+    if (!workerId && workerName) {
+      const existing = vendors.find(v => v.name?.toLowerCase() === workerName.toLowerCase());
+      if (existing) {
+        workerId = existing.id;
+        workerName = existing.name;
+      } else {
+        const savedWorker = await saveVendor({
+          name: workerName,
+          phone: newWorkerPhone.trim(),
+          specialization: 'Work Partner',
+          category: 'Work Partner'
+        });
+        workerId = savedWorker.id;
+      }
+    } else if (workerId && !workerName) {
+      const match = vendors.find(v => v.id === workerId);
+      workerName = match?.name || 'Worker';
     }
-  };
 
-  // Handlers for Outsource Job Actions
-  const handleSaveJob = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const relatedInvoiceId = formData.get('relatedInvoiceId');
-    const selectedInvoice = invoices.find(i => i.id === relatedInvoiceId);
+    const billNumber = editingJob?.contractorBillNumber || generateNextContractorBillNumber(jobs);
 
-    const agreedCost = Number(formData.get('agreedCost')) || 0;
-    const advance = Number(formData.get('advance')) || 0;
+    let paymentStatus = 'Pending';
+    if (autoCalculatedDue === 0 && numAmount > 0) paymentStatus = 'Paid';
+    else if (numPaid > 0) paymentStatus = 'Partial';
 
     const jobPayload = {
       id: editingJob?.id,
-      jobCode: editingJob?.jobCode,
-      project: formData.get('project')?.trim(),
-      description: formData.get('description')?.trim(),
-      client: formData.get('client')?.trim() || selectedInvoice?.customerName || '',
-      relatedInvoiceId: relatedInvoiceId || null,
-      relatedInvoiceNumber: selectedInvoice?.invoiceNumber || '',
-      vendorId: formData.get('vendorId'),
-      vendorName: vendors.find(v => v.id === formData.get('vendorId'))?.name || '',
-      priority: formData.get('priority') || 'Medium',
-      startDate: formData.get('startDate') || new Date().toISOString().split('T')[0],
-      deadline: formData.get('deadline') || '',
-      agreedCost: agreedCost,
-      status: formData.get('status') || 'Assigned',
-      notes: formData.get('notes')?.trim()
+      contractorBillNumber: billNumber,
+      billNumber,
+      jobCode: billNumber,
+      contractorId: workerId,
+      vendorId: workerId,
+      contractorName: workerName,
+      vendorName: workerName,
+      customerId: linkedCustomerId || null,
+      customerName: linkedCustomerName || 'Walk-in / Direct Work',
+      invoiceId: selectedInvoiceId || null,
+      invoiceNumber: linkedInvoiceNumber || '',
+      productId: null,
+      productName: billWorkDescription || (billDesignNumber ? `Design ${billDesignNumber}` : 'Outsource Work'),
+      designNumber: billDesignNumber.trim(),
+      workDescription: billWorkDescription.trim() || (billDesignNumber ? `Design ${billDesignNumber} work` : 'Work Assignment'),
+      totalContractorCost: numAmount,
+      agreedCost: numAmount,
+      paidAmount: editingJob ? (editingJob.paidAmount || 0) : numPaid,
+      totalPaid: editingJob ? (editingJob.totalPaid || 0) : numPaid,
+      dueAmount: Math.max(0, numAmount - (editingJob ? (editingJob.paidAmount || 0) : numPaid)),
+      paymentStatus,
+      workStatus: 'Assigned',
+      status: 'Assigned',
+      assignedAt: billDate ? new Date(billDate).toISOString() : new Date().toISOString(),
+      notes: billNotes.trim()
     };
 
-    if (!jobPayload.description && !jobPayload.project) {
-      toast.error('Please enter a job title or project description.');
-      return;
-    }
-    if (!jobPayload.vendorId) {
-      toast.error('Please select an assigned vendor/freelancer.');
-      return;
-    }
-
     try {
-      const saved = await saveOutsourceJob(jobPayload);
+      const savedJob = await saveOutsourceJob(jobPayload);
 
-      // Auto-record advance payment if requested on new job creation
-      if (!editingJob && advance > 0) {
+      // Record disbursement if newly created with payment
+      if (!editingJob && numPaid > 0) {
         await recordOutsourcePayment({
-          jobId: saved.id,
-          jobCode: saved.jobCode,
-          vendorId: jobPayload.vendorId,
-          vendorName: jobPayload.vendorName,
-          amount: advance,
-          paymentMethod: 'UPI',
-          note: 'Initial Advance for ' + saved.jobCode,
-          isAdvance: true
+          contractorBillId: savedJob.id,
+          jobId: savedJob.id,
+          contractorBillNumber: savedJob.contractorBillNumber,
+          jobCode: savedJob.contractorBillNumber,
+          contractorId: workerId,
+          contractorName: workerName,
+          amount: numPaid,
+          paymentMethod: billPaymentMethod || 'Cash',
+          bankAccount: billBankAccount || 'Cash',
+          note: `Payment for Work Bill ${savedJob.contractorBillNumber} (${billDesignNumber || 'Work'})`,
+          date: billDate || new Date().toISOString().split('T')[0],
+          syncWithBank: true
         });
       }
 
-      toast.success(editingJob ? 'Outsource job updated.' : 'Outsource job created.');
-      setJobModalOpen(false);
-      setEditingJob(null);
+      toast.success(editingJob ? `Work Bill ${billNumber} updated!` : `Work Bill ${savedJob.contractorBillNumber} created!`);
+      resetBillSlip();
       loadAllData();
     } catch (err) {
-      toast.error('Failed to save job: ' + err.message);
+      console.error(err);
+      toast.error('Failed to save Work Bill: ' + (err.message || 'Error'));
     }
   };
 
-  const handleDeleteJob = async (id, code) => {
-    if (!window.confirm(`Are you sure you want to delete job "${code}"?`)) return;
+  // 1-Click "Mark as Paid" (Full Settlement)
+  const handleMarkAsPaid = async (job) => {
+    const cost = Number(job.totalContractorCost !== undefined ? job.totalContractorCost : job.agreedCost) || 0;
+    const paid = Number(job.paidAmount !== undefined ? job.paidAmount : job.totalPaid) || 0;
+    const due = Math.max(0, cost - paid);
+
+    if (due <= 0) {
+      toast.success('This bill is already fully settled.');
+      return;
+    }
+
     try {
-      await deleteOutsourceJob(id);
-      toast.success('Job deleted.');
+      await recordOutsourcePayment({
+        contractorId: job.contractorId || job.vendorId,
+        vendorId: job.contractorId || job.vendorId,
+        contractorName: job.contractorName || job.vendorName || 'Worker',
+        vendorName: job.contractorName || job.vendorName || 'Worker',
+        contractorBillId: job.id,
+        jobId: job.id,
+        contractorBillNumber: job.contractorBillNumber || job.jobCode || '',
+        jobCode: job.contractorBillNumber || job.jobCode || '',
+        amount: due,
+        paymentMethod: 'Cash',
+        bankAccount: bankAccounts[0] || 'Cash',
+        note: `Full settlement for ${job.contractorBillNumber || 'Job'}`,
+        date: new Date().toISOString().split('T')[0],
+        syncWithBank: true
+      });
+
+      toast.success(`Marked as Paid! Full settlement of ${formatCurrency(due)} recorded.`);
       loadAllData();
     } catch (err) {
-      toast.error('Failed to delete job: ' + err.message);
+      toast.error('Failed to mark as paid: ' + err.message);
     }
   };
 
-  // Handlers for Payment Actions
-  const handleRecordPayment = async (e) => {
+  // Submit Partial Payment
+  const handlePartialPaymentSubmit = async (e) => {
     e.preventDefault();
+    if (!paymentTargetJob || isSubmittingPayment) return;
+
     const formData = new FormData(e.target);
     const amount = Number(formData.get('amount')) || 0;
-    const vendorId = formData.get('vendorId');
-    const jobId = formData.get('jobId');
-
     if (amount <= 0) {
       toast.error('Please enter a valid payment amount.');
       return;
     }
-    if (!vendorId) {
-      toast.error('Please select a vendor.');
+
+    const cost = Number(paymentTargetJob.totalContractorCost !== undefined ? paymentTargetJob.totalContractorCost : paymentTargetJob.agreedCost) || 0;
+    const currentPaid = Number(paymentTargetJob.paidAmount !== undefined ? paymentTargetJob.paidAmount : paymentTargetJob.totalPaid) || 0;
+    const maxDue = Math.max(0, cost - currentPaid);
+
+    if (amount > maxDue) {
+      toast.error(`Amount cannot exceed outstanding due of ${formatCurrency(maxDue)}.`);
       return;
     }
 
-    const targetVendor = vendors.find(v => v.id === vendorId);
-    const targetJob = jobs.find(j => j.id === jobId);
-
     try {
+      setIsSubmittingPayment(true);
       await recordOutsourcePayment({
-        vendorId,
-        vendorName: targetVendor?.name || '',
-        jobId: jobId || null,
-        jobCode: targetJob?.jobCode || '',
+        contractorId: paymentTargetJob.contractorId || paymentTargetJob.vendorId,
+        vendorId: paymentTargetJob.contractorId || paymentTargetJob.vendorId,
+        contractorName: paymentTargetJob.contractorName || paymentTargetJob.vendorName || 'Worker',
+        vendorName: paymentTargetJob.contractorName || paymentTargetJob.vendorName || 'Worker',
+        contractorBillId: paymentTargetJob.id,
+        jobId: paymentTargetJob.id,
+        contractorBillNumber: paymentTargetJob.contractorBillNumber || paymentTargetJob.jobCode || '',
+        jobCode: paymentTargetJob.contractorBillNumber || paymentTargetJob.jobCode || '',
         amount,
-        paymentMethod: formData.get('paymentMethod'),
-        reference: formData.get('reference')?.trim(),
-        bankAccount: formData.get('bankAccount'),
-        note: formData.get('note')?.trim(),
+        paymentMethod: formData.get('paymentMethod') || 'Cash',
+        bankAccount: formData.get('bankAccount') || 'Cash',
+        note: formData.get('note')?.trim() || `Disbursement for ${paymentTargetJob.contractorBillNumber || 'Job'}`,
         date: formData.get('date') || new Date().toISOString().split('T')[0],
         syncWithBank: true
       });
 
       toast.success(`Payment of ${formatCurrency(amount)} recorded successfully.`);
-      setPaymentModalOpen(false);
+      setPartialPayModalOpen(false);
       setPaymentTargetJob(null);
-      setPaymentTargetVendor(null);
       loadAllData();
     } catch (err) {
       toast.error('Failed to record payment: ' + err.message);
+    } finally {
+      setIsSubmittingPayment(false);
     }
   };
 
-  const handleDeletePayment = async (id, amount) => {
-    if (!window.confirm(`Reverse payment of ${formatCurrency(amount)}?`)) return;
+  // Delete Job Handler
+  const confirmDeleteJobAction = async () => {
+    if (!deleteConfirmJob) return;
     try {
-      await deleteOutsourcePayment(id);
-      toast.success('Payment removed and balance restored.');
+      await deleteOutsourceJob(deleteConfirmJob.id);
+      toast.success(`Work Bill ${deleteConfirmJob.contractorBillNumber || 'Job'} deleted.`);
+      setDeleteConfirmJob(null);
       loadAllData();
     } catch (err) {
-      toast.error('Failed to reverse payment: ' + err.message);
+      toast.error('Failed to delete work: ' + err.message);
     }
   };
 
-  // Filtered lists
-  const filteredVendors = useMemo(() => {
-    return vendors.filter(v => {
-      const matchesSearch = !searchQuery || 
-        v.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        v.phone?.includes(searchQuery) ||
-        v.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        v.category?.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = categoryFilter === 'ALL' || v.category === categoryFilter;
-      const matchesStatus = statusFilter === 'ALL' || (statusFilter === 'ACTIVE' ? v.isActive !== false : v.isActive === false);
-      return matchesSearch && matchesCategory && matchesStatus;
-    });
-  }, [vendors, searchQuery, categoryFilter, statusFilter]);
+  // Save Worker Profile
+  const handleSaveWorkerSubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const name = formData.get('name')?.trim();
+    if (!name) {
+      toast.error('Worker name is required.');
+      return;
+    }
 
-  const filteredJobs = useMemo(() => {
-    return jobs.filter(j => {
-      const matchesSearch = !searchQuery || 
-        j.jobCode?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        j.project?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        j.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        j.client?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        j.vendorName?.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesStatus = statusFilter === 'ALL' || j.status === statusFilter;
-      return matchesSearch && matchesStatus;
-    });
-  }, [jobs, searchQuery, statusFilter]);
+    try {
+      await saveVendor({
+        id: editingWorker?.id,
+        name,
+        phone: formData.get('phone')?.trim() || '',
+        address: formData.get('address')?.trim() || '',
+        notes: formData.get('notes')?.trim() || '',
+        specialization: formData.get('specialization')?.trim() || 'Work Partner',
+        category: 'Work Partner'
+      });
+
+      toast.success(editingWorker ? 'Worker profile updated.' : 'New Worker added.');
+      setWorkerModalOpen(false);
+      setEditingWorker(null);
+      loadAllData();
+    } catch (err) {
+      toast.error('Failed to save worker: ' + err.message);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-theme-main text-theme-primary font-sans pb-32">
-      {/* Top Header */}
-      <div className="max-w-7xl mx-auto px-4 md:px-6 pt-6">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-6 border-b border-theme-border-soft">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-theme-accent/10 border border-theme-accent/20 flex items-center justify-center text-theme-accent">
-                <Briefcase className="w-5 h-5" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-black tracking-tight text-theme-primary flex items-center gap-2">
-                  Outsource & Vendor Hub
-                  <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-theme-accent/10 text-theme-accent border border-theme-accent/20">
-                    V8 Enterprise
-                  </span>
+    <div className="min-h-screen bg-theme-main text-theme-primary font-sans pb-32 overflow-x-hidden selection:bg-theme-accent/20">
+      
+      {/* ===================================================================== */}
+      {/* 1. HEADER SECTION */}
+      {/* ===================================================================== */}
+      <div className="max-w-6xl mx-auto px-3.5 sm:px-6 pt-5 md:pt-7">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-5 border-b border-theme-border-soft">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-theme-accent/15 border border-theme-accent/25 flex items-center justify-center text-theme-accent shrink-0 shadow-sm">
+              <Receipt className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-theme-primary">
+                  Work Cost
                 </h1>
-                <p className="text-xs text-theme-secondary">
-                  External freelancer costing, job progress tracking, payouts, and client profit margin analytics.
-                </p>
+                <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-theme-accent/10 text-theme-accent border border-theme-accent/20">
+                  Bill Center
+                </span>
               </div>
+              <p className="text-xs text-theme-secondary mt-0.5">
+                Manage outsourced work, payments & worker costs
+              </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5 flex-wrap">
+          <div className="flex items-center gap-2.5 w-full sm:w-auto">
             <button
               onClick={() => {
-                setEditingVendor(null);
-                setVendorModalOpen(true);
+                if (workersSectionRef.current) {
+                  workersSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
               }}
-              className="px-3 py-2 rounded-lg bg-theme-surface-elevated hover:bg-theme-surface-hover border border-theme-border-soft text-xs font-bold flex items-center gap-1.5 transition-all text-theme-primary shadow-sm"
+              className="flex-1 sm:flex-initial min-h-[44px] px-3.5 py-2 rounded-xl bg-theme-surface hover:bg-theme-surface-hover border border-theme-border-soft text-xs font-bold text-theme-primary flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer"
             >
-              <Plus className="w-3.5 h-3.5 text-theme-accent" />
-              <span>Add Vendor</span>
+              <Users className="w-4 h-4 text-theme-accent" />
+              <span>Workers ({vendors.length})</span>
             </button>
+
             <button
               onClick={() => {
-                setEditingJob(null);
-                setJobModalOpen(true);
+                setIsBillSlipOpen(true);
+                resetBillSlip();
+                if (billSlipRef.current) {
+                  billSlipRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
               }}
-              className="px-3 py-2 rounded-lg bg-theme-surface-elevated hover:bg-theme-surface-hover border border-theme-border-soft text-xs font-bold flex items-center gap-1.5 transition-all text-theme-primary shadow-sm"
+              className="flex-1 sm:flex-initial min-h-[44px] px-4 py-2 rounded-xl bg-theme-accent hover:opacity-90 text-theme-accent-contrast text-xs font-black flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer"
             >
-              <Plus className="w-3.5 h-3.5 text-theme-accent" />
-              <span>New Job</span>
-            </button>
-            <button
-              onClick={() => {
-                setPaymentTargetJob(null);
-                setPaymentTargetVendor(null);
-                setPaymentModalOpen(true);
-              }}
-              className="px-3.5 py-2 rounded-lg bg-theme-accent hover:opacity-90 text-theme-accent-contrast text-xs font-extrabold flex items-center gap-1.5 transition-all shadow-md"
-            >
-              <CreditCard className="w-3.5 h-3.5" />
-              <span>Record Payout</span>
+              <Plus className="w-4 h-4" />
+              <span>+ Create Bill</span>
             </button>
           </div>
         </div>
 
-        {/* Navigation Tabs */}
-        <div className="flex items-center gap-1 mt-4 overflow-x-auto custom-scrollbar border-b border-theme-border-soft pb-px">
-          {[
-            { id: 'overview', label: 'Overview', icon: TrendingUp },
-            { id: 'vendors', label: `Vendors (${vendors.length})`, icon: Users },
-            { id: 'jobs', label: `Outsource Jobs (${jobs.length})`, icon: Briefcase },
-            { id: 'payables', label: `Payouts & Ledger (${payments.length})`, icon: CreditCard },
-            { id: 'profit', label: 'Profit & Margins', icon: Landmark }
-          ].map(tab => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-2.5 rounded-t-lg text-xs font-bold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
-                  isActive
-                    ? 'border-theme-accent text-theme-accent bg-theme-accent/5'
-                    : 'border-transparent text-theme-secondary hover:text-theme-primary hover:bg-theme-surface-hover'
-                }`}
-              >
-                <Icon className="w-3.5 h-3.5" />
-                <span>{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Main Tab Content */}
-      <div className="max-w-7xl mx-auto px-4 md:px-6 pt-6">
-        {/* ========================================================================= */}
-        {/* 1. OVERVIEW TAB */}
-        {/* ========================================================================= */}
-        {activeTab === 'overview' && (
-          <div className="space-y-6">
-            {/* KPI Metric Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
-              <div className="p-4 rounded-xl bg-theme-surface border border-theme-border-soft shadow-sm space-y-1">
-                <span className="text-[10px] font-black uppercase text-theme-muted tracking-wider block">Active Vendors</span>
-                <div className="text-xl font-black text-theme-primary">{vendors.filter(v => v.isActive !== false).length}</div>
-                <div className="text-[10px] text-theme-secondary font-medium">Registered freelancers</div>
-              </div>
-
-              <div className="p-4 rounded-xl bg-theme-surface border border-theme-border-soft shadow-sm space-y-1">
-                <span className="text-[10px] font-black uppercase text-theme-muted tracking-wider block">Open Jobs</span>
-                <div className="text-xl font-black text-amber-500">{activeJobsCount}</div>
-                <div className="text-[10px] text-theme-secondary font-medium">In progress / review</div>
-              </div>
-
-              <div className="p-4 rounded-xl bg-theme-surface border border-theme-border-soft shadow-sm space-y-1">
-                <span className="text-[10px] font-black uppercase text-theme-muted tracking-wider block">Total Outsource Cost</span>
-                <div className="text-xl font-black text-theme-primary">{formatCurrency(profitability.totalOutsourceCost)}</div>
-                <div className="text-[10px] text-theme-secondary font-medium">{jobs.length} jobs assigned</div>
-              </div>
-
-              <div className="p-4 rounded-xl bg-theme-surface border border-theme-border-soft shadow-sm space-y-1">
-                <span className="text-[10px] font-black uppercase text-theme-muted tracking-wider block">Total Payouts Made</span>
-                <div className="text-xl font-black text-theme-accent">{formatCurrency(profitability.totalPaid)}</div>
-                <div className="text-[10px] text-theme-secondary font-medium">{payments.length} transactions</div>
-              </div>
-
-              <div className="p-4 rounded-xl bg-theme-surface border border-theme-border-soft shadow-sm space-y-1">
-                <span className="text-[10px] font-black uppercase text-theme-muted tracking-wider block">Outstanding Payables</span>
-                <div className="text-xl font-black text-rose-500">{formatCurrency(totalOutstandingPayable)}</div>
-                <div className="text-[10px] text-rose-400 font-medium">Due to freelancers</div>
-              </div>
-
-              <div className="p-4 rounded-xl bg-theme-surface border border-theme-border-soft shadow-sm space-y-1">
-                <span className="text-[10px] font-black uppercase text-theme-muted tracking-wider block">Gross Margin</span>
-                <div className="text-xl font-black text-theme-accent">{profitability.overallMarginPercent}%</div>
-                <div className="text-[10px] text-theme-secondary font-medium">Linked client projects</div>
-              </div>
+        {/* ===================================================================== */}
+        {/* 2. SUMMARY CARDS (4 PRIMARY METRICS) */}
+        {/* ===================================================================== */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 pt-5">
+          {/* Total Work Cost */}
+          <div className="p-4 rounded-2xl bg-theme-surface border border-theme-border-soft shadow-sm space-y-1">
+            <span className="text-[11px] font-black uppercase tracking-wider text-theme-muted block">
+              Total Work Cost
+            </span>
+            <div className="text-xl sm:text-2xl font-black text-theme-primary font-mono truncate">
+              {formatCurrency(summary.totalWorkCost)}
             </div>
-
-            {/* Quick Actions & High Priority Jobs */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Active Jobs Stream */}
-              <div className="lg:col-span-2 p-5 rounded-2xl bg-theme-surface border border-theme-border-soft space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-extrabold text-theme-primary flex items-center gap-2">
-                    <Briefcase className="w-4 h-4 text-theme-accent" />
-                    Active Outsource Assignments
-                  </h3>
-                  <button onClick={() => setActiveTab('jobs')} className="text-xs font-bold text-theme-accent hover:underline flex items-center gap-1">
-                    View All <ChevronRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-
-                {jobs.length === 0 ? (
-                  <div className="py-12 text-center text-theme-secondary text-xs">
-                    No outsource jobs created yet. Click "New Job" to assign your first external task.
-                  </div>
-                ) : (
-                  <div className="space-y-2.5">
-                    {jobs.slice(0, 5).map(job => {
-                      const fin = calculateJobFinancials(job, payments);
-                      const statusObj = JOB_STATUSES.find(s => s.id === job.status) || JOB_STATUSES[0];
-                      return (
-                        <div key={job.id} className="p-3.5 rounded-xl bg-theme-surface-elevated border border-theme-border-soft flex flex-col md:flex-row md:items-center justify-between gap-3 hover:border-theme-accent/40 transition-colors">
-                          <div className="space-y-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="font-mono text-xs font-black text-theme-primary">{job.jobCode}</span>
-                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${statusObj.color}`}>
-                                {job.status}
-                              </span>
-                              {job.priority === 'Urgent' && (
-                                <span className="text-[10px] font-black px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-500 border border-rose-500/20">
-                                  URGENT
-                                </span>
-                              )}
-                            </div>
-                            <h4 className="text-xs font-extrabold text-theme-primary truncate">{job.project || job.description}</h4>
-                            <div className="text-[11px] text-theme-secondary flex items-center gap-3">
-                              <span>Vendor: <strong className="text-theme-primary">{job.vendorName || 'Unassigned'}</strong></span>
-                              {job.client && <span>Client: <strong>{job.client}</strong></span>}
-                            </div>
-                          </div>
-
-                          <div className="flex items-center justify-between md:justify-end gap-4 shrink-0 border-t md:border-t-0 pt-2 md:pt-0 border-theme-border-soft">
-                            <div className="text-right">
-                              <div className="text-xs font-black text-theme-primary">{formatCurrency(fin.agreedCost)}</div>
-                              <div className="text-[10px] font-bold text-rose-500">
-                                Due: {formatCurrency(fin.outstandingPayable)}
-                              </div>
-                            </div>
-                            <button
-                              onClick={() => {
-                                setPaymentTargetJob(job);
-                                setPaymentTargetVendor(vendors.find(v => v.id === job.vendorId));
-                                setPaymentModalOpen(true);
-                              }}
-                              disabled={fin.outstandingPayable === 0}
-                              className="px-2.5 py-1.5 rounded-lg bg-theme-accent/10 hover:bg-theme-accent/20 text-theme-accent text-xs font-bold border border-theme-accent/20 transition-all disabled:opacity-40"
-                            >
-                              Pay
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-
-              {/* Vendor Payable Summary */}
-              <div className="p-5 rounded-2xl bg-theme-surface border border-theme-border-soft space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-extrabold text-theme-primary flex items-center gap-2">
-                    <Users className="w-4 h-4 text-theme-accent" />
-                    Top Vendor Payables
-                  </h3>
-                  <button onClick={() => setActiveTab('vendors')} className="text-xs font-bold text-theme-accent hover:underline flex items-center gap-1">
-                    Directory <ChevronRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-
-                {vendors.length === 0 ? (
-                  <div className="py-12 text-center text-theme-secondary text-xs">
-                    No vendors registered yet.
-                  </div>
-                ) : (
-                  <div className="space-y-2.5">
-                    {vendors.slice(0, 5).map(v => {
-                      const v360 = calculateVendor360(v, jobs, payments);
-                      return (
-                        <div key={v.id} className="p-3 rounded-xl bg-theme-surface-elevated border border-theme-border-soft flex items-center justify-between">
-                          <div className="min-w-0">
-                            <h4 className="text-xs font-bold text-theme-primary truncate">{v.name}</h4>
-                            <p className="text-[10px] text-theme-secondary truncate">{v.category || 'Specialist'}</p>
-                          </div>
-                          <div className="text-right shrink-0">
-                            <div className="text-xs font-black text-rose-500">{formatCurrency(v360.payable)}</div>
-                            <div className="text-[10px] text-theme-secondary">{v360.totalJobs} jobs</div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </div>
+            <p className="text-[11px] text-theme-secondary">All internal outsource work</p>
           </div>
-        )}
 
-        {/* ========================================================================= */}
-        {/* 2. VENDORS DIRECTORY TAB */}
-        {/* ========================================================================= */}
-        {activeTab === 'vendors' && (
-          <div className="space-y-4">
-            {/* Search and Filters */}
-            <div className="flex flex-col md:flex-row gap-3 items-center justify-between">
-              <div className="relative w-full md:w-80">
-                <Search className="w-4 h-4 text-theme-muted absolute left-3 top-1/2 -translate-y-1/2" />
+          {/* Paid */}
+          <div className="p-4 rounded-2xl bg-theme-surface border border-theme-border-soft shadow-sm space-y-1">
+            <span className="text-[11px] font-black uppercase tracking-wider text-emerald-500 block">
+              Paid
+            </span>
+            <div className="text-xl sm:text-2xl font-black text-emerald-500 font-mono truncate">
+              {formatCurrency(summary.totalPaid)}
+            </div>
+            <p className="text-[11px] text-theme-secondary">Total disbursed to workers</p>
+          </div>
+
+          {/* Due */}
+          <div className="p-4 rounded-2xl bg-theme-surface border border-theme-border-soft shadow-sm space-y-1">
+            <span className="text-[11px] font-black uppercase tracking-wider text-rose-500 block">
+              Due
+            </span>
+            <div className="text-xl sm:text-2xl font-black text-rose-500 font-mono truncate">
+              {formatCurrency(summary.pendingPayment)}
+            </div>
+            <p className="text-[11px] text-rose-500/80 font-medium">Pending worker payout</p>
+          </div>
+
+          {/* This Month */}
+          <div className="p-4 rounded-2xl bg-theme-surface border border-theme-border-soft shadow-sm space-y-1">
+            <span className="text-[11px] font-black uppercase tracking-wider text-amber-500 block">
+              This Month
+            </span>
+            <div className="text-xl sm:text-2xl font-black text-amber-500 font-mono truncate">
+              {formatCurrency(summary.thisMonthCost)}
+            </div>
+            <p className="text-[11px] text-theme-secondary">Current calendar month</p>
+          </div>
+        </div>
+
+        {/* ===================================================================== */}
+        {/* 3. WORK BILL CREATOR (FEELS LIKE A REAL BILL SLIP, NOT A LONG FORM) */}
+        {/* ===================================================================== */}
+        <div ref={billSlipRef} className="mt-6">
+          <div className="bg-theme-surface border-2 border-theme-accent/30 rounded-2xl md:rounded-3xl shadow-lg overflow-hidden transition-all">
+            
+            {/* Bill Voucher Header Bar */}
+            <div className="p-4 sm:p-5 bg-gradient-to-r from-theme-surface to-theme-surface-elevated border-b border-theme-border-soft flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-theme-accent text-theme-accent-contrast flex items-center justify-center font-mono font-black text-sm">
+                  {editingJob ? <Edit3 className="w-4 h-4" /> : <Receipt className="w-4 h-4" />}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-base font-black text-theme-primary">
+                      {editingJob ? `Edit Work Bill` : `Create Work Bill`}
+                    </h2>
+                    <span className="font-mono font-black text-xs px-2.5 py-0.5 rounded-lg bg-theme-accent/15 text-theme-accent border border-theme-accent/30">
+                      {editingJob?.contractorBillNumber || nextBillNumberPreview}
+                    </span>
+                  </div>
+                  <p className="text-xs text-theme-secondary">
+                    Fast & simple · Only Worker & Amount needed
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
                 <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search vendor name, skill, phone..."
-                  className="w-full pl-9 pr-3 py-2 rounded-lg bg-theme-surface border border-theme-border-soft text-xs text-theme-primary placeholder-theme-muted focus:outline-none focus:border-theme-accent"
+                  type="date"
+                  value={billDate}
+                  onChange={e => setBillDate(e.target.value)}
+                  className="px-3 py-1.5 bg-theme-surface border border-theme-border-soft rounded-xl text-xs font-semibold text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent"
                 />
-              </div>
 
-              <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto">
-                <select
-                  value={categoryFilter}
-                  onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="px-3 py-2 rounded-lg bg-theme-surface border border-theme-border-soft text-xs text-theme-primary focus:outline-none focus:border-theme-accent"
-                >
-                  <option value="ALL">All Categories</option>
-                  {VENDOR_CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                </select>
-
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="px-3 py-2 rounded-lg bg-theme-surface border border-theme-border-soft text-xs text-theme-primary focus:outline-none focus:border-theme-accent"
-                >
-                  <option value="ALL">All Statuses</option>
-                  <option value="ACTIVE">Active</option>
-                  <option value="INACTIVE">Inactive</option>
-                </select>
+                {editingJob && (
+                  <button
+                    type="button"
+                    onClick={resetBillSlip}
+                    className="px-3 py-1.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 hover:bg-rose-500/20 text-xs font-bold transition-all cursor-pointer"
+                  >
+                    Cancel Edit
+                  </button>
+                )}
               </div>
             </div>
 
-            {/* Vendors Grid */}
-            {filteredVendors.length === 0 ? (
-              <div className="p-12 text-center bg-theme-surface rounded-2xl border border-theme-border-soft space-y-3">
-                <Users className="w-8 h-8 text-theme-muted mx-auto" />
-                <p className="text-xs text-theme-secondary">No vendors matching your search criteria.</p>
-                <button
-                  onClick={() => {
-                    setEditingVendor(null);
-                    setVendorModalOpen(true);
-                  }}
-                  className="px-3.5 py-1.5 rounded-lg bg-theme-accent text-theme-accent-contrast text-xs font-bold"
-                >
-                  + Add First Vendor
-                </button>
+            {/* Bill Slip Body */}
+            <form onSubmit={handleSaveWorkBill} className="p-4 sm:p-6 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                
+                {/* 1. Worker Selection (Mandatory) */}
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-theme-primary flex items-center gap-1">
+                      <span>Worker / Work Partner</span>
+                      <span className="text-rose-500">*</span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowAddWorkerInline(!showAddWorkerInline);
+                        setBillWorkerId('');
+                      }}
+                      className="text-[11px] font-bold text-theme-accent hover:underline cursor-pointer"
+                    >
+                      {showAddWorkerInline ? 'Choose Existing' : '+ New Worker'}
+                    </button>
+                  </div>
+
+                  {showAddWorkerInline ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <input
+                        type="text"
+                        placeholder="Worker Name (e.g. Rahim)"
+                        value={billWorkerName}
+                        onChange={e => setBillWorkerName(e.target.value)}
+                        className="w-full min-h-[44px] px-3.5 py-2.5 bg-theme-surface-elevated border border-theme-border-soft rounded-xl text-sm font-semibold text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent"
+                        required
+                        autoFocus
+                      />
+                      <input
+                        type="text"
+                        placeholder="Phone (optional)"
+                        value={newWorkerPhone}
+                        onChange={e => setNewWorkerPhone(e.target.value)}
+                        className="w-full min-h-[44px] px-3.5 py-2.5 bg-theme-surface-elevated border border-theme-border-soft rounded-xl text-sm font-semibold text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent"
+                      />
+                    </div>
+                  ) : (
+                    <select
+                      value={billWorkerId}
+                      onChange={e => {
+                        const wid = e.target.value;
+                        setBillWorkerId(wid);
+                        const match = vendors.find(v => v.id === wid);
+                        setBillWorkerName(match ? match.name : '');
+                      }}
+                      className="w-full min-h-[44px] px-3.5 py-2.5 bg-theme-surface-elevated border border-theme-border-soft rounded-xl text-sm font-semibold text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent cursor-pointer"
+                      required
+                    >
+                      <option value="">Select Worker / Work Partner</option>
+                      {vendors.map(v => (
+                        <option key={v.id} value={v.id}>
+                          {v.name} {v.phone ? `(${v.phone})` : ''}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+
+                {/* 2. Design Number & Work Description */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-theme-primary block">
+                      Design / Product No.
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. GK-115"
+                      value={billDesignNumber}
+                      onChange={e => setBillDesignNumber(e.target.value)}
+                      className="w-full min-h-[44px] px-3.5 py-2.5 bg-theme-surface-elevated border border-theme-border-soft rounded-xl text-sm font-mono font-bold text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-theme-primary block">
+                      Work / Description
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Hand Embroidery / Half Work"
+                      value={billWorkDescription}
+                      onChange={e => setBillWorkDescription(e.target.value)}
+                      className="w-full min-h-[44px] px-3.5 py-2.5 bg-theme-surface-elevated border border-theme-border-soft rounded-xl text-sm font-semibold text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent"
+                    />
+                  </div>
+                </div>
               </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredVendors.map(vendor => {
-                  const v360 = calculateVendor360(vendor, jobs, payments);
+
+              {/* 3. Optional Link to Customer / Invoice */}
+              <div className="pt-1">
+                <button
+                  type="button"
+                  onClick={() => setShowInvoiceLink(!showInvoiceLink)}
+                  className="text-xs font-bold text-theme-accent hover:underline flex items-center gap-1.5 cursor-pointer py-1"
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  <span>{showInvoiceLink ? '− Hide Customer / Invoice Link' : '+ Link to Customer / Invoice (Optional)'}</span>
+                </button>
+
+                {showInvoiceLink && (
+                  <div className="mt-2 p-3.5 rounded-2xl bg-theme-surface-elevated border border-theme-border-soft grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-[11px] font-bold text-theme-muted block mb-1">
+                        Select Customer Invoice
+                      </label>
+                      <select
+                        value={selectedInvoiceId}
+                        onChange={e => handleInvoiceSelect(e.target.value)}
+                        className="w-full min-h-[40px] px-3 py-2 bg-theme-surface border border-theme-border-soft rounded-xl text-xs font-semibold text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent cursor-pointer"
+                      >
+                        <option value="">None / Unlinked Work</option>
+                        {invoices.map(inv => (
+                          <option key={inv.id} value={inv.id}>
+                            {inv.invoiceNumber || 'INV'} — {inv.customerName || 'Customer'} ({formatCurrency(inv.totals?.grandTotal || inv.grandTotal || 0)})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-bold text-theme-muted block mb-1">
+                        Customer Name
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Customer name (auto-filled if invoice selected)"
+                        value={linkedCustomerName}
+                        onChange={e => setLinkedCustomerName(e.target.value)}
+                        className="w-full min-h-[40px] px-3 py-2 bg-theme-surface border border-theme-border-soft rounded-xl text-xs font-semibold text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* 4. BILL TOTALS & SETTLEMENT SLIP */}
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-theme-surface-elevated via-theme-surface to-theme-surface-elevated border border-theme-border-soft space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  
+                  {/* Total Work Cost Amount */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-theme-primary flex items-center justify-between">
+                      <span>Total Work Cost (₹)</span>
+                      <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      step="any"
+                      placeholder="e.g. 600"
+                      value={billAmount}
+                      onChange={e => setBillAmount(e.target.value)}
+                      className="w-full min-h-[46px] px-3.5 py-2.5 bg-theme-surface border-2 border-theme-border focus:border-theme-accent rounded-xl text-base font-mono font-black text-theme-primary focus:outline-none transition-all"
+                      required
+                    />
+                  </div>
+
+                  {/* Paid Amount */}
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-emerald-500">
+                        Paid Now (₹)
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setBillPaid(billAmount || '0')}
+                        className="text-[10px] font-bold text-emerald-500 hover:underline cursor-pointer"
+                      >
+                        Full Paid
+                      </button>
+                    </div>
+                    <input
+                      type="number"
+                      step="any"
+                      placeholder="0"
+                      value={billPaid}
+                      onChange={e => setBillPaid(e.target.value)}
+                      className="w-full min-h-[46px] px-3.5 py-2.5 bg-theme-surface border border-theme-border-soft rounded-xl text-base font-mono font-bold text-emerald-500 focus:outline-none focus:ring-2 focus:ring-theme-accent transition-all"
+                    />
+                  </div>
+
+                  {/* Remaining Due (AUTOMATIC CALCULATION) */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-rose-500 block">
+                      Remaining Due (₹)
+                    </label>
+                    <div className="w-full min-h-[46px] px-3.5 py-2.5 bg-theme-surface border border-theme-border-soft rounded-xl flex items-center justify-between font-mono">
+                      <span className="text-sm font-black text-rose-500">
+                        {formatCurrency(autoCalculatedDue)}
+                      </span>
+                      <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full border ${
+                        autoCalculatedDue === 0 && numAmount > 0
+                          ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                          : numPaid > 0
+                          ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                          : 'bg-rose-500/10 text-rose-500 border-rose-500/20'
+                      }`}>
+                        {autoCalculatedDue === 0 && numAmount > 0 ? 'Fully Paid' : numPaid > 0 ? 'Partially Paid' : 'Unpaid'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Payment Method & Internal Bank when Paid > 0 */}
+                {numPaid > 0 && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 border-t border-theme-border-soft/60">
+                    <div>
+                      <label className="text-[11px] font-bold text-theme-muted block mb-1">
+                        Payment Method
+                      </label>
+                      <select
+                        value={billPaymentMethod}
+                        onChange={e => setBillPaymentMethod(e.target.value)}
+                        className="w-full min-h-[40px] px-3 py-2 bg-theme-surface border border-theme-border-soft rounded-xl text-xs font-semibold text-theme-primary focus:outline-none cursor-pointer"
+                      >
+                        <option value="Cash">Cash</option>
+                        <option value="UPI">UPI / QR</option>
+                        <option value="Bank Transfer">Bank Transfer</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-bold text-theme-muted block mb-1">
+                        Internal Bank / Cash Account (Money-Out)
+                      </label>
+                      <select
+                        value={billBankAccount}
+                        onChange={e => setBillBankAccount(e.target.value)}
+                        className="w-full min-h-[40px] px-3 py-2 bg-theme-surface border border-theme-border-soft rounded-xl text-xs font-semibold text-theme-primary focus:outline-none cursor-pointer"
+                      >
+                        {bankAccounts.map(acc => (
+                          <option key={acc} value={acc}>{acc}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-between pt-1 gap-3">
+                <span className="text-[11px] text-theme-secondary hidden sm:inline">
+                  Customer invoice amounts are never changed. Work Cost is tracked internally.
+                </span>
+
+                <div className="flex items-center gap-2.5 ml-auto">
+                  <button
+                    type="button"
+                    onClick={resetBillSlip}
+                    className="min-h-[44px] px-4 py-2 rounded-xl border border-theme-border-soft text-theme-secondary hover:text-theme-primary hover:bg-theme-surface-hover text-xs font-bold transition-all cursor-pointer"
+                  >
+                    Clear
+                  </button>
+
+                  <button
+                    type="submit"
+                    className="min-h-[44px] px-6 py-2 rounded-xl bg-theme-accent hover:opacity-90 text-theme-accent-contrast text-xs font-black transition-all shadow-md cursor-pointer flex items-center gap-2"
+                  >
+                    <Check className="w-4 h-4" />
+                    <span>{editingJob ? 'Update Work Bill' : 'Save Work Bill'}</span>
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        {/* ===================================================================== */}
+        {/* 4. WORK HISTORY SECTION (BILLS & FILTERS) */}
+        {/* ===================================================================== */}
+        <div className="mt-8 space-y-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-black text-theme-primary flex items-center gap-2">
+                Work Bills & History
+                <span className="text-xs px-2 py-0.5 rounded-full bg-theme-surface-elevated border border-theme-border-soft text-theme-secondary font-mono">
+                  {filteredJobs.length}
+                </span>
+              </h2>
+              {selectedWorkerFilter && (
+                <div className="flex items-center gap-1.5 mt-1">
+                  <span className="text-xs text-theme-secondary">Filtered by:</span>
+                  <span className="text-xs font-bold text-theme-accent bg-theme-accent/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+                    {selectedWorkerFilter.name}
+                    <button onClick={() => setSelectedWorkerFilter(null)} className="hover:text-theme-primary cursor-pointer">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Filter Pills */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scroll-premium">
+              {['ALL', 'Pending', 'Partial', 'Paid'].map(filter => (
+                <button
+                  key={filter}
+                  onClick={() => setStatusFilter(filter)}
+                  className={`min-h-[38px] px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                    statusFilter === filter
+                      ? 'bg-theme-accent text-white shadow-sm'
+                      : 'bg-theme-surface border border-theme-border-soft text-theme-secondary hover:text-theme-primary hover:bg-theme-surface-hover'
+                  }`}
+                >
+                  {filter === 'ALL' ? 'All Bills' : filter}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="w-4 h-4 text-theme-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Search by Bill # (WB-0001), Worker, Customer, Invoice, or Design (GK-115)..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="w-full min-h-[44px] pl-10 pr-4 py-2.5 bg-theme-surface border border-theme-border-soft rounded-2xl text-xs font-semibold text-theme-primary placeholder-theme-muted focus:outline-none focus:ring-2 focus:ring-theme-accent transition-all"
+            />
+          </div>
+
+          {/* WORK BILLS: DESKTOP TABLE & MOBILE CARDS */}
+          {loading ? (
+            <div className="p-12 text-center text-xs font-bold text-theme-muted animate-pulse bg-theme-surface border border-theme-border-soft rounded-2xl">
+              Loading Work Bills...
+            </div>
+          ) : filteredJobs.length === 0 ? (
+            <div className="p-12 text-center space-y-3 bg-theme-surface border border-theme-border-soft rounded-2xl">
+              <div className="w-14 h-14 rounded-2xl bg-theme-surface-elevated border border-theme-border-soft flex items-center justify-center mx-auto text-theme-muted">
+                <Receipt className="w-7 h-7" />
+              </div>
+              <h3 className="text-base font-black text-theme-primary">No work bills found</h3>
+              <p className="text-xs text-theme-secondary max-w-sm mx-auto">
+                {searchQuery || selectedWorkerFilter ? 'No bills match your current search or worker filter.' : 'Create your first work bill above.'}
+              </p>
+            </div>
+          ) : (
+            <>
+              {/* DESKTOP TABLE VIEW */}
+              <div className="hidden md:block bg-theme-surface border border-theme-border-soft rounded-2xl overflow-hidden shadow-sm">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-theme-border-soft bg-theme-surface-elevated/40 text-[11px] font-black uppercase tracking-wider text-theme-muted">
+                        <th className="py-3.5 px-4">Bill #</th>
+                        <th className="py-3.5 px-4">Date</th>
+                        <th className="py-3.5 px-4">Worker</th>
+                        <th className="py-3.5 px-4">Design / Work</th>
+                        <th className="py-3.5 px-4">Customer & Invoice</th>
+                        <th className="py-3.5 px-4 text-right">Amount</th>
+                        <th className="py-3.5 px-4 text-right">Paid</th>
+                        <th className="py-3.5 px-4 text-right">Due</th>
+                        <th className="py-3.5 px-4 text-center">Status</th>
+                        <th className="py-3.5 px-4 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-theme-border-soft font-medium">
+                      {filteredJobs.map(job => {
+                        const cost = Number(job.totalContractorCost !== undefined ? job.totalContractorCost : job.agreedCost) || 0;
+                        const paid = Number(job.paidAmount !== undefined ? job.paidAmount : job.totalPaid) || 0;
+                        const due = Math.max(0, cost - paid);
+                        const dateStr = job.assignedAt || job.createdAt || job.date;
+                        const formattedDate = dateStr ? new Date(dateStr).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : '—';
+                        const billNum = job.contractorBillNumber || job.jobCode || 'WB-0001';
+
+                        let statusLabel = 'Unpaid';
+                        let statusColor = 'bg-rose-500/10 text-rose-500 border-rose-500/20';
+                        if (due === 0 && cost > 0) {
+                          statusLabel = 'Paid';
+                          statusColor = 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
+                        } else if (paid > 0) {
+                          statusLabel = 'Partial';
+                          statusColor = 'bg-amber-500/10 text-amber-500 border-amber-500/20';
+                        }
+
+                        return (
+                          <tr key={job.id} className="hover:bg-theme-surface-hover/40 transition-colors">
+                            <td className="py-3.5 px-4 whitespace-nowrap font-mono font-black text-theme-accent text-xs">
+                              {billNum}
+                            </td>
+                            <td className="py-3.5 px-4 whitespace-nowrap text-theme-secondary font-mono text-[11px]">
+                              {formattedDate}
+                            </td>
+                            <td className="py-3.5 px-4 font-bold text-theme-primary">
+                              {job.contractorName || job.vendorName || 'Worker'}
+                            </td>
+                            <td className="py-3.5 px-4">
+                              <div className="font-bold text-theme-primary flex items-center gap-1.5 flex-wrap">
+                                {job.designNumber && (
+                                  <span className="text-[10px] font-mono font-black px-1.5 py-0.5 rounded bg-theme-accent/10 text-theme-accent border border-theme-accent/20">
+                                    {job.designNumber}
+                                  </span>
+                                )}
+                                <span className="truncate max-w-[160px]">{job.workDescription || job.productName || 'Work'}</span>
+                              </div>
+                            </td>
+                            <td className="py-3.5 px-4">
+                              <div className="text-xs">
+                                <span className="font-semibold text-theme-primary">{job.customerName || 'Walk-in'}</span>
+                                {job.invoiceNumber && (
+                                  <span className="ml-1.5 font-mono text-[10px] px-1.5 py-0.2 rounded bg-theme-surface-elevated border border-theme-border-soft text-theme-muted">
+                                    {job.invoiceNumber}
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="py-3.5 px-4 text-right font-black text-theme-primary font-mono">
+                              {formatCurrency(cost)}
+                            </td>
+                            <td className="py-3.5 px-4 text-right font-bold text-emerald-500 font-mono">
+                              {formatCurrency(paid)}
+                            </td>
+                            <td className="py-3.5 px-4 text-right font-black font-mono">
+                              <span className={due > 0 ? 'text-rose-500' : 'text-theme-muted'}>
+                                {formatCurrency(due)}
+                              </span>
+                            </td>
+                            <td className="py-3.5 px-4 text-center">
+                              <span className={`inline-flex items-center text-[10px] font-black uppercase px-2 py-0.5 rounded-full border ${statusColor}`}>
+                                {statusLabel}
+                              </span>
+                            </td>
+                            <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                              <div className="flex items-center justify-end gap-1.5">
+                                <button
+                                  onClick={() => {
+                                    setSelectedJobForBill(job);
+                                    setBillModalOpen(true);
+                                  }}
+                                  className="min-h-[34px] px-2.5 py-1 bg-theme-surface-elevated hover:bg-theme-surface-hover text-theme-primary border border-theme-border-soft rounded-lg text-[11px] font-bold transition-all cursor-pointer"
+                                  title="View Voucher"
+                                >
+                                  View
+                                </button>
+
+                                {due > 0 && (
+                                  <button
+                                    onClick={() => {
+                                      setPaymentTargetJob(job);
+                                      setPartialPayModalOpen(true);
+                                    }}
+                                    className="min-h-[34px] px-2.5 py-1 bg-theme-surface-elevated hover:bg-theme-surface-hover text-theme-primary border border-theme-border-soft rounded-lg text-[11px] font-bold transition-all cursor-pointer"
+                                    title="Pay"
+                                  >
+                                    Pay
+                                  </button>
+                                )}
+
+                                {due > 0 && (
+                                  <button
+                                    onClick={() => handleMarkAsPaid(job)}
+                                    className="min-h-[34px] px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 border border-emerald-500/30 rounded-lg text-[11px] font-black transition-all cursor-pointer"
+                                    title="Mark Paid"
+                                  >
+                                    Mark Paid
+                                  </button>
+                                )}
+
+                                <button
+                                  onClick={() => handleEditJob(job)}
+                                  className="min-h-[34px] w-[34px] flex items-center justify-center text-theme-muted hover:text-theme-primary hover:bg-theme-surface-elevated rounded-lg transition-all cursor-pointer"
+                                  title="Edit"
+                                >
+                                  <Edit3 className="w-3.5 h-3.5" />
+                                </button>
+
+                                <button
+                                  onClick={() => setDeleteConfirmJob(job)}
+                                  className="min-h-[34px] w-[34px] flex items-center justify-center text-theme-muted hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all cursor-pointer"
+                                  title="Delete"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* MOBILE CARDS VIEW (360, 375, 390, 412, 480) */}
+              <div className="md:hidden space-y-3">
+                {filteredJobs.map(job => {
+                  const cost = Number(job.totalContractorCost !== undefined ? job.totalContractorCost : job.agreedCost) || 0;
+                  const paid = Number(job.paidAmount !== undefined ? job.paidAmount : job.totalPaid) || 0;
+                  const due = Math.max(0, cost - paid);
+                  const dateStr = job.assignedAt || job.createdAt || job.date;
+                  const formattedDate = dateStr ? new Date(dateStr).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : '—';
+                  const billNum = job.contractorBillNumber || job.jobCode || 'WB-0001';
+
+                  let statusLabel = 'Unpaid';
+                  let statusColor = 'bg-rose-500/10 text-rose-500 border-rose-500/20';
+                  if (due === 0 && cost > 0) {
+                    statusLabel = 'Paid';
+                    statusColor = 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
+                  } else if (paid > 0) {
+                    statusLabel = 'Partial';
+                    statusColor = 'bg-amber-500/10 text-amber-500 border-amber-500/20';
+                  }
+
                   return (
-                    <div key={vendor.id} className="p-4 rounded-2xl bg-theme-surface border border-theme-border-soft hover:border-theme-accent/30 transition-all shadow-sm flex flex-col justify-between gap-4">
-                      <div>
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0">
-                            <h3 className="text-sm font-black text-theme-primary truncate">{vendor.name}</h3>
-                            <span className="text-[10px] font-bold text-theme-accent bg-theme-accent/10 px-2 py-0.5 rounded border border-theme-accent/20 inline-block mt-0.5">
-                              {vendor.category || 'Specialist'}
-                            </span>
-                          </div>
-                          <span className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded ${vendor.isActive !== false ? 'bg-theme-tint-bg text-theme-accent' : 'bg-zinc-500/10 text-zinc-500'}`}>
-                            {vendor.isActive !== false ? 'Active' : 'Inactive'}
+                    <div
+                      key={job.id}
+                      className="p-4 rounded-2xl bg-theme-surface border border-theme-border-soft shadow-sm space-y-3"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-black text-theme-accent text-sm">
+                            {billNum}
+                          </span>
+                          <span className="text-[11px] font-mono text-theme-muted">
+                            {formattedDate}
+                          </span>
+                        </div>
+                        <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full border ${statusColor}`}>
+                          {statusLabel}
+                        </span>
+                      </div>
+
+                      <div className="space-y-1.5 text-xs">
+                        <div className="flex items-center justify-between">
+                          <span className="text-theme-muted text-[11px]">Worker:</span>
+                          <span className="font-bold text-theme-primary">
+                            {job.contractorName || job.vendorName || 'Worker'}
                           </span>
                         </div>
 
-                        {/* Contact details */}
-                        <div className="mt-3 space-y-1.5 text-xs text-theme-secondary">
-                          {vendor.phone && (
-                            <div className="flex items-center justify-between">
-                              <span className="flex items-center gap-1.5 truncate">
-                                <Phone className="w-3 h-3 text-theme-muted" />
-                                {vendor.phone}
-                              </span>
-                              {vendor.whatsapp && (
-                                <a
-                                  href={`https://wa.me/${vendor.whatsapp.replace(/[^0-9]/g, '')}`}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="text-[10px] font-bold text-theme-accent hover:underline flex items-center gap-0.5"
-                                >
-                                  WhatsApp <ExternalLink className="w-2.5 h-2.5" />
-                                </a>
+                        {(job.designNumber || job.workDescription) && (
+                          <div className="flex items-start justify-between gap-2">
+                            <span className="text-theme-muted text-[11px] shrink-0">Design / Work:</span>
+                            <div className="text-right">
+                              {job.designNumber && (
+                                <span className="inline-block font-mono text-[10px] font-black px-1.5 py-0.2 rounded bg-theme-accent/10 text-theme-accent border border-theme-accent/20 mr-1">
+                                  {job.designNumber}
+                                </span>
                               )}
+                              <span className="font-medium text-theme-secondary text-[11px]">
+                                {job.workDescription || job.productName}
+                              </span>
                             </div>
-                          )}
-                          {vendor.email && (
-                            <div className="flex items-center gap-1.5 truncate">
-                              <Mail className="w-3 h-3 text-theme-muted" />
-                              <span className="truncate">{vendor.email}</span>
-                            </div>
-                          )}
-                          {vendor.paymentPreference && (
-                            <div className="text-[10px] text-theme-muted pt-1">
-                              Pay via: <strong>{vendor.paymentPreference}</strong> {vendor.upiId ? `(${vendor.upiId})` : ''}
-                            </div>
-                          )}
-                        </div>
+                          </div>
+                        )}
 
-                        {/* Vendor 360 Mini Stats */}
-                        <div className="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-theme-border-soft text-center">
-                          <div className="p-1.5 rounded-lg bg-theme-surface-elevated">
-                            <span className="text-[9px] font-bold text-theme-muted uppercase block">Jobs</span>
-                            <span className="text-xs font-black text-theme-primary">{v360.totalJobs}</span>
+                        {job.customerName && (
+                          <div className="flex items-center justify-between pt-1 border-t border-theme-border-soft/60">
+                            <span className="text-theme-muted text-[11px]">Customer / Inv:</span>
+                            <span className="font-semibold text-theme-primary">
+                              {job.customerName}
+                              {job.invoiceNumber && <span className="ml-1 text-[10px] font-mono opacity-80">({job.invoiceNumber})</span>}
+                            </span>
                           </div>
-                          <div className="p-1.5 rounded-lg bg-theme-surface-elevated">
-                            <span className="text-[9px] font-bold text-theme-muted uppercase block">Paid</span>
-                            <span className="text-xs font-black text-theme-accent">{formatCurrency(v360.totalPaid)}</span>
-                          </div>
-                          <div className="p-1.5 rounded-lg bg-theme-surface-elevated">
-                            <span className="text-[9px] font-bold text-theme-muted uppercase block">Due</span>
-                            <span className="text-xs font-black text-rose-500">{formatCurrency(v360.payable)}</span>
-                          </div>
+                        )}
+                      </div>
+
+                      {/* 3-Box Financial Breakdown */}
+                      <div className="grid grid-cols-3 gap-1.5 p-2 rounded-xl bg-theme-surface-elevated/70 border border-theme-border-soft text-center font-mono">
+                        <div>
+                          <span className="text-[9px] text-theme-muted block font-sans">Amount</span>
+                          <span className="font-black text-xs text-theme-primary">{formatCurrency(cost)}</span>
+                        </div>
+                        <div>
+                          <span className="text-[9px] text-theme-muted block font-sans">Paid</span>
+                          <span className="font-bold text-xs text-emerald-500">{formatCurrency(paid)}</span>
+                        </div>
+                        <div>
+                          <span className="text-[9px] text-theme-muted block font-sans">Due</span>
+                          <span className={`font-black text-xs ${due > 0 ? 'text-rose-500' : 'text-theme-muted'}`}>
+                            {formatCurrency(due)}
+                          </span>
                         </div>
                       </div>
 
-                      {/* Card Action Controls */}
-                      <div className="flex items-center justify-between gap-2 pt-2 border-t border-theme-border-soft">
+                      {/* Action Buttons */}
+                      <div className="flex items-center gap-1.5 pt-1">
                         <button
                           onClick={() => {
-                            setSelectedVendorForLedger(vendor);
-                            setLedgerModalOpen(true);
+                            setSelectedJobForBill(job);
+                            setBillModalOpen(true);
                           }}
-                          className="px-2.5 py-1.5 rounded-lg bg-theme-surface-elevated hover:bg-theme-surface-hover text-xs font-bold text-theme-primary flex items-center gap-1 border border-theme-border-soft transition-colors"
+                          className="flex-1 min-h-[44px] px-3 py-2 bg-theme-surface-elevated hover:bg-theme-surface-hover text-theme-primary border border-theme-border-soft rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer"
                         >
-                          <FileText className="w-3.5 h-3.5 text-theme-accent" />
-                          <span>360 Ledger</span>
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>View Bill</span>
                         </button>
 
-                        <div className="flex items-center gap-1.5">
+                        {due > 0 && (
                           <button
                             onClick={() => {
-                              setEditingVendor(vendor);
-                              setVendorModalOpen(true);
+                              setPaymentTargetJob(job);
+                              setPartialPayModalOpen(true);
                             }}
-                            className="p-1.5 rounded-lg hover:bg-theme-surface-hover text-theme-secondary hover:text-theme-primary transition-colors"
-                            title="Edit Vendor"
+                            className="flex-1 min-h-[44px] px-3 py-2 bg-theme-surface-elevated hover:bg-theme-surface-hover text-theme-primary border border-theme-border-soft rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer"
                           >
-                            <Edit3 className="w-3.5 h-3.5" />
+                            <CreditCard className="w-3.5 h-3.5" />
+                            <span>Pay</span>
                           </button>
+                        )}
+
+                        {due > 0 && (
                           <button
-                            onClick={() => handleDeleteVendor(vendor.id, vendor.name)}
-                            className="p-1.5 rounded-lg hover:bg-rose-500/10 text-theme-secondary hover:text-rose-500 transition-colors"
-                            title="Delete Vendor"
+                            onClick={() => handleMarkAsPaid(job)}
+                            className="flex-1 min-h-[44px] px-3 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 border border-emerald-500/30 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1 cursor-pointer"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            <Check className="w-3.5 h-3.5" />
+                            <span>Mark Paid</span>
                           </button>
-                        </div>
+                        )}
+
+                        <button
+                          onClick={() => handleEditJob(job)}
+                          className="min-h-[44px] w-[44px] flex items-center justify-center text-theme-muted hover:text-theme-primary bg-theme-surface-elevated border border-theme-border-soft rounded-xl transition-all cursor-pointer"
+                          title="Edit"
+                        >
+                          <Edit3 className="w-4 h-4" />
+                        </button>
+
+                        <button
+                          onClick={() => setDeleteConfirmJob(job)}
+                          className="min-h-[44px] w-[44px] flex items-center justify-center text-theme-muted hover:text-rose-500 bg-theme-surface-elevated border border-theme-border-soft rounded-xl transition-all cursor-pointer"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
                     </div>
                   );
                 })}
               </div>
-            )}
-          </div>
-        )}
+            </>
+          )}
+        </div>
 
-        {/* ========================================================================= */}
-        {/* 3. OUTSOURCE JOBS TAB */}
-        {/* ========================================================================= */}
-        {activeTab === 'jobs' && (
-          <div className="space-y-4">
-            {/* Search and Filters */}
-            <div className="flex flex-col md:flex-row gap-3 items-center justify-between">
-              <div className="relative w-full md:w-80">
-                <Search className="w-4 h-4 text-theme-muted absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search job code, project, client..."
-                  className="w-full pl-9 pr-3 py-2 rounded-lg bg-theme-surface border border-theme-border-soft text-xs text-theme-primary placeholder-theme-muted focus:outline-none focus:border-theme-accent"
-                />
-              </div>
-
-              <div className="flex items-center gap-2 w-full md:w-auto">
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="px-3 py-2 rounded-lg bg-theme-surface border border-theme-border-soft text-xs text-theme-primary focus:outline-none focus:border-theme-accent"
-                >
-                  <option value="ALL">All Statuses</option>
-                  {JOB_STATUSES.map(st => <option key={st.id} value={st.id}>{st.label}</option>)}
-                </select>
-              </div>
+        {/* ===================================================================== */}
+        {/* 5. WORKER SECTION (WORKERS & TOTALS DIRECTLY ON PAGE) */}
+        {/* ===================================================================== */}
+        <div ref={workersSectionRef} className="mt-12 space-y-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-theme-border-soft">
+            <div>
+              <h2 className="text-lg font-black text-theme-primary flex items-center gap-2">
+                Worker Section
+                <span className="text-xs px-2 py-0.5 rounded-full bg-theme-surface-elevated border border-theme-border-soft text-theme-secondary font-mono">
+                  {vendors.length}
+                </span>
+              </h2>
+              <p className="text-xs text-theme-secondary">
+                Worker names, total work, costs, payments, and complete bill history
+              </p>
             </div>
 
-            {/* Jobs Table */}
-            {filteredJobs.length === 0 ? (
-              <div className="p-12 text-center bg-theme-surface rounded-2xl border border-theme-border-soft space-y-3">
-                <Briefcase className="w-8 h-8 text-theme-muted mx-auto" />
-                <p className="text-xs text-theme-secondary">No outsource jobs found.</p>
-                <button
-                  onClick={() => {
-                    setEditingJob(null);
-                    setJobModalOpen(true);
-                  }}
-                  className="px-3.5 py-1.5 rounded-lg bg-theme-accent text-theme-accent-contrast text-xs font-bold"
-                >
-                  + Create Outsource Job
-                </button>
-              </div>
-            ) : (
-              <div className="overflow-x-auto rounded-2xl border border-theme-border-soft bg-theme-surface">
-                <table className="w-full text-left text-xs border-collapse">
-                  <thead>
-                    <tr className="border-b border-theme-border-soft bg-theme-surface-elevated text-[10px] font-black uppercase text-theme-muted tracking-wider">
-                      <th className="py-3 px-4">Job Code</th>
-                      <th className="py-3 px-4">Project & Client</th>
-                      <th className="py-3 px-4">Assigned Vendor</th>
-                      <th className="py-3 px-4 text-right">Agreed Cost</th>
-                      <th className="py-3 px-4 text-right">Paid</th>
-                      <th className="py-3 px-4 text-right">Payable Due</th>
-                      <th className="py-3 px-4">Status</th>
-                      <th className="py-3 px-4 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-theme-border-soft">
-                    {filteredJobs.map(job => {
-                      const fin = calculateJobFinancials(job, payments);
-                      const statusObj = JOB_STATUSES.find(s => s.id === job.status) || JOB_STATUSES[0];
-                      return (
-                        <tr key={job.id} className="hover:bg-theme-surface-hover transition-colors">
-                          <td className="py-3 px-4 font-mono font-bold text-theme-primary">
-                            {job.jobCode}
-                          </td>
-                          <td className="py-3 px-4 max-w-xs">
-                            <div className="font-extrabold text-theme-primary truncate">{job.project || job.description}</div>
-                            <div className="text-[11px] text-theme-secondary flex items-center gap-2">
-                              {job.client && <span>Client: <strong>{job.client}</strong></span>}
-                              {job.relatedInvoiceNumber && (
-                                <span className="font-mono text-theme-accent">Inv: #{job.relatedInvoiceNumber}</span>
-                              )}
-                            </div>
-                          </td>
-                          <td className="py-3 px-4">
-                            <div className="font-bold text-theme-primary">{job.vendorName || 'Unassigned'}</div>
-                            {job.deadline && <div className="text-[10px] text-theme-muted">Due: {job.deadline}</div>}
-                          </td>
-                          <td className="py-3 px-4 text-right font-black text-theme-primary">
-                            {formatCurrency(fin.agreedCost)}
-                          </td>
-                          <td className="py-3 px-4 text-right font-bold text-theme-accent">
-                            {formatCurrency(fin.totalPaid)}
-                          </td>
-                          <td className="py-3 px-4 text-right font-black text-rose-500">
-                            {formatCurrency(fin.outstandingPayable)}
-                          </td>
-                          <td className="py-3 px-4">
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded border inline-block ${statusObj.color}`}>
-                              {job.status}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4 text-right space-x-1.5">
-                            <button
-                              onClick={() => {
-                                setPaymentTargetJob(job);
-                                setPaymentTargetVendor(vendors.find(v => v.id === job.vendorId));
-                                setPaymentModalOpen(true);
-                              }}
-                              disabled={fin.outstandingPayable === 0}
-                              className="px-2 py-1 rounded bg-theme-accent/10 hover:bg-theme-accent/20 text-theme-accent font-bold text-[11px] disabled:opacity-30 transition-all"
-                            >
-                              Pay
-                            </button>
-                            <button
-                              onClick={() => {
-                                setEditingJob(job);
-                                setJobModalOpen(true);
-                              }}
-                              className="p-1 rounded hover:bg-theme-surface-hover text-theme-secondary hover:text-theme-primary"
-                              title="Edit Job"
-                            >
-                              <Edit3 className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteJob(job.id, job.jobCode)}
-                              className="p-1 rounded hover:bg-rose-500/10 text-theme-secondary hover:text-rose-500"
-                              title="Delete Job"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
+            <button
+              onClick={() => {
+                setEditingWorker(null);
+                setWorkerModalOpen(true);
+              }}
+              className="min-h-[44px] px-4 py-2 bg-theme-accent hover:opacity-90 text-white rounded-xl text-xs font-black flex items-center gap-1.5 shadow-sm cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>+ New Worker</span>
+            </button>
           </div>
-        )}
 
-        {/* ========================================================================= */}
-        {/* 4. PAYOUTS & TRANSACTIONS TAB */}
-        {/* ========================================================================= */}
-        {activeTab === 'payables' && (
-          <div className="space-y-6">
-            <div className="p-4 rounded-2xl bg-theme-surface border border-theme-border-soft flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <div>
-                <h3 className="text-sm font-extrabold text-theme-primary">Freelancer & Vendor Payment History</h3>
-                <p className="text-xs text-theme-secondary">All historical disbursements and advances linked with Internal Bank balances.</p>
-              </div>
-              <button
-                onClick={() => {
-                  setPaymentTargetJob(null);
-                  setPaymentTargetVendor(null);
-                  setPaymentModalOpen(true);
-                }}
-                className="px-3.5 py-2 rounded-lg bg-theme-accent text-theme-accent-contrast text-xs font-extrabold flex items-center gap-1.5"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Record New Payout</span>
-              </button>
+          {vendors.length === 0 ? (
+            <div className="p-8 text-center text-xs text-theme-muted bg-theme-surface border border-theme-border-soft rounded-2xl">
+              No workers registered yet. Click &quot;+ New Worker&quot; to add one.
             </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
+              {vendors.map(worker => {
+                const workerJobs = jobs.filter(j => (j.contractorId === worker.id || j.vendorId === worker.id) && !j.isDeleted);
+                const totalCost = workerJobs.reduce((acc, j) => acc + (Number(j.totalContractorCost !== undefined ? j.totalContractorCost : j.agreedCost) || 0), 0);
+                const totalPaid = workerJobs.reduce((acc, j) => acc + (Number(j.paidAmount !== undefined ? j.paidAmount : j.totalPaid) || 0), 0);
+                const totalDue = Math.max(0, totalCost - totalPaid);
 
-            {payments.length === 0 ? (
-              <div className="p-12 text-center bg-theme-surface rounded-2xl border border-theme-border-soft space-y-3">
-                <CreditCard className="w-8 h-8 text-theme-muted mx-auto" />
-                <p className="text-xs text-theme-secondary">No payout transactions recorded yet.</p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto rounded-2xl border border-theme-border-soft bg-theme-surface">
-                <table className="w-full text-left text-xs border-collapse">
-                  <thead>
-                    <tr className="border-b border-theme-border-soft bg-theme-surface-elevated text-[10px] font-black uppercase text-theme-muted tracking-wider">
-                      <th className="py-3 px-4">Date</th>
-                      <th className="py-3 px-4">Vendor</th>
-                      <th className="py-3 px-4">Job Code</th>
-                      <th className="py-3 px-4">Method & Account</th>
-                      <th className="py-3 px-4">Reference / Note</th>
-                      <th className="py-3 px-4 text-right">Amount Paid</th>
-                      <th className="py-3 px-4 text-right">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-theme-border-soft">
-                    {payments.map(pay => (
-                      <tr key={pay.id} className="hover:bg-theme-surface-hover transition-colors">
-                        <td className="py-3 px-4 font-mono text-theme-secondary">
-                          {pay.date ? pay.date.split('T')[0] : 'N/A'}
-                        </td>
-                        <td className="py-3 px-4 font-bold text-theme-primary">
-                          {pay.vendorName || 'Vendor'}
-                        </td>
-                        <td className="py-3 px-4 font-mono font-bold text-theme-accent">
-                          {pay.jobCode || 'Direct Payout'}
-                        </td>
-                        <td className="py-3 px-4">
-                          <span className="font-bold text-theme-primary">{pay.paymentMethod || 'UPI'}</span>
-                          {pay.bankAccount && (
-                            <span className="text-[10px] text-theme-muted block">via {pay.bankAccount}</span>
+                return (
+                  <div
+                    key={worker.id}
+                    className="p-4 rounded-2xl bg-theme-surface border border-theme-border-soft space-y-3 shadow-sm hover:border-theme-border transition-all"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <h3 className="font-black text-sm text-theme-primary">{worker.name}</h3>
+                        <p className="text-xs text-theme-secondary flex items-center gap-1 mt-0.5">
+                          {worker.phone ? (
+                            <>
+                              <Phone className="w-3 h-3 text-theme-muted" />
+                              <span>{worker.phone}</span>
+                            </>
+                          ) : (
+                            <span className="text-theme-muted">No phone</span>
                           )}
-                        </td>
-                        <td className="py-3 px-4 max-w-xs text-theme-secondary truncate">
-                          {pay.note || pay.reference || '—'}
-                        </td>
-                        <td className="py-3 px-4 text-right font-black text-theme-accent">
-                          {formatCurrency(pay.amount)}
-                        </td>
-                        <td className="py-3 px-4 text-right">
-                          <button
-                            onClick={() => handleDeletePayment(pay.id, pay.amount)}
-                            className="p-1 rounded hover:bg-rose-500/10 text-theme-secondary hover:text-rose-500"
-                            title="Reverse Payment"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
+                        </p>
+                      </div>
 
-        {/* ========================================================================= */}
-        {/* 5. PROFITABILITY & MARGINS TAB */}
-        {/* ========================================================================= */}
-        {activeTab === 'profit' && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="p-4 rounded-xl bg-theme-surface border border-theme-border-soft shadow-sm space-y-1">
-                <span className="text-[10px] font-black uppercase text-theme-muted tracking-wider block">Linked Client Revenue</span>
-                <div className="text-xl font-black text-theme-primary">{formatCurrency(profitability.linkedClientRevenue)}</div>
-                <div className="text-[10px] text-theme-secondary font-medium">From billed invoices</div>
-              </div>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => {
+                            setEditingWorker(worker);
+                            setWorkerModalOpen(true);
+                          }}
+                          className="min-h-[34px] w-[34px] flex items-center justify-center text-theme-muted hover:text-theme-accent rounded-lg transition-colors cursor-pointer"
+                          title="Edit Worker"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={async () => {
+                            if (window.confirm(`Delete worker ${worker.name}?`)) {
+                              await deleteVendor(worker.id);
+                              loadAllData();
+                            }
+                          }}
+                          className="min-h-[34px] w-[34px] flex items-center justify-center text-theme-muted hover:text-rose-500 rounded-lg transition-colors cursor-pointer"
+                          title="Delete Worker"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
 
-              <div className="p-4 rounded-xl bg-theme-surface border border-theme-border-soft shadow-sm space-y-1">
-                <span className="text-[10px] font-black uppercase text-theme-muted tracking-wider block">Total Outsource Cost</span>
-                <div className="text-xl font-black text-rose-500">{formatCurrency(profitability.totalOutsourceCost)}</div>
-                <div className="text-[10px] text-theme-secondary font-medium">Direct vendor costs</div>
-              </div>
+                    {/* Worker Stats */}
+                    <div className="grid grid-cols-4 gap-1 p-2 rounded-xl bg-theme-surface-elevated/70 border border-theme-border-soft text-center font-mono">
+                      <div>
+                        <span className="text-[9px] text-theme-muted block font-sans">Work</span>
+                        <span className="font-bold text-xs text-theme-primary">{workerJobs.length}</span>
+                      </div>
+                      <div>
+                        <span className="text-[9px] text-theme-muted block font-sans">Cost</span>
+                        <span className="font-bold text-xs text-theme-primary">{formatCurrency(totalCost)}</span>
+                      </div>
+                      <div>
+                        <span className="text-[9px] text-theme-muted block font-sans">Paid</span>
+                        <span className="font-bold text-xs text-emerald-500">{formatCurrency(totalPaid)}</span>
+                      </div>
+                      <div>
+                        <span className="text-[9px] text-theme-muted block font-sans">Due</span>
+                        <span className={`font-black text-xs ${totalDue > 0 ? 'text-rose-500' : 'text-theme-muted'}`}>
+                          {formatCurrency(totalDue)}
+                        </span>
+                      </div>
+                    </div>
 
-              <div className="p-4 rounded-xl bg-theme-surface border border-theme-border-soft shadow-sm space-y-1">
-                <span className="text-[10px] font-black uppercase text-theme-muted tracking-wider block">Gross Profit</span>
-                <div className="text-xl font-black text-theme-accent">{formatCurrency(profitability.linkedGrossProfit)}</div>
-                <div className="text-[10px] text-theme-secondary font-medium">Revenue - Outsource Cost</div>
-              </div>
+                    {/* Action: View bills / history */}
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          setSelectedWorkerFilter(worker);
+                          window.scrollTo({ top: 300, behavior: 'smooth' });
+                        }}
+                        className="flex-1 min-h-[38px] px-3 py-1.5 bg-theme-surface-elevated hover:bg-theme-surface-hover text-theme-primary border border-theme-border-soft rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                      >
+                        <FileText className="w-3.5 h-3.5 text-theme-accent" />
+                        <span>Filter Bills ({workerJobs.length})</span>
+                      </button>
 
-              <div className="p-4 rounded-xl bg-theme-surface border border-theme-border-soft shadow-sm space-y-1">
-                <span className="text-[10px] font-black uppercase text-theme-muted tracking-wider block">Profit Margin</span>
-                <div className="text-xl font-black text-theme-accent">{profitability.overallMarginPercent}%</div>
-                <div className="text-[10px] text-theme-secondary font-medium">Overall efficiency</div>
-              </div>
+                      <button
+                        onClick={() => {
+                          setSelectedWorkerForLedger(worker);
+                          setWorkerLedgerModalOpen(true);
+                        }}
+                        className="min-h-[38px] px-3 py-1.5 bg-theme-surface-elevated hover:bg-theme-surface-hover text-theme-secondary hover:text-theme-primary border border-theme-border-soft rounded-xl text-xs font-bold transition-all cursor-pointer"
+                        title="Complete Ledger Statement"
+                      >
+                        Ledger
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-
-            <div className="p-5 rounded-2xl bg-theme-surface border border-theme-border-soft space-y-4">
-              <h3 className="text-sm font-extrabold text-theme-primary flex items-center gap-2">
-                <Landmark className="w-4 h-4 text-theme-accent" />
-                Project-Wise Cost & Profit Breakdown
-              </h3>
-
-              {profitability.projectBreakdown.length === 0 ? (
-                <div className="py-12 text-center text-theme-secondary text-xs">
-                  No projects with linked outsource jobs yet.
-                </div>
-              ) : (
-                <div className="overflow-x-auto rounded-xl border border-theme-border-soft">
-                  <table className="w-full text-left text-xs border-collapse">
-                    <thead>
-                      <tr className="border-b border-theme-border-soft bg-theme-surface-elevated text-[10px] font-black uppercase text-theme-muted tracking-wider">
-                        <th className="py-3 px-4">Job Code</th>
-                        <th className="py-3 px-4">Project & Client</th>
-                        <th className="py-3 px-4">Invoice #</th>
-                        <th className="py-3 px-4 text-right">Client Billed</th>
-                        <th className="py-3 px-4 text-right">Outsource Cost</th>
-                        <th className="py-3 px-4 text-right">Gross Profit</th>
-                        <th className="py-3 px-4 text-right">Margin %</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-theme-border-soft">
-                      {profitability.projectBreakdown.map(item => (
-                        <tr key={item.jobId} className="hover:bg-theme-surface-hover transition-colors">
-                          <td className="py-3 px-4 font-mono font-bold text-theme-primary">{item.jobCode}</td>
-                          <td className="py-3 px-4 font-bold text-theme-primary">
-                            <div>{item.title}</div>
-                            <div className="text-[10px] text-theme-muted">{item.client}</div>
-                          </td>
-                          <td className="py-3 px-4 font-mono text-theme-secondary">{item.invoiceNumber}</td>
-                          <td className="py-3 px-4 text-right font-bold text-theme-primary">{formatCurrency(item.invoiceAmount)}</td>
-                          <td className="py-3 px-4 text-right font-bold text-rose-500">{formatCurrency(item.agreedCost)}</td>
-                          <td className="py-3 px-4 text-right font-black text-theme-accent">{formatCurrency(item.grossProfit)}</td>
-                          <td className="py-3 px-4 text-right font-black text-theme-accent">{item.marginPercent}%</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
-      {/* ========================================================================= */}
-      {/* MODAL 1: ADD / EDIT VENDOR MODAL */}
-      {/* ========================================================================= */}
-      {vendorModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-theme-surface border border-theme-border-soft rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-            <div className="px-5 py-4 border-b border-theme-border-soft flex items-center justify-between">
-              <h3 className="text-sm font-extrabold text-theme-primary flex items-center gap-2">
-                <Users className="w-4 h-4 text-theme-accent" />
-                {editingVendor ? 'Edit Vendor Profile' : 'Register New Vendor / Freelancer'}
-              </h3>
-              <button onClick={() => setVendorModalOpen(false)} className="p-1 rounded-lg hover:bg-theme-surface-hover text-theme-muted hover:text-theme-primary">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveVendor} className="p-5 space-y-4 text-xs">
-              <div className="space-y-1">
-                <label className="font-bold text-theme-secondary">Vendor / Specialist Name *</label>
-                <input
-                  name="name"
-                  defaultValue={editingVendor?.name || ''}
-                  required
-                  placeholder="e.g. John Doe, Alpha Creative Agency"
-                  className="w-full px-3 py-2 rounded-lg bg-theme-surface-elevated border border-theme-border-soft text-theme-primary focus:outline-none focus:border-theme-accent"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="font-bold text-theme-secondary">Skill / Category</label>
-                  <select
-                    name="category"
-                    defaultValue={editingVendor?.category || VENDOR_CATEGORIES[0]}
-                    className="w-full px-3 py-2 rounded-lg bg-theme-surface-elevated border border-theme-border-soft text-theme-primary focus:outline-none focus:border-theme-accent"
-                  >
-                    {VENDOR_CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                  </select>
+      {/* ===================================================================== */}
+      {/* 6. PERSONAL WORK BILL VOUCHER MODAL (BILLQYRO VOUCHER LOOK) */}
+      {/* ===================================================================== */}
+      <AnimatePresence>
+        {billModalOpen && selectedJobForBill && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm overflow-y-auto">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-theme-surface border border-theme-border-soft rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl space-y-5 my-auto max-h-[92vh] overflow-y-auto"
+            >
+              {/* Slip Header */}
+              <div className="flex items-start justify-between border-b border-theme-border-soft pb-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-theme-accent">
+                      Work Cost Voucher
+                    </span>
+                    <span className={`text-[9px] font-black uppercase px-2 py-0.2 rounded-full border ${
+                      (Number(selectedJobForBill.totalContractorCost || selectedJobForBill.agreedCost || 0) - Number(selectedJobForBill.paidAmount || selectedJobForBill.totalPaid || 0)) <= 0
+                        ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                        : Number(selectedJobForBill.paidAmount || selectedJobForBill.totalPaid || 0) > 0
+                        ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                        : 'bg-rose-500/10 text-rose-500 border-rose-500/20'
+                    }`}>
+                      {selectedJobForBill.paymentStatus || 'Pending'}
+                    </span>
+                  </div>
+                  <h3 className="text-2xl font-black text-theme-primary font-mono mt-0.5">
+                    {selectedJobForBill.contractorBillNumber || selectedJobForBill.jobCode || 'WB-0001'}
+                  </h3>
                 </div>
-                <div className="space-y-1">
-                  <label className="font-bold text-theme-secondary">Phone Number</label>
-                  <input
-                    name="phone"
-                    defaultValue={editingVendor?.phone || ''}
-                    placeholder="+91 98765 43210"
-                    className="w-full px-3 py-2 rounded-lg bg-theme-surface-elevated border border-theme-border-soft text-theme-primary focus:outline-none focus:border-theme-accent"
-                  />
-                </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="font-bold text-theme-secondary">WhatsApp (For Direct Chat)</label>
-                  <input
-                    name="whatsapp"
-                    defaultValue={editingVendor?.whatsapp || ''}
-                    placeholder="+91 98765 43210"
-                    className="w-full px-3 py-2 rounded-lg bg-theme-surface-elevated border border-theme-border-soft text-theme-primary focus:outline-none focus:border-theme-accent"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="font-bold text-theme-secondary">Email Address</label>
-                  <input
-                    name="email"
-                    type="email"
-                    defaultValue={editingVendor?.email || ''}
-                    placeholder="vendor@example.com"
-                    className="w-full px-3 py-2 rounded-lg bg-theme-surface-elevated border border-theme-border-soft text-theme-primary focus:outline-none focus:border-theme-accent"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="font-bold text-theme-secondary">Payment Preference</label>
-                  <select
-                    name="paymentPreference"
-                    defaultValue={editingVendor?.paymentPreference || 'UPI'}
-                    className="w-full px-3 py-2 rounded-lg bg-theme-surface-elevated border border-theme-border-soft text-theme-primary focus:outline-none focus:border-theme-accent"
-                  >
-                    <option value="UPI">UPI</option>
-                    <option value="Bank Transfer">Bank Transfer (NEFT/IMPS)</option>
-                    <option value="Cash">Cash</option>
-                    <option value="Cheque">Cheque</option>
-                  </select>
-                </div>
-                <div className="space-y-1">
-                  <label className="font-bold text-theme-secondary">UPI ID / Account Info</label>
-                  <input
-                    name="upiId"
-                    defaultValue={editingVendor?.upiId || ''}
-                    placeholder="e.g. user@okhdfcbank"
-                    className="w-full px-3 py-2 rounded-lg bg-theme-surface-elevated border border-theme-border-soft text-theme-primary focus:outline-none focus:border-theme-accent"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="font-bold text-theme-secondary">Default Rate (₹)</label>
-                  <input
-                    name="defaultRate"
-                    type="number"
-                    defaultValue={editingVendor?.defaultRate || ''}
-                    placeholder="0"
-                    className="w-full px-3 py-2 rounded-lg bg-theme-surface-elevated border border-theme-border-soft text-theme-primary focus:outline-none focus:border-theme-accent"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="font-bold text-theme-secondary">Opening Payable Balance (₹)</label>
-                  <input
-                    name="openingBalance"
-                    type="number"
-                    defaultValue={editingVendor?.openingBalance || ''}
-                    placeholder="0"
-                    className="w-full px-3 py-2 rounded-lg bg-theme-surface-elevated border border-theme-border-soft text-theme-primary focus:outline-none focus:border-theme-accent"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="font-bold text-theme-secondary">Notes & Terms</label>
-                <textarea
-                  name="notes"
-                  defaultValue={editingVendor?.notes || ''}
-                  rows={2}
-                  placeholder="Portfolio link, turnaround time, payment terms..."
-                  className="w-full px-3 py-2 rounded-lg bg-theme-surface-elevated border border-theme-border-soft text-theme-primary focus:outline-none focus:border-theme-accent"
-                />
-              </div>
-
-              <div className="flex items-center gap-2 pt-1">
-                <input
-                  type="checkbox"
-                  name="isActive"
-                  id="isActive"
-                  defaultChecked={editingVendor ? editingVendor.isActive !== false : true}
-                  className="rounded border-theme-border-soft text-theme-accent focus:ring-0"
-                />
-                <label htmlFor="isActive" className="text-xs font-bold text-theme-primary">
-                  Active Vendor (Available for new jobs)
-                </label>
-              </div>
-
-              <div className="flex justify-end gap-2.5 pt-4 border-t border-theme-border-soft">
                 <button
-                  type="button"
-                  onClick={() => setVendorModalOpen(false)}
-                  className="px-4 py-2 rounded-lg bg-theme-surface-elevated hover:bg-theme-surface-hover text-xs font-bold text-theme-secondary"
+                  onClick={() => setBillModalOpen(false)}
+                  className="min-h-[40px] w-[40px] flex items-center justify-center rounded-xl hover:bg-theme-surface-hover text-theme-muted hover:text-theme-primary cursor-pointer"
                 >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 rounded-lg bg-theme-accent hover:opacity-90 text-theme-accent-contrast text-xs font-extrabold"
-                >
-                  {editingVendor ? 'Update Vendor' : 'Save Vendor'}
+                  <X className="w-5 h-5" />
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
 
-      {/* ========================================================================= */}
-      {/* MODAL 2: ADD / EDIT OUTSOURCE JOB MODAL */}
-      {/* ========================================================================= */}
-      {jobModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-theme-surface border border-theme-border-soft rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-            <div className="px-5 py-4 border-b border-theme-border-soft flex items-center justify-between">
-              <h3 className="text-sm font-extrabold text-theme-primary flex items-center gap-2">
-                <Briefcase className="w-4 h-4 text-theme-accent" />
-                {editingJob ? `Edit Job (${editingJob.jobCode})` : 'Create Outsource Job'}
-              </h3>
-              <button onClick={() => setJobModalOpen(false)} className="p-1 rounded-lg hover:bg-theme-surface-hover text-theme-muted hover:text-theme-primary">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveJob} className="p-5 space-y-4 text-xs">
-              <div className="space-y-1">
-                <label className="font-bold text-theme-secondary">Project / Task Title *</label>
-                <input
-                  name="project"
-                  defaultValue={editingJob?.project || editingJob?.description || ''}
-                  required
-                  placeholder="e.g. 3D Product Animation, Wedding Album Retouch"
-                  className="w-full px-3 py-2 rounded-lg bg-theme-surface-elevated border border-theme-border-soft text-theme-primary focus:outline-none focus:border-theme-accent"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="font-bold text-theme-secondary">Assign Vendor *</label>
-                  <select
-                    name="vendorId"
-                    defaultValue={editingJob?.vendorId || (vendors[0]?.id || '')}
-                    required
-                    className="w-full px-3 py-2 rounded-lg bg-theme-surface-elevated border border-theme-border-soft text-theme-primary focus:outline-none focus:border-theme-accent"
-                  >
-                    {vendors.length === 0 && <option value="">No vendors available</option>}
-                    {vendors.map(v => <option key={v.id} value={v.id}>{v.name} ({v.category})</option>)}
-                  </select>
+              {/* Printable Voucher Slip */}
+              <div id="printable-work-voucher" className="space-y-3 text-xs bg-theme-surface-elevated/40 p-4 rounded-2xl border border-theme-border-soft">
+                <div className="flex justify-between py-1.5 border-b border-theme-border-soft/60">
+                  <span className="text-theme-muted">Voucher Date:</span>
+                  <span className="font-bold font-mono text-theme-primary">
+                    {selectedJobForBill.assignedAt ? new Date(selectedJobForBill.assignedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : new Date().toLocaleDateString('en-IN')}
+                  </span>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="font-bold text-theme-secondary">Link to Client Invoice</label>
-                  <select
-                    name="relatedInvoiceId"
-                    defaultValue={editingJob?.relatedInvoiceId || ''}
-                    className="w-full px-3 py-2 rounded-lg bg-theme-surface-elevated border border-theme-border-soft text-theme-primary focus:outline-none focus:border-theme-accent"
-                  >
-                    <option value="">-- No Linked Invoice --</option>
-                    {invoices.map(inv => (
-                      <option key={inv.id} value={inv.id}>
-                        {inv.invoiceNumber} · {inv.customerName} ({formatCurrency(inv.grandTotal || inv.total)})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="font-bold text-theme-secondary">Agreed Cost (₹) *</label>
-                  <input
-                    name="agreedCost"
-                    type="number"
-                    required
-                    defaultValue={editingJob?.agreedCost || ''}
-                    placeholder="e.g. 5000"
-                    className="w-full px-3 py-2 rounded-lg bg-theme-surface-elevated border border-theme-border-soft text-theme-primary focus:outline-none focus:border-theme-accent"
-                  />
+                <div className="flex justify-between py-1.5 border-b border-theme-border-soft/60">
+                  <span className="text-theme-muted">Worker Name:</span>
+                  <span className="font-bold text-theme-primary">{selectedJobForBill.contractorName || 'Worker'}</span>
                 </div>
 
-                {!editingJob && (
-                  <div className="space-y-1">
-                    <label className="font-bold text-theme-secondary">Initial Advance Payout (₹)</label>
-                    <input
-                      name="advance"
-                      type="number"
-                      placeholder="0"
-                      className="w-full px-3 py-2 rounded-lg bg-theme-surface-elevated border border-theme-border-soft text-theme-primary focus:outline-none focus:border-theme-accent"
-                    />
+                <div className="flex justify-between py-1.5 border-b border-theme-border-soft/60">
+                  <span className="text-theme-muted">Customer:</span>
+                  <span className="font-bold text-theme-primary">{selectedJobForBill.customerName || 'Walk-in / Direct Work'}</span>
+                </div>
+
+                {selectedJobForBill.invoiceNumber && (
+                  <div className="flex justify-between py-1.5 border-b border-theme-border-soft/60">
+                    <span className="text-theme-muted">Invoice Ref:</span>
+                    <span className="font-bold font-mono text-theme-primary">{selectedJobForBill.invoiceNumber}</span>
                   </div>
                 )}
-                {editingJob && (
-                  <div className="space-y-1">
-                    <label className="font-bold text-theme-secondary">Status</label>
-                    <select
-                      name="status"
-                      defaultValue={editingJob.status || 'Assigned'}
-                      className="w-full px-3 py-2 rounded-lg bg-theme-surface-elevated border border-theme-border-soft text-theme-primary focus:outline-none focus:border-theme-accent"
+
+                {selectedJobForBill.designNumber && (
+                  <div className="flex justify-between py-1.5 border-b border-theme-border-soft/60">
+                    <span className="text-theme-muted">Design Number:</span>
+                    <span className="font-bold font-mono text-theme-accent bg-theme-accent/10 px-1.5 py-0.5 rounded border border-theme-accent/20">
+                      {selectedJobForBill.designNumber}
+                    </span>
+                  </div>
+                )}
+
+                <div className="flex justify-between py-1.5 border-b border-theme-border-soft/60">
+                  <span className="text-theme-muted">Work Details:</span>
+                  <span className="font-medium text-theme-secondary text-right">{selectedJobForBill.workDescription || 'Work Assignment'}</span>
+                </div>
+
+                <div className="flex justify-between py-2 border-b border-theme-border-soft font-mono">
+                  <span className="text-theme-muted font-sans font-bold">Total Work Cost:</span>
+                  <span className="font-black text-theme-primary text-sm">
+                    {formatCurrency(Number(selectedJobForBill.totalContractorCost !== undefined ? selectedJobForBill.totalContractorCost : selectedJobForBill.agreedCost) || 0)}
+                  </span>
+                </div>
+
+                <div className="flex justify-between py-1.5 border-b border-theme-border-soft/60 font-mono">
+                  <span className="text-theme-muted font-sans">Paid:</span>
+                  <span className="font-bold text-emerald-500">
+                    {formatCurrency(Number(selectedJobForBill.paidAmount !== undefined ? selectedJobForBill.paidAmount : selectedJobForBill.totalPaid) || 0)}
+                  </span>
+                </div>
+
+                <div className="flex justify-between py-2 font-mono">
+                  <span className="text-theme-muted font-sans font-bold">Due:</span>
+                  <span className="font-black text-rose-500 text-sm">
+                    {formatCurrency(Math.max(0, (Number(selectedJobForBill.totalContractorCost !== undefined ? selectedJobForBill.totalContractorCost : selectedJobForBill.agreedCost) || 0) - (Number(selectedJobForBill.paidAmount !== undefined ? selectedJobForBill.paidAmount : selectedJobForBill.totalPaid) || 0)))}
+                  </span>
+                </div>
+
+                {selectedJobForBill.notes && (
+                  <div className="pt-2 text-[11px] text-theme-secondary italic border-t border-theme-border-soft/60">
+                    Note: {selectedJobForBill.notes}
+                  </div>
+                )}
+              </div>
+
+              {/* Voucher Action Buttons: Print, Payment, Edit, Close */}
+              <div className="flex items-center justify-between pt-2 gap-2 flex-wrap">
+                <button
+                  onClick={() => window.print()}
+                  className="min-h-[44px] px-4 py-2 rounded-xl bg-theme-surface hover:bg-theme-surface-hover border border-theme-border-soft text-xs font-bold text-theme-primary flex items-center gap-2 cursor-pointer"
+                >
+                  <Printer className="w-4 h-4" />
+                  <span>Print Bill</span>
+                </button>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      setBillModalOpen(false);
+                      handleEditJob(selectedJobForBill);
+                    }}
+                    className="min-h-[44px] px-3.5 py-2 rounded-xl bg-theme-surface hover:bg-theme-surface-hover border border-theme-border-soft text-xs font-bold text-theme-primary flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Edit3 className="w-3.5 h-3.5" />
+                    <span>Edit</span>
+                  </button>
+
+                  {Math.max(0, (Number(selectedJobForBill.totalContractorCost !== undefined ? selectedJobForBill.totalContractorCost : selectedJobForBill.agreedCost) || 0) - (Number(selectedJobForBill.paidAmount !== undefined ? selectedJobForBill.paidAmount : selectedJobForBill.totalPaid) || 0)) > 0 && (
+                    <button
+                      onClick={() => {
+                        setBillModalOpen(false);
+                        setPaymentTargetJob(selectedJobForBill);
+                        setPartialPayModalOpen(true);
+                      }}
+                      className="min-h-[44px] px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-black flex items-center gap-1.5 shadow-md cursor-pointer"
                     >
-                      {JOB_STATUSES.map(st => <option key={st.id} value={st.id}>{st.label}</option>)}
-                    </select>
-                  </div>
-                )}
-              </div>
+                      <CreditCard className="w-3.5 h-3.5" />
+                      <span>Payment</span>
+                    </button>
+                  )}
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="font-bold text-theme-secondary">Priority</label>
-                  <select
-                    name="priority"
-                    defaultValue={editingJob?.priority || 'Medium'}
-                    className="w-full px-3 py-2 rounded-lg bg-theme-surface-elevated border border-theme-border-soft text-theme-primary focus:outline-none focus:border-theme-accent"
+                  <button
+                    onClick={() => setBillModalOpen(false)}
+                    className="min-h-[44px] px-4 py-2 rounded-xl bg-theme-accent text-white text-xs font-bold cursor-pointer"
                   >
-                    <option value="Low">Low</option>
-                    <option value="Medium">Medium</option>
-                    <option value="High">High</option>
-                    <option value="Urgent">Urgent 🔥</option>
-                  </select>
-                </div>
-                <div className="space-y-1">
-                  <label className="font-bold text-theme-secondary">Deadline</label>
-                  <input
-                    name="deadline"
-                    type="date"
-                    defaultValue={editingJob?.deadline || ''}
-                    className="w-full px-3 py-2 rounded-lg bg-theme-surface-elevated border border-theme-border-soft text-theme-primary focus:outline-none focus:border-theme-accent"
-                  />
+                    Close
+                  </button>
                 </div>
               </div>
-
-              <div className="space-y-1">
-                <label className="font-bold text-theme-secondary">Job Brief & Deliverable Notes</label>
-                <textarea
-                  name="description"
-                  defaultValue={editingJob?.description || ''}
-                  rows={2}
-                  placeholder="Deliverable specifications, Dropbox / Figma link..."
-                  className="w-full px-3 py-2 rounded-lg bg-theme-surface-elevated border border-theme-border-soft text-theme-primary focus:outline-none focus:border-theme-accent"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2.5 pt-4 border-t border-theme-border-soft">
-                <button
-                  type="button"
-                  onClick={() => setJobModalOpen(false)}
-                  className="px-4 py-2 rounded-lg bg-theme-surface-elevated hover:bg-theme-surface-hover text-xs font-bold text-theme-secondary"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 rounded-lg bg-theme-accent hover:opacity-90 text-theme-accent-contrast text-xs font-extrabold"
-                >
-                  {editingJob ? 'Save Changes' : 'Create Job'}
-                </button>
-              </div>
-            </form>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
 
-      {/* ========================================================================= */}
-      {/* MODAL 3: RECORD PAYOUT MODAL */}
-      {/* ========================================================================= */}
-      {paymentModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-theme-surface border border-theme-border-soft rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-            <div className="px-5 py-4 border-b border-theme-border-soft flex items-center justify-between">
-              <h3 className="text-sm font-extrabold text-theme-primary flex items-center gap-2">
-                <CreditCard className="w-4 h-4 text-theme-accent" />
-                Record Freelancer / Vendor Payout
-              </h3>
-              <button onClick={() => setPaymentModalOpen(false)} className="p-1 rounded-lg hover:bg-theme-surface-hover text-theme-muted hover:text-theme-primary">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleRecordPayment} className="p-5 space-y-4 text-xs">
-              <div className="space-y-1">
-                <label className="font-bold text-theme-secondary">Select Vendor *</label>
-                <select
-                  name="vendorId"
-                  defaultValue={paymentTargetVendor?.id || paymentTargetJob?.vendorId || (vendors[0]?.id || '')}
-                  required
-                  className="w-full px-3 py-2 rounded-lg bg-theme-surface-elevated border border-theme-border-soft text-theme-primary focus:outline-none focus:border-theme-accent"
-                >
-                  {vendors.map(v => <option key={v.id} value={v.id}>{v.name} ({v.category})</option>)}
-                </select>
-              </div>
-
-              <div className="space-y-1">
-                <label className="font-bold text-theme-secondary">Related Outsource Job (Optional)</label>
-                <select
-                  name="jobId"
-                  defaultValue={paymentTargetJob?.id || ''}
-                  className="w-full px-3 py-2 rounded-lg bg-theme-surface-elevated border border-theme-border-soft text-theme-primary focus:outline-none focus:border-theme-accent"
-                >
-                  <option value="">-- General / Advance Payout --</option>
-                  {jobs.map(j => (
-                    <option key={j.id} value={j.id}>
-                      {j.jobCode} · {j.project || j.description} ({formatCurrency(j.agreedCost)})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="font-bold text-theme-secondary">Payment Amount (₹) *</label>
-                  <input
-                    name="amount"
-                    type="number"
-                    required
-                    defaultValue={paymentTargetJob ? calculateJobFinancials(paymentTargetJob, payments).outstandingPayable : ''}
-                    placeholder="e.g. 2000"
-                    className="w-full px-3 py-2 rounded-lg bg-theme-surface-elevated border border-theme-border-soft text-theme-primary focus:outline-none focus:border-theme-accent font-bold"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="font-bold text-theme-secondary">Payment Date</label>
-                  <input
-                    name="date"
-                    type="date"
-                    defaultValue={new Date().toISOString().split('T')[0]}
-                    className="w-full px-3 py-2 rounded-lg bg-theme-surface-elevated border border-theme-border-soft text-theme-primary focus:outline-none focus:border-theme-accent"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="font-bold text-theme-secondary">Payment Method</label>
-                  <select
-                    name="paymentMethod"
-                    defaultValue="UPI"
-                    className="w-full px-3 py-2 rounded-lg bg-theme-surface-elevated border border-theme-border-soft text-theme-primary focus:outline-none focus:border-theme-accent"
-                  >
-                    <option value="UPI">UPI / GPay / PhonePe</option>
-                    <option value="Bank Transfer">Bank Transfer (IMPS/NEFT)</option>
-                    <option value="Cash">Cash</option>
-                    <option value="Cheque">Cheque</option>
-                  </select>
+      {/* ===================================================================== */}
+      {/* 7. COMPLETE WORKER LEDGER MODAL */}
+      {/* ===================================================================== */}
+      <AnimatePresence>
+        {workerLedgerModalOpen && selectedWorkerForLedger && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm overflow-y-auto">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-theme-surface border border-theme-border-soft rounded-3xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl space-y-5 my-auto max-h-[92vh] overflow-y-auto"
+            >
+              <div className="flex items-start justify-between border-b border-theme-border-soft pb-4">
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-wider text-theme-accent px-2 py-0.5 rounded-full bg-theme-accent/10 border border-theme-accent/20">
+                    Worker Statement
+                  </span>
+                  <h3 className="text-xl font-black text-theme-primary mt-1">
+                    {selectedWorkerForLedger.name}
+                  </h3>
+                  <p className="text-xs text-theme-secondary">
+                    {selectedWorkerForLedger.phone || 'No phone registered'} {selectedWorkerForLedger.address ? `· ${selectedWorkerForLedger.address}` : ''}
+                  </p>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="font-bold text-theme-secondary">Internal Bank Account</label>
-                  <select
-                    name="bankAccount"
-                    defaultValue={bankAccounts[0] || 'Cash'}
-                    className="w-full px-3 py-2 rounded-lg bg-theme-surface-elevated border border-theme-border-soft text-theme-primary focus:outline-none focus:border-theme-accent"
-                  >
-                    {bankAccounts.map(acc => <option key={acc} value={acc}>{acc}</option>)}
-                  </select>
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="font-bold text-theme-secondary">Transaction Ref / UTR / Note</label>
-                <input
-                  name="reference"
-                  placeholder="e.g. UTR-98234710, Advance payout"
-                  className="w-full px-3 py-2 rounded-lg bg-theme-surface-elevated border border-theme-border-soft text-theme-primary focus:outline-none focus:border-theme-accent"
-                />
-              </div>
-
-              <div className="p-3 rounded-xl bg-theme-accent/5 border border-theme-accent/20 text-[11px] text-theme-secondary space-y-1">
-                <div className="flex items-center gap-1.5 text-theme-accent font-bold">
-                  <Landmark className="w-3.5 h-3.5" />
-                  <span>Automatic Internal Bank Parity</span>
-                </div>
-                <p>This disbursement will decrease the vendor payable and automatically post an expense to your selected bank account.</p>
-              </div>
-
-              <div className="flex justify-end gap-2.5 pt-4 border-t border-theme-border-soft">
                 <button
-                  type="button"
-                  onClick={() => setPaymentModalOpen(false)}
-                  className="px-4 py-2 rounded-lg bg-theme-surface-elevated hover:bg-theme-surface-hover text-xs font-bold text-theme-secondary"
+                  onClick={() => setWorkerLedgerModalOpen(false)}
+                  className="min-h-[40px] w-[40px] flex items-center justify-center rounded-xl hover:bg-theme-surface-hover text-theme-muted hover:text-theme-primary cursor-pointer"
                 >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 rounded-lg bg-theme-accent hover:opacity-90 text-theme-accent-contrast text-xs font-extrabold"
-                >
-                  Disburse & Record
+                  <X className="w-5 h-5" />
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
 
-      {/* ========================================================================= */}
-      {/* MODAL 4: VENDOR 360 & RUNNING STATEMENT LEDGER */}
-      {/* ========================================================================= */}
-      {ledgerModalOpen && selectedVendorForLedger && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-theme-surface border border-theme-border-soft rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150 flex flex-col max-h-[90vh]">
-            <div className="px-5 py-4 border-b border-theme-border-soft flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-extrabold text-theme-primary flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-theme-accent" />
-                  Vendor 360 Statement: {selectedVendorForLedger.name}
-                </h3>
-                <span className="text-[10px] text-theme-secondary">{selectedVendorForLedger.category} · {selectedVendorForLedger.phone || 'No phone'}</span>
-              </div>
-              <button onClick={() => setLedgerModalOpen(false)} className="p-1 rounded-lg hover:bg-theme-surface-hover text-theme-muted hover:text-theme-primary">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="p-5 overflow-y-auto space-y-4 text-xs custom-scrollbar">
-              {/* Top Summary Row */}
               {(() => {
-                const ledger = getVendorLedger(selectedVendorForLedger, jobs, payments);
+                const wJobs = jobs.filter(j => (j.contractorId === selectedWorkerForLedger.id || j.vendorId === selectedWorkerForLedger.id) && !j.isDeleted);
+                const wCost = wJobs.reduce((acc, j) => acc + (Number(j.totalContractorCost !== undefined ? j.totalContractorCost : j.agreedCost) || 0), 0);
+                const wPaid = wJobs.reduce((acc, j) => acc + (Number(j.paidAmount !== undefined ? j.paidAmount : j.totalPaid) || 0), 0);
+                const wDue = Math.max(0, wCost - wPaid);
+                const ledger = getVendorLedger(selectedWorkerForLedger, jobs, payments);
+
                 return (
-                  <>
-                    <div className="grid grid-cols-3 gap-3">
-                      <div className="p-3 rounded-xl bg-theme-surface-elevated border border-theme-border-soft text-center">
-                        <span className="text-[9px] font-bold text-theme-muted uppercase block">Total Job Cost</span>
-                        <span className="text-sm font-black text-theme-primary">{formatCurrency(ledger.totalJobCost)}</span>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-4 gap-2 p-3 rounded-2xl bg-theme-surface-elevated/70 border border-theme-border-soft text-center font-mono">
+                      <div>
+                        <span className="text-[10px] text-theme-muted block font-sans">Total Bills</span>
+                        <span className="font-bold text-xs sm:text-sm text-theme-primary">{wJobs.length}</span>
                       </div>
-                      <div className="p-3 rounded-xl bg-theme-surface-elevated border border-theme-border-soft text-center">
-                        <span className="text-[9px] font-bold text-theme-muted uppercase block">Total Paid</span>
-                        <span className="text-sm font-black text-theme-accent">{formatCurrency(ledger.totalPaid)}</span>
+                      <div>
+                        <span className="text-[10px] text-theme-muted block font-sans">Total Cost</span>
+                        <span className="font-bold text-xs sm:text-sm text-theme-primary">{formatCurrency(wCost)}</span>
                       </div>
-                      <div className="p-3 rounded-xl bg-theme-surface-elevated border border-theme-border-soft text-center">
-                        <span className="text-[9px] font-bold text-theme-muted uppercase block">Net Balance Payable</span>
-                        <span className="text-sm font-black text-rose-500">{formatCurrency(ledger.currentPayable)}</span>
+                      <div>
+                        <span className="text-[10px] text-theme-muted block font-sans">Total Paid</span>
+                        <span className="font-bold text-xs sm:text-sm text-emerald-500">{formatCurrency(wPaid)}</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-theme-muted block font-sans">Due</span>
+                        <span className={`font-black text-xs sm:text-sm ${wDue > 0 ? 'text-rose-500' : 'text-theme-muted'}`}>{formatCurrency(wDue)}</span>
                       </div>
                     </div>
 
-                    <div className="overflow-x-auto rounded-xl border border-theme-border-soft">
-                      <table className="w-full text-left text-xs border-collapse">
-                        <thead>
-                          <tr className="border-b border-theme-border-soft bg-theme-surface-elevated text-[9px] font-black uppercase text-theme-muted tracking-wider">
-                            <th className="py-2.5 px-3">Date</th>
-                            <th className="py-2.5 px-3">Type</th>
-                            <th className="py-2.5 px-3">Description</th>
-                            <th className="py-2.5 px-3 text-right">Job Cost (Cr)</th>
-                            <th className="py-2.5 px-3 text-right">Paid (Dr)</th>
-                            <th className="py-2.5 px-3 text-right">Balance</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-theme-border-soft">
-                          {ledger.statement.length === 0 ? (
+                    <div>
+                      <h4 className="text-xs font-black uppercase tracking-wider text-theme-muted mb-2">
+                        Ledger Statement ({ledger.statement?.length || 0} entries)
+                      </h4>
+                      <div className="max-h-56 overflow-y-auto rounded-xl border border-theme-border-soft">
+                        <table className="w-full text-left text-xs">
+                          <thead className="bg-theme-surface-elevated text-[10px] uppercase font-black text-theme-muted border-b border-theme-border-soft">
                             <tr>
-                              <td colSpan={6} className="py-6 text-center text-theme-muted">
-                                No ledger transactions found for this vendor.
-                              </td>
+                              <th className="p-2">Date</th>
+                              <th className="p-2">Description</th>
+                              <th className="p-2 text-right">Debit</th>
+                              <th className="p-2 text-right">Credit</th>
+                              <th className="p-2 text-right">Balance</th>
                             </tr>
-                          ) : (
-                            ledger.statement.map(st => (
-                              <tr key={st.id} className="hover:bg-theme-surface-hover">
-                                <td className="py-2 px-3 font-mono text-theme-secondary">{st.date ? st.date.split('T')[0] : ''}</td>
-                                <td className="py-2 px-3 font-bold text-theme-primary">{st.type}</td>
-                                <td className="py-2 px-3 text-theme-secondary">{st.description}</td>
-                                <td className="py-2 px-3 text-right font-bold text-theme-primary">{st.credit > 0 ? formatCurrency(st.credit) : '—'}</td>
-                                <td className="py-2 px-3 text-right font-bold text-theme-accent">{st.debit > 0 ? formatCurrency(st.debit) : '—'}</td>
-                                <td className="py-2 px-3 text-right font-black text-rose-500">{formatCurrency(st.balance)}</td>
+                          </thead>
+                          <tbody className="divide-y divide-theme-border-soft font-mono text-[11px]">
+                            {ledger.statement?.map((entry, idx) => (
+                              <tr key={idx} className="hover:bg-theme-surface-hover/50">
+                                <td className="p-2 text-theme-secondary whitespace-nowrap">
+                                  {entry.date ? new Date(entry.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : '—'}
+                                </td>
+                                <td className="p-2 font-sans font-medium text-theme-primary">
+                                  {entry.description}
+                                </td>
+                                <td className="p-2 text-right text-emerald-500 font-bold">
+                                  {entry.debit > 0 ? formatCurrency(entry.debit) : '—'}
+                                </td>
+                                <td className="p-2 text-right text-theme-primary font-bold">
+                                  {entry.credit > 0 ? formatCurrency(entry.credit) : '—'}
+                                </td>
+                                <td className="p-2 text-right font-black text-rose-500">
+                                  {formatCurrency(entry.balance)}
+                                </td>
                               </tr>
-                            ))
-                          )}
-                        </tbody>
-                      </table>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
-                  </>
+                  </div>
                 );
               })()}
-            </div>
 
-            <div className="p-4 border-t border-theme-border-soft flex justify-end">
-              <button
-                onClick={() => setLedgerModalOpen(false)}
-                className="px-4 py-2 rounded-lg bg-theme-surface-elevated hover:bg-theme-surface-hover text-xs font-bold text-theme-primary"
-              >
-                Close Statement
-              </button>
-            </div>
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-theme-border-soft">
+                <button
+                  onClick={() => setWorkerLedgerModalOpen(false)}
+                  className="min-h-[44px] px-5 py-2 rounded-xl bg-theme-accent text-white text-xs font-bold cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
+            </motion.div>
           </div>
+        )}
+      </AnimatePresence>
+
+      {/* ===================================================================== */}
+      {/* 8. PARTIAL PAYMENT MODAL */}
+      {/* ===================================================================== */}
+      <AnimatePresence>
+        {partialPayModalOpen && paymentTargetJob && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-theme-surface border border-theme-border-soft rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-4"
+            >
+              <div className="flex items-center justify-between border-b border-theme-border-soft pb-2.5">
+                <div>
+                  <h3 className="text-sm font-black text-theme-primary">
+                    Record Payment to {paymentTargetJob.contractorName || 'Worker'}
+                  </h3>
+                  <p className="text-[11px] text-theme-secondary">
+                    Bill: {paymentTargetJob.contractorBillNumber} | Due: {formatCurrency(Math.max(0, (Number(paymentTargetJob.totalContractorCost !== undefined ? paymentTargetJob.totalContractorCost : paymentTargetJob.agreedCost) || 0) - (Number(paymentTargetJob.paidAmount !== undefined ? paymentTargetJob.paidAmount : paymentTargetJob.totalPaid) || 0)))}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setPartialPayModalOpen(false)}
+                  className="min-h-[38px] w-[38px] flex items-center justify-center rounded-xl text-theme-muted hover:text-theme-primary cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <form onSubmit={handlePartialPaymentSubmit} className="space-y-3 text-xs font-semibold">
+                <div>
+                  <label className="block text-theme-muted uppercase text-[10px] font-black mb-1">
+                    Amount (₹) *
+                  </label>
+                  <input
+                    type="number"
+                    step="any"
+                    name="amount"
+                    defaultValue={Math.max(0, (Number(paymentTargetJob.totalContractorCost !== undefined ? paymentTargetJob.totalContractorCost : paymentTargetJob.agreedCost) || 0) - (Number(paymentTargetJob.paidAmount !== undefined ? paymentTargetJob.paidAmount : paymentTargetJob.totalPaid) || 0))}
+                    className="w-full min-h-[44px] px-3.5 py-2.5 bg-theme-surface-elevated border border-theme-border-soft rounded-xl text-theme-primary font-mono font-bold focus:outline-none focus:ring-2 focus:ring-theme-accent"
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-theme-muted uppercase text-[10px] font-black mb-1">
+                      Method
+                    </label>
+                    <select
+                      name="paymentMethod"
+                      defaultValue="Cash"
+                      className="w-full min-h-[44px] px-3 py-2 bg-theme-surface-elevated border border-theme-border-soft rounded-xl text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent"
+                    >
+                      <option value="Cash">Cash</option>
+                      <option value="UPI">UPI / QR</option>
+                      <option value="Bank Transfer">Bank Transfer</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-theme-muted uppercase text-[10px] font-black mb-1">
+                      Internal Bank Account
+                    </label>
+                    <select
+                      name="bankAccount"
+                      defaultValue={bankAccounts[0] || 'Cash'}
+                      className="w-full min-h-[44px] px-3 py-2 bg-theme-surface-elevated border border-theme-border-soft rounded-xl text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent"
+                    >
+                      {bankAccounts.map(acc => (
+                        <option key={acc} value={acc}>{acc}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-theme-muted uppercase text-[10px] font-black mb-1">
+                    Date
+                  </label>
+                  <input
+                    type="date"
+                    name="date"
+                    defaultValue={new Date().toISOString().split('T')[0]}
+                    className="w-full min-h-[44px] px-3.5 py-2.5 bg-theme-surface-elevated border border-theme-border-soft rounded-xl text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-theme-muted uppercase text-[10px] font-black mb-1">
+                    Note
+                  </label>
+                  <input
+                    type="text"
+                    name="note"
+                    placeholder="Disbursement remarks"
+                    className="w-full min-h-[44px] px-3.5 py-2.5 bg-theme-surface-elevated border border-theme-border-soft rounded-xl text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent"
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-theme-border-soft">
+                  <button
+                    type="button"
+                    onClick={() => setPartialPayModalOpen(false)}
+                    className="min-h-[44px] px-4 py-2 rounded-xl border border-theme-border-soft text-theme-secondary text-xs font-bold cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmittingPayment}
+                    className="min-h-[44px] px-5 py-2 rounded-xl bg-theme-accent text-white text-xs font-black shadow-sm cursor-pointer disabled:opacity-50"
+                  >
+                    {isSubmittingPayment ? 'Processing...' : 'Confirm Payment'}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ===================================================================== */}
+      {/* 9. ADD / EDIT WORKER MODAL */}
+      {/* ===================================================================== */}
+      <AnimatePresence>
+        {workerModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-theme-surface border border-theme-border-soft rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-4"
+            >
+              <div className="flex items-center justify-between border-b border-theme-border-soft pb-2.5">
+                <h3 className="text-sm font-black text-theme-primary">
+                  {editingWorker ? 'Edit Worker Profile' : '+ Add New Worker'}
+                </h3>
+                <button
+                  onClick={() => setWorkerModalOpen(false)}
+                  className="min-h-[38px] w-[38px] flex items-center justify-center rounded-xl text-theme-muted hover:text-theme-primary cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveWorkerSubmit} className="space-y-3 text-xs font-semibold">
+                <div>
+                  <label className="block text-theme-muted uppercase text-[10px] font-black mb-1">
+                    Worker Name *
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    defaultValue={editingWorker?.name || ''}
+                    placeholder="e.g. Rahim"
+                    className="w-full min-h-[44px] px-3.5 py-2.5 bg-theme-surface-elevated border border-theme-border-soft rounded-xl text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-theme-muted uppercase text-[10px] font-black mb-1">
+                    Phone (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    name="phone"
+                    defaultValue={editingWorker?.phone || ''}
+                    placeholder="+91 98765 43210"
+                    className="w-full min-h-[44px] px-3.5 py-2.5 bg-theme-surface-elevated border border-theme-border-soft rounded-xl text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-theme-muted uppercase text-[10px] font-black mb-1">
+                    Address / Workshop (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    name="address"
+                    defaultValue={editingWorker?.address || ''}
+                    placeholder="Workshop address or city"
+                    className="w-full min-h-[44px] px-3.5 py-2.5 bg-theme-surface-elevated border border-theme-border-soft rounded-xl text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-theme-muted uppercase text-[10px] font-black mb-1">
+                    Notes
+                  </label>
+                  <textarea
+                    name="notes"
+                    defaultValue={editingWorker?.notes || ''}
+                    placeholder="Special skills, remarks"
+                    rows="2"
+                    className="w-full px-3.5 py-2.5 bg-theme-surface-elevated border border-theme-border-soft rounded-xl text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent"
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-theme-border-soft">
+                  <button
+                    type="button"
+                    onClick={() => setWorkerModalOpen(false)}
+                    className="min-h-[44px] px-4 py-2 rounded-xl border border-theme-border-soft text-theme-secondary text-xs font-bold cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="min-h-[44px] px-5 py-2 rounded-xl bg-theme-accent text-white text-xs font-black shadow-sm cursor-pointer"
+                  >
+                    Save Worker
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ===================================================================== */}
+      {/* 10. DELETE CONFIRMATION MODAL */}
+      {/* ===================================================================== */}
+      <AnimatePresence>
+        {deleteConfirmJob && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-theme-surface border border-theme-border-soft rounded-3xl max-w-sm w-full p-5 shadow-2xl space-y-4"
+            >
+              <div className="w-10 h-10 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center">
+                <Trash2 className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-black text-theme-primary">
+                  Delete Work Bill?
+                </h3>
+                <p className="text-xs text-theme-secondary mt-1">
+                  Are you sure you want to delete <strong className="text-theme-primary font-mono">{deleteConfirmJob.contractorBillNumber || 'this bill'}</strong>? Associated internal disbursements will be safely reconciled.
+                </p>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setDeleteConfirmJob(null)}
+                  className="min-h-[44px] px-4 py-2 rounded-xl border border-theme-border-soft text-theme-secondary text-xs font-bold cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmDeleteJobAction}
+                  className="min-h-[44px] px-5 py-2 rounded-xl bg-rose-500 hover:bg-rose-600 text-white text-xs font-black shadow-sm cursor-pointer"
+                >
+                  Confirm Delete
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ===================================================================== */}
+      {/* 11. MOBILE STICKY BOTTOM ACTION BAR */}
+      {/* ===================================================================== */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-30 p-3 bg-theme-surface/90 backdrop-blur-lg border-t border-theme-border-soft flex items-center justify-between gap-3 shadow-lg">
+        <div className="text-xs font-mono">
+          <span className="text-[10px] text-theme-muted block font-sans">Pending Due</span>
+          <span className="font-black text-rose-500 text-sm">{formatCurrency(summary.pendingPayment)}</span>
         </div>
-      )}
+
+        <button
+          onClick={() => {
+            setIsBillSlipOpen(true);
+            resetBillSlip();
+            if (billSlipRef.current) {
+              billSlipRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }}
+          className="min-h-[44px] px-5 py-2.5 rounded-xl bg-theme-accent text-theme-accent-contrast text-xs font-black flex items-center gap-2 shadow-md cursor-pointer ml-auto"
+        >
+          <Plus className="w-4 h-4" />
+          <span>+ Create Bill</span>
+        </button>
+      </div>
+
     </div>
   );
 };

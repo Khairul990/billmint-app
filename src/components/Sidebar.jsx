@@ -163,6 +163,7 @@ const Sidebar = ({
         { id: 'collection-center', label: t('nav.payments', 'Payments'), icon: CreditCard, featureId: 'payment', badge: pendingPaymentsCount },
         { id: 'due-ledger', label: t('nav.collections', 'Collections'), icon: BookOpen, featureId: 'treasury' },
         { id: 'expenses', label: t('nav.expenses', 'Expenses'), icon: TrendingDown, featureId: 'treasury.moneyOut' },
+        { id: 'work-cost', label: t('nav.workCost', 'Work Cost'), icon: Briefcase, featureId: 'outsource' },
         { id: 'bank', label: t('nav.bank', 'Bank & Cash'), icon: Landmark, featureId: 'treasury' },
       ]
     },

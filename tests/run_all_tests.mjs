@@ -22,15 +22,25 @@ if (typeof globalThis.document === 'undefined') {
     querySelector: () => mockStyle
   };
 }
-if (typeof globalThis.localStorage === 'undefined') {
-  const store = new Map();
-  globalThis.localStorage = {
-    getItem: (k) => store.get(k) || null,
-    setItem: (k, v) => store.set(k, String(v)),
-    removeItem: (k) => store.delete(k),
-    clear: () => store.clear()
-  };
+if (typeof globalThis.navigator === 'undefined') {
+  globalThis.navigator = { onLine: true };
+} else {
+  try {
+    Object.defineProperty(globalThis, 'navigator', {
+      value: { onLine: true },
+      configurable: true,
+      writable: true
+    });
+  } catch (e) {}
 }
+
+const store = new Map();
+globalThis.localStorage = {
+  getItem: (k) => store.get(k) || null,
+  setItem: (k, v) => store.set(k, String(v)),
+  removeItem: (k) => store.delete(k),
+  clear: () => store.clear()
+};
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const files = fs.readdirSync(__dirname)
@@ -48,7 +58,10 @@ const origExit = process.exit;
 
 for (const file of files) {
   console.log(`\n▶️  STARTING SUITE: ${file}`);
-  let suiteError = null;
+  
+  // Clear persistent local mocks to guarantee pure test isolation
+  store.clear();
+
   process.exit = (code) => {
     if (code && code !== 0) {
       throw new Error(`Test suite ${file} explicitly called process.exit(${code})`);

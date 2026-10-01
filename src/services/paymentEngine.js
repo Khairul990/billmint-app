@@ -91,120 +91,48 @@ class PaymentEngine {
     const custId = customerId || targetInvoice.customer?.id || targetInvoice.customerId;
     const custName = targetInvoice.customer?.name || targetInvoice.customerName || '';
 
-    // Find all active invoices for this customer
-    const customerInvoices = invoices.filter(inv => {
-      if (inv.isDeleted || inv.status === 'Cancelled' || inv.status === 'Void') return false;
-      if (workspaceId && inv.workspaceId && inv.workspaceId !== workspaceId) return false;
-      const invCustId = inv.customerId || inv.customer?.id;
-      const invCustName = inv.customerName || inv.customer?.name;
-      if (custId && invCustId) return custId === invCustId;
-      if (custName && invCustName) return custName === invCustName;
-      if (inv.id === invoiceId) return true;
-      return false;
-    }).sort((a, b) => new Date(a.date || a.createdAt).getTime() - new Date(b.date || b.createdAt).getTime());
-
-    let remainingPayment = paymentAmount;
-    const modifiedInvoices = [];
-    let primaryPaymentEntry = null;
-    let primaryAllocation = null;
-
     const effectiveDate = paymentDate 
       ? (paymentDate.includes('T') ? paymentDate : `${paymentDate}T12:00:00.000Z`)
       : new Date().toISOString();
 
-    let cumulativeOldDueSettled = 0;
-      const waterfallGroupId = 'grp_' + Date.now() + '_' + Math.random().toString(36).substring(2,9);
+    const fin = calculateCanonicalInvoiceFinancials(targetInvoice);
+    const allocation = allocatePayment(paymentAmount, fin.previousDue, fin.currentInvoiceTotal);
 
-      // Waterfall Cascade
-      for (const inv of customerInvoices) {
-      // If previous invoices were settled in this cascade, reduce this invoice's previousDue accordingly
-      if (cumulativeOldDueSettled > 0 && inv.previousDue > 0) {
-        const reduction = Math.min(inv.previousDue, cumulativeOldDueSettled);
-        inv.previousDue = roundTo2(inv.previousDue - reduction);
-        if (inv.totals) inv.totals.oldDue = inv.previousDue;
-        inv.oldDue = inv.previousDue;
-        cumulativeOldDueSettled = roundTo2(cumulativeOldDueSettled - reduction);
-      }
+    if (!Array.isArray(targetInvoice.paymentHistory)) targetInvoice.paymentHistory = [];
+    if (!Array.isArray(targetInvoice.paymentProofs)) targetInvoice.paymentProofs = [];
 
-      if (remainingPayment <= 0 && inv.id !== invoiceId) {
-        if (inv.previousDue !== undefined) {
-          modifiedInvoices.push(inv); // Save the reduced previousDue even if no payment
-        }
-        continue;
-      }
-      
-      const fin = calculateCanonicalInvoiceFinancials(inv);
-      // Because we reduced previousDue, fin.balanceDue now correctly reflects what THIS invoice needs (including any remaining oldDue it has)
-      const invoiceNeeds = fin.balanceDue;
-      
-      let amountToApply = 0;
-      if (inv.id === invoiceId) {
-        // Target invoice absorbs remaining
-        amountToApply = remainingPayment;
-        remainingPayment = 0;
-      } else if (invoiceNeeds > 0) {
-        amountToApply = Math.min(remainingPayment, invoiceNeeds);
-        remainingPayment = roundTo2(remainingPayment - amountToApply);
-      }
+    const paymentId = proofId ? `pmt_${proofId}` : `pmt_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
-      if (amountToApply > 0 || inv.id === invoiceId) {
-        if (!Array.isArray(inv.paymentHistory)) inv.paymentHistory = [];
-        if (!Array.isArray(inv.paymentProofs)) inv.paymentProofs = [];
+    const primaryPaymentEntry = {
+      id: paymentId,
+      proofId: proofId || null,
+      amount: paymentAmount,
+      method: paymentMethod,
+      transactionId: reference || '',
+      reference: reference || '',
+      date: effectiveDate,
+      note: note || (source === 'live_link_approved' ? 'Payment proof approved' : 'Recorded in Money & Payment Center'),
+      source: source,
+      allocatedToOldDue: allocation.allocatedToOldDue,
+      allocatedToCurrentInvoice: allocation.allocatedToCurrentInvoice,
+      earlierBalancePaid: allocation.allocatedToOldDue,
+      thisBillPaid: allocation.allocatedToCurrentInvoice,
+      customerId: custId,
+      customerName: custName,
+      invoiceId: targetInvoice.id,
+      invoiceNumber: targetInvoice.invoiceNumber || `INV-${targetInvoice.id.slice(0, 4)}`,
+      createdBy,
+      workspaceId: workspaceId || targetInvoice.workspaceId || null,
+      verified: true,
+      createdAt: new Date().toISOString()
+    };
 
-        const allocation = allocatePayment(amountToApply, fin.previousDue, fin.currentInvoiceTotal);
-        
-        // Accumulate settled old due for subsequent invoices
-        // If we pay the current invoice bill of an OLDER invoice, that counts as settling the "oldDue" of NEWER invoices!
-        // Actually, ANY payment applied to an older invoice reduces the oldDue of newer invoices!
-        if (inv.id !== invoiceId) {
-           cumulativeOldDueSettled = roundTo2(cumulativeOldDueSettled + amountToApply);
-        }
+    targetInvoice.paymentHistory.push(primaryPaymentEntry);
+    targetInvoice.paymentMethod = paymentMethod || targetInvoice.paymentMethod || 'Cash';
 
-        const paymentId = (inv.id === invoiceId && proofId) ? `pmt_${proofId}` : `pmt_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-
-        const paymentEntry = {
-          id: paymentId,
-          proofId: (inv.id === invoiceId) ? (proofId || null) : null,
-          amount: amountToApply,
-          method: paymentMethod,
-          transactionId: reference || '',
-          reference: reference || '',
-          date: effectiveDate,
-          note: note || (source === 'live_link_approved' ? 'Payment proof approved' : (inv.id === invoiceId ? 'Recorded in Money & Payment Center' : 'Auto-settled via Payment Waterfall')),
-          source: inv.id === invoiceId ? source : 'waterfall_cascade',
-          allocatedToOldDue: allocation.allocatedToOldDue,
-          allocatedToCurrentInvoice: allocation.allocatedToCurrentInvoice,
-          earlierBalancePaid: allocation.allocatedToOldDue,
-          thisBillPaid: allocation.allocatedToCurrentInvoice,
-          customerId: custId,
-          customerName: custName,
-          invoiceId: inv.id,
-          invoiceNumber: inv.invoiceNumber || `INV-${inv.id.slice(0, 4)}`,
-          createdBy,
-          workspaceId: workspaceId || inv.workspaceId || null,
-          verified: true,
-          groupId: waterfallGroupId,
-          createdAt: new Date().toISOString()
-        };
-
-        inv.paymentHistory.push(paymentEntry);
-        
-        if (inv.id === invoiceId) {
-          primaryPaymentEntry = paymentEntry;
-          primaryAllocation = allocation;
-        }
-      }
-
-      modifiedInvoices.push({
-        ...inv,
-        paymentMethod: paymentMethod || inv.paymentMethod || 'Cash'
-      });
-    }
-
-    // Save all modified invoices
-    const uniqueInvoices = Array.from(new Map(modifiedInvoices.map(i => [i.id, i])).values());
-    const savedInvoices = await Promise.all(uniqueInvoices.map(inv => invoiceEngine.saveInvoice(inv)));
-    const savedTargetInvoice = savedInvoices.find(inv => inv.id === invoiceId) || savedInvoices[0];
+    const savedTargetInvoice = await invoiceEngine.saveInvoice(targetInvoice);
+    const savedInvoices = [savedTargetInvoice];
+    const primaryAllocation = allocation;
 
     // Structured Audit Log
     try {

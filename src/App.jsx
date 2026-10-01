@@ -2036,16 +2036,15 @@ function App() {
 
   // --- PDF GENERATOR WORKER ---
   const handleDownloadPDF = async (invoice) => {
-    const effectiveSettings = activeSettings || settings;
-    if (!effectiveSettings || !effectiveSettings.businessName) {
-      toast.error('⚠️ Business settings are incomplete. Please complete your business settings first.');
-      setCurrentTab('settings');
-      return;
-    }
+    const effectiveSettings = activeSettings || settings || invoice?.businessSnapshot || {};
+    const safeSettings = {
+      ...effectiveSettings,
+      businessName: effectiveSettings.businessName || invoice?.businessSnapshot?.businessName || invoice?.businessName || 'BillQyro Store'
+    };
     try {
       const { downloadInvoicePDF } = await import('./utils/pdfUtils');
       const isPremium = subscription.status === 'premium';
-      const ok = await downloadInvoicePDF(invoice, effectiveSettings, isPremium);
+      const ok = await downloadInvoicePDF(invoice, safeSettings, isPremium);
       if (ok) {
         sendEmpireEvent({
           eventType: "pdf_downloaded",
@@ -2067,15 +2066,14 @@ function App() {
 
   // --- IMAGE GENERATOR WORKER ---
   const handleDownloadImage = async (invoice) => {
-    const effectiveSettings = activeSettings || settings;
-    if (!effectiveSettings || !effectiveSettings.businessName) {
-      toast.error('⚠️ Business settings are incomplete. Please complete your business settings first.');
-      setCurrentTab('settings');
-      return;
-    }
+    const effectiveSettings = activeSettings || settings || invoice?.businessSnapshot || {};
+    const safeSettings = {
+      ...effectiveSettings,
+      businessName: effectiveSettings.businessName || invoice?.businessSnapshot?.businessName || invoice?.businessName || 'BillQyro Store'
+    };
     try {
       const { downloadInvoiceImage } = await import('./utils/pdfUtils');
-      const ok = await downloadInvoiceImage(invoice, effectiveSettings);
+      const ok = await downloadInvoiceImage(invoice, safeSettings);
       if (ok) {
         sendEmpireEvent({
           eventType: "image_downloaded",
@@ -2103,7 +2101,8 @@ function App() {
     'expenses': 'treasury.moneyOut', 'products': 'product', 'inventory': 'product.inventory', 'orders': 'operations', 'bank': 'treasury',
     'appointments': 'customer', 'delivery': 'operations', 'measurements': 'operations',
     'designBook': 'operations', 'devices': 'operations', 'serviceJobs': 'operations', 'projects': 'operations',
-    'staff-ledger': 'staff.ledger', 'customer-portal-config': 'liveLink'
+    'staff-ledger': 'staff.ledger', 'customer-portal-config': 'liveLink',
+    'outsource': 'outsource', 'contractors': 'outsource', 'work-partners': 'outsource', 'work-cost': 'outsource'
   };
 
   const renderTabContent = (targetTab = currentTab) => {
@@ -2202,7 +2201,10 @@ function App() {
             currencySymbol={activeSettings?.currency || '₹'}
             businessSettings={activeSettings}
             activeWsId={activeWorkspaceId}
-            onPaymentSuccess={() => {
+            onPaymentSuccess={(result) => {
+              if (result?.invoice) {
+                handlePaymentRecorded(result.invoice);
+              }
               if (typeof window !== 'undefined') {
                 window.dispatchEvent(new Event('billqyro_bank_updated'));
                 window.dispatchEvent(new Event('billqyro_sync'));
@@ -2455,31 +2457,20 @@ function App() {
       case 'delivery':
         return <Delivery />;
       case 'outsource':
+      case 'contractors':
+      case 'work-partners':
+      case 'work-cost':
         return (
-          <Dashboard
-            invoices={activeInvoices}
-            customers={activeCustomers}
-            staffs={activeStaffs}
-            products={activeProducts}
-            expenses={activeExpenses}
-            onViewInvoice={(inv) => {
-              setEditingInvoice(inv);
-              setCurrentTab('invoices');
-            }}
-            onEditInvoice={(inv) => {
-              setEditingInvoice(inv);
-              setCurrentTab('create-invoice');
-            }}
-            onNewInvoice={() => {
-              setEditingInvoice(null);
-              setCurrentTab('create-invoice');
-            }}
-            onQuickAddCustomer={() => {
-              setCustomerDrawerOpen(true);
-            }}
-            onOpenStaffLedger={() => setCurrentTab('staff-ledger')}
-            setCurrentTab={setCurrentTab}
-          />
+          <React.Suspense fallback={<div className="flex h-screen items-center justify-center"><ClassicLoader /></div>}>
+            <OutsourceVendors
+              invoices={activeInvoices}
+              customers={activeCustomers}
+              products={activeProducts}
+              businessSettings={activeSettings}
+              currentTab={targetTab}
+              setCurrentTab={setCurrentTab}
+            />
+          </React.Suspense>
         );
       case 'premium-upgrade':
         if (isMaintenanceMode || activeSettings?.disablePremiumUpgrade) {

@@ -77,7 +77,8 @@ const InvoiceCard = ({
   onToggleSelect,
   onRecordPayment,
   onDuplicate,
-  onToggleRecurring
+  onToggleRecurring,
+  onAddOutsourcedWork
 }) => {
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [copiedId, setCopiedId] = useState(false);
@@ -301,7 +302,7 @@ const InvoiceCard = ({
             {/* Multi-Select Checkbox */}
             {onToggleSelect && !isDeleted && (
               <div className="pt-2 sm:pt-0 shrink-0">
-                <label className="flex items-center justify-center p-2 cursor-pointer">
+                <label className="flex items-center justify-center p-3 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={isSelected}
@@ -718,6 +719,19 @@ const InvoiceCard = ({
                             >
                               <Repeat className="w-3.5 h-3.5 text-theme-accent" />
                               <span>{invoice.recurring ? 'Turn Off Monthly Billing' : 'Make Monthly Bill'}</span>
+                            </button>
+                          )}
+
+                          {onAddOutsourcedWork && !isDeleted && (
+                            <button
+                              onClick={() => {
+                                onAddOutsourcedWork(invoice);
+                                setShowMoreMenu(false);
+                              }}
+                              className="flex items-center gap-2 px-2.5 py-2 text-theme-primary hover:bg-theme-surface rounded-xl transition-colors font-semibold w-full text-left cursor-pointer"
+                            >
+                              <Scissors className="w-3.5 h-3.5 text-theme-accent" />
+                              <span>Add Outsourced Work</span>
                             </button>
                           )}
 

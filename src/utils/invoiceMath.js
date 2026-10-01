@@ -360,6 +360,10 @@ export const normalizeInvoiceFinancials = (inv) => {
   if (!inv) return inv;
   const canonical = calculateCanonicalInvoiceFinancials(inv);
 
+  const lastHistoryMethod = Array.isArray(inv.paymentHistory) && inv.paymentHistory.length > 0 
+    ? (inv.paymentHistory[inv.paymentHistory.length - 1]?.method || inv.paymentHistory[inv.paymentHistory.length - 1]?.paymentMethod)
+    : null;
+
   return {
     ...inv,
     subtotal: canonical.subtotal,
@@ -375,7 +379,8 @@ export const normalizeInvoiceFinancials = (inv) => {
     paidAmount: canonical.amountPaid,
     balanceDue: canonical.balanceDue,
     customerTotalDue: canonical.customerTotalDue,
-    paymentStatus: canonical.paymentStatus
+    paymentStatus: canonical.paymentStatus,
+    paymentMethod: inv.paymentMethod || lastHistoryMethod || 'Cash'
   };
 };
 
@@ -453,8 +458,13 @@ export const filterByDateRange = (items = [], dateField = 'date', rangeType = 'T
  */
 export const filterByWorkspace = (items = [], targetWorkspaceId = 'default') => {
   if (!Array.isArray(items)) return [];
-  // Bypass workspace isolation completely as requested by user to prevent data hiding
-  return items;
+  if (!targetWorkspaceId || targetWorkspaceId === 'all') return items;
+  return items.filter(item => {
+    if (!item) return false;
+    if (item.workspaceId === targetWorkspaceId) return true;
+    if (!item.workspaceId && (targetWorkspaceId === 'default' || targetWorkspaceId === 'ws_default')) return true;
+    return false;
+  });
 };
 
 /**

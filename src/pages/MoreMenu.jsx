@@ -26,7 +26,8 @@ import {
   CheckCircle2,
   Phone,
   User,
-  ArrowRight
+  ArrowRight,
+  Briefcase
 } from 'lucide-react';
 import { adminEngine } from '../services/adminEngine';
 import { useFeatureControl } from '../hooks/useFeatureControl';
@@ -257,6 +258,13 @@ const MoreMenu = ({
               onClick={() => setCurrentTab('expenses')} 
             />
           )}
+          <CommandItem 
+            icon={Briefcase} 
+            title={t('more.work_cost', 'Work Cost')} 
+            description={t('more.work_cost_desc', 'Outsourced work, worker costs, and contractor bills')} 
+            onClick={() => setCurrentTab('work-cost')} 
+            tag={t('more.outsourced', 'Outsourced')}
+          />
           {isFeatureEnabled('payment') && (
             <CommandItem 
               icon={CreditCard} 

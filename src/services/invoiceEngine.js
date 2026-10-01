@@ -34,10 +34,9 @@ export const invoiceEngine = {
   async saveInvoice(invoice) {
     const normalized = normalizeInvoiceFinancials(invoice);
     const saved = await dbSaveInvoice(normalized);
-    try {
-      const { invalidateInvoicePdfCache } = await import('../utils/pdfCacheEngine.js');
-      await invalidateInvoicePdfCache(saved.id || invoice.id);
-    } catch (e) { /* non-blocking */ }
+    import('../utils/pdfCacheEngine.js')
+      .then(m => m.invalidateInvoicePdfCache(saved.id || invoice.id))
+      .catch(() => {});
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('billqyro_invoice_updated', { detail: saved }));
       window.dispatchEvent(new Event('billqyro_sync'));

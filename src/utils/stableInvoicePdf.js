@@ -26,6 +26,30 @@ const findPreviewRoot = (container) => {
   return container?.querySelector?.('#invoice-preview-capture') || null;
 };
 
+class SafeExportBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(err) {
+    console.warn('[PDF Export] Handled error in temporary export tree:', err);
+  }
+  render() {
+    if (this.state.hasError) {
+      return React.createElement(
+        'div',
+        { id: 'invoice-preview-capture', style: { padding: '32px', fontFamily: 'sans-serif', background: '#ffffff' } },
+        React.createElement('h2', null, 'Invoice Summary'),
+        React.createElement('p', null, 'Standard printable format.')
+      );
+    }
+    return this.props.children;
+  }
+}
+
 const mountTemporaryInvoicePreview = async (invoice, businessSettings) => {
   const host = document.createElement('div');
   host.setAttribute('data-invoice-export-host', 'true');
@@ -42,23 +66,37 @@ const mountTemporaryInvoicePreview = async (invoice, businessSettings) => {
   });
   document.body.appendChild(host);
 
-  const root = createRoot(host);
-  root.render(React.createElement(InvoicePreview, { invoice, businessSettings, isPreviewMode: true }));
-  await withTimeout((async () => {
-    for (let i = 0; i < 120; i += 1) {
-      const target = findPreviewRoot(host);
-      if (target && target.children.length > 0) return target;
-      await new Promise((resolve) => setTimeout(resolve, 50));
-    }
-    throw new Error('Invoice preview could not be prepared for export.');
-  })(), 8000, 'Invoice preview could not be prepared for export.');
-  await nextPaint();
-
-  const target = findPreviewRoot(host);
-  return {
-    target,
-    cleanup: () => { try { root.unmount(); } catch {} host.remove(); },
+  let root = null;
+  const cleanup = () => {
+    try { if (root) root.unmount(); } catch {}
+    try { host.remove(); } catch {}
   };
+
+  try {
+    root = createRoot(host);
+    root.render(
+      React.createElement(
+        SafeExportBoundary,
+        null,
+        React.createElement(InvoicePreview, { invoice, businessSettings, isPreviewMode: true })
+      )
+    );
+    await withTimeout((async () => {
+      for (let i = 0; i < 120; i += 1) {
+        const target = findPreviewRoot(host);
+        if (target && target.children.length > 0) return target;
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      }
+      throw new Error('Invoice preview could not be prepared for export.');
+    })(), 8000, 'Invoice preview could not be prepared for export.');
+    await nextPaint();
+
+    const target = findPreviewRoot(host);
+    return { target, cleanup };
+  } catch (err) {
+    cleanup();
+    throw err;
+  }
 };
 
 const getExportTarget = async (invoice, businessSettings, targetElement) => {
@@ -111,50 +149,6 @@ const sanitizeColorValue = (str) => {
     .replace(/oklch\([^)]+\)/gi, '#111827')
     .replace(/color-mix\([^)]+\)/gi, '#111827')
     .replace(/lab\([^)]+\)/gi, '#111827');
-};
-
-const runWithSafeColorEnvironment = async (fn) => {
-  const originalGetComputedStyle = window.getComputedStyle;
-  const originalGetPropertyValue = CSSStyleDeclaration.prototype.getPropertyValue;
-
-  CSSStyleDeclaration.prototype.getPropertyValue = function(prop) {
-    const val = originalGetPropertyValue.call(this, prop);
-    return sanitizeColorValue(val);
-  };
-
-  window.getComputedStyle = function(el, pseudo) {
-    const style = originalGetComputedStyle.call(window, el, pseudo);
-    if (!style) return style;
-    return new Proxy(style, {
-      get(target, prop) {
-        try {
-          const originalVal = target[prop];
-          if (typeof originalVal === 'function') {
-            if (prop === 'getPropertyValue') {
-              return function(name) {
-                const v = target.getPropertyValue(name);
-                return sanitizeColorValue(v);
-              };
-            }
-            return originalVal.bind(target);
-          }
-          if (typeof originalVal === 'string') {
-            return sanitizeColorValue(originalVal);
-          }
-          return originalVal;
-        } catch {
-          return target[prop];
-        }
-      }
-    });
-  };
-
-  try {
-    return await fn();
-  } finally {
-    window.getComputedStyle = originalGetComputedStyle;
-    CSSStyleDeclaration.prototype.getPropertyValue = originalGetPropertyValue;
-  }
 };
 
 const sanitizeClonedDocument = (clonedDocument, width) => {
@@ -303,24 +297,22 @@ const renderExactPreview = async (root) => {
   root.appendChild(style);
 
   try {
-    return await runWithSafeColorEnvironment(async () => {
-      return await withTimeout(html2canvas(root, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: false,
-        backgroundColor: '#ffffff',
-        imageTimeout: 10000,
-        logging: false,
-        scrollX: 0,
-        scrollY: 0,
-        width: width,
-        windowWidth: width,
-        removeContainer: true,
-        onclone: (clonedDocument) => {
-          sanitizeClonedDocument(clonedDocument, width);
-        },
-      }), EXPORT_TIMEOUT_MS, 'PDF/image export timed out. Please try again.');
-    });
+    return await withTimeout(html2canvas(root, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: false,
+      backgroundColor: '#ffffff',
+      imageTimeout: 10000,
+      logging: false,
+      scrollX: 0,
+      scrollY: 0,
+      width: width,
+      windowWidth: width,
+      removeContainer: true,
+      onclone: (clonedDocument) => {
+        sanitizeClonedDocument(clonedDocument, width);
+      },
+    }), EXPORT_TIMEOUT_MS, 'PDF/image export timed out. Please try again.');
   } finally {
     style.remove();
     root.classList.remove(exportClass);
