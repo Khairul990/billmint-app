@@ -1759,7 +1759,7 @@ export const logout = async () => {
   sessionStorage.clear();
 };
 
-export const resetBusinessDataOnly = async () => {
+export const resetBusinessDataOnly = async (autoReload = true) => {
   const userId = getRealUserId();
   
   if (firebaseReady && userId) {
@@ -1775,16 +1775,89 @@ export const resetBusinessDataOnly = async () => {
     await BillQyroDB.clear('customers').catch(() => {});
     await BillQyroDB.clear('products').catch(() => {});
     await BillQyroDB.clear('expenses').catch(() => {});
+    await BillQyroDB.clear('students').catch(() => {});
+    await BillQyroDB.clear('staff').catch(() => {});
     await BillQyroDB.clear('syncQueue').catch(() => {});
     await BillQyroDB.clear('auditLogs').catch(() => {});
     await BillQyroDB.clear('errorLogs').catch(() => {});
-  } catch (e) { console.warn('Ignored error in resetBusinessDataOnly:', e); }
-  
-  window.location.reload();
+  } catch (e) { console.warn('Ignored error in resetBusinessDataOnly IndexedDB clear:', e); }
+
+  try {
+    updateLocalCache(KEYS.INVOICES, []);
+    updateLocalCache(KEYS.CUSTOMERS, []);
+    updateLocalCache(KEYS.PRODUCTS, []);
+    updateLocalCache(KEYS.EXPENSES, []);
+    updateLocalCache(KEYS.STUDENTS, []);
+
+    localStorage.setItem(KEYS.INVOICES, JSON.stringify([]));
+    localStorage.setItem(KEYS.CUSTOMERS, JSON.stringify([]));
+    localStorage.setItem(KEYS.PRODUCTS, JSON.stringify([]));
+    localStorage.setItem(KEYS.EXPENSES, JSON.stringify([]));
+    localStorage.setItem(KEYS.STUDENTS, JSON.stringify([]));
+    localStorage.setItem(KEYS.BANK_LEDGER, JSON.stringify([]));
+    localStorage.setItem(KEYS.BANK_CREDIT, JSON.stringify([]));
+    
+    localStorage.setItem(GLOBAL_KEYS.INVOICES, JSON.stringify([]));
+    localStorage.setItem(GLOBAL_KEYS.CUSTOMERS, JSON.stringify([]));
+    localStorage.setItem(GLOBAL_KEYS.PRODUCTS, JSON.stringify([]));
+    localStorage.setItem(GLOBAL_KEYS.EXPENSES, JSON.stringify([]));
+    localStorage.setItem(GLOBAL_KEYS.STUDENTS, JSON.stringify([]));
+    localStorage.setItem(GLOBAL_KEYS.BANK_LEDGER, JSON.stringify([]));
+
+    // Dynamic sweep: delete auxiliary storage keys for demo, sandbox, drafts, pdf cache
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (!k) continue;
+      if (
+        k.startsWith('billqyro_demo_') ||
+        k.startsWith('billqyro_sandbox_') ||
+        k.startsWith('billqyro_draft_') ||
+        k.startsWith('billqyro_dream_') ||
+        k.startsWith('storage_') ||
+        k.includes('_offline_') ||
+        k.includes('_pending_') ||
+        k.includes('_syncQueue') ||
+        k.includes('_invoices') ||
+        k.includes('_customers') ||
+        k.includes('_products') ||
+        k.includes('_expenses') ||
+        k.includes('_bank')
+      ) {
+        if (k === GLOBAL_KEYS.AUTH || k === KEYS.SETTINGS || k.endsWith('_settings') || k.includes('user_session') || k.includes('_auth')) {
+          continue;
+        }
+        keysToRemove.push(k);
+      }
+    }
+    keysToRemove.forEach(k => localStorage.removeItem(k));
+
+    // Reset sequence counters in settings so new bills start from 1
+    const settings = getSettings();
+    if (settings) {
+      settings.nextInvoiceNumber = 1;
+      settings.nextEstimateNumber = 1;
+      saveSettings(settings);
+    }
+
+    sessionStorage.clear();
+  } catch (e) {
+    console.warn('Ignored error in resetBusinessDataOnly localStorage clear:', e);
+  }
+
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('billqyro_sync'));
+    window.dispatchEvent(new CustomEvent('billqyro_bank_updated'));
+    window.dispatchEvent(new CustomEvent('billqyro_outsource_updated'));
+    if (autoReload) {
+      window.location.reload();
+    }
+  }
+
+  return true;
 };
 
-export const factoryResetAllData = async () => {
-  // Get userId before clearing local storage
+export const factoryResetAllData = async (autoRedirect = true) => {
   const userId = getRealUserId();
   
   if (firebaseReady && userId) {
@@ -1795,38 +1868,38 @@ export const factoryResetAllData = async () => {
     }
   }
 
-  // Wipe all local storage
-  localStorage.clear();
-  sessionStorage.clear();
+  // Wipe all local storage & session storage
+  try {
+    localStorage.clear();
+    sessionStorage.clear();
+  } catch (e) {}
   
   try {
-    // Manually clear all object stores first as a fallback
     await BillQyroDB.clear('invoices').catch(() => {});
     await BillQyroDB.clear('customers').catch(() => {});
     await BillQyroDB.clear('products').catch(() => {});
     await BillQyroDB.clear('expenses').catch(() => {});
     await BillQyroDB.clear('students').catch(() => {});
+    await BillQyroDB.clear('staff').catch(() => {});
     await BillQyroDB.clear('syncQueue').catch(() => {});
     await BillQyroDB.clear('auditLogs').catch(() => {});
     await BillQyroDB.clear('errorLogs').catch(() => {});
     
-    // Now close and delete the whole database
     BillQyroDB.close();
-    await new Promise((resolve, reject) => {
+    await new Promise((resolve) => {
       const req = indexedDB.deleteDatabase('billqyro-db');
       req.onsuccess = () => resolve();
-      req.onerror = () => reject(req.error);
-      req.onblocked = () => {
-        console.warn('Database deletion blocked by another tab. Stores were cleared though.');
-        resolve();
-      };
+      req.onerror = () => resolve();
+      req.onblocked = () => resolve();
     });
     
-    const caches = await window.caches.keys();
-    for (const name of caches) {
-      await window.caches.delete(name);
+    if (window.caches) {
+      const caches = await window.caches.keys();
+      for (const name of caches) {
+        await window.caches.delete(name);
+      }
     }
-  } catch (e) { console.warn('Ignored error in dbEngine.js:', e); }
+  } catch (e) { console.warn('Ignored error in factoryResetAllData:', e); }
   
   if (firebaseReady) {
     try {
@@ -1838,10 +1911,14 @@ export const factoryResetAllData = async () => {
           await auth.signOut();
         }
       }
-    } catch (e) { console.warn('Ignored error in dbEngine.js:', e); }
+    } catch (e) { console.warn('Ignored error in auth signout during factory reset:', e); }
   }
   
-  window.location.href = '/';
+  if (autoRedirect && typeof window !== 'undefined') {
+    window.location.href = '/';
+  }
+
+  return true;
 };
 
 export const clearAllLocalData = async () => {
@@ -2122,21 +2199,29 @@ export const getAdminTotalStats = async () => {
 export const deleteEnterpriseUser = async (targetUserId) => {
   if (!firebaseReady || !targetUserId) return false;
   try {
-    // Client-side best-effort deletion. Production requires Cloud Functions to recursively delete subcollections.
-    const collectionsToClear = ['invoices', 'customers', 'staff', 'products', 'expenses', 'students'];
+    const collectionsToClear = [
+      'invoices', 'customers', 'staff', 'products', 'expenses', 'students',
+      'vendors', 'outsourceJobs', 'vendorPayments', 'bankLedger', 'paymentProofs'
+    ];
     for (const coll of collectionsToClear) {
       try {
         const snap = await getDocs(collection(getDb(), coll, targetUserId, 'items'));
         const deletePromises = [];
-        snap.forEach(d => deletePromises.push(deleteDoc(d.ref)));
+        snap.forEach(d => {
+          deletePromises.push(deleteDoc(d.ref));
+          const invData = d.data();
+          if (coll === 'invoices' && invData?.publicToken) {
+            deletePromises.push(deleteDoc(doc(getDb(), 'publicInvoices', invData.publicToken)).catch(() => {}));
+          }
+        });
         await Promise.all(deletePromises);
       } catch { console.warn(`Skipped deleting ${coll} for ${targetUserId}`); }
     }
     
-    await deleteDoc(doc(getDb(), 'settings', targetUserId));
-    await deleteDoc(doc(getDb(), 'subscription', targetUserId));
-    await deleteDoc(doc(getDb(), 'usersList', targetUserId));
-    await deleteDoc(doc(getDb(), 'platformRevenue', targetUserId));
+    await deleteDoc(doc(getDb(), 'settings', targetUserId)).catch(() => {});
+    await deleteDoc(doc(getDb(), 'subscription', targetUserId)).catch(() => {});
+    await deleteDoc(doc(getDb(), 'usersList', targetUserId)).catch(() => {});
+    await deleteDoc(doc(getDb(), 'platformRevenue', targetUserId)).catch(() => {});
     
     return true;
   } catch (e) {
@@ -2148,12 +2233,21 @@ export const deleteEnterpriseUser = async (targetUserId) => {
 export const resetEnterpriseWorkspace = async (targetUserId) => {
   if (!firebaseReady || !targetUserId) return false;
   try {
-    const collectionsToClear = ['invoices', 'customers', 'staff', 'products', 'expenses', 'students'];
+    const collectionsToClear = [
+      'invoices', 'customers', 'staff', 'products', 'expenses', 'students',
+      'vendors', 'outsourceJobs', 'vendorPayments', 'bankLedger', 'paymentProofs'
+    ];
     for (const coll of collectionsToClear) {
       try {
         const snap = await getDocs(collection(getDb(), coll, targetUserId, 'items'));
         const deletePromises = [];
-        snap.forEach(d => deletePromises.push(deleteDoc(d.ref)));
+        snap.forEach(d => {
+          deletePromises.push(deleteDoc(d.ref));
+          const invData = d.data();
+          if (coll === 'invoices' && invData?.publicToken) {
+            deletePromises.push(deleteDoc(doc(getDb(), 'publicInvoices', invData.publicToken)).catch(() => {}));
+          }
+        });
         await Promise.all(deletePromises);
       } catch { console.warn(`Skipped resetting ${coll} for ${targetUserId}`); }
     }

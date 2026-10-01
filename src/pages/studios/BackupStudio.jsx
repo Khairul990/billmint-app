@@ -8,6 +8,8 @@ import { toast } from 'react-hot-toast';
 const BackupStudio = ({ settings, onUpdate }) => {
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
+  const [isFactoryResetting, setIsFactoryResetting] = useState(false);
 
   const handleExport = async () => {
     setIsExporting(true);
@@ -154,14 +156,23 @@ const BackupStudio = ({ settings, onUpdate }) => {
               variant="danger" 
               size="sm"
               leftIcon={DatabaseZap}
-              onClick={() => { 
-                if (confirm('Are you sure you want to delete all invoices, customers, and products in this workspace? Your account login will remain safe.')) { 
-                  adminEngine.resetBusinessDataOnly(); 
-                  toast.success('Business records reset in progress...'); 
+              disabled={isResetting || isFactoryResetting}
+              onClick={async () => { 
+                if (confirm('Are you sure you want to permanently delete ALL invoices, customers, products, and expenses in this workspace? Your account login will remain safe.')) { 
+                  try {
+                    setIsResetting(true);
+                    toast.loading('Deep cleaning records from cloud and device...', { id: 'reset-records' });
+                    await adminEngine.resetBusinessDataOnly(false); 
+                    toast.success('All business records wiped cleanly! Refreshing...', { id: 'reset-records' });
+                    setTimeout(() => window.location.reload(), 600);
+                  } catch (err) {
+                    toast.error('Reset failed: ' + (err?.message || 'Unknown error'), { id: 'reset-records' });
+                    setIsResetting(false);
+                  }
                 } 
               }}
             >
-              Reset Records Only
+              {isResetting ? 'Resetting...' : 'Reset Records Only'}
             </Button>
           </div>
 
@@ -176,14 +187,25 @@ const BackupStudio = ({ settings, onUpdate }) => {
               variant="danger" 
               size="sm"
               leftIcon={Trash2}
-              onClick={() => { 
-                if (confirm('PERMANENT ACTION: Reset entire app? This will wipe your account, settings, and ALL data. This CANNOT be undone.')) { 
-                  adminEngine.factoryResetAllData(); 
-                  toast.success('Factory reset in progress...'); 
+              disabled={isResetting || isFactoryResetting}
+              onClick={async () => { 
+                if (confirm('PERMANENT ACTION: Reset entire app? This will wipe your account, settings, and ALL cloud and local data. This CANNOT be undone.')) { 
+                  try {
+                    setIsFactoryResetting(true);
+                    toast.loading('Purging entire application and account data...', { id: 'factory-reset' });
+                    await adminEngine.factoryResetAllData(false); 
+                    toast.success('App completely reset! Redirecting...', { id: 'factory-reset' });
+                    setTimeout(() => {
+                      window.location.href = '/';
+                    }, 600);
+                  } catch (err) {
+                    toast.error('Factory reset failed: ' + (err?.message || 'Unknown error'), { id: 'factory-reset' });
+                    setIsFactoryResetting(false);
+                  }
                 } 
               }}
             >
-              Factory Reset App
+              {isFactoryResetting ? 'Resetting...' : 'Factory Reset App'}
             </Button>
           </div>
         </div>

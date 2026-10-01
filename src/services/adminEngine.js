@@ -560,8 +560,8 @@ export const adminEngine = {
   },
 
   // --- Maintenance & Wipe Operations ---
-  async resetBusinessDataOnly() { return dbResetBusinessDataOnly(); },
-  async factoryResetAllData() { return dbFactoryResetAllData(); },
+  async resetBusinessDataOnly(autoReload = true) { return dbResetBusinessDataOnly(autoReload); },
+  async factoryResetAllData(autoRedirect = true) { return dbFactoryResetAllData(autoRedirect); },
   async clearAllLocalData() { return dbClearAllLocalData(); },
   async clearInvoices() { return dbClearInvoices(); },
   async emptyTrash() { return dbEmptyTrash(); },
