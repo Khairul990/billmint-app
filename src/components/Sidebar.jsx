@@ -253,16 +253,17 @@ const Sidebar = ({
               activeWorkspaceId={activeWorkspaceId}
               setActiveWorkspace={setActiveWorkspace}
               setCurrentTab={setCurrentTab}
+              businessSettings={businessSettings}
             />
           </div>
         ) : (
           <div className="flex justify-center">
             <button
               onClick={() => setCurrentTab('settings')}
-              title={`Workspace: ${activeWorkspace.name || 'Default'}`}
+              title={`Workspace: ${(activeWorkspace.name && activeWorkspace.name !== 'Default Workspace') ? activeWorkspace.name : (businessSettings?.businessName || activeWorkspace.name || 'Default')}`}
               className="w-8 h-8 rounded-xl bg-theme-accent/15 text-theme-accent flex items-center justify-center text-xs font-black hover:scale-105 transition-transform"
             >
-              {(activeWorkspace.name || 'W').charAt(0).toUpperCase()}
+              {((activeWorkspace.name && activeWorkspace.name !== 'Default Workspace' ? activeWorkspace.name : businessSettings?.businessName) || 'W').charAt(0).toUpperCase()}
             </button>
           </div>
         )}

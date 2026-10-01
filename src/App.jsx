@@ -644,7 +644,7 @@ function App() {
       // Initialize default workspace
       const defaultWs = {
         id: 'ws_default_001',
-        name: 'Default Workspace',
+        name: s.businessName || 'Default Workspace',
         type: 'default',
         enabledModules: ['billing', 'customers', 'products', 'dueLedger', 'reports'],
       };

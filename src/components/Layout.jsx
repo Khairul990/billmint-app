@@ -542,6 +542,7 @@ const Layout = ({ children, currentTab, setCurrentTab, onLogout, businessSetting
                   activeWorkspaceId={activeWorkspaceId}
                   setActiveWorkspace={setActiveWorkspace}
                   setCurrentTab={setCurrentTab}
+                  businessSettings={businessSettings}
                   mobile
                 />
               </div>

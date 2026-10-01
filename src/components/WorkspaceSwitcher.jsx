@@ -3,13 +3,21 @@ import { ChevronDown, ChevronUp, Check, Plus, Settings, Building2, Sparkles, Clo
 import { useOnClickOutside } from '../hooks/useOnClickOutside';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const WorkspaceSwitcher = ({ businessWorkspaces = [], activeWorkspaceId, setActiveWorkspace, setCurrentTab, mobile }) => {
+const WorkspaceSwitcher = ({ businessWorkspaces = [], activeWorkspaceId, setActiveWorkspace, setCurrentTab, mobile, businessSettings = {} }) => {
   const [open, setOpen] = useState(false);
   const [isSwitching, setIsSwitching] = useState(false);
   const dropdownRef = useRef(null);
   
   const workspacesList = businessWorkspaces || [];
   const activeWorkspace = workspacesList.find(ws => ws.id === activeWorkspaceId) || workspacesList[0] || {};
+
+  const getWorkspaceDisplayName = (ws) => {
+    if (!ws) return businessSettings?.businessName || 'Default Workspace';
+    if (ws.name && ws.name !== 'Default Workspace' && ws.name !== 'My Retail Shop') return ws.name;
+    return businessSettings?.businessName || ws.name || 'Default Workspace';
+  };
+
+  const activeName = getWorkspaceDisplayName(activeWorkspace);
 
   useOnClickOutside(dropdownRef, () => setOpen(false));
 
@@ -27,13 +35,15 @@ const WorkspaceSwitcher = ({ businessWorkspaces = [], activeWorkspaceId, setActi
   };
 
   const getInitials = (name = '') => {
-    return name
-      .split(' ')
-      .filter(Boolean)
-      .map(w => w[0])
-      .slice(0, 2)
-      .join('')
-      .toUpperCase() || 'WS';
+    const clean = (name || '').replace(/[^a-zA-Z0-9\s.]/g, ' ').replace(/\./g, ' ');
+    const parts = clean.split(' ').filter(Boolean);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    if (parts.length === 1) {
+      return parts[0].slice(0, 2).toUpperCase();
+    }
+    return 'WS';
   };
 
   if (mobile) {
@@ -52,9 +62,9 @@ const WorkspaceSwitcher = ({ businessWorkspaces = [], activeWorkspaceId, setActi
           ) : (
             <>
               <div className="w-4 h-4 rounded-md bg-theme-accent/15 text-theme-accent flex items-center justify-center text-[9px] font-black shrink-0">
-                {getInitials(activeWorkspace.name)}
+                {getInitials(activeName)}
               </div>
-              <span className="truncate max-w-[110px]">{activeWorkspace.name || 'Workspace'}</span>
+              <span className="truncate max-w-[110px]">{activeName}</span>
               {open ? <ChevronUp className="w-3 h-3 text-theme-muted shrink-0" /> : <ChevronDown className="w-3 h-3 text-theme-muted shrink-0" />}
             </>
           )}
@@ -89,9 +99,9 @@ const WorkspaceSwitcher = ({ businessWorkspaces = [], activeWorkspaceId, setActi
                         <div className={`w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-black shrink-0 ${
                           isCurrent ? 'bg-theme-accent text-white' : 'bg-theme-surface text-theme-secondary border border-theme-border-soft'
                         }`}>
-                          {getInitials(ws.name)}
+                          {getInitials(getWorkspaceDisplayName(ws))}
                         </div>
-                        <span className="truncate">{ws.name}</span>
+                        <span className="truncate">{getWorkspaceDisplayName(ws)}</span>
                       </div>
                       {isCurrent && <Check className="w-3.5 h-3.5 text-theme-accent shrink-0 ml-1" />}
                     </button>
@@ -136,11 +146,11 @@ const WorkspaceSwitcher = ({ businessWorkspaces = [], activeWorkspaceId, setActi
           <>
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="w-8 h-8 rounded-xl bg-theme-accent/10 border border-theme-accent/20 text-theme-accent flex items-center justify-center font-black text-xs shrink-0 group-hover:bg-theme-accent group-hover:text-white transition-colors">
-                {getInitials(activeWorkspace.name)}
+                {getInitials(activeName)}
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-xs font-bold text-theme-primary truncate leading-snug">
-                  {activeWorkspace.name || 'Default Workspace'}
+                  {activeName}
                 </p>
                 <div className="flex items-center gap-1.5 text-[10px] text-theme-muted font-medium mt-0.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-theme-accent"></span>
@@ -189,10 +199,10 @@ const WorkspaceSwitcher = ({ businessWorkspaces = [], activeWorkspaceId, setActi
                           ? 'bg-theme-accent text-white' 
                           : 'bg-theme-surface text-theme-secondary border border-theme-border-soft'
                       }`}>
-                        {getInitials(ws.name)}
+                        {getInitials(getWorkspaceDisplayName(ws))}
                       </div>
                       <div className="min-w-0">
-                        <p className="truncate font-bold leading-tight">{ws.name}</p>
+                        <p className="truncate font-bold leading-tight">{getWorkspaceDisplayName(ws)}</p>
                         {ws.type && (
                           <p className="text-[9px] font-normal text-theme-muted capitalize truncate">{ws.type}</p>
                         )}
