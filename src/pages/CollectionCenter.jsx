@@ -213,6 +213,8 @@ const CollectionCenter = ({
   const [historyTimeframe, setHistoryTimeframe] = useState('all');
   const [historyMethod, setHistoryMethod] = useState('all');
   const [selectedPaymentDetail, setSelectedPaymentDetail] = useState(null);
+  const [showReverseConfirm, setShowReverseConfirm] = useState(false);
+  const [reverseReason, setReverseReason] = useState('');
 
   // --- 3. PENDING REQUESTS STATES ---
   const [selectedProof, setSelectedProof] = useState(null);
@@ -736,6 +738,21 @@ const CollectionCenter = ({
       toast.error(err.message || 'Failed to record transaction.');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleReverseTransaction = async () => {
+    if (!selectedPaymentDetail) return;
+    try {
+      await bankEngine.reverseTransaction(selectedPaymentDetail.id, reverseReason);
+      toast.success('Transaction successfully reversed.', { icon: '✅' });
+      setSelectedPaymentDetail(null);
+      setShowReverseConfirm(false);
+      setReverseReason('');
+      onPaymentSuccess?.();
+    } catch (err) {
+      console.error('Reversal error:', err);
+      toast.error(err.message || 'Failed to reverse transaction.');
     }
   };
 
@@ -2628,7 +2645,7 @@ const CollectionCenter = ({
                 </div>
               </div>
 
-              <div className="space-y-2 text-2xs divide-y divide-theme-border-soft">
+              <div id="printable-payment-receipt" className="space-y-2 text-2xs divide-y divide-theme-border-soft printable-area">
                 <div className="flex justify-between pt-1.5">
                   <span className="text-theme-muted font-bold">Date:</span>
                   <span className="font-mono text-theme-primary">{selectedPaymentDetail.date?.slice(0, 10)}</span>
@@ -2683,13 +2700,106 @@ const CollectionCenter = ({
                 )}
               </div>
 
-              <button
-                type="button"
-                onClick={() => setSelectedPaymentDetail(null)}
-                className="btn-premium w-full !py-2.5 text-xs font-bold mt-2"
-              >
-                Close
-              </button>
+              {!showReverseConfirm ? (
+                <div className="flex flex-col gap-2 mt-4">
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const printContent = document.getElementById('printable-payment-receipt').innerHTML;
+                        const originalContent = document.body.innerHTML;
+                        document.body.innerHTML = `
+                          <div style="padding: 40px; font-family: sans-serif; max-width: 400px; margin: 0 auto; border: 1px solid #ddd;">
+                            <h2 style="text-align: center; margin-bottom: 5px;">Payment Receipt</h2>
+                            <div style="text-align: center; margin-bottom: 20px; font-size: 24px; font-weight: bold;">${formatCurrency(selectedPaymentDetail.amount, currencySymbol)}</div>
+                            <div style="display: flex; flex-direction: column; gap: 10px;">${printContent}</div>
+                          </div>
+                        `;
+                        window.print();
+                        document.body.innerHTML = originalContent;
+                        window.location.reload(); // Reload to restore React bindings after native print swap
+                      }}
+                      className="flex-1 py-2.5 rounded-xl border border-theme-border-soft bg-theme-surface hover:bg-theme-surface-hover text-theme-primary text-xs font-bold transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Printer className="w-4 h-4" /> Print Receipt
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowReverseConfirm(true)}
+                    className="w-full py-2.5 rounded-xl border border-rose-500 text-rose-500 hover:bg-rose-500 hover:text-white text-xs font-bold transition-colors"
+                  >
+                    Reverse / Delete Transaction
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedPaymentDetail(null)}
+                    className="btn-premium w-full !py-2.5 text-xs font-bold"
+                  >
+                    Close
+                  </button>
+                </div>
+              ) : (
+                <div className="mt-4 p-4 border border-rose-500/30 bg-rose-500/10 rounded-xl space-y-3">
+                  <h4 className="text-sm font-black text-rose-500">Reverse Transaction?</h4>
+                  <p className="text-xs text-rose-400">
+                    This action will permanently reverse this transaction and update related ledgers.
+                  </p>
+                  <div>
+                    <input
+                      type="text"
+                      placeholder="Reason for reversal (optional)"
+                      value={reverseReason}
+                      onChange={(e) => setReverseReason(e.target.value)}
+                      className="w-full px-3 py-2 bg-theme-surface border border-rose-500/30 rounded-lg text-xs font-medium outline-none mb-3"
+                    />
+                    <label className="text-xs font-bold text-rose-500 mb-1.5 block uppercase tracking-wider">
+                      Type "DELETE" to confirm *
+                    </label>
+                    <input
+                      type="text"
+                      id="confirmReverseInput"
+                      placeholder="DELETE"
+                      className="w-full px-3 py-2 bg-theme-surface border border-rose-500/50 rounded-xl focus:border-rose-500 focus:ring-1 focus:ring-rose-500 text-sm font-mono outline-none"
+                      onChange={(e) => {
+                        const btn = document.getElementById('confirmReverseBtn');
+                        if (btn) {
+                          if (e.target.value === 'DELETE') {
+                            btn.disabled = false;
+                            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                            btn.classList.add('hover:bg-rose-600', 'cursor-pointer');
+                          } else {
+                            btn.disabled = true;
+                            btn.classList.add('opacity-50', 'cursor-not-allowed');
+                            btn.classList.remove('hover:bg-rose-600', 'cursor-pointer');
+                          }
+                        }
+                      }}
+                    />
+                  </div>
+                  <div className="flex gap-2 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowReverseConfirm(false);
+                        setReverseReason('');
+                      }}
+                      className="flex-1 py-2 rounded-xl border border-theme-border-soft text-theme-secondary text-xs font-bold cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      id="confirmReverseBtn"
+                      disabled={true}
+                      onClick={handleReverseTransaction}
+                      className="flex-1 py-2 rounded-xl bg-rose-500 text-white text-xs font-black shadow-sm opacity-50 cursor-not-allowed transition-all"
+                    >
+                      Confirm Reverse
+                    </button>
+                  </div>
+                </div>
+              )}
             </motion.div>
           </div>
         )}

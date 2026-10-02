@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Cloud, HardDrive, Download, RotateCcw, Clock, CheckCircle2, Upload, Trash2, DatabaseZap, AlertTriangle, ShieldCheck, FileSpreadsheet } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
+import { Modal } from '../../components/ui/Modal';
+import { Input, Label } from '../../components/ui/Input';
 import { backupEngine } from '../../services/backupEngine';
 import { adminEngine } from '../../services/adminEngine';
 import { toast } from 'react-hot-toast';
@@ -10,6 +12,9 @@ const BackupStudio = ({ settings, onUpdate }) => {
   const [isImporting, setIsImporting] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [isFactoryResetting, setIsFactoryResetting] = useState(false);
+
+  // Modal state for double confirmation
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, type: null, inputValue: '' });
 
   const handleExport = async () => {
     setIsExporting(true);
@@ -35,6 +40,36 @@ const BackupStudio = ({ settings, onUpdate }) => {
       toast.error('Import failed: ' + err.message);
     } finally {
       setIsImporting(false);
+    }
+  };
+
+  const executeResetRecords = async () => {
+    try {
+      setConfirmModal({ isOpen: false, type: null, inputValue: '' });
+      setIsResetting(true);
+      toast.loading('Deep cleaning records from cloud and device...', { id: 'reset-records' });
+      await adminEngine.resetBusinessDataOnly(false); 
+      toast.success('All business records wiped cleanly! Refreshing...', { id: 'reset-records' });
+      setTimeout(() => window.location.reload(), 600);
+    } catch (err) {
+      toast.error('Reset failed: ' + (err?.message || 'Unknown error'), { id: 'reset-records' });
+      setIsResetting(false);
+    }
+  };
+
+  const executeFactoryReset = async () => {
+    try {
+      setConfirmModal({ isOpen: false, type: null, inputValue: '' });
+      setIsFactoryResetting(true);
+      toast.loading('Purging entire application and account data...', { id: 'factory-reset' });
+      await adminEngine.factoryResetAllData(false); 
+      toast.success('App completely reset! Redirecting...', { id: 'factory-reset' });
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 600);
+    } catch (err) {
+      toast.error('Factory reset failed: ' + (err?.message || 'Unknown error'), { id: 'factory-reset' });
+      setIsFactoryResetting(false);
     }
   };
 
@@ -157,20 +192,7 @@ const BackupStudio = ({ settings, onUpdate }) => {
               size="sm"
               leftIcon={DatabaseZap}
               disabled={isResetting || isFactoryResetting}
-              onClick={async () => { 
-                if (confirm('Are you sure you want to permanently delete ALL invoices, customers, products, and expenses in this workspace? Your account login will remain safe.')) { 
-                  try {
-                    setIsResetting(true);
-                    toast.loading('Deep cleaning records from cloud and device...', { id: 'reset-records' });
-                    await adminEngine.resetBusinessDataOnly(false); 
-                    toast.success('All business records wiped cleanly! Refreshing...', { id: 'reset-records' });
-                    setTimeout(() => window.location.reload(), 600);
-                  } catch (err) {
-                    toast.error('Reset failed: ' + (err?.message || 'Unknown error'), { id: 'reset-records' });
-                    setIsResetting(false);
-                  }
-                } 
-              }}
+              onClick={() => setConfirmModal({ isOpen: true, type: 'reset', inputValue: '' })}
             >
               {isResetting ? 'Resetting...' : 'Reset Records Only'}
             </Button>
@@ -188,28 +210,55 @@ const BackupStudio = ({ settings, onUpdate }) => {
               size="sm"
               leftIcon={Trash2}
               disabled={isResetting || isFactoryResetting}
-              onClick={async () => { 
-                if (confirm('PERMANENT ACTION: Reset entire app? This will wipe your account, settings, and ALL cloud and local data. This CANNOT be undone.')) { 
-                  try {
-                    setIsFactoryResetting(true);
-                    toast.loading('Purging entire application and account data...', { id: 'factory-reset' });
-                    await adminEngine.factoryResetAllData(false); 
-                    toast.success('App completely reset! Redirecting...', { id: 'factory-reset' });
-                    setTimeout(() => {
-                      window.location.href = '/';
-                    }, 600);
-                  } catch (err) {
-                    toast.error('Factory reset failed: ' + (err?.message || 'Unknown error'), { id: 'factory-reset' });
-                    setIsFactoryResetting(false);
-                  }
-                } 
-              }}
+              onClick={() => setConfirmModal({ isOpen: true, type: 'factory', inputValue: '' })}
             >
               {isFactoryResetting ? 'Resetting...' : 'Factory Reset App'}
             </Button>
           </div>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      <Modal 
+        isOpen={confirmModal.isOpen} 
+        onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+        title={confirmModal.type === 'factory' ? "Factory Reset Application" : "Reset Business Records"}
+        maxWidth="max-w-md"
+      >
+        <div className="space-y-4">
+          <div className="p-3 bg-theme-danger/10 border border-theme-danger/20 rounded-xl flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-theme-danger shrink-0 mt-0.5" />
+            <p className="text-xs text-theme-danger font-medium leading-relaxed">
+              {confirmModal.type === 'factory' 
+                ? "PERMANENT ACTION: This will wipe your account, settings, and ALL cloud and local data. This CANNOT be undone."
+                : "Are you sure you want to permanently delete ALL invoices, customers, products, and expenses in this workspace? Your account login will remain safe."}
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label required>Type "DELETE" to confirm</Label>
+            <Input 
+              value={confirmModal.inputValue}
+              onChange={(e) => setConfirmModal({ ...confirmModal, inputValue: e.target.value })}
+              placeholder="DELETE"
+              className="uppercase"
+            />
+          </div>
+
+          <div className="flex justify-end gap-3 pt-2">
+            <Button variant="ghost" onClick={() => setConfirmModal({ ...confirmModal, isOpen: false })}>
+              Cancel
+            </Button>
+            <Button 
+              variant="danger" 
+              disabled={confirmModal.inputValue !== 'DELETE'}
+              onClick={confirmModal.type === 'factory' ? executeFactoryReset : executeResetRecords}
+            >
+              {confirmModal.type === 'factory' ? 'Permanently Factory Reset' : 'Permanently Reset Records'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

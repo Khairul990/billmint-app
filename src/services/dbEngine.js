@@ -1780,6 +1780,17 @@ export const resetBusinessDataOnly = async (autoReload = true) => {
     await BillQyroDB.clear('syncQueue').catch(() => {});
     await BillQyroDB.clear('auditLogs').catch(() => {});
     await BillQyroDB.clear('errorLogs').catch(() => {});
+    await BillQyroDB.clear('bankLedger').catch(() => {});
+    await BillQyroDB.clear('bankCredit').catch(() => {});
+    await BillQyroDB.clear('appointments').catch(() => {});
+    await BillQyroDB.clear('orders').catch(() => {});
+    await BillQyroDB.clear('activities').catch(() => {});
+    await BillQyroDB.clear('announcements').catch(() => {});
+    await BillQyroDB.clear('vendors').catch(() => {});
+    await BillQyroDB.clear('outsourceJobs').catch(() => {});
+    await BillQyroDB.clear('outsourcePayments').catch(() => {});
+    await BillQyroDB.clear('deadLetterQueue').catch(() => {});
+    await BillQyroDB.clear('pdfCache').catch(() => {});
   } catch (e) { console.warn('Ignored error in resetBusinessDataOnly IndexedDB clear:', e); }
 
   try {
@@ -1948,7 +1959,11 @@ export const clearAllLocalData = async () => {
 export const wipeUserFirestoreData = async (userId) => {
   if (!firebaseReady) return;
   try {
-    const collectionsToEmpty = ['invoices', 'customers', 'staff', 'products', 'expenses', 'students'];
+    const collectionsToEmpty = [
+      'invoices', 'customers', 'staff', 'products', 'expenses', 'students',
+      'bankLedger', 'bankCredit', 'appointments', 'orders', 'activities',
+      'vendors', 'outsourceJobs', 'outsourcePayments', 'paymentProofs'
+    ];
     for (const colName of collectionsToEmpty) {
       const itemsRef = collection(getDb(), colName, userId, 'items');
       const snapshot = await getDocs(itemsRef);

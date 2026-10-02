@@ -891,6 +891,9 @@ function App() {
   // --- Phase 25: first-7-days onboarding check-in tip (real accounts) ---
   useEffect(() => {
     if (!isAuthenticated || isDemoSessionActive || isDataHydrating) return;
+    const currentView = currentTab || 'home';
+    if (currentView !== 'home' && currentView !== 'dashboard') return;
+    
     const t = setTimeout(() => {
       try {
         const tip = getOnboardingTip({ invoices, customers, products });
