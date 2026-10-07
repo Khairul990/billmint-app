@@ -3939,6 +3939,17 @@ export const importRestore = async (rawBackupData) => {
   const previousInvoices = await getInvoices();
   const settings = backupData.settings || previousSettings || {};
 
+  // Auto-correct activeWorkspaceId on restore to prevent empty Dashboard issue
+  if (backupData.workspaceId && backupData.workspaceId !== 'default') {
+    settings.activeWorkspaceId = backupData.workspaceId;
+  }
+  if (settings.businessWorkspaces && Array.isArray(settings.businessWorkspaces) && settings.businessWorkspaces.length > 0) {
+    const activeWsExists = settings.businessWorkspaces.some(ws => ws.id === settings.activeWorkspaceId);
+    if (!activeWsExists) {
+      settings.activeWorkspaceId = settings.businessWorkspaces[0].id;
+    }
+  }
+
   try {
     const userId = getRealUserId();
     if (userId && userId !== 'local-user') {
