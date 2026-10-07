@@ -1873,7 +1873,15 @@ export const factoryResetAllData = async (autoRedirect = true) => {
   
   if (firebaseReady && userId) {
     try {
-      await deleteEnterpriseUser(userId);
+      // Add a 8 second timeout to prevent hanging if Firebase is slow/offline
+      const timeoutPromise = new Promise(resolve => setTimeout(() => resolve('timeout'), 8000));
+      const deleteResult = await Promise.race([
+        deleteEnterpriseUser(userId),
+        timeoutPromise
+      ]);
+      if (deleteResult === 'timeout') {
+        console.warn('[WIPE] Cloud deletion timed out, continuing with local reset...');
+      }
     } catch (e) {
       console.error('[WIPE] Failed to wipe cloud data during factory reset', e);
     }
@@ -1916,7 +1924,15 @@ export const factoryResetAllData = async (autoRedirect = true) => {
     try {
       if (auth.currentUser) {
         try {
-          await auth.currentUser.delete();
+          const authTimeout = new Promise(resolve => setTimeout(() => resolve('timeout'), 5000));
+          const authResult = await Promise.race([
+            auth.currentUser.delete(),
+            authTimeout
+          ]);
+          if (authResult === 'timeout') {
+            console.warn('Auth delete timed out, signing out instead');
+            await auth.signOut();
+          }
         } catch (delErr) {
           console.warn('Failed to delete auth user, signing out instead:', delErr);
           await auth.signOut();
