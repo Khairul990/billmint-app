@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Cloud, HardDrive, Download, RotateCcw, Clock, CheckCircle2, Upload, Trash2, DatabaseZap, AlertTriangle, ShieldCheck, FileSpreadsheet } from 'lucide-react';
+import { Cloud, HardDrive, Download, RotateCcw, Clock, CheckCircle2, Upload, Trash2, DatabaseZap, AlertTriangle, ShieldCheck, FileSpreadsheet, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
 import { Input, Label } from '../../components/ui/Input';
@@ -73,123 +74,163 @@ const BackupStudio = ({ settings, onUpdate }) => {
     }
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.1 } }
+  };
+  
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
+  };
+
   return (
-    <div className="space-y-6">
+    <motion.div 
+      className="space-y-6"
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+    >
       {/* Header */}
-      <div className="flex items-center gap-4 mb-6 border-b border-theme-border-soft pb-4">
-        <div className="w-10 h-10 rounded-xl bg-theme-accent/10 text-theme-accent flex items-center justify-center">
-          <HardDrive className="w-5 h-5" />
+      <motion.div variants={itemVariants} className="flex items-center gap-4 mb-6 pb-4 relative">
+        <div className="absolute -bottom-2 left-0 w-1/3 h-[1px] bg-gradient-to-r from-theme-accent/50 to-transparent" />
+        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-theme-accent/20 to-theme-accent/5 border border-theme-accent/20 text-theme-accent flex items-center justify-center shadow-inner relative overflow-hidden">
+          <motion.div 
+            animate={{ rotate: 360 }}
+            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+            className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,var(--accent)_0%,transparent_70%)]"
+          />
+          <HardDrive className="w-6 h-6 relative z-10" />
         </div>
         <div>
-          <h2 className="text-base font-black text-theme-primary">Data Management & Backup</h2>
-          <p className="text-xs text-theme-muted">Export offline copies, restore records, and manage storage safety</p>
+          <h2 className="text-xl sm:text-2xl font-black text-theme-primary bg-clip-text text-transparent bg-gradient-to-r from-theme-primary to-theme-accent">
+            Data & Backup Studio
+          </h2>
+          <p className="text-xs font-medium text-theme-muted mt-0.5">Export offline copies, restore records, and manage storage safety</p>
         </div>
-      </div>
+      </motion.div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* 1. Cloud & Sync Status */}
-        <div className="card-premium p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2.5">
-              <Cloud className="w-5 h-5 text-theme-accent" />
-              <h3 className="text-sm font-black text-theme-primary">Cloud Synchronization</h3>
+        <motion.div variants={itemVariants} className="card-premium relative overflow-hidden group p-6 bg-theme-surface/60 backdrop-blur-xl border border-theme-border-soft hover:border-theme-accent/40 hover:shadow-xl hover:shadow-theme-accent/5 transition-all duration-300">
+          <div className="absolute inset-0 bg-gradient-to-br from-theme-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          
+          <div className="flex items-center justify-between mb-5 relative z-10">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-theme-accent/10 flex items-center justify-center">
+                <Cloud className="w-5 h-5 text-theme-accent" />
+              </div>
+              <h3 className="text-base font-black text-theme-primary">Cloud Sync</h3>
             </div>
             <button 
-              className={`relative w-10 h-5 rounded-full transition-all flex items-center p-0.5 border ${settings?.autoBackup !== false ? 'bg-theme-accent border-theme-accent' : 'bg-theme-surface border-theme-border-soft'}`} 
+              className={`relative w-12 h-6 rounded-full transition-colors duration-300 flex items-center p-1 border ${settings?.autoBackup !== false ? 'bg-theme-accent border-theme-accent shadow-[0_0_15px_var(--accent-glow)]' : 'bg-theme-surface-elevated border-theme-border-strong'}`} 
               onClick={() => onUpdate({ autoBackup: !(settings?.autoBackup !== false) })}
             >
-              <span className={`w-4 h-4 bg-white rounded-full shadow-md transition-transform ${settings?.autoBackup !== false ? 'translate-x-5' : 'translate-x-0'}`} />
+              <motion.span 
+                layout
+                className={`w-4 h-4 bg-white rounded-full shadow-md`} 
+                animate={{ x: settings?.autoBackup !== false ? 22 : 0 }}
+                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+              />
             </button>
           </div>
           
-          <p className="text-xs text-theme-muted mb-5 leading-relaxed">
-            Synchronizes your workspace records with secure cloud storage when an internet connection is available.
+          <p className="text-[13px] text-theme-muted mb-6 leading-relaxed relative z-10">
+            Automatically synchronizes your workspace records with secure cloud storage when internet is available.
           </p>
 
-          <div className="p-4 bg-theme-surface-elevated/70 rounded-2xl border border-theme-border-soft mb-5 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-theme-success/10 text-theme-success flex items-center justify-center shrink-0">
+          <div className="p-4 bg-theme-surface/80 backdrop-blur-md rounded-2xl border border-theme-success/20 mb-6 flex items-center gap-4 relative z-10">
+            <div className="w-10 h-10 rounded-xl bg-theme-success/15 text-theme-success flex items-center justify-center shrink-0">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-xs font-bold text-theme-primary">Data is Protected</p>
-              <p className="text-[10px] text-theme-muted">Encrypted locally in IndexedDB & backed up</p>
+              <p className="text-sm font-bold text-theme-primary">Enterprise Protection</p>
+              <p className="text-[11px] font-medium text-theme-muted mt-0.5">Encrypted in IndexedDB & Backed Up</p>
             </div>
           </div>
           
           <Button 
-            className="w-full" 
+            className="w-full relative z-10 h-12 text-sm" 
             variant="secondary"
             leftIcon={Cloud}
-            onClick={() => toast.success('Workspace synchronization verified')}
+            onClick={() => toast.success('Workspace synchronization verified', { icon: '✨' })}
           >
-            Check Sync Status
+            Verify Sync Status
           </Button>
-        </div>
+        </motion.div>
 
         {/* 2. Local Backup & Restore */}
-        <div className="card-premium p-6">
-          <div className="flex items-center gap-2.5 mb-4">
-            <HardDrive className="w-5 h-5 text-theme-accent" />
-            <h3 className="text-sm font-black text-theme-primary">Offline Backup & Restore</h3>
+        <motion.div variants={itemVariants} className="card-premium relative overflow-hidden group p-6 bg-theme-surface/60 backdrop-blur-xl border border-theme-border-soft hover:border-theme-accent/40 hover:shadow-xl hover:shadow-theme-accent/5 transition-all duration-300">
+          <div className="absolute inset-0 bg-gradient-to-br from-theme-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          
+          <div className="flex items-center gap-3 mb-5 relative z-10">
+            <div className="w-10 h-10 rounded-xl bg-theme-accent/10 flex items-center justify-center">
+              <HardDrive className="w-5 h-5 text-theme-accent" />
+            </div>
+            <h3 className="text-base font-black text-theme-primary">Offline Archive</h3>
           </div>
           
-          <p className="text-xs text-theme-muted mb-5 leading-relaxed">
+          <p className="text-[13px] text-theme-muted mb-6 leading-relaxed relative z-10">
             Save a complete offline snapshot of all your invoices, products, and customers to a single JSON file.
           </p>
           
-          <div className="space-y-3">
+          <div className="space-y-4 relative z-10">
             <Button 
               onClick={handleExport} 
               variant="outline" 
-              className="w-full justify-start h-12 px-4"
+              className="w-full justify-start h-16 px-5 border-theme-border-strong hover:border-theme-accent hover:bg-theme-accent/5 transition-all duration-300 group/btn"
               isLoading={isExporting}
-              leftIcon={Download}
             >
-              <div className="text-left ml-2">
-                <span className="text-xs font-bold block text-theme-primary">Download Full JSON Backup</span>
-                <span className="text-[10px] text-theme-muted block">Save all records to your computer or phone</span>
+              <div className="w-8 h-8 rounded-lg bg-theme-accent/10 text-theme-accent flex items-center justify-center mr-4 group-hover/btn:scale-110 transition-transform">
+                <Download className="w-4 h-4" />
+              </div>
+              <div className="text-left">
+                <span className="text-sm font-bold block text-theme-primary group-hover/btn:text-theme-accent transition-colors">Download JSON Snapshot</span>
+                <span className="text-[11px] font-medium text-theme-muted block mt-0.5">Secure full backup to local device</span>
               </div>
             </Button>
             
-            <label className="w-full">
-              <div className="w-full p-3.5 bg-theme-surface hover:bg-theme-surface-hover rounded-xl border border-theme-border-soft hover:border-theme-accent/50 transition-all flex items-center gap-3 cursor-pointer">
-                <div className="w-8 h-8 rounded-lg bg-theme-accent/10 text-theme-accent flex items-center justify-center shrink-0">
+            <label className="w-full block">
+              <div className="w-full h-16 px-5 bg-theme-surface/80 backdrop-blur-md hover:bg-theme-accent/5 rounded-xl border border-theme-border-strong hover:border-theme-accent transition-all duration-300 flex items-center cursor-pointer group/btn">
+                <div className="w-8 h-8 rounded-lg bg-theme-accent/10 text-theme-accent flex items-center justify-center mr-4 shrink-0 group-hover/btn:scale-110 transition-transform">
                   <Upload className="w-4 h-4" />
                 </div>
                 <div className="text-left">
-                  <span className="text-xs font-bold block text-theme-primary">Restore from Backup File</span>
-                  <span className="text-[10px] text-theme-muted block">Upload a previously exported .json file</span>
+                  <span className="text-sm font-bold block text-theme-primary group-hover/btn:text-theme-accent transition-colors">Restore from Archive</span>
+                  <span className="text-[11px] font-medium text-theme-muted block mt-0.5">Upload a previously exported .json file</span>
                 </div>
               </div>
               <input type="file" accept=".json" onChange={handleImport} className="hidden" />
             </label>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* 3. Isolated Danger Zone */}
-      <div className="card-premium p-6 border-theme-danger/30 bg-theme-danger/[0.02]">
-        <div className="flex items-center gap-3 mb-4 pb-3 border-b border-theme-danger/20">
-          <div className="w-8 h-8 rounded-xl bg-theme-danger/10 text-theme-danger flex items-center justify-center">
-            <AlertTriangle className="w-4 h-4" />
+      <motion.div variants={itemVariants} className="card-premium relative overflow-hidden group p-6 border-rose-500/30 bg-gradient-to-br from-rose-500/5 to-transparent">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 rounded-full blur-3xl" />
+        
+        <div className="flex items-center gap-4 mb-6 pb-4 border-b border-rose-500/20 relative z-10">
+          <div className="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center border border-rose-500/20">
+            <AlertTriangle className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-sm font-black text-theme-danger">Danger Zone</h3>
-            <p className="text-[11px] text-theme-muted">Destructive actions for testing or full account reset</p>
+            <h3 className="text-lg font-black text-rose-600 dark:text-rose-400">Danger Zone</h3>
+            <p className="text-[12px] font-medium text-theme-muted mt-0.5">Destructive actions for testing or full account reset</p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="p-4 rounded-xl border border-theme-danger/20 bg-theme-surface flex flex-col justify-between">
-            <div className="mb-3">
-              <p className="text-xs font-bold text-theme-primary">Reset Business Records</p>
-              <p className="text-[10px] text-theme-muted mt-1 leading-relaxed">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 relative z-10">
+          <div className="p-5 rounded-2xl border border-rose-500/20 bg-theme-surface/80 backdrop-blur-md flex flex-col justify-between hover:border-rose-500/40 hover:shadow-lg hover:shadow-rose-500/5 transition-all">
+            <div className="mb-5">
+              <p className="text-sm font-bold text-theme-primary">Reset Business Records</p>
+              <p className="text-[12px] text-theme-muted mt-2 leading-relaxed">
                 Deletes all invoices, customers, and products in this workspace. Your login account and settings remain safe.
               </p>
             </div>
             <Button 
               variant="danger" 
-              size="sm"
+              className="h-11 w-full"
               leftIcon={DatabaseZap}
               disabled={isResetting || isFactoryResetting}
               onClick={() => setConfirmModal({ isOpen: true, type: 'reset', inputValue: '' })}
@@ -198,16 +239,16 @@ const BackupStudio = ({ settings, onUpdate }) => {
             </Button>
           </div>
 
-          <div className="p-4 rounded-xl border border-theme-danger/20 bg-theme-surface flex flex-col justify-between">
-            <div className="mb-3">
-              <p className="text-xs font-bold text-theme-danger">Factory Reset Application</p>
-              <p className="text-[10px] text-theme-muted mt-1 leading-relaxed">
+          <div className="p-5 rounded-2xl border border-rose-500/20 bg-theme-surface/80 backdrop-blur-md flex flex-col justify-between hover:border-rose-500/40 hover:shadow-lg hover:shadow-rose-500/5 transition-all">
+            <div className="mb-5">
+              <p className="text-sm font-bold text-rose-600 dark:text-rose-400">Factory Reset Application</p>
+              <p className="text-[12px] text-theme-muted mt-2 leading-relaxed">
                 Permanently wipes all accounts, settings, and local database cache. You will be logged out immediately.
               </p>
             </div>
             <Button 
               variant="danger" 
-              size="sm"
+              className="h-11 w-full shadow-lg shadow-rose-500/20"
               leftIcon={Trash2}
               disabled={isResetting || isFactoryResetting}
               onClick={() => setConfirmModal({ isOpen: true, type: 'factory', inputValue: '' })}
@@ -216,7 +257,7 @@ const BackupStudio = ({ settings, onUpdate }) => {
             </Button>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Confirmation Modal */}
       <Modal 
@@ -225,10 +266,10 @@ const BackupStudio = ({ settings, onUpdate }) => {
         title={confirmModal.type === 'factory' ? "Factory Reset Application" : "Reset Business Records"}
         maxWidth="max-w-md"
       >
-        <div className="space-y-4">
-          <div className="p-3 bg-theme-danger/10 border border-theme-danger/20 rounded-xl flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-theme-danger shrink-0 mt-0.5" />
-            <p className="text-xs text-theme-danger font-medium leading-relaxed">
+        <div className="space-y-5 p-1">
+          <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-start gap-3">
+            <AlertTriangle className="w-6 h-6 text-rose-500 shrink-0 mt-0.5 animate-pulse" />
+            <p className="text-[13px] text-rose-600 dark:text-rose-400 font-bold leading-relaxed">
               {confirmModal.type === 'factory' 
                 ? "PERMANENT ACTION: This will wipe your account, settings, and ALL cloud and local data. This CANNOT be undone."
                 : "Are you sure you want to permanently delete ALL invoices, customers, products, and expenses in this workspace? Your account login will remain safe."}
@@ -236,21 +277,22 @@ const BackupStudio = ({ settings, onUpdate }) => {
           </div>
 
           <div className="space-y-2">
-            <Label required>Type "DELETE" to confirm</Label>
+            <Label required className="text-sm font-bold">Type "DELETE" to confirm</Label>
             <Input 
               value={confirmModal.inputValue}
               onChange={(e) => setConfirmModal({ ...confirmModal, inputValue: e.target.value })}
               placeholder="DELETE"
-              className="uppercase"
+              className="uppercase h-12 font-mono text-center tracking-widest text-lg font-bold"
             />
           </div>
 
-          <div className="flex justify-end gap-3 pt-2">
-            <Button variant="ghost" onClick={() => setConfirmModal({ ...confirmModal, isOpen: false })}>
+          <div className="flex justify-end gap-3 pt-4">
+            <Button variant="ghost" className="px-6 h-11" onClick={() => setConfirmModal({ ...confirmModal, isOpen: false })}>
               Cancel
             </Button>
             <Button 
               variant="danger" 
+              className="px-6 h-11"
               disabled={confirmModal.inputValue !== 'DELETE'}
               onClick={confirmModal.type === 'factory' ? executeFactoryReset : executeResetRecords}
             >
@@ -259,7 +301,7 @@ const BackupStudio = ({ settings, onUpdate }) => {
           </div>
         </div>
       </Modal>
-    </div>
+    </motion.div>
   );
 };
 

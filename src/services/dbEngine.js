@@ -3807,28 +3807,27 @@ export const deleteInvoice = async (id, permanent = false) => {
 // --- BACKUP & RESTORE DATABASE ---
 export const exportBackup = async () => {
   const [
-    invoices,
-    customers,
-    products,
-    expenses,
-    students,
-    staff,
-    settings
+    invoices, customers, products, expenses, students, staff, settings,
+    bankLedger, bankCredit, appointments, orders, activities, announcements,
+    vendors, outsourceJobs, outsourcePayments
   ] = await Promise.all([
-    getInvoices(),
-    getCustomers(),
-    getProducts(),
-    getExpenses(),
-    getStudents(),
-    getStaffs(),
-    Promise.resolve(getSettings())
+    getInvoices(), getCustomers(), getProducts(), getExpenses(), getStudents(), getStaffs(), Promise.resolve(getSettings()),
+    BillQyroDB.getAll('bankLedger').catch(() => []),
+    BillQyroDB.getAll('bankCredit').catch(() => []),
+    BillQyroDB.getAll('appointments').catch(() => []),
+    BillQyroDB.getAll('orders').catch(() => []),
+    BillQyroDB.getAll('activities').catch(() => []),
+    BillQyroDB.getAll('announcements').catch(() => []),
+    BillQyroDB.getAll('vendors').catch(() => []),
+    BillQyroDB.getAll('outsourceJobs').catch(() => []),
+    BillQyroDB.getAll('outsourcePayments').catch(() => [])
   ]);
 
   localStorage.setItem('billqyro_last_backup_time', new Date().toISOString());
 
   return {
     appName: "BillQyro",
-    backupVersion: 1,
+    backupVersion: 2,
     formatVersion: 1,
     createdAt: new Date().toISOString(),
     dataSource: "localStorage/firebase-current",
@@ -3839,7 +3838,9 @@ export const exportBackup = async () => {
       products: products.length,
       expenses: expenses.length,
       students: students.length,
-      staff: staff.length
+      staff: staff.length,
+      vendors: vendors.length,
+      outsourceJobs: outsourceJobs.length
     },
     settings,
     customers,
@@ -3848,6 +3849,15 @@ export const exportBackup = async () => {
     expenses,
     students,
     staff,
+    bankLedger,
+    bankCredit,
+    appointments,
+    orders,
+    activities,
+    announcements,
+    vendors,
+    outsourceJobs,
+    outsourcePayments,
     subscription: getSubscriptionStatus(),
   };
 };
@@ -3914,6 +3924,17 @@ export const importRestore = async (rawBackupData) => {
   const expenses = Array.isArray(backupData.expenses) ? backupData.expenses : [];
   const staff = Array.isArray(backupData.staff) ? backupData.staff : [];
   const students = Array.isArray(backupData.students) ? backupData.students : [];
+  
+  const bankLedger = Array.isArray(backupData.bankLedger) ? backupData.bankLedger : [];
+  const bankCredit = Array.isArray(backupData.bankCredit) ? backupData.bankCredit : [];
+  const appointments = Array.isArray(backupData.appointments) ? backupData.appointments : [];
+  const orders = Array.isArray(backupData.orders) ? backupData.orders : [];
+  const activities = Array.isArray(backupData.activities) ? backupData.activities : [];
+  const announcements = Array.isArray(backupData.announcements) ? backupData.announcements : [];
+  const vendors = Array.isArray(backupData.vendors) ? backupData.vendors : [];
+  const outsourceJobs = Array.isArray(backupData.outsourceJobs) ? backupData.outsourceJobs : [];
+  const outsourcePayments = Array.isArray(backupData.outsourcePayments) ? backupData.outsourcePayments : [];
+
   const previousSettings = getSettings();
   const previousInvoices = await getInvoices();
   const settings = backupData.settings || previousSettings || {};
@@ -3929,6 +3950,17 @@ export const importRestore = async (rawBackupData) => {
       customers.forEach(c => { c.userId = userId; c.syncStatus = 'synced'; });
       products.forEach(p => { p.userId = userId; p.syncStatus = 'synced'; });
       expenses.forEach(e => { e.userId = userId; e.syncStatus = 'synced'; });
+      
+      // Update new entities
+      vendors.forEach(v => { v.userId = userId; v.syncStatus = 'synced'; });
+      outsourceJobs.forEach(o => { o.userId = userId; o.syncStatus = 'synced'; });
+      outsourcePayments.forEach(o => { o.userId = userId; o.syncStatus = 'synced'; });
+      bankLedger.forEach(b => { b.userId = userId; b.syncStatus = 'synced'; });
+      bankCredit.forEach(b => { b.userId = userId; b.syncStatus = 'synced'; });
+      appointments.forEach(a => { a.userId = userId; a.syncStatus = 'synced'; });
+      orders.forEach(o => { o.userId = userId; o.syncStatus = 'synced'; });
+      activities.forEach(a => { a.userId = userId; a.syncStatus = 'synced'; });
+
       if (settings) {
         settings.userId = userId;
       }
@@ -3952,7 +3984,16 @@ export const importRestore = async (rawBackupData) => {
         invoices.length > 0 ? BillQyroDB.bulkPut('invoices', invoices) : null,
         expenses.length > 0 ? BillQyroDB.bulkPut('expenses', expenses) : null,
         staff.length > 0 ? BillQyroDB.bulkPut('staff', staff) : null,
-        students.length > 0 ? BillQyroDB.bulkPut('students', students) : null
+        students.length > 0 ? BillQyroDB.bulkPut('students', students) : null,
+        bankLedger.length > 0 ? BillQyroDB.bulkPut('bankLedger', bankLedger) : null,
+        bankCredit.length > 0 ? BillQyroDB.bulkPut('bankCredit', bankCredit) : null,
+        appointments.length > 0 ? BillQyroDB.bulkPut('appointments', appointments) : null,
+        orders.length > 0 ? BillQyroDB.bulkPut('orders', orders) : null,
+        activities.length > 0 ? BillQyroDB.bulkPut('activities', activities) : null,
+        announcements.length > 0 ? BillQyroDB.bulkPut('announcements', announcements) : null,
+        vendors.length > 0 ? BillQyroDB.bulkPut('vendors', vendors) : null,
+        outsourceJobs.length > 0 ? BillQyroDB.bulkPut('outsourceJobs', outsourceJobs) : null,
+        outsourcePayments.length > 0 ? BillQyroDB.bulkPut('outsourcePayments', outsourcePayments) : null
       ].filter(Boolean));
     } catch (idbErr) {
       console.warn('[RESTORE IDB NOTICE]: IndexedDB write fallback to cache:', idbErr?.message);

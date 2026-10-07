@@ -547,43 +547,65 @@ const OutsourceVendors = ({
     }
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.1 } }
+  };
+  
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
+  };
+
   return (
-    <div className="min-h-screen bg-theme-main text-theme-primary font-sans pb-32 overflow-x-hidden selection:bg-theme-accent/20">
+    <motion.div 
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+      className="min-h-screen bg-[var(--bg-gradient)] text-theme-primary font-sans pb-32 overflow-x-hidden selection:bg-theme-accent/20 relative"
+    >
+      <div className="absolute inset-0 bg-theme-main/40 backdrop-blur-[2px] pointer-events-none" />
       
       {/* ===================================================================== */}
       {/* 1. HEADER SECTION */}
       {/* ===================================================================== */}
-      <div className="max-w-6xl mx-auto px-3.5 sm:px-6 pt-5 md:pt-7">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-5 border-b border-theme-border-soft">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-theme-accent/15 border border-theme-accent/25 flex items-center justify-center text-theme-accent shrink-0 shadow-sm">
-              <Receipt className="w-5 h-5" />
+      <div className="max-w-6xl mx-auto px-3.5 sm:px-6 pt-5 md:pt-7 relative z-10">
+        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-5 border-b border-theme-border-strong/30 relative">
+          <div className="absolute -bottom-[1px] left-0 w-1/3 h-[2px] bg-gradient-to-r from-theme-accent/60 to-transparent" />
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-theme-accent/20 to-theme-accent/5 border border-theme-accent/20 flex items-center justify-center text-theme-accent shrink-0 shadow-inner relative overflow-hidden">
+              <motion.div 
+                animate={{ rotate: 360 }}
+                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,var(--accent)_0%,transparent_70%)]"
+              />
+              <Receipt className="w-6 h-6 relative z-10" />
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-theme-primary">
+                <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-theme-primary bg-clip-text text-transparent bg-gradient-to-r from-theme-primary to-theme-accent">
                   Work Cost
                 </h1>
-                <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-theme-accent/10 text-theme-accent border border-theme-accent/20">
+                <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-theme-accent/10 text-theme-accent border border-theme-accent/30 shadow-[0_0_10px_var(--accent-glow)]">
                   Bill Center
                 </span>
               </div>
-              <p className="text-xs text-theme-secondary mt-0.5">
+              <p className="text-xs font-medium text-theme-muted mt-0.5">
                 Manage outsourced work, payments & worker costs
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5 w-full sm:w-auto">
+          <div className="flex items-center gap-3 w-full sm:w-auto">
             <button
               onClick={() => {
                 if (workersSectionRef.current) {
                   workersSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
               }}
-              className="flex-1 sm:flex-initial min-h-[44px] px-3.5 py-2 rounded-xl bg-theme-surface hover:bg-theme-surface-hover border border-theme-border-soft text-xs font-bold text-theme-primary flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer"
+              className="flex-1 sm:flex-initial min-h-[44px] px-4 py-2 rounded-xl bg-theme-surface/60 backdrop-blur-md hover:bg-theme-surface border border-theme-border-strong/40 text-xs font-bold text-theme-primary flex items-center justify-center gap-2 transition-all hover:border-theme-accent/40 shadow-sm cursor-pointer group"
             >
-              <Users className="w-4 h-4 text-theme-accent" />
+              <Users className="w-4 h-4 text-theme-accent group-hover:scale-110 transition-transform" />
               <span>Workers ({vendors.length})</span>
             </button>
 
@@ -595,103 +617,108 @@ const OutsourceVendors = ({
                   billSlipRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
               }}
-              className="flex-1 sm:flex-initial min-h-[44px] px-4 py-2 rounded-xl bg-theme-accent hover:opacity-90 text-theme-accent-contrast text-xs font-black flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer"
+              className="flex-1 sm:flex-initial min-h-[44px] px-5 py-2 rounded-xl bg-theme-accent hover:opacity-90 text-theme-accent-contrast text-xs font-black flex items-center justify-center gap-2 transition-all shadow-[0_4px_14px_var(--accent-glow)] cursor-pointer hover:scale-[1.02] active:scale-95"
             >
               <Plus className="w-4 h-4" />
               <span>+ Create Bill</span>
             </button>
           </div>
-        </div>
+        </motion.div>
 
         {/* ===================================================================== */}
         {/* 2. SUMMARY CARDS (4 PRIMARY METRICS) */}
         {/* ===================================================================== */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 pt-5">
+        <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 pt-6">
           {/* Total Work Cost */}
-          <div className="p-4 rounded-2xl bg-theme-surface border border-theme-border-soft shadow-sm space-y-1">
-            <span className="text-[11px] font-black uppercase tracking-wider text-theme-muted block">
+          <div className="p-5 rounded-2xl bg-theme-surface/70 backdrop-blur-xl border border-theme-border-soft hover:border-theme-accent/40 shadow-sm hover:shadow-xl hover:shadow-theme-accent/5 transition-all group overflow-hidden relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-theme-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <span className="text-[11px] font-black uppercase tracking-wider text-theme-muted block relative z-10">
               Total Work Cost
             </span>
-            <div className="text-xl sm:text-2xl font-black text-theme-primary font-mono truncate">
+            <div className="text-2xl sm:text-3xl font-black text-theme-primary font-mono truncate mt-1 relative z-10">
               {formatCurrency(summary.totalWorkCost)}
             </div>
-            <p className="text-[11px] text-theme-secondary">All internal outsource work</p>
+            <p className="text-[11px] font-medium text-theme-muted mt-1 relative z-10">All internal outsource work</p>
           </div>
 
           {/* Paid */}
-          <div className="p-4 rounded-2xl bg-theme-surface border border-theme-border-soft shadow-sm space-y-1">
-            <span className="text-[11px] font-black uppercase tracking-wider text-emerald-500 block">
+          <div className="p-5 rounded-2xl bg-theme-surface/70 backdrop-blur-xl border border-theme-border-soft hover:border-emerald-500/40 shadow-sm hover:shadow-xl hover:shadow-emerald-500/5 transition-all group overflow-hidden relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <span className="text-[11px] font-black uppercase tracking-wider text-emerald-500 block relative z-10">
               Paid
             </span>
-            <div className="text-xl sm:text-2xl font-black text-emerald-500 font-mono truncate">
+            <div className="text-2xl sm:text-3xl font-black text-emerald-500 font-mono truncate mt-1 relative z-10 drop-shadow-[0_0_8px_rgba(16,185,129,0.3)]">
               {formatCurrency(summary.totalPaid)}
             </div>
-            <p className="text-[11px] text-theme-secondary">Total disbursed to workers</p>
+            <p className="text-[11px] font-medium text-theme-muted mt-1 relative z-10">Total disbursed to workers</p>
           </div>
 
           {/* Due */}
-          <div className="p-4 rounded-2xl bg-theme-surface border border-theme-border-soft shadow-sm space-y-1">
-            <span className="text-[11px] font-black uppercase tracking-wider text-rose-500 block">
+          <div className="p-5 rounded-2xl bg-theme-surface/70 backdrop-blur-xl border border-theme-border-soft hover:border-rose-500/40 shadow-sm hover:shadow-xl hover:shadow-rose-500/10 transition-all group overflow-hidden relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-rose-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <span className="text-[11px] font-black uppercase tracking-wider text-rose-500 block relative z-10 animate-pulse">
               Due
             </span>
-            <div className="text-xl sm:text-2xl font-black text-rose-500 font-mono truncate">
+            <div className="text-2xl sm:text-3xl font-black text-rose-500 font-mono truncate mt-1 relative z-10 drop-shadow-[0_0_8px_rgba(244,63,94,0.3)]">
               {formatCurrency(summary.pendingPayment)}
             </div>
-            <p className="text-[11px] text-rose-500/80 font-medium">Pending worker payout</p>
+            <p className="text-[11px] text-rose-500/80 font-medium mt-1 relative z-10">Pending worker payout</p>
           </div>
 
           {/* This Month */}
-          <div className="p-4 rounded-2xl bg-theme-surface border border-theme-border-soft shadow-sm space-y-1">
-            <span className="text-[11px] font-black uppercase tracking-wider text-amber-500 block">
+          <div className="p-5 rounded-2xl bg-theme-surface/70 backdrop-blur-xl border border-theme-border-soft hover:border-amber-500/40 shadow-sm hover:shadow-xl hover:shadow-amber-500/5 transition-all group overflow-hidden relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <span className="text-[11px] font-black uppercase tracking-wider text-amber-500 block relative z-10">
               This Month
             </span>
-            <div className="text-xl sm:text-2xl font-black text-amber-500 font-mono truncate">
+            <div className="text-2xl sm:text-3xl font-black text-amber-500 font-mono truncate mt-1 relative z-10">
               {formatCurrency(summary.thisMonthCost)}
             </div>
-            <p className="text-[11px] text-theme-secondary">Current calendar month</p>
+            <p className="text-[11px] font-medium text-theme-muted mt-1 relative z-10">Current calendar month</p>
           </div>
-        </div>
+        </motion.div>
 
         {/* ===================================================================== */}
         {/* 3. WORK BILL CREATOR (FEELS LIKE A REAL BILL SLIP, NOT A LONG FORM) */}
         {/* ===================================================================== */}
-        <div ref={billSlipRef} className="mt-6">
-          <div className="bg-theme-surface border-2 border-theme-accent/30 rounded-2xl md:rounded-3xl shadow-lg overflow-hidden transition-all">
+        <motion.div variants={itemVariants} ref={billSlipRef} className="mt-8">
+          <div className="bg-theme-surface/80 backdrop-blur-2xl border border-theme-border-strong/50 rounded-2xl md:rounded-3xl shadow-[0_12px_40px_-15px_rgba(0,0,0,0.1)] shadow-theme-accent/5 overflow-hidden transition-all">
             
             {/* Bill Voucher Header Bar */}
-            <div className="p-4 sm:p-5 bg-gradient-to-r from-theme-surface to-theme-surface-elevated border-b border-theme-border-soft flex items-center justify-between flex-wrap gap-2">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-theme-accent text-theme-accent-contrast flex items-center justify-center font-mono font-black text-sm">
-                  {editingJob ? <Edit3 className="w-4 h-4" /> : <Receipt className="w-4 h-4" />}
+            <div className="p-5 sm:p-6 bg-gradient-to-r from-theme-surface to-theme-surface-elevated/50 border-b border-theme-border-strong/30 flex items-center justify-between flex-wrap gap-4 relative">
+              <div className="absolute left-0 top-0 bottom-0 w-1 bg-theme-accent" />
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-theme-accent text-theme-accent-contrast flex items-center justify-center font-mono font-black text-sm shadow-[0_0_15px_var(--accent-glow)]">
+                  {editingJob ? <Edit3 className="w-5 h-5" /> : <Receipt className="w-5 h-5" />}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h2 className="text-base font-black text-theme-primary">
+                    <h2 className="text-lg font-black text-theme-primary">
                       {editingJob ? `Edit Work Bill` : `Create Work Bill`}
                     </h2>
-                    <span className="font-mono font-black text-xs px-2.5 py-0.5 rounded-lg bg-theme-accent/15 text-theme-accent border border-theme-accent/30">
+                    <span className="font-mono font-black text-xs px-3 py-1 rounded-lg bg-theme-accent/15 text-theme-accent border border-theme-accent/30 shadow-inner">
                       {editingJob?.contractorBillNumber || nextBillNumberPreview}
                     </span>
                   </div>
-                  <p className="text-xs text-theme-secondary">
+                  <p className="text-xs font-medium text-theme-muted mt-0.5">
                     Fast & simple · Only Worker & Amount needed
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <input
                   type="date"
                   value={billDate}
                   onChange={e => setBillDate(e.target.value)}
-                  className="px-3 py-1.5 bg-theme-surface border border-theme-border-soft rounded-xl text-xs font-semibold text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent"
+                  className="px-4 py-2 bg-theme-surface/80 border border-theme-border-strong/50 rounded-xl text-xs font-bold text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent hover:border-theme-accent/50 transition-colors cursor-pointer"
                 />
 
                 {editingJob && (
                   <button
                     type="button"
                     onClick={resetBillSlip}
-                    className="px-3 py-1.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 hover:bg-rose-500/20 text-xs font-bold transition-all cursor-pointer"
+                    className="px-4 py-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 hover:bg-rose-500/20 text-xs font-bold transition-all cursor-pointer shadow-sm"
                   >
                     Cancel Edit
                   </button>
