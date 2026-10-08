@@ -64,10 +64,18 @@ export const downloadInvoicePDF = async (invoice, businessSettings = {}, isPremi
       invoiceId: invoice?.id,
       invoiceNumber: invoice?.invoiceNumber,
       template: invoice?.selectedTemplate || businessSettings?.selectedPdfTemplate,
-      error: error?.message
+      error: error?.message || String(error)
     });
     toast.dismiss(toastId);
-    toast.error('PDF could not be generated. Please try again.');
+    
+    // Check if it's a chunk loading error (classic SPA issue after deployment)
+    const errMsg = error?.message || '';
+    if (errMsg.includes('Failed to fetch dynamically imported module') || errMsg.includes('Importing a module script failed')) {
+      toast.error('App was updated. Refreshing page to load new PDF engine...', { duration: 4000 });
+      setTimeout(() => window.location.reload(), 2000);
+    } else {
+      toast.error(`PDF Error: ${errMsg.slice(0, 80)}. Please try again.`);
+    }
     return false;
   } finally {
     isDownloadingPdf = false;

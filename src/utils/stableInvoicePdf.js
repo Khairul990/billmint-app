@@ -108,14 +108,14 @@ const getExportTarget = async (invoice, businessSettings, targetElement) => {
 const waitForAssets = async (root) => {
   if (document.fonts?.ready) { try { await document.fonts.ready; } catch {} }
   const images = Array.from(root.querySelectorAll('img'));
-  await Promise.all(images.map((img) => {
+  await withTimeout(Promise.all(images.map((img) => {
     if (!img.src || img.complete) return Promise.resolve();
     return new Promise((resolve) => {
       const done = () => { img.removeEventListener('load', done); img.removeEventListener('error', done); resolve(); };
       img.addEventListener('load', done, { once: true });
       img.addEventListener('error', done, { once: true });
     });
-  }));
+  })), 10000, 'Image loading timed out');
 };
 
 const imageToBase64 = async (img) => {

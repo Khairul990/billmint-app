@@ -2234,7 +2234,7 @@ export const deleteEnterpriseUser = async (targetUserId) => {
       'invoices', 'customers', 'staff', 'products', 'expenses', 'students',
       'vendors', 'outsourceJobs', 'vendorPayments', 'bankLedger', 'paymentProofs'
     ];
-    for (const coll of collectionsToClear) {
+    await Promise.all(collectionsToClear.map(async (coll) => {
       try {
         const snap = await getDocs(collection(getDb(), coll, targetUserId, 'items'));
         const deletePromises = [];
@@ -2247,12 +2247,14 @@ export const deleteEnterpriseUser = async (targetUserId) => {
         });
         await Promise.all(deletePromises);
       } catch { console.warn(`Skipped deleting ${coll} for ${targetUserId}`); }
-    }
+    }));
     
-    await deleteDoc(doc(getDb(), 'settings', targetUserId)).catch(() => {});
-    await deleteDoc(doc(getDb(), 'subscription', targetUserId)).catch(() => {});
-    await deleteDoc(doc(getDb(), 'usersList', targetUserId)).catch(() => {});
-    await deleteDoc(doc(getDb(), 'platformRevenue', targetUserId)).catch(() => {});
+    await Promise.all([
+      deleteDoc(doc(getDb(), 'settings', targetUserId)).catch(() => {}),
+      deleteDoc(doc(getDb(), 'subscription', targetUserId)).catch(() => {}),
+      deleteDoc(doc(getDb(), 'usersList', targetUserId)).catch(() => {}),
+      deleteDoc(doc(getDb(), 'platformRevenue', targetUserId)).catch(() => {})
+    ]);
     
     return true;
   } catch (e) {
@@ -2268,7 +2270,7 @@ export const resetEnterpriseWorkspace = async (targetUserId) => {
       'invoices', 'customers', 'staff', 'products', 'expenses', 'students',
       'vendors', 'outsourceJobs', 'vendorPayments', 'bankLedger', 'paymentProofs'
     ];
-    for (const coll of collectionsToClear) {
+    await Promise.all(collectionsToClear.map(async (coll) => {
       try {
         const snap = await getDocs(collection(getDb(), coll, targetUserId, 'items'));
         const deletePromises = [];
@@ -2281,7 +2283,7 @@ export const resetEnterpriseWorkspace = async (targetUserId) => {
         });
         await Promise.all(deletePromises);
       } catch { console.warn(`Skipped resetting ${coll} for ${targetUserId}`); }
-    }
+    }));
     return true;
   } catch (e) {
     console.error('Failed to reset enterprise workspace:', e);
