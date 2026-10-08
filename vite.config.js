@@ -286,6 +286,9 @@ export default defineConfig(({ mode }) => ({
       }
     })
   ],
+  optimizeDeps: {
+    exclude: ['@react-pdf/renderer']
+  },
   server: {
     host: '0.0.0.0',
     allowedHosts: ['.e2b.app', '.e2b-studio.app', 'localhost'],

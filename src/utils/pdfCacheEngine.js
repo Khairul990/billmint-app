@@ -221,9 +221,14 @@ export const getOrGenerateInvoicePdfBlob = async (invoice, businessSettings = {}
       } catch (primaryErr) {
         console.warn('[PDF Cache Engine] Primary canvas generator failed, attempting React-PDF fallback:', primaryErr);
         engineUsed = 'react-pdf-fallback';
-        const { generateInvoicePdfBlob: generateReactPdfBlob } = await import('../services/communication/attachmentEngine.js');
-        blob = await generateReactPdfBlob(invoice, businessSettings);
-        await validatePdfBlob(blob);
+        try {
+          const { generateInvoicePdfBlob: generateReactPdfBlob } = await import('../services/communication/attachmentEngine.js');
+          blob = await generateReactPdfBlob(invoice, businessSettings);
+          await validatePdfBlob(blob);
+        } catch (fallbackErr) {
+          console.error('[PDF Cache Engine] Fallback also failed:', fallbackErr);
+          throw primaryErr; // Throw original canvas error for better debugging
+        }
       }
 
       // Store in pdfCache
