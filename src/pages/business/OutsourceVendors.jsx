@@ -995,7 +995,8 @@ const OutsourceVendors = ({
                 </div>
               </div>
             </form>
-          </motion.div>
+          </div>
+        </div>
 
         {/* ===================================================================== */}
         {/* 4. WORK HISTORY SECTION (BILLS & FILTERS) */}
@@ -2168,7 +2169,8 @@ const OutsourceVendors = ({
           <span>+ Create Bill</span>
         </button>
       </div>
-    </motion.div>
+
+    </div>
   );
 };
 
