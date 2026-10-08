@@ -223,17 +223,19 @@ const CollectionCenter = ({
   // Pre-selection on Mount / Update
   useEffect(() => {
     if (initialInvoice) {
-      const inv = scopedInvoices.find(i => i.id === initialInvoice.id) || initialInvoice;
-      setSelectedInvoice(inv);
-      if (inv.paymentMethod) setPaymentMethod(inv.paymentMethod);
-      const cust = scopedCustomers.find(c => c.id === inv.customer?.id || c.name === inv.customerName) || {
-        id: inv.customer?.id || inv.customerId || 'cust_temp',
-        name: inv.customerName || inv.customer?.name || 'Walk-in Customer',
-        phone: inv.customerPhone || inv.customer?.phone || ''
-      };
-      setSelectedCustomer(cust);
-      setSelectedTxType('customer_payment');
-      setActiveTab('record');
+      const inv = scopedInvoices.find(i => i.id === initialInvoice.id);
+      if (inv) {
+        setSelectedInvoice(inv);
+        if (inv.paymentMethod) setPaymentMethod(inv.paymentMethod);
+        const cust = scopedCustomers.find(c => c.id === inv.customer?.id || c.name === inv.customerName) || {
+          id: inv.customer?.id || inv.customerId || 'cust_temp',
+          name: inv.customerName || inv.customer?.name || 'Walk-in Customer',
+          phone: inv.customerPhone || inv.customer?.phone || ''
+        };
+        setSelectedCustomer(cust);
+        setSelectedTxType('customer_payment');
+        setActiveTab('record');
+      }
     } else if (initialCustomer) {
       const cust = scopedCustomers.find(c => c.id === initialCustomer.id) || initialCustomer;
       setSelectedCustomer(cust);
@@ -255,6 +257,20 @@ const CollectionCenter = ({
       setActiveTab('record');
     }
   }, [initialInvoice, initialCustomer, initialStaff, initialVendor, initialPaymentType, scopedInvoices, scopedCustomers, scopedStaffs, combinedVendors]);
+
+  // Ensure selectedInvoice always matches selectedCustomer
+  useEffect(() => {
+    if (selectedCustomer && selectedInvoice && selectedTxType === 'customer_payment') {
+      const cId = selectedCustomer.id;
+      const cName = (selectedCustomer.name || '').toLowerCase().trim();
+      const matchCust = (selectedInvoice.customerId && selectedInvoice.customerId === cId) ||
+        (selectedInvoice.customer?.id && selectedInvoice.customer.id === cId) ||
+        ((selectedInvoice.customerName || selectedInvoice.customer?.name || '').toLowerCase().trim() === cName);
+      if (!matchCust) {
+        setSelectedInvoice(null);
+      }
+    }
+  }, [selectedCustomer, selectedInvoice, selectedTxType]);
 
   // Customer Search Results
   const customerSearchResults = useMemo(() => {
