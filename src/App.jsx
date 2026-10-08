@@ -32,6 +32,7 @@ import { calculateTotals } from './utils/invoiceUtils';
 import { isEducationBusiness } from './config/businessPresets';
 import { getBootstrapSettings } from './services/settingsBootstrap';
 import { useFeatureControl } from './hooks/useFeatureControl';
+import { filterByWorkspace } from './utils/invoiceMath';
 
 import { authEngine } from './services/authEngine';
 import { settingsEngine } from './services/settingsEngine';
@@ -700,12 +701,38 @@ function App() {
     // calls setSubscription, so including it caused an infinite fetch loop
     // (new object identity every cycle → effect re-ran forever).
   }, [invoices, isAuthenticated, isDemoSessionActive]);
+  // Workspace state
+  const safeSettings = settings || {};
+  const safeWorkspaces = safeSettings.businessWorkspaces || [];
+  
+  const [businessWorkspaces, setBusinessWorkspaces] = useState(safeWorkspaces);
+  const [activeWorkspaceId, setActiveWorkspaceId] = useState(safeSettings.activeWorkspaceId || (safeWorkspaces.length > 0 ? safeWorkspaces[0].id : null));
+
   // HARD DEMO MODE ISOLATION SWITCH
-  const activeInvoices = isDemoSessionActive ? demoInvoices : invoices;
-  const activeCustomers = isDemoSessionActive ? demoCustomers : customers;
-  const activeStaffs = isDemoSessionActive ? demoStaffs : staffs;
-  const activeProducts = isDemoSessionActive ? demoProducts : products;
-  const activeExpenses = isDemoSessionActive ? demoExpenses : expenses;
+  const activeInvoices = useMemo(() => {
+    const list = isDemoSessionActive ? demoInvoices : invoices;
+    return isDemoSessionActive ? list : filterByWorkspace(list, activeWorkspaceId);
+  }, [invoices, demoInvoices, isDemoSessionActive, activeWorkspaceId]);
+
+  const activeCustomers = useMemo(() => {
+    const list = isDemoSessionActive ? demoCustomers : customers;
+    return isDemoSessionActive ? list : filterByWorkspace(list, activeWorkspaceId);
+  }, [customers, demoCustomers, isDemoSessionActive, activeWorkspaceId]);
+
+  const activeStaffs = useMemo(() => {
+    const list = isDemoSessionActive ? demoStaffs : staffs;
+    return isDemoSessionActive ? list : filterByWorkspace(list, activeWorkspaceId);
+  }, [staffs, demoStaffs, isDemoSessionActive, activeWorkspaceId]);
+
+  const activeProducts = useMemo(() => {
+    const list = isDemoSessionActive ? demoProducts : products;
+    return isDemoSessionActive ? list : filterByWorkspace(list, activeWorkspaceId);
+  }, [products, demoProducts, isDemoSessionActive, activeWorkspaceId]);
+
+  const activeExpenses = useMemo(() => {
+    const list = isDemoSessionActive ? demoExpenses : expenses;
+    return isDemoSessionActive ? list : filterByWorkspace(list, activeWorkspaceId);
+  }, [expenses, demoExpenses, isDemoSessionActive, activeWorkspaceId]);
   
   let activeSettings = (isDemoSessionActive && demoSettings) ? demoSettings : settings;
   if (isDemoSessionActive && isVideoCreatorMode && activeSettings) {
@@ -720,13 +747,6 @@ function App() {
     };
   }
 
-  // Workspace state
-  const safeSettings = settings || {};
-  const safeWorkspaces = safeSettings.businessWorkspaces || [];
-  
-  const [businessWorkspaces, setBusinessWorkspaces] = useState(safeWorkspaces);
-  const [activeWorkspaceId, setActiveWorkspaceId] = useState(safeSettings.activeWorkspaceId || (safeWorkspaces.length > 0 ? safeWorkspaces[0].id : null));
-  
   // Feature Control Engine Integration
   const { isFeatureEnabled, loading: featuresLoading } = useFeatureControl(activeWorkspaceId || settings?.activeWorkspaceId);
 
