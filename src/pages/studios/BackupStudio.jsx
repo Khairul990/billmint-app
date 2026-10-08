@@ -153,7 +153,23 @@ const BackupStudio = ({ settings, onUpdate }) => {
             className="w-full relative z-10 h-12 text-sm" 
             variant="secondary"
             leftIcon={Cloud}
-            onClick={() => toast.success('Workspace synchronization verified', { icon: '✨' })}
+            onClick={async () => {
+              toast.loading('Checking sync status...', { id: 'sync-status' });
+              try {
+                const { syncOfflineTransactions } = await import('../../services/dbEngine');
+                const { BillQyroDB } = await import('../../services/localDb');
+                await syncOfflineTransactions(true);
+                const queue = await BillQyroDB.getAll('syncQueue');
+                const pending = queue.filter(q => q.status === 'pending' || q.status === 'failed').length;
+                if (pending > 0) {
+                  toast.error(`There are ${pending} items waiting to sync. Please ensure internet is stable.`, { id: 'sync-status' });
+                } else {
+                  toast.success('Workspace synchronization verified! No pending items.', { icon: '✨', id: 'sync-status' });
+                }
+              } catch (e) {
+                toast.error('Could not verify sync status.', { id: 'sync-status' });
+              }
+            }}
           >
             Verify Sync Status
           </Button>

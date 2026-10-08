@@ -1861,7 +1861,7 @@ export const resetBusinessDataOnly = async (autoReload = true) => {
     window.dispatchEvent(new CustomEvent('billqyro_bank_updated'));
     window.dispatchEvent(new CustomEvent('billqyro_outsource_updated'));
     if (autoReload) {
-      window.location.reload();
+      window.location.href = window.location.origin + window.location.pathname + '?_reset=' + Date.now();
     }
   }
 
@@ -1894,23 +1894,39 @@ export const factoryResetAllData = async (autoRedirect = true) => {
   } catch (e) {}
   
   try {
-    await BillQyroDB.clear('invoices').catch(() => {});
-    await BillQyroDB.clear('customers').catch(() => {});
-    await BillQyroDB.clear('products').catch(() => {});
-    await BillQyroDB.clear('expenses').catch(() => {});
-    await BillQyroDB.clear('students').catch(() => {});
-    await BillQyroDB.clear('staff').catch(() => {});
-    await BillQyroDB.clear('syncQueue').catch(() => {});
-    await BillQyroDB.clear('auditLogs').catch(() => {});
-    await BillQyroDB.clear('errorLogs').catch(() => {});
+    const allTables = [
+      'invoices', 'customers', 'products', 'expenses', 'students', 'staff', 
+      'syncQueue', 'auditLogs', 'errorLogs', 'bankLedger', 'bankCredit', 
+      'appointments', 'orders', 'activities', 'announcements', 'vendors', 
+      'outsourceJobs', 'outsourcePayments', 'paymentProofs', 'deadLetterQueue', 
+      'pdfCache', 'settings', 'subscription'
+    ];
+    for (const table of allTables) {
+      await BillQyroDB.clear(table).catch(() => {});
+    }
     
     BillQyroDB.close();
-    await new Promise((resolve) => {
-      const req = indexedDB.deleteDatabase('billqyro-db');
-      req.onsuccess = () => resolve();
-      req.onerror = () => resolve();
-      req.onblocked = () => resolve();
-    });
+    
+    if (indexedDB.databases) {
+      const dbs = await indexedDB.databases();
+      for (const db of dbs) {
+        if (db.name) {
+          await new Promise((resolve) => {
+            const req = indexedDB.deleteDatabase(db.name);
+            req.onsuccess = () => resolve();
+            req.onerror = () => resolve();
+            req.onblocked = () => resolve();
+          });
+        }
+      }
+    } else {
+      await new Promise((resolve) => {
+        const req = indexedDB.deleteDatabase('billqyro-db');
+        req.onsuccess = () => resolve();
+        req.onerror = () => resolve();
+        req.onblocked = () => resolve();
+      });
+    }
     
     if (window.caches) {
       const caches = await window.caches.keys();
@@ -1942,7 +1958,7 @@ export const factoryResetAllData = async (autoRedirect = true) => {
   }
   
   if (autoRedirect && typeof window !== 'undefined') {
-    window.location.href = '/';
+    window.location.href = window.location.origin + '/?_reset=' + Date.now();
   }
 
   return true;
@@ -1953,15 +1969,32 @@ export const clearAllLocalData = async () => {
   sessionStorage.clear();
   try {
     BillQyroDB.close();
-    await new Promise((resolve, reject) => {
-      const req = indexedDB.deleteDatabase('billqyro-db');
-      req.onsuccess = () => resolve();
-      req.onerror = () => reject(req.error);
-      req.onblocked = () => {
-        console.warn('Database deletion blocked. Force resolving.');
-        resolve();
-      };
-    });
+    if (indexedDB.databases) {
+      const dbs = await indexedDB.databases();
+      for (const db of dbs) {
+        if (db.name) {
+          await new Promise((resolve, reject) => {
+            const req = indexedDB.deleteDatabase(db.name);
+            req.onsuccess = () => resolve();
+            req.onerror = () => reject(req.error);
+            req.onblocked = () => {
+              console.warn('Database deletion blocked. Force resolving.');
+              resolve();
+            };
+          });
+        }
+      }
+    } else {
+      await new Promise((resolve, reject) => {
+        const req = indexedDB.deleteDatabase('billqyro-db');
+        req.onsuccess = () => resolve();
+        req.onerror = () => reject(req.error);
+        req.onblocked = () => {
+          console.warn('Database deletion blocked. Force resolving.');
+          resolve();
+        };
+      });
+    }
     
     const caches = await window.caches.keys();
     for (const name of caches) {
@@ -2232,7 +2265,9 @@ export const deleteEnterpriseUser = async (targetUserId) => {
   try {
     const collectionsToClear = [
       'invoices', 'customers', 'staff', 'products', 'expenses', 'students',
-      'vendors', 'outsourceJobs', 'vendorPayments', 'bankLedger', 'paymentProofs'
+      'vendors', 'outsourceJobs', 'vendorPayments', 'bankLedger', 'bankCredit',
+      'appointments', 'orders', 'activities', 'paymentProofs', 'announcements',
+      'outsourcePayments'
     ];
     await Promise.all(collectionsToClear.map(async (coll) => {
       try {
@@ -2253,6 +2288,7 @@ export const deleteEnterpriseUser = async (targetUserId) => {
       deleteDoc(doc(getDb(), 'settings', targetUserId)).catch(() => {}),
       deleteDoc(doc(getDb(), 'subscription', targetUserId)).catch(() => {}),
       deleteDoc(doc(getDb(), 'usersList', targetUserId)).catch(() => {}),
+      deleteDoc(doc(getDb(), 'users', targetUserId)).catch(() => {}),
       deleteDoc(doc(getDb(), 'platformRevenue', targetUserId)).catch(() => {})
     ]);
     
@@ -3970,28 +4006,45 @@ export const importRestore = async (rawBackupData) => {
 
   try {
     const userId = getRealUserId();
+    const syncQueueAdds = [];
+    const pushToQueue = (item, storeName) => {
+      syncQueueAdds.push({
+        id: 'sq-' + Date.now() + '-' + Math.random().toString(36).substring(2,9),
+        action: 'save',
+        storeName,
+        docId: item.id,
+        data: item,
+        userId: userId,
+        status: 'pending',
+        createdAt: Date.now(),
+        retryCount: 0
+      });
+    };
+
     if (userId && userId !== 'local-user') {
       invoices.forEach(i => {
         i.userId = userId;
         i.createdByUid = userId;
-        i.syncStatus = 'synced';
+        i.syncStatus = 'pending';
+        pushToQueue(i, 'invoices');
       });
-      customers.forEach(c => { c.userId = userId; c.syncStatus = 'synced'; });
-      products.forEach(p => { p.userId = userId; p.syncStatus = 'synced'; });
-      expenses.forEach(e => { e.userId = userId; e.syncStatus = 'synced'; });
+      customers.forEach(c => { c.userId = userId; c.syncStatus = 'pending'; pushToQueue(c, 'customers'); });
+      products.forEach(p => { p.userId = userId; p.syncStatus = 'pending'; pushToQueue(p, 'products'); });
+      expenses.forEach(e => { e.userId = userId; e.syncStatus = 'pending'; pushToQueue(e, 'expenses'); });
       
       // Update new entities
-      vendors.forEach(v => { v.userId = userId; v.syncStatus = 'synced'; });
-      outsourceJobs.forEach(o => { o.userId = userId; o.syncStatus = 'synced'; });
-      outsourcePayments.forEach(o => { o.userId = userId; o.syncStatus = 'synced'; });
-      bankLedger.forEach(b => { b.userId = userId; b.syncStatus = 'synced'; });
-      bankCredit.forEach(b => { b.userId = userId; b.syncStatus = 'synced'; });
-      appointments.forEach(a => { a.userId = userId; a.syncStatus = 'synced'; });
-      orders.forEach(o => { o.userId = userId; o.syncStatus = 'synced'; });
-      activities.forEach(a => { a.userId = userId; a.syncStatus = 'synced'; });
+      vendors.forEach(v => { v.userId = userId; v.syncStatus = 'pending'; pushToQueue(v, 'vendors'); });
+      outsourceJobs.forEach(o => { o.userId = userId; o.syncStatus = 'pending'; pushToQueue(o, 'outsourceJobs'); });
+      outsourcePayments.forEach(o => { o.userId = userId; o.syncStatus = 'pending'; pushToQueue(o, 'outsourcePayments'); });
+      bankLedger.forEach(b => { b.userId = userId; b.syncStatus = 'pending'; pushToQueue(b, 'bankLedger'); });
+      bankCredit.forEach(b => { b.userId = userId; b.syncStatus = 'pending'; pushToQueue(b, 'bankCredit'); });
+      appointments.forEach(a => { a.userId = userId; a.syncStatus = 'pending'; pushToQueue(a, 'appointments'); });
+      orders.forEach(o => { o.userId = userId; o.syncStatus = 'pending'; pushToQueue(o, 'orders'); });
+      activities.forEach(a => { a.userId = userId; a.syncStatus = 'pending'; pushToQueue(a, 'activities'); });
 
       if (settings) {
         settings.userId = userId;
+        pushToQueue(settings, 'settings');
       }
     }
 
@@ -4022,7 +4075,8 @@ export const importRestore = async (rawBackupData) => {
         announcements.length > 0 ? BillQyroDB.bulkPut('announcements', announcements) : null,
         vendors.length > 0 ? BillQyroDB.bulkPut('vendors', vendors) : null,
         outsourceJobs.length > 0 ? BillQyroDB.bulkPut('outsourceJobs', outsourceJobs) : null,
-        outsourcePayments.length > 0 ? BillQyroDB.bulkPut('outsourcePayments', outsourcePayments) : null
+        outsourcePayments.length > 0 ? BillQyroDB.bulkPut('outsourcePayments', outsourcePayments) : null,
+        syncQueueAdds.length > 0 ? BillQyroDB.bulkPut('syncQueue', syncQueueAdds) : null
       ].filter(Boolean));
     } catch (idbErr) {
       console.warn('[RESTORE IDB NOTICE]: IndexedDB write fallback to cache:', idbErr?.message);
