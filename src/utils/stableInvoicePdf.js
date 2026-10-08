@@ -275,8 +275,27 @@ const renderExactPreview = async (root) => {
 
   const exportClass = 'billqyro-export-freeze';
   root.classList.add(exportClass);
+
+  // Pre-fetch all external stylesheets to bypass html2canvas parsing crashes on `color-mix` / `color()`
+  let sanitizedExternalCss = '';
+  try {
+    const links = Array.from(document.querySelectorAll('link[rel="stylesheet"]'));
+    const cssTexts = await Promise.all(links.map(async (link) => {
+      try {
+        const res = await fetch(link.href);
+        return await res.text();
+      } catch {
+        return '';
+      }
+    }));
+    sanitizedExternalCss = sanitizeColorValue(cssTexts.join('\n'));
+  } catch (err) {
+    console.warn('[PDF Export] Failed to inline external CSS', err);
+  }
+
   const style = document.createElement('style');
   style.textContent = `
+    ${sanitizedExternalCss}
     .${exportClass}, .${exportClass} * { 
       animation: none !important; 
       transition: none !important; 
@@ -310,6 +329,13 @@ const renderExactPreview = async (root) => {
       windowWidth: width,
       removeContainer: true,
       onclone: (clonedDocument) => {
+        // Strip link tags so html2canvas doesn't fetch the raw CSS and crash on color-mix()
+        clonedDocument.querySelectorAll('link[rel="stylesheet"]').forEach(link => {
+          // Keep google fonts, remove local bundled css
+          if (!link.href.includes('fonts.googleapis.com')) {
+            link.remove();
+          }
+        });
         sanitizeClonedDocument(clonedDocument, width);
       },
     }), EXPORT_TIMEOUT_MS, 'PDF/image export timed out. Please try again.');
