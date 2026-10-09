@@ -112,6 +112,35 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false, templat
 
     return (
       <div id="invoice-preview-capture" className="billqyro-template-export-container w-full max-w-4xl mx-auto transition-all duration-300 relative">
+        {/* Company Top Header Banner if configured */}
+        {(layoutData.businessSettings?.headerBannerUrl || businessSettings?.headerBannerUrl) && (
+          <div className="w-full mb-3 rounded-2xl overflow-hidden border border-slate-200/80 shadow-xs">
+            <img 
+              src={layoutData.businessSettings?.headerBannerUrl || businessSettings?.headerBannerUrl} 
+              alt="Header Banner" 
+              className="w-full max-h-40 object-cover" 
+            />
+          </div>
+        )}
+
+        {/* Sub-Header Quick Payment QR placement */}
+        {(layoutData.businessSettings?.showSubHeaderQr || businessSettings?.showSubHeaderQr) && layoutData.qrValue && (
+          <div className="mb-3 p-3 bg-white border border-emerald-200/80 rounded-2xl flex items-center justify-between shadow-xs">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                <QrCode className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-xs font-black text-slate-900">Scan & Pay Instantly</p>
+                <p className="text-[10px] text-slate-500 font-medium">Instant payment to {layoutData.businessSettings?.businessName || 'Merchant'}</p>
+              </div>
+            </div>
+            <div className="bg-white p-1 rounded-lg border border-slate-200 shadow-xs">
+              <DynamicQRCode value={layoutData.qrValue} size={64} />
+            </div>
+          </div>
+        )}
+
         <SelectedLayout data={layoutData} />
       </div>
     );
@@ -148,12 +177,55 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false, templat
   const cleanEmail = (str) => (typeof str === 'string' ? str.trim().replace(/\s*@\s*/g, '@').replace(/\s+/g, '') : str);
   const cleanUpi = (str) => (typeof str === 'string' ? str.trim().replace(/\s*@\s*/g, '@').replace(/\s+/g, '') : str);
 
+  const fallbackDueAmount = (financials.remainingOldDue !== undefined && financials.currentBillDue !== undefined)
+    ? roundTo2(financials.remainingOldDue + financials.currentBillDue)
+    : (financials.totalReceivable || financials.balanceDue || 0);
+  const fallbackPaymentMethod = paymentPrefs?.paymentMethod || 'UPI';
+  let fallbackQrValue = '';
+  if (fallbackPaymentMethod === 'UPI' && paymentPrefs?.upiId) {
+    fallbackQrValue = `upi://pay?pa=${paymentPrefs.upiId}&pn=${encodeURIComponent(paymentPrefs.payeeName || businessPrefs.businessName || '')}&am=${fallbackDueAmount}&cu=${regionalPrefs.currencyCode || 'INR'}&tn=${encodeURIComponent(invoice.invoiceNumber || '')}`;
+  } else if (fallbackPaymentMethod === 'bKash' && paymentPrefs?.bkashNumber) {
+    fallbackQrValue = `bKash Payment\nNumber: ${paymentPrefs.bkashNumber}\nAmount: ${fallbackDueAmount}\nInvoice: ${invoice.invoiceNumber}`;
+  } else if (fallbackPaymentMethod === 'Nagad' && paymentPrefs?.nagadNumber) {
+    fallbackQrValue = `Nagad Payment\nNumber: ${paymentPrefs.nagadNumber}\nAmount: ${fallbackDueAmount}\nInvoice: ${invoice.invoiceNumber}`;
+  } else if (paymentPrefs?.customPaymentLink) {
+    fallbackQrValue = paymentPrefs.customPaymentLink;
+  }
+
   return (
     <div 
       id="invoice-preview-capture" 
       className={`bg-theme-card dark:bg-theme-card border ${templateId === 'minimal' ? 'border-black rounded-none shadow-none' : templateId === 'classic-elegant' ? 'border-theme-tint-border rounded-none shadow-md' : 'border-theme-border-soft dark:border-theme-border-soft rounded-2xl sm:rounded-3xl shadow-premium'} p-5 sm:p-7 md:p-8 max-w-4xl mx-auto text-theme-primary dark:text-theme-primary transition-all duration-300 relative`}
       style={{ fontFamily: (templateId === 'classic-elegant' || templateId === 'premium-gold') ? "'Georgia', serif" : "'Inter', sans-serif" }}
     >
+      {/* Top Header Banner if uploaded */}
+      {(businessSettings?.headerBannerUrl || businessPrefs?.headerBannerUrl) && (
+        <div className="w-full mb-4 rounded-xl overflow-hidden shadow-xs border border-theme-border-soft">
+          <img 
+            src={businessSettings?.headerBannerUrl || businessPrefs?.headerBannerUrl} 
+            alt="Header Banner" 
+            className="w-full max-h-40 object-cover" 
+          />
+        </div>
+      )}
+
+      {/* Sub-Header Quick QR Code */}
+      {(businessSettings?.showSubHeaderQr || businessPrefs?.showSubHeaderQr) && fallbackQrValue && (
+        <div className="mb-4 p-3.5 bg-theme-surface border border-theme-border-soft rounded-2xl flex items-center justify-between shadow-xs">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-theme-accent/10 text-theme-accent flex items-center justify-center font-bold">
+              <QrCode className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-xs font-black text-theme-primary">Instant Payment QR</p>
+              <p className="text-[10px] text-theme-muted font-medium">Scan with any UPI / payment app</p>
+            </div>
+          </div>
+          <div className="bg-white p-1 rounded-xl border border-theme-border-soft shadow-xs">
+            <DynamicQRCode value={fallbackQrValue} size={64} />
+          </div>
+        </div>
+      )}
 
       {/* 1. BRAND HEADER & METADATA GRID */}
       <div className={`flex flex-row justify-between items-start gap-4 border-b pb-4 mb-2 ${templateId === 'modern' ? 'bg-slate-900 text-slate-200 -mx-5 -mt-5 sm:-mx-7 sm:-mt-7 md:-mx-8 md:-mt-8 p-5 sm:p-7 md:p-8 rounded-t-2xl sm:rounded-t-3xl border-slate-800' : templateId === 'gold' ? 'bg-slate-900 text-amber-100 -mx-5 -mt-5 sm:-mx-7 sm:-mt-7 md:-mx-8 md:-mt-8 p-5 sm:p-7 md:p-8 rounded-t-2xl sm:rounded-t-3xl border-amber-500/30' : templateId === 'corporate' ? 'border-b-4 border-theme-tint-border' : templateId === 'minimal' ? 'border-black' : 'border-theme-border-soft dark:border-theme-border-soft'}`}>

@@ -1,11 +1,21 @@
 import React, { useState } from 'react';
 import { 
   FileText, Columns, Droplet, ArrowUp, ArrowDown, Eye, EyeOff, 
-  Building, DollarSign, Palette, ShieldCheck, Trash2, PenLine, X 
+  Building, DollarSign, Palette, ShieldCheck, Trash2, PenLine, X,
+  Image as ImageIcon, Sparkles, QrCode, Upload
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import PdfTemplateStudio from '../../pages/PdfTemplateStudio';
 import SignaturePadModal from '../common/SignaturePadModal';
+
+const LUXURY_PALETTES = [
+  { id: 'emerald', name: 'Royal Emerald', primary: '#059669', accent: '#10B981', desc: 'Fintech & Trust' },
+  { id: 'amber', name: 'Imperial Amber', primary: '#D97706', accent: '#F59E0B', desc: 'Luxury Gold & Jewel' },
+  { id: 'indigo', name: 'Cyber Indigo', primary: '#4F46E5', accent: '#6366F1', desc: 'High-Tech SaaS' },
+  { id: 'sapphire', name: 'Midnight Sapphire', primary: '#1D4ED8', accent: '#38BDF8', desc: 'Corporate Banking' },
+  { id: 'ruby', name: 'Crimson Ruby', primary: '#BE123C', accent: '#FB7185', desc: 'Retail & Fashion' },
+  { id: 'carbon', name: 'Titanium Slate', primary: '#0F172A', accent: '#64748B', desc: 'Minimal Obsidian' },
+];
 
 const InvoiceCustomizationPanel = ({ 
   businessSettings,
@@ -246,6 +256,211 @@ const InvoiceCustomizationPanel = ({
           {/* BRANDING & TEXT TAB */}
           {activeTab === 'branding' && (
             <div className="space-y-6">
+              {/* 1. CURATED LUXURY COLOR PALETTES */}
+              <div className="card-premium p-6">
+                <div className="flex items-center gap-3 mb-6 border-b border-theme-border-soft pb-4">
+                  <div className="w-10 h-10 rounded-xl bg-theme-accent/10 text-theme-accent flex items-center justify-center">
+                    <Sparkles className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-black text-theme-primary">Luxury Color Themes</h2>
+                    <p className="text-xs text-theme-muted">Select an executive bill palette or custom branding accents</p>
+                  </div>
+                </div>
+
+                <div className="space-y-5">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {LUXURY_PALETTES.map((palette) => {
+                      const isSelected = businessSettings?.primaryColor === palette.primary;
+                      return (
+                        <button
+                          key={palette.id}
+                          type="button"
+                          onClick={() => handleUpdateSettings({
+                            primaryColor: palette.primary,
+                            accentColor: palette.accent
+                          })}
+                          className={`p-3 rounded-2xl border text-left transition-all relative overflow-hidden group ${
+                            isSelected 
+                              ? 'border-theme-accent bg-theme-accent/10 shadow-sm ring-1 ring-theme-accent' 
+                              : 'border-theme-border-soft bg-theme-surface hover:border-theme-accent/40'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 mb-2">
+                            <span 
+                              className="w-4 h-4 rounded-full shadow-xs" 
+                              style={{ backgroundColor: palette.primary }} 
+                            />
+                            <span 
+                              className="w-3 h-3 rounded-full shadow-xs -ml-1 border border-white/40" 
+                              style={{ backgroundColor: palette.accent }} 
+                            />
+                            <span className="text-xs font-black text-theme-primary truncate">{palette.name}</span>
+                          </div>
+                          <p className="text-[10px] text-theme-muted truncate">{palette.desc}</p>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-theme-border-soft">
+                    <div>
+                      <label className="block text-[10px] font-bold text-theme-muted uppercase tracking-wider mb-2">Primary Brand Color</label>
+                      <div className="flex items-center gap-2">
+                        <input 
+                          type="color" 
+                          value={businessSettings?.primaryColor || '#059669'} 
+                          onChange={(e) => handleUpdateSettings({ primaryColor: e.target.value })} 
+                          className="w-10 h-10 rounded-xl cursor-pointer border border-theme-border-soft bg-transparent p-0.5" 
+                        />
+                        <input 
+                          type="text" 
+                          value={businessSettings?.primaryColor || '#059669'} 
+                          onChange={(e) => handleUpdateSettings({ primaryColor: e.target.value })} 
+                          className="flex-1 px-3 py-2 bg-theme-surface border border-theme-border-soft rounded-xl text-xs font-mono font-bold text-theme-primary uppercase" 
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-theme-muted uppercase tracking-wider mb-2">Accent / Highlight Color</label>
+                      <div className="flex items-center gap-2">
+                        <input 
+                          type="color" 
+                          value={businessSettings?.accentColor || '#10B981'} 
+                          onChange={(e) => handleUpdateSettings({ accentColor: e.target.value })} 
+                          className="w-10 h-10 rounded-xl cursor-pointer border border-theme-border-soft bg-transparent p-0.5" 
+                        />
+                        <input 
+                          type="text" 
+                          value={businessSettings?.accentColor || '#10B981'} 
+                          onChange={(e) => handleUpdateSettings({ accentColor: e.target.value })} 
+                          className="flex-1 px-3 py-2 bg-theme-surface border border-theme-border-soft rounded-xl text-xs font-mono font-bold text-theme-primary uppercase" 
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 2. TOP HEADER BANNER IMAGE UPLOAD */}
+              <div className="card-premium p-6">
+                <div className="flex items-center justify-between mb-6 border-b border-theme-border-soft pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-theme-info/10 text-theme-info flex items-center justify-center">
+                      <ImageIcon className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-black text-theme-primary">Top Header Banner</h2>
+                      <p className="text-xs text-theme-muted">Display a custom letterhead banner graphic at the top of your bill</p>
+                    </div>
+                  </div>
+                  {businessSettings?.headerBannerUrl && (
+                    <button
+                      type="button"
+                      onClick={() => handleUpdateSettings({ headerBannerUrl: '' })}
+                      className="px-3 py-1.5 text-xs font-bold text-theme-danger hover:bg-theme-danger/10 rounded-xl transition-colors flex items-center gap-1.5"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" /> Remove Banner
+                    </button>
+                  )}
+                </div>
+
+                {businessSettings?.headerBannerUrl ? (
+                  <div className="relative rounded-2xl overflow-hidden border border-theme-border-soft shadow-xs group">
+                    <img 
+                      src={businessSettings.headerBannerUrl} 
+                      alt="Header Banner Preview" 
+                      className="w-full max-h-36 object-cover" 
+                    />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                      <label className="px-3 py-1.5 bg-white text-slate-900 rounded-lg text-xs font-bold cursor-pointer hover:bg-slate-100 transition-colors flex items-center gap-1.5">
+                        <Upload className="w-3.5 h-3.5" /> Change Banner
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const f = e.target.files && e.target.files[0];
+                            if (!f) return;
+                            const r = new FileReader();
+                            r.onload = () => {
+                              const img = new Image();
+                              img.onload = () => {
+                                const maxW = 1200;
+                                const scale = Math.min(1, maxW / img.width);
+                                const c = document.createElement('canvas');
+                                c.width = Math.round(img.width * scale);
+                                c.height = Math.round(img.height * scale);
+                                c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+                                handleUpdateSettings({ headerBannerUrl: c.toDataURL('image/jpeg', 0.88) });
+                              };
+                              img.src = r.result;
+                            };
+                            r.readAsDataURL(f);
+                            e.target.value = '';
+                          }}
+                        />
+                      </label>
+                    </div>
+                  </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center p-6 bg-theme-surface hover:bg-theme-surface/80 border-2 border-dashed border-theme-border-soft rounded-2xl transition-all cursor-pointer text-center group">
+                    <Upload className="w-7 h-7 text-theme-muted mb-2 group-hover:text-theme-accent group-hover:scale-110 transition-transform" />
+                    <span className="text-xs font-bold text-theme-primary">Upload Top Banner Graphic</span>
+                    <span className="text-[10px] text-theme-muted mt-0.5">Recommended ratio: 1200x200 or 1200x240 (PNG/JPG)</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const f = e.target.files && e.target.files[0];
+                        if (!f) return;
+                        const r = new FileReader();
+                        r.onload = () => {
+                          const img = new Image();
+                          img.onload = () => {
+                            const maxW = 1200;
+                            const scale = Math.min(1, maxW / img.width);
+                            const c = document.createElement('canvas');
+                            c.width = Math.round(img.width * scale);
+                            c.height = Math.round(img.height * scale);
+                            c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+                            handleUpdateSettings({ headerBannerUrl: c.toDataURL('image/jpeg', 0.88) });
+                          };
+                          img.src = r.result;
+                        };
+                        r.readAsDataURL(f);
+                        e.target.value = '';
+                      }}
+                    />
+                  </label>
+                )}
+              </div>
+
+              {/* 3. SUB-HEADER INSTANT PAYMENT QR PLACEMENT */}
+              <div className="card-premium p-6">
+                <div className="flex items-center justify-between border-b border-theme-border-soft pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-theme-success/10 text-theme-success flex items-center justify-center">
+                      <QrCode className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-black text-theme-primary">Sub-Header Payment QR</h2>
+                      <p className="text-xs text-theme-muted">Position payment QR code directly beneath the invoice header for instant scanning</p>
+                    </div>
+                  </div>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(businessSettings?.showSubHeaderQr)}
+                      onChange={(e) => handleUpdateSettings({ showSubHeaderQr: e.target.checked })}
+                      className="accent-theme-accent w-4 h-4 cursor-pointer"
+                    />
+                    <span className="text-xs font-bold text-theme-primary">Show Under Header</span>
+                  </label>
+                </div>
+              </div>
+
               <div className="card-premium p-6">
                 <div className="flex items-center gap-3 mb-6 border-b border-theme-border-soft pb-4">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-theme-accent to-theme-primary text-white flex items-center justify-center">
