@@ -1152,158 +1152,74 @@ const Dashboard = ({
               </div>
 
               {/* ========================================================================= */}
-              {/* LEVEL 1.5: EXECUTIVE VELOCITY SPEEDOMETER & REGISTERED TRADEMARK SEAL */}
+              {/* LEVEL 1.5: SLEEK EXECUTIVE TREASURY & FLOW COMMAND BAR */}
               {/* ========================================================================= */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 sm:gap-6">
-                
-                {/* 1. BUSINESS VELOCITY SPEEDOMETER GAUGE (স্পিডোমিটার মিটার) */}
-                <div className="lg:col-span-6 relative overflow-hidden p-6 rounded-[2rem] border border-emerald-500/25 bg-gradient-to-br from-theme-card via-theme-surface to-emerald-500/5 backdrop-blur-xl shadow-xl shadow-emerald-500/5 group flex flex-col justify-between">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
-                      <Activity className="w-3.5 h-3.5 text-emerald-500 animate-pulse" />
-                      <span>Business Velocity Speedometer (গতি মাপক)</span>
-                    </span>
-                    <span className="text-[10px] font-bold text-theme-muted uppercase tracking-wider">
-                      Performance Index
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center my-2">
-                    {/* SVG Speedometer Semi-Circle */}
-                    <div className="relative flex flex-col items-center justify-center">
-                      <svg viewBox="0 0 200 120" className="w-full max-w-[170px] overflow-visible">
-                        <defs>
-                          <linearGradient id="speedGaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stopColor="#10b981" />
-                            <stop offset="50%" stopColor="#06b6d4" />
-                            <stop offset="100%" stopColor="#3b82f6" />
-                          </linearGradient>
-                          <filter id="gaugeGlow">
-                            <feGaussianBlur stdDeviation="3" result="blur" />
-                            <feMerge>
-                              <feMergeNode in="blur" />
-                              <feMergeNode in="SourceGraphic" />
-                            </feMerge>
-                          </filter>
-                        </defs>
-                        {/* Background Track Arc */}
-                        <path
-                          d="M 25 100 A 75 75 0 0 1 175 100"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="14"
-                          strokeLinecap="round"
-                          className="text-theme-border-soft opacity-40 dark:opacity-20"
-                        />
-                        {/* Active Velocity Gradient Arc */}
-                        <path
-                          d="M 25 100 A 75 75 0 0 1 175 100"
-                          fill="none"
-                          stroke="url(#speedGaugeGrad)"
-                          strokeWidth="14"
-                          strokeLinecap="round"
-                          strokeDasharray="235.6"
-                          strokeDashoffset={235.6 * (1 - Math.min(100, Math.max(15, metrics.collectionRate || 80)) / 100)}
-                          filter="url(#gaugeGlow)"
-                          className="transition-all duration-1000 ease-out"
-                        />
-                        {/* Center Hub */}
-                        <circle cx="100" cy="100" r="7" className="fill-theme-primary" />
-                        <circle cx="100" cy="100" r="3.5" className="fill-emerald-400 animate-ping" />
-                        {/* Needle */}
-                        <line
-                          x1="100"
-                          y1="100"
-                          x2={100 - 60 * Math.cos((Math.PI * Math.min(100, Math.max(0, metrics.collectionRate || 80))) / 100)}
-                          y2={100 - 60 * Math.sin((Math.PI * Math.min(100, Math.max(0, metrics.collectionRate || 80))) / 100)}
-                          stroke="#10b981"
-                          strokeWidth="3.5"
-                          strokeLinecap="round"
-                          className="transition-all duration-1000 ease-out shadow-lg"
-                        />
-                      </svg>
-                      <div className="text-center -mt-2">
-                        <span className="text-2xl font-black bq-financial-number text-theme-primary">
-                          {metrics.collectionRate || 80}%
-                        </span>
-                        <span className="text-[10px] font-bold text-theme-muted block -mt-0.5">Velocity Score</span>
-                      </div>
-                    </div>
-
-                    {/* Speedometer Stats Details */}
-                    <div className="space-y-2 text-xs">
-                      <div className="p-2.5 rounded-xl bg-theme-surface/70 border border-theme-border-soft">
-                        <span className="text-[10px] text-theme-muted block font-bold uppercase">Collection Speed</span>
-                        <span className="font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1 text-sm">
-                          <Zap className="w-3.5 h-3.5 fill-current" />
-                          <span>{metrics.collectionRate >= 70 ? 'Fast & Healthy Flow' : 'Steady Collection'}</span>
-                        </span>
-                      </div>
-                      <div className="p-2.5 rounded-xl bg-theme-surface/70 border border-theme-border-soft flex justify-between items-center">
-                        <div>
-                          <span className="text-[10px] text-theme-muted block font-bold uppercase">Cash Runway</span>
-                          <span className="font-extrabold text-theme-primary">Optimal 30+ Days</span>
-                        </div>
-                        <button
-                          onClick={onOpenCollection}
-                          className="text-[10px] font-black text-theme-accent hover:underline cursor-pointer"
-                        >
-                          Collect &rarr;
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="pt-2 border-t border-theme-border-soft/60 flex items-center justify-between text-[11px] font-bold text-theme-muted">
-                    <span>Monthly Target Pace: Normal</span>
-                    <span className="text-emerald-500 font-black">● 100% Active Velocity</span>
-                  </div>
-                </div>
-
-                {/* 2. OFFICIAL REGISTERED TRADEMARK & SECURITY SHIELD (ট্রেডমার্কের মতো সিল) */}
-                <div className="lg:col-span-6 relative overflow-hidden p-6 rounded-[2rem] border border-amber-500/30 bg-gradient-to-br from-theme-card via-amber-500/5 to-amber-500/10 backdrop-blur-xl shadow-xl shadow-amber-500/5 group flex flex-col justify-between">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 flex items-center gap-1.5 shadow-sm">
-                      <Award className="w-3.5 h-3.5 text-amber-500" />
-                      <span>REGISTERED TRADEMARK ®</span>
-                    </span>
-                    <span className="text-[10px] font-black font-mono text-amber-600/80 dark:text-amber-400/80 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">
-                      #BQ-TRADEMARK-2026
-                    </span>
-                  </div>
-
-                  <div className="my-3 flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-500 via-yellow-400 to-amber-600 p-[2.5px] shadow-lg shadow-amber-500/25 shrink-0 transform hover:scale-105 transition-transform">
-                      <div className="w-full h-full rounded-2xl bg-[#0b121a] flex flex-col items-center justify-center text-amber-400 font-black">
-                        <ShieldCheck className="w-7 h-7 animate-pulse text-amber-400" />
-                        <span className="text-[8px] tracking-tight uppercase font-mono mt-0.5">VERIFIED</span>
-                      </div>
+              <div className="bg-white dark:bg-theme-card rounded-3xl p-4 sm:p-5 shadow-xs border border-theme-border-soft transition-all duration-300">
+                <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
+                  {/* 1. Treasury Status & Pulse */}
+                  <div className="flex items-center gap-3.5 w-full lg:w-auto">
+                    <div className="w-11 h-11 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                      <TrendingUp className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="text-base font-black text-theme-primary flex items-center gap-1.5">
-                        <span>{businessSettings?.businessName || ownerName || 'BillQyro Empire Studio'}</span>
-                        <span className="text-xs font-black text-amber-500">®</span>
-                      </h3>
-                      <p className="text-xs text-theme-muted font-medium mt-1 leading-snug">
-                        Official Merchant Seal • Authenticated 256-Bit Cryptographic Ledger &amp; Tax Invoice Ready
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-black tracking-tight text-theme-primary">
+                          {businessSettings?.businessName || ownerName || 'Executive Treasury'}
+                        </span>
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          <span>Ledger Verified</span>
+                        </span>
+                      </div>
+                      <p className="text-xs text-theme-muted font-medium mt-0.5">
+                        Real-time revenue flow &bull; {metrics.collectionRate || 80}% collection efficiency
                       </p>
                     </div>
                   </div>
 
-                  <div className="pt-3 border-t border-amber-500/20 flex items-center justify-between text-xs font-bold">
-                    <span className="text-theme-muted flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                      <span>Compliance: Active &amp; Verified</span>
-                    </span>
+                  {/* 2. Slim Linear Settlement Gauge */}
+                  <div className="w-full lg:max-w-md bg-theme-surface/60 border border-theme-border-soft/60 rounded-2xl p-2.5 px-4 flex flex-col gap-1.5">
+                    <div className="flex items-center justify-between text-[11px] font-bold">
+                      <span className="text-theme-muted">
+                        Collected: <strong className="text-theme-primary">{formatCurrency(metrics.totalCollected || 0, currencySymbol)}</strong>
+                      </span>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-black">
+                        {metrics.collectionRate || 80}% Settled
+                      </span>
+                    </div>
+                    <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                      <div 
+                        className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-teal-400 to-indigo-500 transition-all duration-700" 
+                        style={{ width: `${Math.min(100, Math.max(8, metrics.collectionRate || 80))}%` }} 
+                      />
+                    </div>
+                  </div>
+
+                  {/* 3. Quick Action Launchpad */}
+                  <div className="flex items-center gap-2 w-full lg:w-auto justify-end">
                     <button
-                      onClick={() => setCurrentTab('settings')}
-                      className="text-amber-600 dark:text-amber-400 hover:underline font-black cursor-pointer text-xs"
+                      onClick={() => setCurrentTab('create-invoice')}
+                      className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
                     >
-                      View Certificate &rarr;
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Create Bill</span>
+                    </button>
+                    <button
+                      onClick={onOpenCollection}
+                      className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+                    >
+                      <CreditCard className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" />
+                      <span>Collect</span>
+                    </button>
+                    <button
+                      onClick={() => setCurrentTab('bank')}
+                      className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 transition-all cursor-pointer hover:text-indigo-600"
+                      title="Bank & Cash Ledger"
+                    >
+                      <Landmark className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
-
               </div>
 
               {/* FIRST BUSINESS EMPTY STATE */}
