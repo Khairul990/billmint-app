@@ -31,8 +31,15 @@ import {
   Clock,
   Layers,
   HelpCircle,
-  CreditCard
+  CreditCard,
+  QrCode,
+  Copy,
+  Check,
+  Zap,
+  Activity,
+  Lock
 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { bankEngine, paiseToRupees, rupeesToPaise, BANK_CATEGORIES } from '../services/bankEngine';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { calculateCanonicalInvoiceFinancials } from '../utils/invoiceMath';
@@ -88,6 +95,10 @@ const InternalBank = ({
   const [showModal, setShowModal] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [showDepositModal, setShowDepositModal] = useState(false);
+  const [showQrModal, setShowQrModal] = useState(false);
+  const [qrAmount, setQrAmount] = useState('500');
+  const [copiedUpi, setCopiedUpi] = useState(false);
+
   const [withdrawTarget, setWithdrawTarget] = useState(WITHDRAW_TARGETS[0]);
   const [depositSource, setDepositSource] = useState(DEPOSIT_SOURCES[0]);
   const [quickAmount, setQuickAmount] = useState('');
@@ -98,6 +109,25 @@ const InternalBank = ({
   const [filters, setFilters] = useState({ type: 'all', category: 'all', search: '', customerId: 'all' });
   const [confirmReverse, setConfirmReverse] = useState(null);
   const [settingsDraft, setSettingsDraft] = useState(null);
+
+  const activeUpiId = useMemo(() => {
+    return businessSettings?.upiId || businessSettings?.bankDetails?.upiId || '9903591839@ybl';
+  }, [businessSettings]);
+
+  const activeBusinessName = useMemo(() => {
+    return businessSettings?.businessName || businessSettings?.companyName || 'BillQyro Treasury';
+  }, [businessSettings]);
+
+  const copyUpiId = () => {
+    try {
+      navigator.clipboard.writeText(activeUpiId);
+      setCopiedUpi(true);
+      toast.success('UPI ID copied to clipboard!');
+      setTimeout(() => setCopiedUpi(false), 2000);
+    } catch {
+      toast.error('Failed to copy UPI ID');
+    }
+  };
 
   // Financial totals derived from canonical billing engine
   const billingStats = useMemo(() => {
@@ -116,6 +146,18 @@ const InternalBank = ({
 
     return { totalBilled, totalDues, totalInvoices };
   }, [invoices]);
+
+  // Financial collection ratio derived from canonical billing engine
+  const billingRatios = useMemo(() => {
+    const totalBilled = billingStats.totalBilled || 0;
+    const collected = paiseToRupees(state?.totals?.totalIn || 0);
+    const dues = billingStats.totalDues || 0;
+    if (totalBilled <= 0) return { collectedPct: 100, duesPct: 0, pendingPct: 0 };
+    const collectedPct = Math.min(100, Math.round((collected / totalBilled) * 100));
+    const duesPct = Math.min(100 - collectedPct, Math.round((dues / totalBilled) * 100));
+    const pendingPct = Math.max(0, 100 - collectedPct - duesPct);
+    return { collectedPct, duesPct, pendingPct };
+  }, [billingStats, state]);
 
   useEffect(() => {
     if (state?.settings && !settingsDraft) {
@@ -277,6 +319,31 @@ const InternalBank = ({
       await refresh();
     } catch (err) {
       toast.error(err.message || 'Failed to deposit money.');
+    }
+  };
+
+  const handleDepositFromQr = async () => {
+    const amount = Number(qrAmount);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      toast.error('Enter a valid amount to deposit.');
+      return;
+    }
+
+    try {
+      await bankEngine.addTransaction({
+        type: 'moneyIn',
+        amountRupees: amount,
+        category: 'Sale / Invoice Payment',
+        title: 'PhonePe / UPI QR Deposit',
+        account: 'phonepe',
+        note: `Received via PhonePe QR (${activeUpiId})`,
+        date: new Date()
+      });
+      toast.success(`Successfully deposited ${formatCurrency(amount, currencySymbol)} from PhonePe QR into Bank Vault!`, { icon: '📱' });
+      setShowQrModal(false);
+      await refresh();
+    } catch (err) {
+      toast.error(err.message || 'Failed to record QR deposit.');
     }
   };
 
@@ -534,23 +601,75 @@ const InternalBank = ({
         <motion.div key="ov" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
           
           {/* 3A. THE INTERACTIVE VISUAL BANKING MAP (ম্যাপ সাইট মতো আর্কিটেকচার) */}
-          <div className="relative overflow-hidden p-6 sm:p-8 rounded-[2.5rem] border border-theme-accent/20 bg-gradient-to-br from-theme-card via-theme-surface to-theme-card backdrop-blur-2xl shadow-xl shadow-theme-accent/5">
-            <div className="flex flex-wrap items-center justify-between gap-3 mb-6 pb-4 border-b border-theme-border-soft">
+          <div className="relative overflow-hidden p-6 sm:p-8 rounded-[2.5rem] border border-theme-accent/25 bg-gradient-to-br from-theme-card via-theme-surface to-theme-card backdrop-blur-2xl shadow-2xl shadow-theme-accent/10">
+            {/* Subtle background glow orbs */}
+            <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
+
+            {/* Header with Live Sync Status & Quick QR Trigger */}
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-6 pb-4 border-b border-theme-border-soft relative z-10">
               <div>
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
-                  <h2 className="text-lg sm:text-xl font-black text-theme-primary tracking-tight">
+                <div className="flex items-center gap-2.5">
+                  <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                  </span>
+                  <h2 className="text-lg sm:text-xl font-black text-theme-primary tracking-tight flex items-center gap-2">
                     Interactive Bank &amp; Money Flow Map (লাইভ মানি ফ্লো ম্যাপ)
+                    <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-theme-accent/10 text-theme-accent border border-theme-accent/20">
+                      Live FinTech Map
+                    </span>
                   </h2>
                 </div>
-                <p className="text-xs text-theme-muted mt-0.5">
-                  টাকা আসার উৎস ➔ ওয়েবসাইটের কেন্দ্রীয় ব্যাংক ভল্ট ➔ ফোনপে, ক্যাশ ও খরচে উইথড্রয়ালের সম্পূর্ণ লাইভ চিত্র
+                <p className="text-xs text-theme-muted mt-1">
+                  টাকা আসার উৎস ➔ ওয়েবসাইটের কেন্দ্রীয় ব্যাংক ভল্ট ➔ ফোনপে, ক্যাশ ও খরচে উইথড্রয়ালের সম্পূর্ণ লাইভ নেটওয়ার্ক পাইপলাইন
                 </p>
               </div>
+
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-bold text-theme-muted bg-theme-surface px-3 py-1 rounded-xl border border-theme-border-soft">
-                  Real-time Ledger Sync
+                <button
+                  onClick={() => setShowQrModal(true)}
+                  className="px-3.5 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-500 border border-indigo-500/30 text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
+                >
+                  <QrCode className="w-3.5 h-3.5" />
+                  <span>PhonePe QR</span>
+                </button>
+                <span className="text-[11px] font-bold text-theme-muted bg-theme-surface px-3 py-1.5 rounded-xl border border-theme-border-soft flex items-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+                  <span>Real-time Ledger Sync</span>
                 </span>
+              </div>
+            </div>
+
+            {/* PIPELINE STREAM FLOW BAR (DESKTOP / TABLET VISUAL CONNECTOR) */}
+            <div className="hidden lg:grid grid-cols-12 gap-5 mb-3 text-center text-[10px] font-extrabold uppercase tracking-wider relative z-10">
+              <div className="col-span-4 flex items-center justify-between text-emerald-600 dark:text-emerald-400 px-3">
+                <span>Stage 1: Sales Inflow</span>
+                <div className="flex items-center gap-1">
+                  <motion.span 
+                    animate={{ x: [0, 15, 0], opacity: [0.3, 1, 0.3] }} 
+                    transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+                    className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" 
+                  />
+                  <span>Flowing into Vault &rarr;</span>
+                </div>
+              </div>
+              <div className="col-span-4 flex items-center justify-center text-theme-accent px-3">
+                <span className="flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-theme-accent/10 border border-theme-accent/30">
+                  <Lock className="w-3 h-3 text-theme-accent" />
+                  Stage 2: Central Secure Vault
+                </span>
+              </div>
+              <div className="col-span-4 flex items-center justify-between text-indigo-600 dark:text-indigo-400 px-3">
+                <div className="flex items-center gap-1">
+                  <span>&rarr; Disbursing to Wallets</span>
+                  <motion.span 
+                    animate={{ x: [0, 15, 0], opacity: [0.3, 1, 0.3] }} 
+                    transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+                    className="w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_8px_#6366f1]" 
+                  />
+                </div>
+                <span>Stage 3: Outflow Pools</span>
               </div>
             </div>
 
@@ -558,7 +677,7 @@ const InternalBank = ({
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch relative">
               
               {/* ZONE 1: INFLOW & BILLING SOURCES (৪ কলাম) */}
-              <div className="lg:col-span-4 flex flex-col justify-between p-5 rounded-3xl bg-theme-surface/70 border border-theme-border-soft/80 shadow-sm relative group hover:border-theme-success/40 transition-all">
+              <div className="lg:col-span-4 flex flex-col justify-between p-5 rounded-3xl bg-theme-surface/80 border border-theme-border-soft/80 shadow-md relative group hover:border-theme-success/50 transition-all hover:shadow-theme-success/5">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-theme-success/10 text-theme-success border border-theme-success/20 flex items-center gap-1.5">
@@ -573,15 +692,58 @@ const InternalBank = ({
                     <p className="text-[11px] text-theme-muted">দোকান ও ওয়েবসাইটের মোট তৈরি করা বিল ও বিক্রয়</p>
                   </div>
 
-                  <div className="space-y-2 pt-2">
+                  {/* Multi-segmented Billing & Cash Realization Health Meter */}
+                  <div className="p-3 rounded-2xl bg-theme-card border border-theme-border-soft/70 space-y-2">
+                    <div className="flex items-center justify-between text-[10px] font-extrabold uppercase tracking-wide">
+                      <span className="text-theme-muted">Collection Realization Rate</span>
+                      <span className="text-theme-success font-black">{billingRatios.collectedPct}% Realized</span>
+                    </div>
+
+                    {/* Gradient Progress Bar */}
+                    <div className="h-2.5 w-full rounded-full bg-theme-surface flex overflow-hidden border border-theme-border-soft">
+                      <div 
+                        style={{ width: `${billingRatios.collectedPct}%` }} 
+                        className="bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-700" 
+                        title={`Collected: ${billingRatios.collectedPct}%`}
+                      />
+                      <div 
+                        style={{ width: `${billingRatios.duesPct}%` }} 
+                        className="bg-gradient-to-r from-amber-500 to-orange-400 transition-all duration-700" 
+                        title={`Due: ${billingRatios.duesPct}%`}
+                      />
+                      <div 
+                        style={{ width: `${billingRatios.pendingPct}%` }} 
+                        className="bg-slate-300 dark:bg-slate-700 transition-all duration-700" 
+                        title={`Unbilled / Pending: ${billingRatios.pendingPct}%`}
+                      />
+                    </div>
+
+                    <div className="flex justify-between items-center text-[10px] font-bold text-theme-muted pt-0.5">
+                      <span className="flex items-center gap-1 text-theme-success">
+                        <span className="w-1.5 h-1.5 rounded-full bg-theme-success" />
+                        Bank: {billingRatios.collectedPct}%
+                      </span>
+                      <span className="flex items-center gap-1 text-amber-500">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                        Due: {billingRatios.duesPct}%
+                      </span>
+                      <span className="flex items-center gap-1 text-theme-muted">
+                        <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+                        Other: {billingRatios.pendingPct}%
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Financial Counters */}
+                  <div className="space-y-2 pt-1">
                     <div className="flex justify-between items-center text-xs p-2.5 rounded-xl bg-theme-card border border-theme-border-soft/60">
                       <span className="text-theme-muted font-medium">Total Lifetime Billed:</span>
                       <span className="font-black text-theme-primary">{formatCurrency(billingStats.totalBilled, currencySymbol)}</span>
                     </div>
 
-                    <div className="flex justify-between items-center text-xs p-2.5 rounded-xl bg-theme-card border border-theme-border-soft/60">
-                      <span className="text-theme-muted font-medium">Collected in Bank:</span>
-                      <span className="font-black text-theme-success">+{formatCurrency(paiseToRupees(state.totals.totalIn), currencySymbol)}</span>
+                    <div className="flex justify-between items-center text-xs p-2.5 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
+                      <span className="text-emerald-600 dark:text-emerald-400 font-bold">Collected in Bank:</span>
+                      <span className="font-black text-emerald-600 dark:text-emerald-400">+{formatCurrency(paiseToRupees(state.totals.totalIn), currencySymbol)}</span>
                     </div>
 
                     <div className="flex justify-between items-center text-xs p-2.5 rounded-xl bg-amber-500/5 border border-amber-500/20">
@@ -594,7 +756,7 @@ const InternalBank = ({
                 <div className="pt-4 mt-4 border-t border-theme-border-soft/60">
                   <button
                     onClick={() => openQuickDeposit('sale')}
-                    className="w-full py-2.5 rounded-xl bg-theme-success/15 hover:bg-theme-success/25 text-theme-success text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="w-full py-2.5 rounded-xl bg-theme-success/15 hover:bg-theme-success/25 text-theme-success text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Deposit Sales Money (+ যোগ করুন)</span>
@@ -602,74 +764,89 @@ const InternalBank = ({
                 </div>
               </div>
 
-              {/* ZONE 2: CENTRAL VAULT (৪ কলাম) */}
-              <div className="lg:col-span-4 flex flex-col justify-between p-6 rounded-3xl bg-gradient-to-b from-theme-card via-theme-accent/5 to-theme-card border-2 border-theme-accent/30 shadow-xl shadow-theme-accent/10 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-36 h-36 bg-theme-accent/15 rounded-full blur-2xl group-hover:scale-125 transition-transform duration-700 pointer-events-none" />
+              {/* ZONE 2: CENTRAL VAULT (৪ কলাম) — 3D METALLIC GLASSMORPHIC SECURITY VAULT */}
+              <div className="lg:col-span-4 flex flex-col justify-between p-6 rounded-3xl bg-gradient-to-b from-white/95 via-theme-accent/5 to-white/90 dark:from-theme-card dark:via-theme-accent/10 dark:to-theme-card border-2 border-theme-accent/40 shadow-2xl shadow-theme-accent/15 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-48 h-48 bg-theme-accent/20 rounded-full blur-3xl group-hover:scale-125 transition-transform duration-700 pointer-events-none" />
+                <div className="absolute -left-12 -bottom-12 w-40 h-40 bg-teal-500/10 rounded-full blur-2xl pointer-events-none" />
 
                 <div className="space-y-4 relative z-10">
                   <div className="flex items-center justify-between">
-                    <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-theme-accent text-white shadow-sm flex items-center gap-1.5">
-                      <Landmark className="w-3 h-3" />
+                    <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-theme-accent text-white shadow-md shadow-theme-accent/25 flex items-center gap-1.5">
+                      <Landmark className="w-3.5 h-3.5" />
                       2. Central Vault (ওয়েবসাইট ব্যাংক)
                     </span>
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="flex items-center gap-1.5 text-[9px] font-black text-emerald-500 uppercase tracking-wider bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+                      Encrypted &amp; Synced
+                    </span>
                   </div>
 
-                  <div className="text-center py-2">
-                    <p className="text-[11px] font-extrabold uppercase tracking-widest text-theme-accent">
+                  {/* Vault 3D Emblem & Big Financial Display */}
+                  <div className="text-center py-2 relative">
+                    <p className="text-[11px] font-black uppercase tracking-widest text-theme-accent">
                       Available Business Balance
                     </p>
-                    <p className={`text-4xl font-black bq-financial-number mt-1.5 tracking-tight ${vaultBalanceRupees < 0 ? 'text-theme-danger' : 'text-theme-primary'}`}>
+                    <p className={`text-4xl sm:text-5xl font-black bq-financial-number mt-1.5 tracking-tight ${vaultBalanceRupees < 0 ? 'text-theme-danger' : 'text-theme-primary'}`}>
                       {formatCurrency(vaultBalanceRupees, currencySymbol)}
                     </p>
-                    <p className="text-[11px] text-theme-muted mt-1 font-semibold">
-                      ওয়েবসাইটের মূল কার্যকর ব্যালেন্স
+                    <p className="text-[11px] text-theme-muted mt-1 font-semibold flex items-center justify-center gap-1.5">
+                      <ShieldCheck className="w-3.5 h-3.5 text-theme-accent" />
+                      <span>ওয়েবসাইটের মূল কার্যকর ব্যালেন্স</span>
                     </p>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 text-center text-xs">
-                    <div className="p-2 rounded-xl bg-theme-surface/80 border border-theme-border-soft">
-                      <span className="text-[10px] text-theme-muted block font-semibold">Total In</span>
-                      <span className="font-black text-theme-success">+{formatCurrency(paiseToRupees(state.totals.totalIn), currencySymbol)}</span>
+                    <div className="p-2.5 rounded-2xl bg-theme-surface/90 border border-theme-border-soft shadow-xs">
+                      <span className="text-[10px] text-theme-muted block font-extrabold uppercase">Total In</span>
+                      <span className="font-black text-theme-success text-sm">+{formatCurrency(paiseToRupees(state.totals.totalIn), currencySymbol)}</span>
                     </div>
-                    <div className="p-2 rounded-xl bg-theme-surface/80 border border-theme-border-soft">
-                      <span className="text-[10px] text-theme-muted block font-semibold">Total Out</span>
-                      <span className="font-black text-theme-danger">-{formatCurrency(paiseToRupees(state.totals.totalOut), currencySymbol)}</span>
+                    <div className="p-2.5 rounded-2xl bg-theme-surface/90 border border-theme-border-soft shadow-xs">
+                      <span className="text-[10px] text-theme-muted block font-extrabold uppercase">Total Out</span>
+                      <span className="font-black text-theme-danger text-sm">-{formatCurrency(paiseToRupees(state.totals.totalOut), currencySymbol)}</span>
                     </div>
                   </div>
                 </div>
 
-                {/* FAST DISBURSEMENT BUTTONS */}
+                {/* FAST DISBURSEMENT & DIRECT QR BUTTONS */}
                 <div className="space-y-2 pt-4 mt-4 border-t border-theme-border-soft relative z-10">
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       onClick={() => openQuickDeposit('sale')}
-                      className="py-2.5 px-3 rounded-xl bg-theme-success text-white hover:opacity-95 text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
+                      className="py-2.5 px-3 rounded-xl bg-theme-success text-white hover:opacity-95 text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-theme-success/20 active:scale-95"
                     >
                       <Plus className="w-3.5 h-3.5" />
                       <span>Deposit (+)</span>
                     </button>
                     <button
                       onClick={() => openQuickWithdraw('phonepe')}
-                      className="py-2.5 px-3 rounded-xl bg-theme-danger text-white hover:opacity-95 text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
+                      className="py-2.5 px-3 rounded-xl bg-theme-danger text-white hover:opacity-95 text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-theme-danger/20 active:scale-95"
                     >
                       <ArrowUpRight className="w-3.5 h-3.5" />
                       <span>Withdraw (-)</span>
                     </button>
                   </div>
 
-                  <button
-                    onClick={() => openQuickWithdraw('phonepe')}
-                    className="w-full py-2 px-3 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-500 border border-indigo-500/25 text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                  >
-                    <Smartphone className="w-3.5 h-3.5" />
-                    <span>Send to PhonePe (ফোনপেতে পাঠান)</span>
-                  </button>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => openQuickWithdraw('phonepe')}
+                      className="py-2 px-3 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-500 border border-indigo-500/25 text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+                    >
+                      <Smartphone className="w-3.5 h-3.5" />
+                      <span>Send to PhonePe</span>
+                    </button>
+                    <button
+                      onClick={() => setShowQrModal(true)}
+                      className="py-2 px-3 rounded-xl bg-theme-accent/10 hover:bg-theme-accent/20 text-theme-accent border border-theme-accent/25 text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+                    >
+                      <QrCode className="w-3.5 h-3.5" />
+                      <span>PhonePe QR</span>
+                    </button>
+                  </div>
                 </div>
               </div>
 
               {/* ZONE 3: WALLETS & OUTFLOW DESTINATIONS (৪ কলাম) */}
-              <div className="lg:col-span-4 flex flex-col justify-between p-5 rounded-3xl bg-theme-surface/70 border border-theme-border-soft/80 shadow-sm relative group hover:border-theme-danger/40 transition-all">
+              <div className="lg:col-span-4 flex flex-col justify-between p-5 rounded-3xl bg-theme-surface/80 border border-theme-border-soft/80 shadow-md relative group hover:border-theme-danger/50 transition-all hover:shadow-theme-danger/5">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-theme-danger/10 text-theme-danger border border-theme-danger/20 flex items-center gap-1.5">
@@ -684,7 +861,25 @@ const InternalBank = ({
                     <p className="text-[11px] text-theme-muted">ভল্ট থেকে কোথায় কোথায় কত টাকা সরানো হয়েছে</p>
                   </div>
 
-                  <div className="space-y-2 pt-2">
+                  {/* Outflow Distribution Multi-bar */}
+                  {(poolStats.phonepe + poolStats.cash + poolStats.personal + poolStats.salary) > 0 && (
+                    <div className="p-3 rounded-2xl bg-theme-card border border-theme-border-soft/70 space-y-2">
+                      <div className="flex justify-between text-[10px] font-extrabold uppercase tracking-wide text-theme-muted">
+                        <span>Outflow Distribution</span>
+                        <span className="text-theme-danger font-black">
+                          {formatCurrency(poolStats.phonepe + poolStats.cash + poolStats.personal + poolStats.salary, currencySymbol)}
+                        </span>
+                      </div>
+                      <div className="h-2 w-full rounded-full bg-theme-surface flex overflow-hidden border border-theme-border-soft">
+                        <div style={{ width: `${(poolStats.phonepe / Math.max(1, (poolStats.phonepe + poolStats.cash + poolStats.personal + poolStats.salary))) * 100}%` }} className="bg-indigo-500" title="PhonePe" />
+                        <div style={{ width: `${(poolStats.cash / Math.max(1, (poolStats.phonepe + poolStats.cash + poolStats.personal + poolStats.salary))) * 100}%` }} className="bg-emerald-500" title="Cash Drawer" />
+                        <div style={{ width: `${(poolStats.personal / Math.max(1, (poolStats.phonepe + poolStats.cash + poolStats.personal + poolStats.salary))) * 100}%` }} className="bg-pink-500" title="Personal Expense" />
+                        <div style={{ width: `${(poolStats.salary / Math.max(1, (poolStats.phonepe + poolStats.cash + poolStats.personal + poolStats.salary))) * 100}%` }} className="bg-sky-500" title="Staff Salary" />
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-2 pt-1">
                     {/* PhonePe Pool */}
                     <div 
                       onClick={() => openQuickWithdraw('phonepe')}
@@ -742,7 +937,7 @@ const InternalBank = ({
                 <div className="pt-4 mt-4 border-t border-theme-border-soft/60">
                   <button
                     onClick={() => openQuickWithdraw('personal')}
-                    className="w-full py-2.5 rounded-xl bg-theme-danger/15 hover:bg-theme-danger/25 text-theme-danger text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="w-full py-2.5 rounded-xl bg-theme-danger/15 hover:bg-theme-danger/25 text-theme-danger text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
                   >
                     <ShoppingBag className="w-3.5 h-3.5" />
                     <span>Withdraw for Personal Expense (হাতখরচ)</span>
@@ -751,6 +946,36 @@ const InternalBank = ({
               </div>
 
             </div>
+
+            {/* LIVE FINANCIAL ACTIVITY TICKER / REAL-TIME STREAM BAR */}
+            <div className="mt-5 p-3.5 rounded-2xl bg-theme-surface/70 border border-theme-border-soft flex flex-wrap items-center justify-between gap-3 text-xs backdrop-blur-md">
+              <div className="flex items-center gap-2">
+                <span className="p-1 rounded-lg bg-emerald-500/10 text-emerald-500">
+                  <Activity className="w-3.5 h-3.5 animate-pulse" />
+                </span>
+                <span className="text-[11px] font-black text-theme-primary uppercase tracking-wider">Live Stream:</span>
+              </div>
+              
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-[11px] font-bold">
+                <span className="flex items-center gap-1.5 text-theme-success bg-theme-success/10 px-2.5 py-0.5 rounded-lg border border-theme-success/20">
+                  <ArrowDownRight className="w-3 h-3" />
+                  <span>+{formatCurrency(paiseToRupees(state.totals.totalIn), currencySymbol)} Collected Inflow</span>
+                </span>
+                <span className="flex items-center gap-1.5 text-amber-500 bg-amber-500/10 px-2.5 py-0.5 rounded-lg border border-amber-500/20">
+                  <Clock className="w-3 h-3" />
+                  <span>{formatCurrency(billingStats.totalDues, currencySymbol)} Pending Dues</span>
+                </span>
+                <span className="flex items-center gap-1.5 text-indigo-500 bg-indigo-500/10 px-2.5 py-0.5 rounded-lg border border-indigo-500/20">
+                  <Smartphone className="w-3 h-3" />
+                  <span>PhonePe &amp; Cash Pools Active</span>
+                </span>
+                <span className="flex items-center gap-1.5 text-theme-muted bg-theme-card px-2.5 py-0.5 rounded-lg border border-theme-border-soft">
+                  <ShieldCheck className="w-3 h-3 text-emerald-500" />
+                  <span>Encrypted Audit Trail</span>
+                </span>
+              </div>
+            </div>
+
           </div>
 
           {/* 3B. FINANCIAL PILLARS SUMMARY CARDS */}
@@ -1460,6 +1685,90 @@ const InternalBank = ({
                 </button>
               </div>
             </form>
+          </Modal>
+        )}
+      </AnimatePresence>
+
+      {/* ========================================================================= */}
+      {/* 8B. DEDICATED PHONEPE / UPI INSTANT QR MODAL */}
+      {/* ========================================================================= */}
+      <AnimatePresence>
+        {showQrModal && (
+          <Modal onClose={() => setShowQrModal(false)}>
+            <div className="space-y-4 text-center">
+              <div className="flex items-center justify-between border-b border-theme-border-soft pb-3">
+                <div className="flex items-center gap-2.5 text-left">
+                  <div className="w-10 h-10 rounded-2xl bg-indigo-500/15 text-indigo-500 flex items-center justify-center">
+                    <QrCode className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-base font-black text-theme-primary">PhonePe / UPI Instant QR</h2>
+                    <p className="text-[11px] text-theme-muted">স্ক্যান করে সরাসরি ভল্টে টাকা লোড করুন</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* QR Code Container */}
+              <div className="p-4 rounded-3xl bg-white border border-theme-border-soft/80 shadow-inner inline-block mx-auto">
+                <QRCodeSVG
+                  value={`upi://pay?pa=${encodeURIComponent(activeUpiId)}&pn=${encodeURIComponent(activeBusinessName)}&am=${qrAmount || ''}&cu=INR`}
+                  size={180}
+                  level="H"
+                  includeMargin={true}
+                />
+              </div>
+
+              {/* Live Preset Amount Selector */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-theme-muted block">Amount to Receive ({currencySymbol}):</label>
+                <input
+                  type="number"
+                  min="1"
+                  value={qrAmount}
+                  onChange={(e) => setQrAmount(e.target.value)}
+                  className="w-full text-center px-4 py-2.5 rounded-2xl bg-theme-surface border border-theme-border-soft text-theme-primary text-xl font-black font-numbers focus:outline-none focus:border-theme-accent"
+                  placeholder="Enter amount"
+                />
+                <div className="flex gap-2 justify-center">
+                  {[200, 500, 1000, 2000].map(amt => (
+                    <button
+                      key={amt}
+                      type="button"
+                      onClick={() => setQrAmount(String(amt))}
+                      className="py-1 px-3 rounded-xl bg-theme-surface border border-theme-border-soft text-xs font-bold text-theme-muted hover:text-theme-primary hover:border-theme-accent transition-colors"
+                    >
+                      ₹{amt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* UPI ID Badge & Copy Button */}
+              <div className="flex items-center justify-between p-3 rounded-2xl bg-theme-surface border border-theme-border-soft text-xs">
+                <div className="text-left truncate mr-2">
+                  <span className="text-[10px] text-theme-muted block font-semibold">UPI ID:</span>
+                  <span className="font-extrabold text-theme-primary truncate block font-mono">{activeUpiId}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={copyUpiId}
+                  className="px-3 py-1.5 rounded-xl bg-theme-card border border-theme-border-soft hover:border-theme-accent text-theme-primary text-xs font-bold flex items-center gap-1.5 shrink-0 cursor-pointer transition-colors"
+                >
+                  {copiedUpi ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedUpi ? 'Copied' : 'Copy'}</span>
+                </button>
+              </div>
+
+              {/* Instant Deposit Action */}
+              <button
+                type="button"
+                onClick={handleDepositFromQr}
+                className="w-full py-3 rounded-2xl bg-theme-success text-white text-xs font-black hover:opacity-95 shadow-md shadow-theme-success/30 cursor-pointer active:scale-95 transition-all flex items-center justify-center gap-2"
+              >
+                <CheckCircle2 className="w-4 h-4" />
+                <span>Mark as Received &amp; Deposit +{formatCurrency(Number(qrAmount) || 0, currencySymbol)} into Vault</span>
+              </button>
+            </div>
           </Modal>
         )}
       </AnimatePresence>
