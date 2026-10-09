@@ -22,6 +22,7 @@ import { getStudioHeaderTarget } from '../utils/portalTargets';
 import { getInvoiceColumns } from '../utils/invoiceSchema';
 import { customerEngine } from '../services/customerEngine';
 import { computeCustomerLedger, allocatePayment } from '../utils/financialCalculations';
+import { printThermalReceipt } from '../utils/thermalPrinter';
 import { toast } from 'react-hot-toast';
 
 // Preview of the next sequential invoice number (dbEngine assigns the
@@ -40,6 +41,7 @@ const previewNextInvoiceNumber = (settings, invoices) => {
 
 const CreateInvoice = ({ 
   onSaveInvoice, 
+  onSaveSettings,
   invoices = [], 
   customers = [], 
   staffs = [], 
@@ -141,6 +143,31 @@ const CreateInvoice = ({
   const [showPreviewPanel, setShowPreviewPanel] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 1024);
   const [isSaving, setIsSaving] = useState(false);
   const [draftBusinessSettings, setDraftBusinessSettings] = useState(businessSettings || {});
+
+  useEffect(() => {
+    if (businessSettings) {
+      setDraftBusinessSettings(prev => ({
+        ...businessSettings,
+        ...prev,
+        invoiceBuilderSettings: {
+          ...(businessSettings?.invoiceBuilderSettings || {}),
+          ...(prev?.invoiceBuilderSettings || {})
+        }
+      }));
+    }
+  }, [businessSettings]);
+
+  const handleUpdateDraftBusinessSettings = (updater) => {
+    setDraftBusinessSettings(prev => {
+      const next = typeof updater === 'function' ? updater(prev) : { ...prev, ...updater };
+      if (onSaveSettings) {
+        Promise.resolve(onSaveSettings(next)).catch(err => {
+          console.warn('Auto-saving business settings failed:', err);
+        });
+      }
+      return next;
+    });
+  };
   const [invoiceNumber, setInvoiceNumber] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
@@ -400,8 +427,23 @@ const CreateInvoice = ({
       }
       // Restore the saved discount input/type; legacy invoices (saved before
       // these fields existed) fall back to inferring a flat discount.
-      setDiscountAmount(parseFloat(editingInvoice.discountInput ?? editingInvoice.discountAmount) || 0);
-      setDiscountType(editingInvoice.discountType || (parseFloat(editingInvoice.discountAmount) > 0 ? 'flat' : 'none'));
+      const initialDiscountAmt = parseFloat(editingInvoice.discountInput ?? editingInvoice.discountAmount) || 0;
+      const initialDiscountType = editingInvoice.discountType || (initialDiscountAmt > 0 ? 'flat' : 'none');
+      setDiscountAmount(initialDiscountAmt);
+      setDiscountType(initialDiscountType);
+
+      // Restore builder settings from editingInvoice if present
+      const invBuilderSettings = editingInvoice.businessSnapshot?.invoiceBuilderSettings || editingInvoice.settings?.invoiceBuilderSettings;
+      if (invBuilderSettings || initialDiscountAmt > 0) {
+        setDraftBusinessSettings(prev => ({
+          ...prev,
+          invoiceBuilderSettings: {
+            ...(prev?.invoiceBuilderSettings || {}),
+            ...(invBuilderSettings || {}),
+            ...(initialDiscountAmt > 0 ? { showDiscount: true } : {})
+          }
+        }));
+      }
       // Use the SAVED tax percentage. Reconstructing it from taxAmount/subtotal
       // is wrong whenever a discount existed (tax is computed after discount).
       setTaxPercent(
@@ -835,8 +877,25 @@ const CreateInvoice = ({
       })),
       selectedTemplate,
       pdfTemplate: selectedTemplate,
-      invoiceColumns
+      invoiceColumns,
+      settings: {
+        ...(editingInvoice?.settings || {}),
+        invoiceBuilderSettings: draftBusinessSettings?.invoiceBuilderSettings
+      },
+      businessSnapshot: {
+        ...(businessSettings || {}),
+        ...draftBusinessSettings,
+        invoiceBuilderSettings: draftBusinessSettings?.invoiceBuilderSettings
+      }
     };
+    
+    if (onSaveSettings && draftBusinessSettings) {
+      try {
+        await Promise.resolve(onSaveSettings(draftBusinessSettings));
+      } catch (err) {
+        console.warn('Failed to persist business settings alongside invoice:', err);
+      }
+    }
     
     if (onSaveInvoice) {
       setIsSaving(true);
@@ -1638,7 +1697,7 @@ const CreateInvoice = ({
                   <span className="text-theme-primary font-bold tabular-nums">{formatCurrency(totals.subtotal)}</span>
                 </div>
 
-                {draftBusinessSettings?.invoiceBuilderSettings?.showDiscount !== false && (
+                {(draftBusinessSettings?.invoiceBuilderSettings?.showDiscount !== false || discountType !== 'none' || parseFloat(discountAmount) > 0) && (
                   <div className="flex justify-between items-center text-sm font-semibold text-theme-muted gap-4">
                     <div className="flex gap-2 items-center">
                       <span>{t('ci.discount', 'Discount')}</span>
@@ -1776,7 +1835,7 @@ const CreateInvoice = ({
                 selectedTemplate={selectedTemplate}
                 onSelectTemplate={setSelectedTemplate}
                 businessSettings={draftBusinessSettings}
-                setBusinessSettings={setDraftBusinessSettings}
+                setBusinessSettings={handleUpdateDraftBusinessSettings}
                 viewMode={viewMode}
                 setViewMode={setViewMode}
                 subscription={subscription}
@@ -1813,6 +1872,7 @@ const CreateInvoice = ({
               <button onClick={() => setViewMode('pdf')} className={`px-3 py-1 text-[10px] font-bold rounded-md transition-colors ${viewMode === 'pdf' ? 'bg-slate-200 text-slate-800' : 'text-slate-400 hover:text-slate-600'}`}>PDF Preview</button>
               <button onClick={() => setViewMode('livelink')} className={`px-3 py-1 text-[10px] font-bold rounded-md transition-colors ${viewMode === 'livelink' ? 'bg-slate-200 text-slate-800' : 'text-slate-400 hover:text-slate-600'}`}>Live Link Preview</button>
               <button onClick={() => { window.print(); }} className="px-3 py-1 text-[10px] font-bold rounded-md transition-colors text-slate-400 hover:text-slate-600 flex items-center gap-1">{t('ci.print_bill', 'Print Bill')}</button>
+              <button onClick={() => { printThermalReceipt(previewData, draftBusinessSettings); toast.success('Printing Thermal POS receipt...'); }} className="px-3 py-1 text-[10px] font-bold rounded-md transition-colors text-slate-400 hover:text-slate-600 flex items-center gap-1">Thermal Slip</button>
             </div>
           </div>
           

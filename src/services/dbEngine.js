@@ -3343,8 +3343,11 @@ export const saveInvoice = async (invoice) => {
       gstNumber: activeSettings.gstNumber || '',
       currency: activeSettings.currency || '₹',
       taxLabel: activeSettings.taxLabel || 'Tax',
-      country: activeSettings.country || 'India'
+      country: activeSettings.country || 'India',
+      invoiceBuilderSettings: activeSettings.invoiceBuilderSettings || {}
     };
+  } else if (!invoice.businessSnapshot.invoiceBuilderSettings && activeSettings.invoiceBuilderSettings) {
+    invoice.businessSnapshot.invoiceBuilderSettings = activeSettings.invoiceBuilderSettings;
   }
   if (!invoice.paymentSettingsSnapshot) {
     invoice.paymentSettingsSnapshot = {

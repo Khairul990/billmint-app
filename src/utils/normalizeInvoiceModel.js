@@ -70,7 +70,7 @@ export const buildCanonicalRenderModel = (invoice, businessSettings, previewOver
   };
 
   // 4. Payment & QR Code Resolution
-  const invoiceBuilderSettings = businessSettings?.invoiceBuilderSettings || {};
+  const invoiceBuilderSettings = businessSettings?.invoiceBuilderSettings || invoice?.businessSnapshot?.invoiceBuilderSettings || invoice?.settings?.invoiceBuilderSettings || {};
   const bankDetails = invoiceBuilderSettings.bankDetails || {};
 
   const paySnap = invoice.paymentSettingsSnapshot || {};
@@ -103,6 +103,7 @@ export const buildCanonicalRenderModel = (invoice, businessSettings, previewOver
     regionalPrefs,
     paymentPrefs,
     bankDetails,
+    invoiceBuilderSettings,
     currencySymbol,
     categoryWords,
     financials,

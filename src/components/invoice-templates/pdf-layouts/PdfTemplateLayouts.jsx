@@ -44,7 +44,7 @@ export const PdfTotalsSummary = ({
 }) => {
   const fin = calculateCanonicalInvoiceFinancials(invoice);
   const showOldDue = Boolean(businessSettings?.invoiceBuilderSettings?.showOldDue || fin.previousDue > 0);
-  const showDiscount = businessSettings?.invoiceBuilderSettings?.showDiscount !== false && fin.discountAmount > 0;
+  const showDiscount = (businessSettings?.invoiceBuilderSettings?.showDiscount !== false || fin.discountAmount > 0) && fin.discountAmount > 0;
   const showTax = businessSettings?.invoiceBuilderSettings?.showTax !== false && fin.taxAmount > 0;
   const showShipping = Boolean(businessSettings?.invoiceBuilderSettings?.showShipping && fin.shipping > 0);
 
@@ -66,10 +66,32 @@ export const PdfTotalsSummary = ({
       )}
 
       {showTax && (
-        <View style={[s.row, s.justifyBetween, s.mb4]}>
-          <Text style={{ fontSize: 9, color: labelColor }}>{businessSettings?.invoiceBuilderSettings?.taxLabel || 'Tax'} ({invoice.taxPercentage || 0}%)</Text>
-          <Text style={{ fontSize: 9, color: valColor, fontFamily: 'Helvetica-Bold', textAlign: 'right' }}>{formatCurrency(fin.taxAmount)}</Text>
-        </View>
+        (() => {
+          const splitGst = businessSettings?.invoiceBuilderSettings?.splitGst;
+          const taxLabel = businessSettings?.invoiceBuilderSettings?.taxLabel || 'Tax';
+          if (splitGst && invoice.taxPercentage > 0) {
+            const halfPct = invoice.taxPercentage / 2;
+            const halfAmt = fin.taxAmount / 2;
+            return (
+              <>
+                <View style={[s.row, s.justifyBetween, s.mb4]}>
+                  <Text style={{ fontSize: 9, color: labelColor }}>CGST ({halfPct}%)</Text>
+                  <Text style={{ fontSize: 9, color: valColor, fontFamily: 'Helvetica-Bold', textAlign: 'right' }}>{formatCurrency(halfAmt)}</Text>
+                </View>
+                <View style={[s.row, s.justifyBetween, s.mb4]}>
+                  <Text style={{ fontSize: 9, color: labelColor }}>SGST ({halfPct}%)</Text>
+                  <Text style={{ fontSize: 9, color: valColor, fontFamily: 'Helvetica-Bold', textAlign: 'right' }}>{formatCurrency(halfAmt)}</Text>
+                </View>
+              </>
+            );
+          }
+          return (
+            <View style={[s.row, s.justifyBetween, s.mb4]}>
+              <Text style={{ fontSize: 9, color: labelColor }}>{taxLabel} ({invoice.taxPercentage || 0}%)</Text>
+              <Text style={{ fontSize: 9, color: valColor, fontFamily: 'Helvetica-Bold', textAlign: 'right' }}>{formatCurrency(fin.taxAmount)}</Text>
+            </View>
+          );
+        })()
       )}
 
       {showShipping && (

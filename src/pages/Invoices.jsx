@@ -57,6 +57,7 @@ import {
 } from '../utils/shareUtils';
 import { invoiceEngine } from '../services/invoiceEngine';
 import { shareOnWhatsApp } from '../services/invoiceShareService2';
+import { printThermalReceipt } from '../utils/thermalPrinter';
 import PullToRefresh from '../components/PullToRefresh';
 import PremiumEmptyState from '../components/PremiumEmptyState';
 import { getPortalLabelByType } from '../config/businessPresets';
@@ -1318,9 +1319,19 @@ const Invoices = ({
                 <button
                   onClick={handlePrint}
                   className="tap-target p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-surface rounded-xl transition-all cursor-pointer"
-                  title="Print Invoice"
+                  title="Print Invoice (A4/A5)"
                 >
                   <Printer className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => {
+                    printThermalReceipt(viewingInvoice, businessSettings);
+                    toast.success('Printing Thermal POS receipt...');
+                  }}
+                  className="tap-target p-2 text-theme-muted hover:text-theme-accent hover:bg-theme-surface rounded-xl transition-all cursor-pointer"
+                  title="Print Thermal POS Receipt (80mm / 58mm)"
+                >
+                  <Receipt className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => onDownloadPDF(viewingInvoice)}

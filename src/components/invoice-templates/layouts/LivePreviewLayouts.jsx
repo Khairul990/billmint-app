@@ -26,7 +26,7 @@ export const HtmlTotalsSummary = ({
   const fmt = (val) => formatCurrency(val, currencySymbol, numFormat);
 
   const showOldDue = Boolean(data.businessSettings?.invoiceBuilderSettings?.showOldDue || fin.previousDue > 0);
-  const showDiscount = data.businessSettings?.invoiceBuilderSettings?.showDiscount !== false && fin.discountAmount > 0;
+  const showDiscount = (data.businessSettings?.invoiceBuilderSettings?.showDiscount !== false || fin.discountAmount > 0) && fin.discountAmount > 0;
   const showTax = data.businessSettings?.invoiceBuilderSettings?.showTax !== false && fin.taxAmount > 0;
   const showShipping = Boolean(data.businessSettings?.invoiceBuilderSettings?.showShipping && fin.shipping > 0);
 
@@ -49,10 +49,32 @@ export const HtmlTotalsSummary = ({
       )}
 
       {showTax && (
-        <div className="flex justify-between">
-          <span className={labelColor}>{data.businessSettings?.invoiceBuilderSettings?.taxLabel || 'Tax'} ({data.taxPercentage || 0}%):</span>
-          <span className={`${valColor} tabular-nums`}>{fmt(fin.taxAmount)}</span>
-        </div>
+        (() => {
+          const splitGst = data.businessSettings?.invoiceBuilderSettings?.splitGst;
+          const taxLabel = data.businessSettings?.invoiceBuilderSettings?.taxLabel || 'Tax';
+          if (splitGst && data.taxPercentage > 0) {
+            const halfPct = data.taxPercentage / 2;
+            const halfAmt = fin.taxAmount / 2;
+            return (
+              <>
+                <div className="flex justify-between">
+                  <span className={labelColor}>CGST ({halfPct}%):</span>
+                  <span className={`${valColor} tabular-nums`}>{fmt(halfAmt)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className={labelColor}>SGST ({halfPct}%):</span>
+                  <span className={`${valColor} tabular-nums`}>{fmt(halfAmt)}</span>
+                </div>
+              </>
+            );
+          }
+          return (
+            <div className="flex justify-between">
+              <span className={labelColor}>{taxLabel} ({data.taxPercentage || 0}%):</span>
+              <span className={`${valColor} tabular-nums`}>{fmt(fin.taxAmount)}</span>
+            </div>
+          );
+        })()
       )}
 
       {showShipping && (
@@ -1172,14 +1194,20 @@ const BlackHeaderProfessional = ({ data }) => (
       </div>
     </div>
 
-    <table className="w-full text-left mb-10 border-collapse">
+    <table className="w-full text-left mb-10 border-collapse" style={{ tableLayout: 'fixed', width: '100%' }}>
       <thead>
         <tr className="border-b-[3px] border-dashed border-[#1a1a1a]">
           {getInvoiceColumns(data, data.businessSettings).map((col, index, arr) => {
             const isFirst = index === 0;
             const isLast = index === arr.length - 1;
+            const align = col.align || 'left';
+            const alignClass = align === 'right' ? 'text-right' : align === 'center' ? 'text-center' : 'text-left';
             return (
-              <th key={col.id} className={`py-4 px-2 text-[12px] font-bold text-[#1a1a1a] uppercase tracking-wider text-${col.align} ${isFirst ? 'rounded-l-md rounded-tl-xl' : ''} ${isLast ? 'rounded-r-md rounded-tr-xl' : ''}`}>
+              <th 
+                key={col.id} 
+                className={`py-4 px-2 text-[12px] font-bold text-[#1a1a1a] uppercase tracking-wider ${alignClass} ${isFirst ? 'rounded-l-md rounded-tl-xl' : ''} ${isLast ? 'rounded-r-md rounded-tr-xl' : ''}`}
+                style={{ width: col.width, textAlign: align, boxSizing: 'border-box' }}
+              >
                 {col.label}
               </th>
             );
@@ -1192,8 +1220,14 @@ const BlackHeaderProfessional = ({ data }) => (
             {getInvoiceColumns(data, data.businessSettings).map(col => {
               const val = getItemValue(item, col.id, data.billType);
               const displayVal = (col.id === 'amount' || col.id === 'rate' || col.id === 'tax' || col.id === 'discount') && val !== '' ? formatCurrency(val) : val;
+              const align = col.align || 'left';
+              const alignClass = align === 'right' ? 'text-right' : align === 'center' ? 'text-center' : 'text-left';
               return (
-                <td key={col.id} className={`py-4 px-2 text-[13px] text-${col.align} ${(col.id === 'amount' || col.id === 'total') ? 'font-bold' : ''}`}>
+                <td 
+                  key={col.id} 
+                  className={`py-4 px-2 text-[13px] ${alignClass} ${(col.id === 'amount' || col.id === 'total') ? 'font-bold' : ''}`}
+                  style={{ width: col.width, textAlign: align, verticalAlign: 'top', wordBreak: 'break-word', overflowWrap: 'anywhere', boxSizing: 'border-box' }}
+                >
                   {displayVal}
                 </td>
               );

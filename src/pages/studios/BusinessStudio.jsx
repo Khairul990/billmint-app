@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { Building2, Upload, Trash2, Globe, Languages, DollarSign, Percent, FileText, Image as ImageIcon, Phone, Mail, MapPin, MessageCircle } from 'lucide-react';
+import { Building2, Upload, Trash2, Globe, Languages, DollarSign, Percent, FileText, Image as ImageIcon, Phone, Mail, MapPin, MessageCircle, PenLine } from 'lucide-react';
 import { BUSINESS_PRESETS } from '../../config/businessPresets';
+import SignaturePadModal from '../../components/common/SignaturePadModal';
 
 const BusinessStudio = ({ settings, onUpdate }) => {
   const [isDraggingLogo, setIsDraggingLogo] = useState(false);
   const [isDraggingSig, setIsDraggingSig] = useState(false);
+  const [isSigPadOpen, setIsSigPadOpen] = useState(false);
 
   const handleChange = (key, value) => {
     onUpdate({ [key]: value });
@@ -265,7 +267,16 @@ const BusinessStudio = ({ settings, onUpdate }) => {
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold text-theme-primary uppercase tracking-wider mb-1">Digital Signature</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-[11px] font-bold text-theme-primary uppercase tracking-wider">Digital Signature</label>
+              <button
+                type="button"
+                onClick={() => setIsSigPadOpen(true)}
+                className="text-[11px] font-bold text-theme-accent hover:underline flex items-center gap-1 cursor-pointer"
+              >
+                <PenLine className="w-3.5 h-3.5" /> Draw Signature
+              </button>
+            </div>
             <p className="text-[11px] text-theme-muted mb-2">Authorized signature graphic placed at bottom right of PDF.</p>
             <div 
               className={`relative border-2 border-dashed rounded-xl p-3 text-center transition-all ${isDraggingSig ? 'border-theme-success bg-theme-success/5' : 'border-theme-border-soft bg-theme-surface/50 hover:bg-theme-surface'}`}
@@ -275,19 +286,46 @@ const BusinessStudio = ({ settings, onUpdate }) => {
                 e.preventDefault(); 
                 setIsDraggingSig(false); 
                 const f = e.dataTransfer.files[0]; 
-                if (f && f.type.startsWith('image/')) handleChange('signatureUrl', await compressImage(f)); 
+                if (f && f.type.startsWith('image/')) {
+                  const comp = await compressImage(f);
+                  handleChange('signatureUrl', comp);
+                  handleChange('signatureDataUrl', comp);
+                }
               }}
             >
-              <input type="file" accept="image/*" onChange={async (e) => { const f = e.target.files[0]; if (f && f.type.startsWith('image/')) handleChange('signatureUrl', await compressImage(f)); }} className="absolute inset-0 opacity-0 cursor-pointer z-10" />
-              {settings?.signatureUrl ? (
+              <input type="file" accept="image/*" onChange={async (e) => { 
+                const f = e.target.files[0]; 
+                if (f && f.type.startsWith('image/')) {
+                  const comp = await compressImage(f);
+                  handleChange('signatureUrl', comp);
+                  handleChange('signatureDataUrl', comp);
+                }
+              }} className="absolute inset-0 opacity-0 cursor-pointer z-10" />
+              {settings?.signatureUrl || settings?.signatureDataUrl ? (
                 <div className="relative inline-block group">
-                  <img src={settings.signatureUrl} alt="Signature" className="h-12 w-auto object-contain rounded-lg bg-white/10" />
-                  <button onClick={(e) => { e.preventDefault(); handleChange('signatureUrl', ''); }} className="absolute -top-2 -right-2 bg-theme-danger text-white rounded-full p-1 opacity-0 group-hover:opacity-100"><Trash2 className="w-3 h-3" /></button>
+                  <img src={settings.signatureUrl || settings.signatureDataUrl} alt="Signature" className="h-12 w-auto object-contain rounded-lg bg-white/10" />
+                  <button onClick={(e) => { e.preventDefault(); handleChange('signatureUrl', ''); handleChange('signatureDataUrl', ''); }} className="absolute -top-2 -right-2 bg-theme-danger text-white rounded-full p-1 opacity-0 group-hover:opacity-100 z-20"><Trash2 className="w-3 h-3" /></button>
                 </div>
               ) : (
-                <span className="text-xs font-bold text-theme-muted flex items-center justify-center gap-2"><ImageIcon className="w-4 h-4" /> Upload Signature Image</span>
+                <div className="flex flex-col items-center justify-center gap-1">
+                  <span className="text-xs font-bold text-theme-muted flex items-center justify-center gap-2">
+                    <ImageIcon className="w-4 h-4" /> Drop image or click to upload
+                  </span>
+                  <span className="text-[10px] text-theme-muted/70">Or click 'Draw Signature' above to sign with finger/mouse</span>
+                </div>
               )}
             </div>
+
+            <SignaturePadModal
+              isOpen={isSigPadOpen}
+              onClose={() => setIsSigPadOpen(false)}
+              onSave={(dataUrl) => {
+                handleChange('signatureUrl', dataUrl);
+                handleChange('signatureDataUrl', dataUrl);
+                setIsSigPadOpen(false);
+              }}
+              initialImage={settings?.signatureUrl || settings?.signatureDataUrl || ''}
+            />
           </div>
 
           <div className="md:col-span-2">

@@ -753,6 +753,7 @@ const DueCenter = ({
         customer={selectedCustomer}
         invoices={invoices}
         currencySymbol={currencySymbol}
+        businessSettings={businessSettings}
         onPaymentRecorded={onPaymentRecorded}
         onOpenCollection={onOpenCollection}
       />

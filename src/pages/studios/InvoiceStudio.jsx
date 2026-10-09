@@ -10,6 +10,7 @@ import InvoicePreview from '../../components/InvoicePreview';
 import { LivePreviewLayouts } from '../../components/invoice-templates/layouts/LivePreviewLayouts';
 import { getPortalLabelByType } from '../../config/businessPresets';
 import { getStudioHeaderTarget } from '../../utils/portalTargets';
+import SignaturePadModal from '../../components/common/SignaturePadModal';
 
 import { DEFAULT_INVOICE_COLUMNS } from '../../utils/invoiceSchema';
 
@@ -48,6 +49,7 @@ const InvoiceStudio = ({ settings, onUpdate, subscription }) => {
   const [showPreviewPanel, setShowPreviewPanel] = useState(true);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1);
+  const [isSigPadOpen, setIsSigPadOpen] = useState(false);
   const containerRef = useRef(null);
   const modalContainerRef = useRef(null);
   const [panelScale, setPanelScale] = useState(0.6);
@@ -332,12 +334,24 @@ const InvoiceStudio = ({ settings, onUpdate, subscription }) => {
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold text-theme-muted uppercase tracking-wider mb-2">Signature / Stamp (shown on invoices)</label>
-                      {settings?.signatureDataUrl ? (
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="block text-[10px] font-bold text-theme-muted uppercase tracking-wider">Signature / Stamp (shown on invoices)</label>
+                        <button
+                          type="button"
+                          onClick={() => setIsSigPadOpen(true)}
+                          className="text-[11px] font-bold text-theme-accent hover:underline flex items-center gap-1 cursor-pointer"
+                        >
+                          <PenLine className="w-3.5 h-3.5" /> Draw Signature
+                        </button>
+                      </div>
+                      {settings?.signatureDataUrl || settings?.signatureUrl ? (
                         <div className="relative inline-block">
-                          <img src={settings.signatureDataUrl} alt="Signature" className="h-20 object-contain rounded-xl border border-theme-border-soft bg-white p-1" />
+                          <img src={settings.signatureDataUrl || settings.signatureUrl} alt="Signature" className="h-20 object-contain rounded-xl border border-theme-border-soft bg-white p-1" />
                           <button
-                            onClick={() => handleChange('signatureDataUrl', '')}
+                            onClick={() => {
+                              handleChange('signatureDataUrl', '');
+                              handleChange('signatureUrl', '');
+                            }}
                             className="absolute -top-2 -right-2 p-1 rounded-lg bg-theme-card border border-theme-border-soft text-theme-muted hover:text-theme-danger"
                             title="Remove signature"
                           >
@@ -345,39 +359,66 @@ const InvoiceStudio = ({ settings, onUpdate, subscription }) => {
                           </button>
                         </div>
                       ) : (
-                        <label className="flex items-center justify-center gap-2 w-full px-4 py-5 bg-theme-surface border border-dashed border-theme-border-soft rounded-xl text-xs font-bold text-theme-muted hover:text-theme-accent hover:border-theme-accent/50 transition-all cursor-pointer">
-                          <PenLine className="w-4 h-4" /> Upload signature or stamp image
-                          <input
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={(e) => {
-                              const f = e.target.files && e.target.files[0];
-                              if (!f) return;
-                              if (!f.type.startsWith('image/')) return;
-                              const r = new FileReader();
-                              r.onload = () => {
-                                const img = new Image();
-                                img.onload = () => {
-                                  try {
-                                    const maxW = 500;
-                                    const scale = Math.min(1, maxW / img.width);
-                                    const c = document.createElement('canvas');
-                                    c.width = Math.round(img.width * scale);
-                                    c.height = Math.round(img.height * scale);
-                                    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-                                    handleChange('signatureDataUrl', c.toDataURL('image/png'));
-                                  } catch (err) { console.error(err); }
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <button
+                            type="button"
+                            onClick={() => setIsSigPadOpen(true)}
+                            className="flex flex-col items-center justify-center p-4 bg-theme-accent/5 hover:bg-theme-accent/10 border-2 border-dashed border-theme-accent/30 rounded-xl transition-all cursor-pointer text-center group"
+                          >
+                            <PenLine className="w-5 h-5 text-theme-accent mb-1 group-hover:scale-110 transition-transform" />
+                            <span className="text-xs font-bold text-theme-primary">Draw Signature</span>
+                            <span className="text-[10px] text-theme-muted">With mouse or finger</span>
+                          </button>
+
+                          <label className="flex flex-col items-center justify-center p-4 bg-theme-surface hover:bg-theme-surface/80 border-2 border-dashed border-theme-border-soft rounded-xl transition-all cursor-pointer text-center group">
+                            <FileText className="w-5 h-5 text-theme-muted mb-1 group-hover:scale-110 transition-transform" />
+                            <span className="text-xs font-bold text-theme-primary">Upload Stamp / Image</span>
+                            <span className="text-[10px] text-theme-muted">PNG with transparent bg</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => {
+                                const f = e.target.files && e.target.files[0];
+                                if (!f) return;
+                                if (!f.type.startsWith('image/')) return;
+                                const r = new FileReader();
+                                r.onload = () => {
+                                  const img = new Image();
+                                  img.onload = () => {
+                                    try {
+                                      const maxW = 500;
+                                      const scale = Math.min(1, maxW / img.width);
+                                      const c = document.createElement('canvas');
+                                      c.width = Math.round(img.width * scale);
+                                      c.height = Math.round(img.height * scale);
+                                      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+                                      const data = c.toDataURL('image/png');
+                                      handleChange('signatureDataUrl', data);
+                                      handleChange('signatureUrl', data);
+                                    } catch (err) { console.error(err); }
+                                  };
+                                  img.src = r.result;
                                 };
-                                img.src = r.result;
-                              };
-                              r.readAsDataURL(f);
-                              e.target.value = '';
-                            }}
-                          />
-                        </label>
+                                r.readAsDataURL(f);
+                                e.target.value = '';
+                              }}
+                            />
+                          </label>
+                        </div>
                       )}
                       <p className="text-[10px] text-theme-muted mt-1.5">Transparent PNG works best. Saved with your invoice profile and printed under Terms.</p>
+
+                      <SignaturePadModal
+                        isOpen={isSigPadOpen}
+                        onClose={() => setIsSigPadOpen(false)}
+                        onSave={(dataUrl) => {
+                          handleChange('signatureDataUrl', dataUrl);
+                          handleChange('signatureUrl', dataUrl);
+                          setIsSigPadOpen(false);
+                        }}
+                        initialImage={settings?.signatureDataUrl || settings?.signatureUrl || ''}
+                      />
                     </div>
                   </div>
                 </div>

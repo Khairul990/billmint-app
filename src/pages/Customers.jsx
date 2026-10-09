@@ -731,6 +731,7 @@ const Customers = ({
             customer={ledgerCustomer}
             invoices={invoices}
             currencySymbol={currencySymbol}
+            businessSettings={businessSettings}
             onCreateBill={onCreateBill}
             onPaymentRecorded={onPaymentRecorded}
             onOpenCollection={onOpenCollection}

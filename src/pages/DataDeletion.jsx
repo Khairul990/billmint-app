@@ -35,25 +35,68 @@ export default function DataDeletion({ onBack }) {
         <section className="bg-theme-card rounded-3xl p-6 border border-theme-border-soft shadow-premium">
           <h2 className="text-xl font-black mb-4 text-theme-danger">Delete Your Account & Data</h2>
           <p className="text-theme-muted mb-6 text-sm leading-relaxed">
-            You can request the permanent deletion of your account and all associated data. This action is irreversible. Once deleted, you will not be able to recover your invoices, customer data, or settings.
+            You can permanently delete your account and all associated data. This action is irreversible. Once deleted, you will not be able to recover your invoices, customer data, or settings.
           </p>
           <div className="bg-theme-danger/5 border border-theme-danger/20 rounded-xl p-4 mb-6">
             <h3 className="font-bold text-theme-danger mb-2">What happens when you delete your account?</h3>
             <ul className="list-disc pl-5 text-sm text-theme-danger/80 space-y-1">
-              <li>All invoices and estimates will be permanently deleted.</li>
+              <li>All invoices and estimates will be permanently deleted from this device.</li>
               <li>Customer data will be permanently deleted.</li>
-              <li>Your business profile and settings will be removed.</li>
-              <li>Public invoice links will stop working immediately.</li>
+              <li>Your business profile and settings will be wiped.</li>
+              <li>Your cloud account (if connected) will be deleted.</li>
             </ul>
           </div>
-          <a href="mailto:privacy@billqyro.com?subject=Account%20Deletion%20Request&body=I%20request%20permanent%20deletion%20of%20my%20account%20and%20all%20associated%20data." className="flex items-center gap-2 px-5 py-2.5 bg-theme-danger text-white rounded-xl font-bold hover:bg-theme-danger/90 transition-colors shadow-md">
-            <Trash2 className="w-4 h-4" /> Request Account Deletion
-          </a>
+          <button 
+            onClick={async () => {
+              const confirm1 = window.confirm("WARNING: You are about to PERMANENTLY DELETE all your data. This cannot be undone. Are you absolutely sure?");
+              if (!confirm1) return;
+              const confirm2 = window.prompt("Type 'DELETE' to confirm permanent account deletion:");
+              if (confirm2 !== 'DELETE') return;
+
+              try {
+                // 1. Clear LocalStorage
+                localStorage.clear();
+
+                // 2. Clear IndexedDB
+                const stores = [
+                  'invoices', 'customers', 'expenses', 'products', 'students',
+                  'bankLedger', 'bankCredit', 'appointments', 'orders', 'activities', 'announcements',
+                  'vendors', 'outsourceJobs', 'outsourcePayments', 'staff', 'syncQueue', 'auditLogs', 'errorLogs', 'deadLetterQueue', 'pdfCache'
+                ];
+                
+                // Dynamic import to avoid top level issues if any
+                const { BillQyroDB } = await import('../services/localDb.js');
+                for (let store of stores) {
+                  try {
+                    await BillQyroDB.clear(store);
+                  } catch (e) {
+                    console.warn(`Failed to clear store ${store}:`, e);
+                  }
+                }
+
+                // 3. Delete Firebase User if logged in
+                const { auth } = await import('../services/firebaseConfig.js');
+                if (auth?.currentUser) {
+                  const { deleteUser } = await import('firebase/auth');
+                  await deleteUser(auth.currentUser);
+                }
+
+                alert("Account and all data have been permanently deleted.");
+                window.location.href = '/';
+              } catch (err) {
+                console.error("Error deleting account:", err);
+                alert("An error occurred while deleting your account. Please check your connection or contact support.");
+              }
+            }}
+            className="flex items-center gap-2 px-5 py-2.5 bg-theme-danger text-white rounded-xl font-bold hover:bg-theme-danger/90 transition-colors shadow-md w-full justify-center sm:w-auto"
+          >
+            <Trash2 className="w-4 h-4" /> Permanently Delete Account
+          </button>
         </section>
 
         <div className="text-center pb-10">
           <p className="text-xs text-theme-muted font-semibold">
-            To manually request data deletion now, please contact our support team at privacy@billqyro.com.
+            If you encounter issues, please contact our support team at privacy@billqyro.com.
           </p>
         </div>
       </div>

@@ -2369,6 +2369,7 @@ function App() {
             products={activeProducts}
             businessSettings={activeSettings}
             onSaveInvoice={handleSaveInvoice}
+            onSaveSettings={handleSaveSettings}
             setCurrentTab={setCurrentTab}
             editingInvoice={editingInvoice}
             onDownloadPDF={handleDownloadPDF}

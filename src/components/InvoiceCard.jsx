@@ -26,7 +26,9 @@ import {
   ShoppingBag,
   GraduationCap,
   Wrench,
-  Package, Repeat
+  Package, Repeat,
+  Printer,
+  Receipt
 } from 'lucide-react';
 import { formatCurrency } from '../utils/invoiceUtils';
 import { 
@@ -42,6 +44,7 @@ import {
 } from '../utils/shareUtils';
 import { invoiceEngine } from '../services/invoiceEngine';
 import { shareOnWhatsApp } from '../services/invoiceShareService2';
+import { printThermalReceipt } from '../utils/thermalPrinter';
 import { isEducationCategory } from '../utils/categoryChecks';
 import { getPortalLabelByType } from '../config/businessPresets';
 import WhatsAppCommunicationPreview from './communication/WhatsAppCommunicationPreview';
@@ -595,6 +598,18 @@ const InvoiceCard = ({
                               <span>Download PNG</span>
                             </button>
                           )}
+
+                          <button
+                            onClick={() => {
+                              printThermalReceipt(invoice, businessSettings);
+                              toast.success('Printing Thermal POS receipt...');
+                              setShowMoreMenu(false);
+                            }}
+                            className="flex items-center gap-2 px-2.5 py-2 text-theme-primary hover:bg-theme-surface rounded-xl transition-colors font-semibold w-full text-left cursor-pointer"
+                          >
+                            <Receipt className="w-3.5 h-3.5 text-theme-accent" />
+                            <span>Print Thermal POS Slip</span>
+                          </button>
 
                           <button
                             onClick={async () => {

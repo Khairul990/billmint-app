@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { 
   FileText, Columns, Droplet, ArrowUp, ArrowDown, Eye, EyeOff, 
-  Building, DollarSign, Palette, ShieldCheck, Trash2 
+  Building, DollarSign, Palette, ShieldCheck, Trash2, PenLine, X 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import PdfTemplateStudio from '../../pages/PdfTemplateStudio';
+import SignaturePadModal from '../common/SignaturePadModal';
 
 const InvoiceCustomizationPanel = ({ 
   businessSettings,
@@ -30,6 +31,7 @@ const InvoiceCustomizationPanel = ({
   setNotes,
   activeTab
 }) => {
+  const [isSigPadOpen, setIsSigPadOpen] = useState(false);
 
   const tabs = [
     { id: 'templates', label: 'Templates', icon: Palette },
@@ -314,6 +316,122 @@ const InvoiceCustomizationPanel = ({
                   </div>
                 </div>
               </div>
+
+              <div className="card-premium p-6">
+                <div className="flex items-center justify-between mb-4 border-b border-theme-border-soft pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-theme-accent/10 text-theme-accent flex items-center justify-center">
+                      <PenLine className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-black text-theme-primary">Signature & Stamp</h2>
+                      <p className="text-xs text-theme-muted">Authorized signatory printed on your invoices</p>
+                    </div>
+                  </div>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={builderSettings.showSignature !== false}
+                      onChange={(e) => handleUpdateBuilderSettings({ showSignature: e.target.checked })}
+                      className="accent-theme-accent w-4 h-4 cursor-pointer"
+                    />
+                    <span className="text-xs font-bold text-theme-primary">Show Signature</span>
+                  </label>
+                </div>
+
+                <div className="space-y-4">
+                  {businessSettings?.signatureDataUrl || businessSettings?.signatureUrl ? (
+                    <div className="flex items-center justify-between p-4 bg-theme-surface rounded-xl border border-theme-border-soft">
+                      <div className="flex items-center gap-4">
+                        <img 
+                          src={businessSettings.signatureDataUrl || businessSettings.signatureUrl} 
+                          alt="Signature Preview" 
+                          className="h-16 object-contain bg-white rounded-lg p-1.5 border border-theme-border-soft" 
+                        />
+                        <div>
+                          <p className="text-xs font-bold text-theme-primary">Active Signature / Stamp</p>
+                          <p className="text-[11px] text-theme-muted">Appears at bottom-right of bill</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setIsSigPadOpen(true)}
+                          className="px-3 py-1.5 bg-theme-accent/10 hover:bg-theme-accent/20 text-theme-accent rounded-lg text-xs font-bold transition-colors"
+                        >
+                          Redraw
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            handleUpdateSettings({ signatureDataUrl: '', signatureUrl: '' });
+                          }}
+                          className="p-2 text-theme-muted hover:text-theme-danger hover:bg-theme-danger/10 rounded-lg transition-colors"
+                          title="Remove signature"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setIsSigPadOpen(true)}
+                        className="flex flex-col items-center justify-center p-5 bg-theme-accent/5 hover:bg-theme-accent/10 border-2 border-dashed border-theme-accent/30 rounded-xl transition-all cursor-pointer text-center group"
+                      >
+                        <PenLine className="w-6 h-6 text-theme-accent mb-2 group-hover:scale-110 transition-transform" />
+                        <span className="text-xs font-bold text-theme-primary">Draw Digital Signature</span>
+                        <span className="text-[10px] text-theme-muted">Sign with finger or mouse</span>
+                      </button>
+
+                      <label className="flex flex-col items-center justify-center p-5 bg-theme-surface hover:bg-theme-surface/80 border-2 border-dashed border-theme-border-soft rounded-xl transition-all cursor-pointer text-center group">
+                        <FileText className="w-6 h-6 text-theme-muted mb-2 group-hover:scale-110 transition-transform" />
+                        <span className="text-xs font-bold text-theme-primary">Upload Stamp / File</span>
+                        <span className="text-[10px] text-theme-muted">PNG or JPG graphic</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const f = e.target.files && e.target.files[0];
+                            if (!f) return;
+                            const r = new FileReader();
+                            r.onload = () => {
+                              const img = new Image();
+                              img.onload = () => {
+                                try {
+                                  const maxW = 500;
+                                  const scale = Math.min(1, maxW / img.width);
+                                  const c = document.createElement('canvas');
+                                  c.width = Math.round(img.width * scale);
+                                  c.height = Math.round(img.height * scale);
+                                  c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+                                  const data = c.toDataURL('image/png');
+                                  handleUpdateSettings({ signatureDataUrl: data, signatureUrl: data });
+                                } catch (err) { console.error(err); }
+                              };
+                              img.src = r.result;
+                            };
+                            r.readAsDataURL(f);
+                            e.target.value = '';
+                          }}
+                        />
+                      </label>
+                    </div>
+                  )}
+                </div>
+
+                <SignaturePadModal
+                  isOpen={isSigPadOpen}
+                  onClose={() => setIsSigPadOpen(false)}
+                  onSave={(dataUrl) => {
+                    handleUpdateSettings({ signatureDataUrl: dataUrl, signatureUrl: dataUrl });
+                    setIsSigPadOpen(false);
+                  }}
+                  initialImage={businessSettings?.signatureDataUrl || businessSettings?.signatureUrl || ''}
+                />
+              </div>
             </div>
           )}
 
@@ -376,6 +494,22 @@ const InvoiceCustomizationPanel = ({
                         onChange={(e) => setShipping(parseFloat(e.target.value) || 0)} 
                       />
                     </div>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3.5 bg-theme-surface/70 border border-theme-border-soft rounded-xl">
+                    <div>
+                      <p className="text-xs font-bold text-theme-primary">Split GST into CGST &amp; SGST</p>
+                      <p className="text-[10px] text-theme-muted">Divides tax percentage into equal 50% Central and State components on PDF</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        checked={Boolean(builderSettings.splitGst)} 
+                        onChange={(e) => handleUpdateBuilderSettings({ splitGst: e.target.checked })} 
+                        className="sr-only peer"
+                      />
+                      <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-theme-accent"></div>
+                    </label>
                   </div>
                   {businessSettings?.invoiceBuilderSettings?.showOldDue && (
                     <div className="grid grid-cols-2 gap-4">

@@ -9,7 +9,7 @@ const InvoiceContext = createContext();
 const initialState = {
   id: '', publicToken: '', invoiceNumber: '', date: '', dueDate: '', billType: 'retail', selectedTemplate: 'retail', templateFields: [], pdfVisibleFields: [],
   customer: { id: '', name: '', phone: '', email: '', address: '' }, items: [],
-  totals: { subtotal: 0, taxPercentage: 0, taxAmount: 0, discountAmount: 0, grandTotal: 0, oldDue: 0, totalDue: 0, amountPaid: 0, balanceDue: 0 },
+  totals: { subtotal: 0, taxPercentage: 0, taxAmount: 0, discountType: 'fixed', discountPercentage: 0, discountAmount: 0, grandTotal: 0, oldDue: 0, totalDue: 0, amountPaid: 0, balanceDue: 0 },
   settings: { notes: '', terms: '', paymentStatus: 'Unpaid', orderStatus: 'Pending', paymentMethod: 'Cash', paymentNote: '' }, paymentProofs: [], isInitialized: false
 };
 
@@ -26,7 +26,17 @@ const invoiceReducer = (state, action) => {
       const subtotal = state.items.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
       const taxPercentage = updatedTotals.taxPercentage ?? state.totals.taxPercentage ?? 0;
       const taxAmount = (subtotal * taxPercentage) / 100;
-      const discountAmount = Number(updatedTotals.discountAmount) || 0;
+      
+      const discountType = updatedTotals.discountType || state.totals.discountType || 'fixed';
+      let discountAmount = 0;
+      if (discountType === 'percentage') {
+        const discountPercentage = Number(updatedTotals.discountPercentage) || 0;
+        discountAmount = (subtotal * discountPercentage) / 100;
+        updatedTotals.discountAmount = discountAmount; // keep it in sync
+      } else {
+        discountAmount = Number(updatedTotals.discountAmount) || 0;
+      }
+
       const grandTotal = Math.max(0, subtotal + taxAmount - discountAmount);
       const amountPaid = Number(updatedTotals.amountPaid) || 0;
       const oldDue = roundTo2(Number(updatedTotals.oldDue) || 0);

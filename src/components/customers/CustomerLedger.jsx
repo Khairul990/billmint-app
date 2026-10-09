@@ -16,11 +16,12 @@ import {
   TrendingUp,
   FileText,
   ExternalLink,
-  ChevronRight
+  ChevronRight,
+  Printer
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { computeCustomerLedger } from '../../utils/financialCalculations';
-import { buildCustomerStatementText } from '../../utils/moneyCenterReports';
+import { buildCustomerStatementText, printCustomerStatement } from '../../utils/moneyCenterReports';
 import { FinancialValue, FinancialEquation, StatusBadge, SignatureSurface, Button } from '../ui';
 import { toast } from 'react-hot-toast';
 
@@ -39,6 +40,7 @@ const CustomerLedger = ({
   customer, 
   invoices = [], 
   currencySymbol = '₹', 
+  businessSettings = {},
   onCreateBill, 
   onPaymentRecorded,
   onOpenCollection 
@@ -155,6 +157,15 @@ const CustomerLedger = ({
     } else {
       toast.error("No phone number found for this customer.");
     }
+  };
+
+  const handlePrintStatement = () => {
+    printCustomerStatement({
+      customer,
+      ledger: ledgerData,
+      currencySymbol,
+      businessSettings
+    });
   };
 
   return (
@@ -362,6 +373,14 @@ const CustomerLedger = ({
               >
                 <FileText className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Share</span> Statement
+              </button>
+              <button
+                onClick={handlePrintStatement}
+                className="px-3 py-1.5 rounded-xl bg-theme-accent text-white hover:opacity-90 text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
+                title="Print or Save PDF Account Statement / Khata Ledger"
+              >
+                <Printer className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Print / Save</span> PDF
               </button>
             </div>
 

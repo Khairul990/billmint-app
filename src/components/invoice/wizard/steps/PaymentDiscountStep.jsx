@@ -58,16 +58,42 @@ const PaymentDiscountStep = () => {
                 </div>
               </div>
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-theme-muted uppercase tracking-wider text-green-500">Discount (-) {currencySymbol}</label>
+                <div className="flex justify-between items-center">
+                  <label className="block text-xs font-bold text-theme-muted uppercase tracking-wider text-green-500">Discount (-)</label>
+                  <select 
+                    value={totals.discountType || 'fixed'} 
+                    onChange={(e) => handleTotalChange('discountType', e.target.value)}
+                    className="text-xs bg-theme-surface border border-theme-border-soft rounded px-2 py-0.5 text-theme-primary focus:outline-none"
+                  >
+                    <option value="fixed">{currencySymbol} Flat</option>
+                    <option value="percentage">% Percent</option>
+                  </select>
+                </div>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-green-500">{currencySymbol}</span>
-                  <input
-                    type="number"
-                    min="0"
-                    value={totals.discountAmount}
-                    onChange={(e) => handleTotalChange('discountAmount', parseFloat(e.target.value) || 0)}
-                    className="w-full pl-8 pr-3 py-2.5 bg-theme-card border border-green-200 focus:border-green-500 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-green-500/30 transition-all text-theme-primary text-right"
-                  />
+                  {totals.discountType === 'percentage' ? (
+                    <>
+                      <Percent className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-500" />
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={totals.discountPercentage || 0}
+                        onChange={(e) => handleTotalChange('discountPercentage', parseFloat(e.target.value) || 0)}
+                        className="w-full pl-9 pr-3 py-2.5 bg-theme-card border border-green-200 focus:border-green-500 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-green-500/30 transition-all text-theme-primary text-right"
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-green-500">{currencySymbol}</span>
+                      <input
+                        type="number"
+                        min="0"
+                        value={totals.discountAmount || 0}
+                        onChange={(e) => handleTotalChange('discountAmount', parseFloat(e.target.value) || 0)}
+                        className="w-full pl-8 pr-3 py-2.5 bg-theme-card border border-green-200 focus:border-green-500 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-green-500/30 transition-all text-theme-primary text-right"
+                      />
+                    </>
+                  )}
                 </div>
               </div>
             </div>

@@ -199,7 +199,7 @@ const sanitizeClonedDocument = (clonedDocument, width) => {
     clonedDocument.body.style.maxWidth = `${width}px`;
     clonedDocument.body.style.background = '#ffffff';
     clonedDocument.body.style.color = '#111827';
-    clonedDocument.body.style.fontFamily = "'Inter', system-ui, -apple-system, sans-serif";
+    clonedDocument.body.style.fontFamily = "'Inter', 'Hind Siliguri', 'Noto Sans Bengali', system-ui, -apple-system, sans-serif";
     clonedDocument.body.style.letterSpacing = 'normal';
     clonedDocument.body.style.wordSpacing = 'normal';
   }
@@ -224,12 +224,25 @@ const sanitizeClonedDocument = (clonedDocument, width) => {
     clonedRoot.style.maxWidth = `${width}px`;
     clonedRoot.style.margin = '0 auto';
     clonedRoot.style.boxSizing = 'border-box';
-    clonedRoot.style.fontFamily = "'Inter', system-ui, -apple-system, sans-serif";
+    clonedRoot.style.fontFamily = "'Inter', 'Hind Siliguri', 'Noto Sans Bengali', system-ui, -apple-system, sans-serif";
     clonedRoot.style.letterSpacing = 'normal';
     clonedRoot.style.wordSpacing = 'normal';
     clonedRoot.style.visibility = 'visible';
     clonedRoot.style.opacity = '1';
   }
+
+  // Lock table and cell geometries to prevent text from shifting out of cells/boxes
+  clonedDocument.querySelectorAll('table').forEach((tbl) => {
+    tbl.style.tableLayout = 'fixed';
+    tbl.style.width = '100%';
+    tbl.style.borderCollapse = 'collapse';
+  });
+  clonedDocument.querySelectorAll('th, td').forEach((cell) => {
+    cell.style.boxSizing = 'border-box';
+    cell.style.wordBreak = 'break-word';
+    cell.style.overflowWrap = 'anywhere';
+    cell.style.verticalAlign = 'top';
+  });
 
   // 4. Sanitize inline and computed styles on all cloned nodes
   const colorProps = [
@@ -300,7 +313,7 @@ const renderExactPreview = async (root) => {
       animation: none !important; 
       transition: none !important; 
       caret-color: transparent !important;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+      font-family: 'Inter', 'Hind Siliguri', 'Noto Sans Bengali', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
       letter-spacing: normal !important;
       word-spacing: normal !important;
       font-variant-ligatures: normal !important;
@@ -310,6 +323,17 @@ const renderExactPreview = async (root) => {
     }
     .${exportClass} .font-mono, .${exportClass} .font-mono * {
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+    }
+    .${exportClass} table {
+      table-layout: fixed !important;
+      width: 100% !important;
+      border-collapse: collapse !important;
+    }
+    .${exportClass} th, .${exportClass} td {
+      box-sizing: border-box !important;
+      word-break: break-word !important;
+      overflow-wrap: anywhere !important;
+      vertical-align: top !important;
     }
     .${exportClass} img { max-width: 100%; object-fit: contain; }
   `;
@@ -325,6 +349,8 @@ const renderExactPreview = async (root) => {
       logging: false,
       scrollX: 0,
       scrollY: 0,
+      x: 0,
+      y: 0,
       width: width,
       windowWidth: width,
       removeContainer: true,

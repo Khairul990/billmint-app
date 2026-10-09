@@ -32,6 +32,7 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false, templat
     regionalPrefs,
     paymentPrefs,
     bankDetails,
+    invoiceBuilderSettings,
     currencySymbol,
     categoryWords,
     financials
@@ -88,6 +89,10 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false, templat
       },
       businessSettings: {
         ...businessSettings,
+        invoiceBuilderSettings: {
+          ...(businessSettings?.invoiceBuilderSettings || {}),
+          ...invoiceBuilderSettings
+        },
         businessName: businessPrefs.businessName,
         logoUrl: businessPrefs.logoUrl,
         email: businessPrefs.email,
@@ -262,74 +267,103 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false, templat
       </div>
 
       {/* 3. ITEM TABLE (DYNAMIC SYNC) */}
-      <div className="py-3.5 overflow-x-auto no-scrollbar">
-        <table className="w-full text-left text-xs border-collapse">
+      <div className="py-3.5 w-full">
+        <table className="w-full text-left text-xs border-collapse" style={{ tableLayout: 'fixed', width: '100%' }}>
           <thead>
             <tr className={`border-b text-theme-muted dark:text-theme-muted font-bold uppercase tracking-wider ${templateId === 'classic-elegant' ? 'border-theme-tint-border text-theme-accent' : 'border-theme-border-soft dark:border-theme-border-soft'}`}>
-              {getInvoiceColumns(invoice, businessSettings).map(col => (
-                <th key={col.id} className={`pb-2 px-2 text-${col.align}`} style={{ width: col.width }}>
-                  {col.label}
-                </th>
-              ))}
+              {getInvoiceColumns(invoice, businessSettings).map(col => {
+                const align = col.align || 'left';
+                const textAlignClass = align === 'right' ? 'text-right' : align === 'center' ? 'text-center' : 'text-left';
+                return (
+                  <th 
+                    key={col.id} 
+                    className={`pb-2.5 px-2.5 ${textAlignClass}`} 
+                    style={{ width: col.width, textAlign: align, boxSizing: 'border-box' }}
+                  >
+                    {col.label}
+                  </th>
+                );
+              })}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-50 dark:divide-slate-800/40">
-            {invoice.items && invoice.items.map((item, idx) => (
-              <tr key={idx} className="text-theme-primary dark:text-theme-muted hover:bg-theme-surface-elevated dark:bg-theme-surface/50 dark:hover:bg-theme-card/20">
-                {getInvoiceColumns(invoice, businessSettings).map(col => {
-                  if (col.id === 'sn') return <td key={col.id} className={`py-2 px-2 text-${col.align} text-theme-muted font-bold`}>{idx + 1}</td>;
-                  
-                  const val = getItemValue(item, col.id, invoice.billType);
-                  
-                  // Primary Column 1 gets slightly richer UI in preview
-                  if (col.id === 'item') {
-                    return (
-                      <td key={col.id} className={`py-2 px-2 font-semibold text-theme-primary dark:text-theme-primary dark:text-theme-secondary text-${col.align}`}>
-                        <div className="flex flex-wrap items-center gap-1.5 mb-0.5">
-                          {item.designNo && item.designNo !== 'N/A' && (
-                            <span className="inline-block px-1.5 py-0.5 bg-theme-accent-light dark:bg-theme-accent-light text-theme-accent dark:text-theme-accent rounded text-[9px] font-black tracking-wider uppercase border border-theme-border-soft/10">
-                              {item.designNo}
-                            </span>
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-800/40">
+            {invoice.items && invoice.items.map((item, idx) => {
+              const columns = getInvoiceColumns(invoice, businessSettings);
+              const hasSeparateDesignCol = columns.some(c => c.id === 'designNo' || (c.label && c.label.toLowerCase().includes('desin')));
+              return (
+                <tr key={idx} className="text-theme-primary dark:text-theme-muted hover:bg-theme-surface-elevated dark:bg-theme-surface/50 dark:hover:bg-theme-card/20">
+                  {columns.map(col => {
+                    const align = col.align || 'left';
+                    const textAlignClass = align === 'right' ? 'text-right' : align === 'center' ? 'text-center' : 'text-left';
+                    const cellStyle = {
+                      width: col.width,
+                      textAlign: align,
+                      verticalAlign: 'top',
+                      wordBreak: 'break-word',
+                      overflowWrap: 'anywhere',
+                      boxSizing: 'border-box'
+                    };
+
+                    if (col.id === 'sn') {
+                      return (
+                        <td key={col.id} className={`py-2.5 px-2.5 ${textAlignClass} text-theme-muted font-bold`} style={cellStyle}>
+                          {idx + 1}
+                        </td>
+                      );
+                    }
+                    
+                    const val = getItemValue(item, col.id, invoice.billType);
+                    
+                    // Primary Column 1 gets slightly richer UI in preview
+                    if (col.id === 'item') {
+                      return (
+                        <td key={col.id} className={`py-2.5 px-2.5 font-semibold text-theme-primary dark:text-theme-primary dark:text-theme-secondary ${textAlignClass}`} style={cellStyle}>
+                          <div className="flex flex-wrap items-center gap-1.5 mb-0.5">
+                            {!hasSeparateDesignCol && item.designNo && item.designNo !== 'N/A' && (
+                              <span className="inline-block px-1.5 py-0.5 bg-theme-accent-light dark:bg-theme-accent-light text-theme-accent dark:text-theme-accent rounded text-[9px] font-black tracking-wider uppercase border border-theme-border-soft/10">
+                                {item.designNo}
+                              </span>
+                            )}
+                            {item.workType && (
+                              <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-bold ${(templateId === 'embroidery' || templateId === 'tailor') ? 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300 border border-pink-200 dark:border-pink-800' : 'bg-theme-surface dark:bg-theme-card text-theme-muted dark:text-theme-muted'}`}>
+                                {item.workType}
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-xs text-theme-primary dark:text-theme-primary dark:text-theme-secondary font-semibold">{val}</span>
+                          {item.size && item.size !== 'N/A' && (
+                            <span className={`block text-[10px] font-medium mt-0.5 ${(templateId === 'embroidery' || templateId === 'tailor') ? 'text-indigo-600 dark:text-indigo-400 font-bold bg-indigo-50 dark:bg-indigo-900/20 px-1.5 py-0.5 rounded-sm inline-block' : 'text-theme-muted dark:text-theme-muted'}`}>Size: {item.size}</span>
                           )}
-                          {item.workType && (
-                            <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-bold ${(templateId === 'embroidery' || templateId === 'tailor') ? 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300 border border-pink-200 dark:border-pink-800' : 'bg-theme-surface dark:bg-theme-card text-theme-muted dark:text-theme-muted'}`}>
-                              {item.workType}
-                            </span>
-                          )}
-                        </div>
-                        <span className="text-xs text-theme-primary dark:text-theme-primary dark:text-theme-secondary font-semibold">{val}</span>
-                        {item.size && item.size !== 'N/A' && (
-                          <span className={`block text-[10px] font-medium mt-0.5 ${(templateId === 'embroidery' || templateId === 'tailor') ? 'text-indigo-600 dark:text-indigo-400 font-bold bg-indigo-50 dark:bg-indigo-900/20 px-1.5 py-0.5 rounded-sm inline-block' : 'text-theme-muted dark:text-theme-muted'}`}>Size: {item.size}</span>
-                        )}
-                      </td>
-                    );
-                  }
-                  
-                  if (col.id === 'qty') {
+                        </td>
+                      );
+                    }
+                    
+                    if (col.id === 'qty') {
+                      return (
+                        <td key={col.id} className={`py-2.5 px-2.5 ${textAlignClass} font-bold text-theme-muted dark:text-theme-muted`} style={cellStyle}>
+                          {val}
+                          {item.unit && <span className="text-[10px] ml-1 uppercase">{item.unit}</span>}
+                        </td>
+                      );
+                    }
+                    
+                    if (col.id === 'amount' || col.id === 'rate' || col.id === 'discount' || col.id === 'tax') {
+                      return (
+                        <td key={col.id} className={`py-2.5 px-2.5 ${textAlignClass} ${col.id === 'amount' ? 'font-extrabold text-theme-primary dark:text-theme-primary' : col.id === 'discount' && val > 0 ? 'text-theme-danger dark:text-theme-danger font-semibold' : 'font-semibold text-theme-muted dark:text-theme-muted'}`} style={cellStyle}>
+                          {col.id === 'discount' && val > 0 ? '-' : ''}{formatCurrency(val, currencySymbol, regionalPrefs.numberFormat)}
+                        </td>
+                      );
+                    }
+                    
                     return (
-                      <td key={col.id} className={`py-2 px-2 text-${col.align} font-bold text-theme-muted dark:text-theme-muted`}>
+                      <td key={col.id} className={`py-2.5 px-2.5 ${textAlignClass} text-theme-muted dark:text-theme-muted font-medium`} style={cellStyle}>
                         {val}
-                        {item.unit && <span className="text-[10px] ml-1 uppercase">{item.unit}</span>}
                       </td>
                     );
-                  }
-                  
-                  if (col.id === 'amount' || col.id === 'rate' || col.id === 'discount' || col.id === 'tax') {
-                    return (
-                      <td key={col.id} className={`py-2 px-2 text-${col.align} ${col.id === 'amount' ? 'font-extrabold text-theme-primary dark:text-theme-primary dark:text-theme-primary' : col.id === 'discount' && val > 0 ? 'text-theme-danger dark:text-theme-danger font-semibold' : 'font-semibold text-theme-muted dark:text-theme-muted'}`}>
-                        {col.id === 'discount' && val > 0 ? '-' : ''}{formatCurrency(val, currencySymbol, regionalPrefs.numberFormat)}
-                      </td>
-                    );
-                  }
-                  
-                  return (
-                    <td key={col.id} className={`py-2 px-2 text-${col.align} text-theme-muted dark:text-theme-muted font-medium`}>
-                      {val}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
+                  })}
+                </tr>
+              );
+            })}
             {(!invoice.items || invoice.items.length === 0) && (
               <tr>
                 <td colSpan="10" className="py-4 text-center text-theme-muted dark:text-theme-muted font-semibold">
@@ -362,8 +396,15 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false, templat
             </>
           )}
           {(() => {
-            const sigFlagOff = invoice.businessSettings?.invoiceBuilderSettings?.showSignature === false;
-            const sig = sigFlagOff ? null : (invoice.businessSettings?.signatureDataUrl || invoice.signatureDataUrl);
+            const sigFlagOff = invoice.businessSettings?.invoiceBuilderSettings?.showSignature === false || businessSettings?.invoiceBuilderSettings?.showSignature === false;
+            const sig = sigFlagOff ? null : (
+              invoice.businessSettings?.signatureDataUrl || 
+              invoice.signatureDataUrl || 
+              invoice.businessSettings?.signatureUrl || 
+              invoice.signatureUrl || 
+              businessSettings?.signatureDataUrl || 
+              businessSettings?.signatureUrl
+            );
             if (!sig) return null;
             return (
               <div className="mt-3">
@@ -380,17 +421,39 @@ const InvoicePreview = ({ invoice, businessSettings, isLiveLink = false, templat
             <span>Subtotal</span>
             <span className="text-theme-primary dark:text-theme-primary dark:text-theme-secondary font-bold tabular-nums">{formatCurrency(financials.subtotal, currencySymbol, regionalPrefs.numberFormat)}</span>
           </div>
-          {(businessSettings?.invoiceBuilderSettings?.showDiscount !== false) && financials.discountAmount > 0 && (
+          {((businessSettings?.invoiceBuilderSettings?.showDiscount !== false) || financials.discountAmount > 0) && financials.discountAmount > 0 && (
             <div className="flex justify-between text-theme-danger dark:text-rose-450 font-bold">
               <span>Discount</span>
               <span className="tabular-nums">-{formatCurrency(financials.discountAmount, currencySymbol, regionalPrefs.numberFormat)}</span>
             </div>
           )}
           {(businessSettings?.invoiceBuilderSettings?.showTax !== false) && financials.taxAmount > 0 && (
-            <div className="flex justify-between">
-              <span>{regionalPrefs.taxLabel || 'Tax'} ({invoice.taxPercentage || 0}%)</span>
-              <span className="text-theme-primary dark:text-theme-primary dark:text-theme-secondary font-bold tabular-nums">{formatCurrency(financials.taxAmount, currencySymbol, regionalPrefs.numberFormat)}</span>
-            </div>
+            (() => {
+              const splitGst = businessSettings?.invoiceBuilderSettings?.splitGst;
+              const taxLabel = regionalPrefs.taxLabel || 'Tax';
+              if (splitGst && invoice.taxPercentage > 0) {
+                const halfPct = invoice.taxPercentage / 2;
+                const halfAmt = financials.taxAmount / 2;
+                return (
+                  <>
+                    <div className="flex justify-between">
+                      <span>CGST ({halfPct}%)</span>
+                      <span className="text-theme-primary dark:text-theme-secondary font-bold tabular-nums">{formatCurrency(halfAmt, currencySymbol, regionalPrefs.numberFormat)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>SGST ({halfPct}%)</span>
+                      <span className="text-theme-primary dark:text-theme-secondary font-bold tabular-nums">{formatCurrency(halfAmt, currencySymbol, regionalPrefs.numberFormat)}</span>
+                    </div>
+                  </>
+                );
+              }
+              return (
+                <div className="flex justify-between">
+                  <span>{taxLabel} ({invoice.taxPercentage || 0}%)</span>
+                  <span className="text-theme-primary dark:text-theme-secondary font-bold tabular-nums">{formatCurrency(financials.taxAmount, currencySymbol, regionalPrefs.numberFormat)}</span>
+                </div>
+              );
+            })()
           )}
           {(businessSettings?.invoiceBuilderSettings?.showShipping) && financials.shipping > 0 && (
             <div className="flex justify-between text-theme-primary dark:text-theme-secondary font-bold">
